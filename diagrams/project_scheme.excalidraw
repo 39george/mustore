@@ -48,8 +48,8 @@
     },
     {
       "type": "text",
-      "version": 346,
-      "versionNonce": 2043545960,
+      "version": 347,
+      "versionNonce": 238153562,
       "isDeleted": false,
       "id": "79GTvb5Qlda0u9VEp-hOI",
       "fillStyle": "hachure",
@@ -68,7 +68,7 @@
       "groupIds": [],
       "roundness": null,
       "boundElements": [],
-      "updated": 1696275358862,
+      "updated": 1696315227354,
       "link": null,
       "locked": false,
       "fontSize": 28,
@@ -79,12 +79,12 @@
       "containerId": null,
       "originalText": "Backend",
       "lineHeight": 1.25,
-      "baseline": 25
+      "baseline": 24
     },
     {
       "type": "text",
-      "version": 257,
-      "versionNonce": 1493147928,
+      "version": 258,
+      "versionNonce": 430623558,
       "isDeleted": false,
       "id": "dM13bAP6EqtYfnSqaMO3-",
       "fillStyle": "hachure",
@@ -103,7 +103,7 @@
       "groupIds": [],
       "roundness": null,
       "boundElements": [],
-      "updated": 1696275358863,
+      "updated": 1696315227355,
       "link": null,
       "locked": false,
       "fontSize": 28,
@@ -114,7 +114,7 @@
       "containerId": null,
       "originalText": "Frontend",
       "lineHeight": 1.25,
-      "baseline": 25
+      "baseline": 24
     },
     {
       "type": "text",
@@ -149,7 +149,7 @@
       "containerId": null,
       "originalText": "1. Client registration. User-friendly registration process, possibly with social media integration for easier sign-up\n2. Think up a moderation hierarchy. Clearly define the roles and responsibilities of each level of moderation to ensure efficient content management and user support.\n3. Top-level moderator should  have privilege to create any-level moderation accounts.\n4. Moderation should be implemented in web interface.\n5. Think up security of accounts and authorization.\n6. Setup mail server and its security.\n7. Restrict incoming mail.\n8. Consider using micro-service achitecture for backend.\n9. Develop client-account UI.\n10. Develop moderator-account UI.\n11. Develop main page with top content.\n12. Possibility of uploading content.\n13. Possibility of purchasing content.\n14. Implement additional services (mixing, beatmaking, consulting, distribution, promotion, song-writing, content-plan making).\n15. Implement rating system, preferences (song rating, seller rating), sorting system, personal compilations.\n16. Confidential policy, redeem terms and conditions, copyrighting, making contracts, internal censor.\n17. Think about right status of our platform. Guarantees and obligations.\n18. Payment system.\n19. Legal registration.\n20. Beatmaker's free leasing for gaining carma.\n21. Native promotion system from our platform.\n22. Implement \"trust\" or (hidden or top moderator) rating.\n23. Newbie seller trust testing\n24. Implement Superuser moderator which can handle exceptional cases..\n25. Terms and conditions should contain point about deleting content/account without explaining the reason.\n26. Terms and conditions should contain point about restrictions of discussion topics.\n27. About section, portfolio cases.\n28. Create a catchy and memorable tagline that reflects the unique selling points and value proposition of your platform.\n29. Ensure that your terms and conditions cover important aspects such as copyright protection, content deletion, and user obligations, and consult with legal professionals to ensure compliance with relevant laws and regulations.\n30.  Implement robust security measures such as two-factor authentication, encryption, and regular security audits to protect user accounts and data.",
       "lineHeight": 1.15,
-      "baseline": 959
+      "baseline": 958
     },
     {
       "type": "text",
@@ -219,7 +219,7 @@
       "containerId": null,
       "originalText": "1. Open Web Application Security Project (OWASP): OWASP provides a comprehensive set of tools and resources for web application security.\nThey offer project-specific audits, code reviews, and vulnerability assessments.\n\n2. NCC Group: NCC Group offers a range of security services, including web application security audits.\nThey conduct thorough assessments to identify vulnerabilities and provide recommendations for remediation.\n\n3. Trustwave: Trustwave offers a variety of security services, including web application security testing.\nThey can perform vulnerability assessments, penetration testing, and code reviews to identify and mitigate security risks.\n\n4. Rapid7: Rapid7 provides a suite of security services, including web application security testing.\nThey offer dynamic application security testing (DAST) and static application security testing (SAST) to identify vulnerabilities in your web app.\n\n5. Synopsys: Synopsys offers security testing services, including web application security audits.\nThey provide comprehensive assessments to identify vulnerabilities, along with recommendations for remediation.\n\n6. WhiteHat Security: WhiteHat Security specializes in web application security testing and offers services such as vulnerability assessments,\ncode reviews, and penetration testing.\n\n7. Veracode: Veracode offers static and dynamic application security testing services for web applications.\nThey provide detailed reports on vulnerabilities and offer guidance on remediation.\n\nWhen selecting a security audit service, consider factors such as their expertise, reputation, experience, and the specific requirements of your web app.\nIt's also helpful to read reviews and testimonials, and if possible, speak with their representatives to discuss your specific\nneeds and get a better understanding of the services they offer.",
       "lineHeight": 1.15,
-      "baseline": 766
+      "baseline": 765
     },
     {
       "type": "text",
@@ -359,7 +359,7 @@
       "containerId": null,
       "originalText": "Certainly! Here are some popular payment gateway providers that you can consider integrating into your web app:\n\n1. PayPal: PayPal is one of the most widely recognized and trusted payment gateway providers. It supports various payment methods, including credit/debit cards, PayPal balances, and bank transfers. PayPal offers easy integration options and provides robust security measures.\n\n2. Stripe: Stripe is a popular payment gateway known for its developer-friendly APIs and extensive documentation. It supports global payments, multiple currencies, and various payment methods. Stripe offers customizable checkout experiences and strong security features.\n\n3. Authorize.Net: Authorize.Net is a long-standing and reliable payment gateway provider. It supports a wide range of payment methods, including credit cards, eChecks, and digital wallets. Authorize.Net offers features like recurring billing, fraud detection, and secure payment processing.\n\n4. Braintree: Braintree, owned by PayPal, is a payment gateway provider that offers a seamless and modern payment experience. It supports multiple payment methods, including cards, PayPal, Venmo, and digital wallets. Braintree provides advanced fraud protection and supports global payments.\n\n5. Square: Square is a popular payment gateway provider that caters to small and medium-sized businesses. It offers various payment solutions, including in-person payments, online payments, and mobile payments. Square provides a user-friendly interface and competitive transaction fees.\n\n6. Adyen: Adyen is a global payment gateway provider that supports a wide range of payment methods and currencies. It offers features like recurring billing, tokenization for secure payments, and advanced fraud prevention. Adyen provides a unified platform for online, mobile, and in-store payments.\n\n7. 2Checkout: 2Checkout is a payment gateway provider that supports global payments and multiple currencies. It offers various payment methods, including credit cards, PayPal, and local payment options. 2Checkout provides features like recurring billing, subscription management, and fraud protection.\n\nWhen choosing a payment gateway provider, consider factors such as transaction fees, supported payment methods, security features, ease of integration, customer support, and any specific requirements or preferences you may have for your business. It's also helpful to review their documentation, read user reviews, and compare the features and pricing of different providers to make an informed decision.",
       "lineHeight": 1.15,
-      "baseline": 541
+      "baseline": 540
     },
     {
       "type": "text",
@@ -394,7 +394,42 @@
       "containerId": null,
       "originalText": "Registration and User Experience:\n1. Develop a user-friendly registration process, possibly with social media integration for easier sign-up.\n\nModeration and Content Management:\n2. Define a moderation hierarchy, clearly outlining the roles and responsibilities of each level to ensure efficient content management and user support.\n3. Grant top-level moderators the privilege to create moderation accounts at any level.\n4. Implement moderation features within the web interface.\n\nSecurity and Account Management:\n5. Establish robust account security and authorization protocols.\n6. Set up a secure mail server.\n7. Implement restrictions on incoming mail.\n\nBackend and Architecture:\n8. Consider using a micro-service architecture for the backend.\n\nUser Interface Development:\n9. Develop the client account user interface.\n10. Develop the moderator account user interface.\n11. Create a main page featuring top content.\n\nContent Management and Monetization:\n12. Enable users to upload content.\n13. Implement a purchasing system for content.\n14. Include additional services such as mixing, beatmaking, consulting, distribution, promotion, songwriting, and content planning.\n\nRating and Sorting:\n15. Implement a rating system, including song and seller ratings, as well as a sorting system.\n16. Allow users to create personal compilations.\n\nLegal and Policy Considerations:\n17. Address confidentiality policies, redemption terms, conditions, copyrighting, contract creation, and internal censorship.\n18. Determine the appropriate legal status of your platform, including guarantees and obligations.\n19. Implement a payment system.\n20. Complete legal registration.\n\nPromotion and Trust Building:\n21. Offer beatmakers free leasing options to gain karma.\n22. Develop a native promotion system within your platform.\n23. Implement a trust or hidden/top moderator rating system.\n24. Test the trustworthiness of new sellers.\n25. Implement a Superuser moderator role to handle exceptional cases.\n\nTerms and Conditions:\n26. Include a clause in the terms and conditions about the possibility of content or account deletion without explanation.\n27. Specify restrictions on discussion topics within the terms and conditions.\n\nAbout Section and Portfolio:\n28. Create an engaging tagline that reflects your platform's unique selling points and value proposition.\n29. Showcase portfolio cases in the About section.\n\nLegal Compliance and Security:\n30. Ensure that your terms and conditions cover important aspects such as copyright protection, content deletion, and user obligations. Consult with legal professionals to ensure compliance with relevant laws and regulations. Additionally, implement robust security measures, such as two-factor authentication, encryption, and regular security audits, to protect user accounts and data.\n\nOther:\n31. Communication system between content creators, relationsheep regulation.",
       "lineHeight": 1.15,
-      "baseline": 1796
+      "baseline": 1795
+    },
+    {
+      "id": "I7ZKfxwBPYMShfDcqRd6v",
+      "type": "text",
+      "x": 612.9372457566421,
+      "y": 165.7984016940128,
+      "width": 61.13993835449219,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "hachure",
+      "strokeWidth": 1,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "roundness": null,
+      "seed": 1241346694,
+      "version": 11,
+      "versionNonce": 409411270,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1696315239940,
+      "link": null,
+      "locked": false,
+      "text": "Design",
+      "fontSize": 20,
+      "fontFamily": 1,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "baseline": 18,
+      "containerId": null,
+      "originalText": "Design",
+      "lineHeight": 1.25
     }
   ],
   "appState": {
