@@ -1,0 +1,404 @@
+Enum "UserRole" {
+  "creator"
+  "consumer"
+  "fullstack"
+}
+
+Enum "MusicKey" {
+  "a-minor"
+  "a-major"
+  "b-flat-minor"
+  "b-flat-major"
+  "b-minor"
+  "b-major"
+  "c-minor"
+  "c-major"
+  "c-sharp-minor"
+  "c-sharp-major"
+  "d-minor"
+  "d-major"
+  "e-flat-minor"
+  "e-flat-major"
+  "e-minor"
+  "e-major"
+  "f-minor"
+  "f-major"
+  "f-sharp-minor"
+  "f-sharp-major"
+  "g-minor"
+  "g-major"
+  "a-flat-minor"
+  "a-flat-major"
+}
+
+Enum "ProductStatus" {
+  "active"
+  "hidden"
+  "sold"
+}
+
+Enum "ServiceStatus" {
+  "active"
+  "hidden"
+}
+
+Enum "OfferStatus" {
+  "pending"
+  "accepted"
+  "revision"
+  "delivered"
+  "dispute"
+  "fulfiled"
+  "rejected"
+}
+
+Enum "OrderStatus" {
+  "created"
+  "paid"
+  "rejected"
+  "fulfiled"
+}
+
+Table "genres" {
+  "id" SERIAL [pk, increment]
+  "created_at" TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
+  "name" VARCHAR(50) [not null]
+}
+
+Table "tags" {
+  "id" SERIAL [pk, increment]
+  "created_at" TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
+  "name" VARCHAR(50) [not null]
+}
+
+Table "superusers" {
+  "id" SERIAL [pk, increment]
+  "created_at" TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
+  "updated_at" TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+}
+
+Table "administrators" {
+  "id" SERIAL [pk, increment]
+  "created_at" TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
+  "updated_at" TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+}
+
+Table "users" {
+  "id" SERIAL [pk, increment]
+  "created_at" TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
+  "updated_at" TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+  "username" VARCHAR(30) [not null]
+  "bio" VARCHAR(400)
+  "avatar_url" VARCHAR(200) [not null]
+  "email" VARCHAR(40) [not null]
+  "password" VARCHAR(50) [not null]
+  "status" VARCHAR(30)
+  "role" UserRole
+  "ban" VARCHAR(500)
+}
+
+Table "products" {
+  "id" SERIAL [pk, increment]
+  "created_at" TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
+  "updated_at" TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+  "creator_id" INTEGER [not null]
+  "name" VARCHAR(30) [not null]
+  "description" VARCHAR(400)
+  "price" NUMERIC(10,2) [not null]
+  "status" ProductStatus [not null]
+  "cover_url" VARCHAR(1000)
+}
+
+Table "products_tags" {
+  "id" SERIAL [pk, increment]
+  "products_id" INTEGER [not null]
+  "tags_id" INTEGER [not null]
+}
+
+Table "songs" {
+  "id" SERIAL [pk, increment]
+  "product_id" INTEGER [not null]
+  "primary_genre" INTEGER [not null]
+  "secondary_genre" INTEGER
+  "sex" "CHAR (1)" [not null]
+  "tempo" SMALLINT [not null]
+  "key" MusicKey [not null]
+  "duration" REAL [not null]
+  "master_url" VARCHAR(1000) [not null]
+  "multitrack_url" VARCHAR(1000) [not null]
+  "lyric" VARCHAR(1000)
+}
+
+Table "beats" {
+  "id" SERIAL [pk, increment]
+  "product_id" INTEGER [not null]
+  "primary_genre" INTEGER [not null]
+  "secondary_genre" INTEGER
+  "tempo" SMALLINT [not null]
+  "key" MusicKey [not null]
+  "duration" REAL [not null]
+  "master_url" VARCHAR(1000) [not null]
+  "multitrack_url" VARCHAR(1000) [not null]
+}
+
+Table "lyrics" {
+  "id" SERIAL [pk, increment]
+  "product_id" INTEGER [not null]
+  "text" VARCHAR(5000) [not null]
+}
+
+Table "covers" {
+  "product_id" INTEGER [not null]
+  "id" SERIAL [pk, increment]
+}
+
+Table "likes" {
+  "created_at" TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
+  "users_id" INTEGER [not null]
+  "songs_id" INTEGER
+  "beats_id" INTEGER
+  "lyrics_id" INTEGER
+  "covers_id" INTEGER
+  Indexes {
+  (users_id, songs_id, beats_id, lyrics_id, covers_id) [pk, name: "pk_likes"]
+  }
+}
+
+Table "listenings" {
+  "created_at" TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
+  "users_id" INTEGER [not null]
+  "songs_id" INTEGER
+  "beats_id" INTEGER
+  Indexes {
+    (users_id, songs_id, beats_id) [pk, name: "pk_listenings"]
+  }
+}
+
+Table "services" {
+  "id" SERIAL [pk, increment]
+  "created_at" TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
+  "updated_at" TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+  "creator_id" INTEGER [not null]
+  "name" VARCHAR(30) [not null]
+  "cover_url" VARCHAR(1000)
+  "video_desc_url" VARCHAR(1000)
+  "description" VARCHAR(400)
+  "display_price" NUMERIC(10,2) [not null]
+  "status" ProductStatus [not null, default: "active"]
+}
+
+Table "mixing" {
+  "id" SERIAL [pk, increment]
+  "services_id" INTEGER [not null]
+  "mixing_credits" "VARCHAR(1000)[]"
+}
+
+Table "song_writing" {
+  "id" SERIAL [pk, increment]
+  "services_id" INTEGER [not null]
+  "song_credits" "VARCHAR(1000)[]"
+}
+
+Table "beat_writing" {
+  "id" SERIAL [pk, increment]
+  "services_id" INTEGER [not null]
+  "beat_credits" "VARCHAR(1000)[]"
+}
+
+Table "ghost_writing" {
+  "id" SERIAL [pk, increment]
+  "services_id" INTEGER [not null]
+  "ghost_credits" "VARCHAR(5000)[]"
+}
+
+Table "cover_design" {
+  "id" SERIAL [pk, increment]
+  "services_id" INTEGER [not null]
+  "cover_credits" "VARCHAR(1000)[]"
+}
+
+Table "music_services_genres" {
+  "id" SERIAL [pk, increment]
+  "created_at" TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
+  "genres_id" INTEGER [not null]
+  "beat_writing_id" INTEGER
+  "song_writing_id" INTEGER
+  "mixing_id" INTEGER
+}
+
+Table "views" {
+  "created_at" TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
+  "users_id" INTEGER [not null]
+  "services_id" INTEGER
+  "songs_id" INTEGER
+  "beats_id" INTEGER
+  "lyrics_id" INTEGER
+  "covers_id" INTEGER
+  Indexes {
+    (users_id, songs_id, beats_id, lyrics_id, covers_id) [pk, name: "pk_views"]
+  }
+}
+
+Table "favorites" {
+  "created_at" TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
+  "users_id" INTEGER [not null]
+  "services_id" INTEGER
+  Indexes {
+    (users_id, services_id) [pk, name: "pk_favorites"]
+  }
+}
+
+Table "orders" {
+  "id" SERIAL [pk, increment]
+  "created_at" TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
+  "updated_at" TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+  "consumers_id" INTEGER
+  "products_id" INTEGER
+  "services_id" INTEGER
+  "offers_id" INTEGER
+  "status" OrderStatus [not null, default: "created"]
+}
+
+Table "transactions" {
+  "id" SERIAL [pk, increment]
+  "created_at" TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
+  "users_id" INTEGER
+  "orders_id" INTEGER [not null]
+  "description" VARCHAR(200) [not null]
+  "from_desc" VARCHAR(200) [not null]
+  "for_desc" VARCHAR(200) [not null]
+  "money_amount" NUMERIC(10,2) [not null]
+}
+
+Table "reviews_data" {
+  "id" SERIAL [pk, increment]
+  "text" VARCHAR(400) [not null]
+  "heading" VARCHAR(50) [not null]
+  "mark" SMALLINT [not null]
+}
+
+Table "reviews" {
+  "id" SERIAL [pk, increment]
+  "created_at" TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
+  "updated_at" TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+  "users_id" INTEGER
+  "services_id" INTEGER
+  "reviews_data_id" INTEGER
+  "backreview_data_id" INTEGER
+  "orders_id" INTEGER [not null]
+}
+
+Table "conversations" {
+  "id" SERIAL [pk, increment]
+  "created_at" TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
+  "updated_at" TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+  "orders_id" INTEGER [not null]
+}
+
+Table "messages" {
+  "id" SERIAL [pk, increment]
+  "created_at" TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
+  "updated_at" TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+  "conversations_id" INTEGER [not null]
+  "users_id" INTEGER
+  "administrators_id" INTEGER
+  "superusers_id" INTEGER
+  "text" VARCHAR(2500) [not null]
+}
+
+Table "participants" {
+  "id" SERIAL [pk, increment]
+  "created_at" TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
+  "conversations_id" INTEGER [not null]
+  "users_id" INTEGER
+  "administrators_id" INTEGER
+  "superusers_id" INTEGER
+}
+
+Table "offers" {
+  "id" SERIAL [pk, increment]
+  "created_at" TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
+  "updated_at" TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+  "conversations_id" INTEGER [not null]
+  "price" NUMERIC(10,2) [not null]
+  "delivery_date" TIMESTAMP [not null]
+  "free_revisions" INTEGER [not null]
+  "revision_price" NUMERIC(10,2) [not null]
+  "status" OfferStatus [not null]
+}
+
+Ref:"users"."id" < "products"."creator_id" [delete: cascade]
+Ref:"users"."id" < "likes"."users_id" [delete: cascade]
+Ref:"users"."id" < "listenings"."users_id" [delete: cascade]
+Ref:"users"."id" < "services"."creator_id" [delete: cascade]
+Ref:"users"."id" < "views"."users_id" [delete: cascade]
+Ref:"users"."id" < "favorites"."users_id" [delete: cascade]
+Ref:"users"."id" < "orders"."consumers_id" [delete: set null]
+Ref:"users"."id" < "transactions"."users_id" [delete: set null]
+Ref:"users"."id" < "reviews"."users_id" [delete: set null]
+Ref:"users"."id" < "messages"."users_id" [delete: set null]
+Ref:"users"."id" < "participants"."users_id" [delete: cascade]
+
+Ref:"products"."id" < "products_tags"."products_id" [delete: cascade]
+Ref:"products"."id" < "songs"."product_id" [delete: cascade]
+Ref:"products"."id" < "beats"."product_id" [delete: cascade]
+Ref:"products"."id" < "lyrics"."product_id" [delete: cascade]
+Ref:"products"."id" < "covers"."product_id" [delete: cascade]
+Ref:"products"."id" < "orders"."products_id" [delete: restrict]
+
+Ref:"genres"."id" < "songs"."primary_genre" [delete: restrict]
+Ref:"genres"."id" < "songs"."secondary_genre" [delete: set null]
+Ref:"genres"."id" < "beats"."primary_genre" [delete: restrict]
+Ref:"genres"."id" < "beats"."secondary_genre" [delete: set null]
+Ref:"genres"."id" < "music_services_genres"."genres_id" [delete: restrict]
+
+Ref:"songs"."id" < "likes"."songs_id" [delete: cascade]
+Ref:"songs"."id" < "listenings"."songs_id" [delete: cascade]
+Ref:"songs"."id" < "views"."songs_id" [delete: cascade]
+Ref:"songs"."tempo" < "beats"."secondary_genre"
+
+Ref:"beat_writing"."id" < "music_services_genres"."beat_writing_id" [delete: cascade]
+Ref:"song_writing"."id" < "music_services_genres"."song_writing_id" [delete: cascade]
+Ref:"mixing"."id" < "music_services_genres"."mixing_id" [delete: cascade]
+
+Ref:"beats"."id" < "likes"."beats_id" [delete: cascade]
+Ref:"beats"."id" < "listenings"."beats_id" [delete: cascade]
+Ref:"beats"."id" < "views"."beats_id" [delete: cascade]
+
+Ref:"lyrics"."id" < "likes"."lyrics_id" [delete: cascade]
+Ref:"lyrics"."id" < "views"."lyrics_id" [delete: cascade]
+
+Ref:"covers"."id" < "likes"."covers_id" [delete: cascade]
+Ref:"covers"."id" < "views"."covers_id" [delete: cascade]
+
+Ref:"services"."id" < "mixing"."services_id" [delete: cascade]
+Ref:"services"."id" < "song_writing"."services_id" [delete: cascade]
+Ref:"services"."id" < "beat_writing"."services_id" [delete: cascade]
+Ref:"services"."id" < "ghost_writing"."services_id" [delete: cascade]
+Ref:"services"."id" < "cover_design"."services_id" [delete: cascade]
+Ref:"services"."id" < "views"."services_id" [delete: cascade]
+Ref:"services"."id" < "favorites"."services_id" [delete: cascade]
+Ref:"services"."id" < "orders"."services_id" [delete: restrict]
+Ref:"services"."id" < "reviews"."services_id" [delete: set null]
+
+Ref:"orders"."id" < "transactions"."orders_id" [delete: restrict]
+Ref:"orders"."id" < "reviews"."orders_id" [delete: restrict]
+Ref:"orders"."id" < "conversations"."orders_id" [delete: restrict]
+
+Ref:"conversations"."id" < "messages"."conversations_id" [delete: restrict]
+Ref:"conversations"."id" < "participants"."conversations_id" [delete: cascade]
+Ref:"conversations"."id" < "offers"."conversations_id" [delete: cascade]
+
+Ref:"reviews_data"."id" < "reviews"."reviews_data_id" [delete: set null]
+Ref:"reviews_data"."id" < "reviews"."backreview_data_id" [delete: set null]
+
+Ref:"superusers"."id" < "messages"."superusers_id" [delete: set null]
+Ref:"superusers"."id" < "participants"."superusers_id" [delete: cascade]
+
+Ref:"administrators"."id" < "messages"."administrators_id" [delete: set null]
+Ref:"administrators"."id" < "participants"."administrators_id" [delete: cascade]
+
+Ref:"offers"."id" < "orders"."offers_id" [delete: restrict]
+
+Ref:"tags"."id" < "products_tags"."tags_id" [delete: restrict]
+
