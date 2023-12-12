@@ -101,7 +101,7 @@ CREATE TABLE products_tags (
 
 CREATE TABLE songs (
     id SERIAL PRIMARY KEY,
-    product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    products_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
     primary_genre INTEGER NOT NULL REFERENCES genres(id) ON DELETE RESTRICT,
     secondary_genre INTEGER REFERENCES genres(id) ON DELETE RESTRICT,
     sex CHAR(1) NOT NULL CHECK (sex IN ('m', 'f')),
@@ -115,7 +115,7 @@ CREATE TABLE songs (
 
 CREATE TABLE beats (
     id SERIAL PRIMARY KEY,
-    product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    products_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
     primary_genre INTEGER NOT NULL REFERENCES genres(id) ON DELETE RESTRICT,
     secondary_genre INTEGER REFERENCES genres(id) ON DELETE RESTRICT,
     tempo SMALLINT NOT NULL,
@@ -127,12 +127,12 @@ CREATE TABLE beats (
 
 CREATE TABLE lyrics (
     id SERIAL PRIMARY KEY,
-    product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    products_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
     text VARCHAR(5000) NOT NULL
 );
 
 CREATE TABLE covers (
-    product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    products_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
     id SERIAL PRIMARY KEY
 );
 
