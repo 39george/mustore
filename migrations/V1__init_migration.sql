@@ -1,6 +1,7 @@
 BEGIN;
 
 -- Enums
+
 CREATE TYPE UserRole
 AS ENUM ('creator', 'consumer', 'fullstack');
 
@@ -51,7 +52,17 @@ CREATE TABLE superusers (
 CREATE TABLE administrators (
     id SERIAL PRIMARY KEY,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    name VARCHAR(50) NOT NULL,
+    password_hash VARCHAR(500) NOT NULL
+);
+
+CREATE TABLE admin_signup_tokens(
+    id SERIAL PRIMARY KEY,
+    token VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    used BOOLEAN NOT NULL DEFAULT FALSE,
+    admin_id INTEGER REFERENCES administrators(id)
 );
 
 CREATE TABLE user_settings (
@@ -67,7 +78,7 @@ CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    username VARCHAR(30) NOT NULL,
+    username VARCHAR(50) NOT NULL,
     bio VARCHAR(400),
     avatar_url VARCHAR(1000) NOT NULL,
     email VARCHAR(40) NOT NULL,
@@ -110,7 +121,7 @@ CREATE TABLE songs (
     duration REAL NOT NULL,
     master_url VARCHAR(1000) NOT NULL,
     multitrack_url VARCHAR(1000) NOT NULL,
-    lyric VARCHAR(1000)
+    lyric VARCHAR(1000) NOT NULL
 );
 
 CREATE TABLE beats (

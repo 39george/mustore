@@ -92,14 +92,25 @@ Table superusers {
 Ref:superusers.id < messages.superusers_id [delete: set null]
 Ref:superusers.id < participants.superusers_id [delete: cascade]
 
+Table admin_signup_tokens {
+    id SERIAL [pk, increment]
+    token VARCHAR(255) [not null]
+    created_at TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
+    used BOOLEAN [not null, default: `FALSE`]
+    administrators_id INTEGER
+}
+
 Table administrators {
   id SERIAL [pk, increment]
   created_at TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
   updated_at TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+  name VARCHAR(50) [not null]
+  password_hash VARCHAR(500) [not null]
 }
 
 Ref:administrators.id < messages.administrators_id [delete: set null]
 Ref:administrators.id < participants.administrators_id [delete: cascade]
+Ref:administrators.id < admin_signup_tokens.administrators_id [delete: set null]
 
 Table user_settings {
   id SERIAL [pk, increment]
@@ -116,11 +127,11 @@ Table users {
   id SERIAL [pk, increment]
   created_at TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
   updated_at TIMESTAMP [default: `CURRENT_TIMESTAMP`]
-  username VARCHAR(30) [not null]
+  username VARCHAR(50) [not null]
   bio VARCHAR(400)
   avatar_url VARCHAR(1000) [not null]
   email VARCHAR(40) [not null]
-  password VARCHAR(50) [not null]
+  password_hash VARCHAR(500) [not null]
   status VARCHAR(30)
   role UserRole
   ban VARCHAR(500)
@@ -157,10 +168,10 @@ Table products {
 }
 
 Ref:products.id < products_tags.products_id [delete: cascade]
-Ref:products.id < songs.product_id [delete: cascade]
-Ref:products.id < beats.product_id [delete: cascade]
-Ref:products.id < lyrics.product_id [delete: cascade]
-Ref:products.id < covers.product_id [delete: cascade]
+Ref:products.id < songs.products_id [delete: cascade]
+Ref:products.id < beats.products_id [delete: cascade]
+Ref:products.id < lyrics.products_id [delete: cascade]
+Ref:products.id < covers.products_id [delete: cascade]
 Ref:products.id < product_orders.products_id [delete: set null]
 Ref:products.id < reports.products_id [delete: cascade]
 
@@ -174,7 +185,7 @@ Table products_tags {
 
 Table songs {
   id SERIAL [pk, increment]
-  product_id INTEGER [not null]
+  products_id INTEGER [not null]
   primary_genre INTEGER [not null]
   secondary_genre INTEGER
   sex CHAR (1) [not null]
@@ -183,7 +194,7 @@ Table songs {
   duration REAL [not null]
   master_url VARCHAR(1000) [not null]
   multitrack_url VARCHAR(1000) [not null]
-  lyric VARCHAR(1000)
+  lyric VARCHAR(1000) [not null]
 }
 
 Ref:songs.id < likes.songs_id [delete: cascade]
@@ -192,7 +203,7 @@ Ref:songs.id < views.songs_id [delete: cascade]
 
 Table beats {
   id SERIAL [pk, increment]
-  product_id INTEGER [not null]
+  products_id INTEGER [not null]
   primary_genre INTEGER [not null]
   secondary_genre INTEGER
   tempo SMALLINT [not null]
@@ -208,7 +219,7 @@ Ref:beats.id < views.beats_id [delete: cascade]
 
 Table lyrics {
   id SERIAL [pk, increment]
-  product_id INTEGER [not null]
+  products_id INTEGER [not null]
   text VARCHAR(5000) [not null]
 }
 
@@ -217,7 +228,7 @@ Ref:lyrics.id < views.lyrics_id [delete: cascade]
 
 Table covers {
   id SERIAL [pk, increment]
-  product_id INTEGER [not null]
+  products_id INTEGER [not null]
 }
 
 Ref:covers.id < likes.covers_id [delete: cascade]
