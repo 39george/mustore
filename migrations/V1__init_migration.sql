@@ -74,20 +74,28 @@ CREATE TABLE user_settings (
     order_updates BOOL NOT NULL DEFAULT TRUE
 );
 
+CREATE TABLE user_candidates (
+    id SERIAL PRIMARY KEY,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password_hash VARCHAR(500) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    validation_token VARCHAR(25) NOT NULL
+);
+
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    user_settings_id INTEGER NOT NULL REFERENCES user_settings(id) ON DELETE RESTRICT,
     username VARCHAR(50) NOT NULL UNIQUE,
     bio VARCHAR(400),
     avatar_url VARCHAR(1000) NOT NULL UNIQUE,
-    email VARCHAR(40) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
     password_hash VARCHAR(500) NOT NULL,
-    status VARCHAR(30),
+    status VARCHAR(50),
     role UserRole,
-    is_email_confirmed BOOL NOT NULL DEFAULT FALSE,
-    ban VARCHAR(500),
-    user_settings_id INTEGER REFERENCES user_settings(id) ON DELETE RESTRICT
+    ban VARCHAR(500)
 );
 
 -- Products & tags
