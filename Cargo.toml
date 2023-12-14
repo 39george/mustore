@@ -56,6 +56,7 @@ axum-login = "0.10.2"
 base64 = "0.21.5"
 argon2 = { version = "0.5.2", features = ["std"] }
 secrecy = { version = "0.8.0", features = ["serde"] }
+zxcvbn = "2.2.2"
 
 # Telemetry
 tracing = "0.1.40"
