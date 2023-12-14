@@ -1,7 +1,4 @@
-BEGIN;
-
 -- Enums
-
 CREATE TYPE UserRole
 AS ENUM ('creator', 'consumer', 'fullstack');
 
@@ -78,8 +75,8 @@ CREATE TABLE user_candidates (
     id SERIAL PRIMARY KEY,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     username VARCHAR(50) NOT NULL UNIQUE,
-    password_hash VARCHAR(500) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
+    password_hash VARCHAR(500) NOT NULL,
     validation_token VARCHAR(25) NOT NULL
 );
 
@@ -528,5 +525,3 @@ CREATE TABLE support_tickets (
     is_open BOOL NOT NULL DEFAULT TRUE,
     CHECK (array_length(attachments, 1) < 4)
 );
-
-COMMIT;
