@@ -19,8 +19,7 @@ use tower::ServiceBuilder;
 use crate::config::DatabaseSettings;
 use crate::config::Settings;
 use crate::email_client::EmailClient;
-use crate::routes::health_check::get_hello;
-use crate::routes::health_check::my_handler;
+use crate::routes::health_check::health_check;
 use crate::routes::open::open_router;
 use crate::routes::private::private_router;
 pub mod db_migration;
@@ -132,8 +131,7 @@ impl Application {
         let app = Router::new()
             .nest("/api/private", private_router())
             .nest("/api/open", open_router())
-            .route("/health_check", routing::get(my_handler))
-            .route("/hello", routing::get(get_hello))
+            .route("/health_check", routing::get(health_check))
             .with_state(app_state)
             .merge(crate::auth::login_router())
             .layer(auth_service);
