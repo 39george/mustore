@@ -6,20 +6,25 @@ pub struct UserName(String);
 impl UserName {
     /// Returns an instance of `UserName` if the input satisfies
     /// our validation constraints on subscriber names.
-    pub fn parse(name: &str) -> Result<UserName, &'static str> {
+    pub fn parse(name: &str) -> Result<UserName, anyhow::Error> {
         let is_empty_or_whitespace = name.trim().is_empty();
         let is_too_long = name.chars().count() > 256;
+        let is_too_short = name.chars().count() < 3;
         let forbidden_characters =
             ['/', '(', ')', '"', '<', '>', '\\', '{', '}', ';', ':'];
         let contains_forbidden_chars =
             name.chars().any(|g| forbidden_characters.contains(&g));
 
         if is_empty_or_whitespace {
-            Err("String is emtpy")
+            Err(anyhow::anyhow!("String is emtpy"))
         } else if is_too_long {
-            Err("String is too long")
+            Err(anyhow::anyhow!("String is too long"))
+        } else if is_too_short {
+            Err(anyhow::anyhow!(
+                "String is too short, should be longer than 2 symbols"
+            ))
         } else if contains_forbidden_chars {
-            Err("String contains forbidden chars")
+            Err(anyhow::anyhow!("String contains forbidden chars"))
         } else {
             Ok(UserName(name.to_string()))
         }
@@ -47,6 +52,12 @@ mod tests {
     #[test]
     fn a_name_longer_than_256_chars_is_rejected() {
         let name = "a".repeat(257);
+        assert!(UserName::parse(&name).is_err());
+    }
+
+    #[test]
+    fn a_name_shorter_than_3_chars_is_rejected() {
+        let name = "ab";
         assert!(UserName::parse(&name).is_err());
     }
 
