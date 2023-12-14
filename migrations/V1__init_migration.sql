@@ -87,7 +87,7 @@ CREATE TABLE users (
     role UserRole,
     is_email_confirmed BOOL NOT NULL DEFAULT FALSE,
     ban VARCHAR(500),
-    user_settings_id INTEGER NOT NULL REFERENCES user_settings(id) ON DELETE RESTRICT
+    user_settings_id INTEGER REFERENCES user_settings(id) ON DELETE RESTRICT
 );
 
 -- Products & tags
