@@ -82,9 +82,10 @@ CREATE TABLE users (
     bio VARCHAR(400),
     avatar_url VARCHAR(1000) NOT NULL UNIQUE,
     email VARCHAR(40) NOT NULL UNIQUE,
-    password VARCHAR(50) NOT NULL,
+    password_hash VARCHAR(500) NOT NULL,
     status VARCHAR(30),
     role UserRole,
+    is_email_confirmed BOOL NOT NULL DEFAULT FALSE,
     ban VARCHAR(500),
     user_settings_id INTEGER NOT NULL REFERENCES user_settings(id) ON DELETE RESTRICT
 );
