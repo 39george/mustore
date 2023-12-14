@@ -8,6 +8,8 @@ use axum::response::Response;
 use axum::routing::get;
 use axum::routing::post;
 use axum::Router;
+use http::header::WWW_AUTHENTICATE;
+use http::HeaderValue;
 use serde::Deserialize;
 use serde::Serialize;
 use tower::ServiceBuilder;
@@ -29,7 +31,7 @@ use users::AuthSession;
 
 // ───── Submodules ───────────────────────────────────────────────────────── //
 
-mod middleware;
+pub mod signup;
 pub mod users;
 
 // ───── Auth Types ───────────────────────────────────────────────────────── //
@@ -42,6 +44,8 @@ pub enum AuthError {
     UnexpectedError(#[from] anyhow::Error),
     #[error("Internal error")]
     InternalError,
+    #[error("User creation failed")]
+    UserCreationFailed,
 }
 
 impl std::fmt::Debug for AuthError {
@@ -52,6 +56,7 @@ impl std::fmt::Debug for AuthError {
 
 impl IntoResponse for AuthError {
     fn into_response(self) -> Response {
+        tracing::error!("{:?}", self);
         match self {
             AuthError::UnexpectedError(_) => {
                 StatusCode::INTERNAL_SERVER_ERROR.into_response()
@@ -59,33 +64,35 @@ impl IntoResponse for AuthError {
             AuthError::InternalError => {
                 StatusCode::INTERNAL_SERVER_ERROR.into_response()
             }
-            AuthError::InvalidCredentialsError(_) => {
-                axum::response::Response::builder()
-                    .status(StatusCode::UNAUTHORIZED)
-                    .header(
-                        http::header::WWW_AUTHENTICATE,
-                        http::HeaderValue::from_str(
-                            r#"Basic realm="Mustore User Access""#,
-                        )
-                        .unwrap(),
-                    )
-                    .body(axum::body::Body::empty())
-                    .unwrap()
-            }
+            AuthError::InvalidCredentialsError(_) => Response::builder()
+                .status(StatusCode::UNAUTHORIZED)
+                .header(
+                    WWW_AUTHENTICATE,
+                    HeaderValue::from_static(
+                        r#"Basic realm="Mustore User Access""#,
+                    ),
+                )
+                .body(axum::body::Body::empty())
+                .unwrap(),
+            AuthError::UserCreationFailed => Response::builder()
+                .status(StatusCode::BAD_REQUEST)
+                .body("User creation failed".into())
+                .unwrap(),
         }
     }
 }
 
 #[derive(Clone)]
-pub struct Credentials {
+pub struct UserCredentials {
     pub username: String,
     pub password: Secret<String>,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
-struct SignupCredentials {
+pub struct UserSignupData {
     username: String,
     password: String,
+    email: String,
 }
 
 // ───── Router ───────────────────────────────────────────────────────────── //
@@ -93,7 +100,6 @@ struct SignupCredentials {
 pub fn login_router() -> Router {
     Router::new()
         .route("/login", post(self::post::login))
-        .route("/signup", post(self::post::signup))
         .route("/logout", get(self::get::logout))
         .layer(
             ServiceBuilder::new().layer(
@@ -109,14 +115,12 @@ pub fn login_router() -> Router {
                     ), // on so on for `on_eos`, `on_body_chunk`, and `on_failure`
             ),
         )
-        .layer(ServiceBuilder::new().layer(middleware::LogLayer))
 }
 
 // ───── Handlers ─────────────────────────────────────────────────────────── //
 
 mod post {
     use anyhow::anyhow;
-    use axum::Form;
     use http::HeaderMap;
 
     use super::*;
@@ -143,13 +147,6 @@ mod post {
             Ok(StatusCode::OK)
         }
     }
-
-    #[tracing::instrument(name = "Signup attempt", skip_all)]
-    pub async fn signup(
-        Form(SignupCredentials { username, password }): Form<SignupCredentials>,
-    ) {
-        println!("{}:{}", username, password);
-    }
 }
 
 mod get {
@@ -167,7 +164,7 @@ mod get {
 
 fn basic_authentication(
     headers: &HeaderMap,
-) -> Result<Credentials, anyhow::Error> {
+) -> Result<UserCredentials, anyhow::Error> {
     let header_value = headers
         .get("Authorization")
         .context("The 'Authorization' header was missing")?
@@ -197,7 +194,7 @@ fn basic_authentication(
             anyhow::anyhow!("A password must be provided in 'Basic' auth.")
         })?
         .to_string();
-    Ok(Credentials {
+    Ok(UserCredentials {
         username,
         password: Secret::new(password),
     })

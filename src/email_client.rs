@@ -29,7 +29,7 @@ impl TryFrom<String> for EmailDeliveryService {
 
 /// This type handles the sending of emails.
 /// Internally, it includes a connection pool.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct EmailClient {
     /// Every time a `Client` instance is created, `reqwest` initialises a
     /// connection pool under the hood.

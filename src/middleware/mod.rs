@@ -1,6 +1,7 @@
 use axum::http::Request;
 use axum::http::Response;
 use futures::future::BoxFuture;
+use std::fmt::Display;
 use std::task::Context;
 use std::task::Poll;
 use tower::Layer;
@@ -16,6 +17,7 @@ where
     S: Service<Request<B>, Response = Response<B>> + Send + 'static,
     B: Send + 'static + std::fmt::Debug,
     S::Future: Send + 'static,
+    S::Error: Display,
 {
     type Response = S::Response;
     type Error = S::Error;
@@ -45,7 +47,10 @@ where
                     );
                     println!("ERROR: {}, {:?}", res.status(), res.body());
                 }
-                _ => {}
+                Ok(_) => (),
+                Err(e) => {
+                    tracing::error!("Error: {e}");
+                }
             }
             result
         })

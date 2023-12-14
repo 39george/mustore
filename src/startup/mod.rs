@@ -16,6 +16,7 @@ use tokio::net::TcpListener;
 use tokio_postgres::NoTls;
 use tower::ServiceBuilder;
 
+use crate::auth;
 use crate::config::DatabaseSettings;
 use crate::config::Settings;
 use crate::email_client::EmailClient;
@@ -33,11 +34,12 @@ pub struct Application {
 
 /// Shareable type, we insert it to the main `Router` as state,
 /// at the launch stage.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AppState {
     pub base_url: String,
     pub pool: Pool,
     pub email_client: EmailClient,
+    pub argon2_obj: argon2::Argon2<'static>,
 }
 
 impl Application {
@@ -98,6 +100,22 @@ impl Application {
         pool: Pool,
         email_client: EmailClient,
     ) -> Serve<Router, Router> {
+        let argon2_obj = argon2::Argon2::new(
+            argon2::Algorithm::Argon2id,
+            argon2::Version::V0x13,
+            // Params are good
+            argon2::Params::new(15000, 2, 1, None).unwrap(),
+        );
+
+        // We do not wrap pool into arc because internally it alreaday has an
+        // `Arc`, and copying is cheap.
+        let app_state = AppState {
+            pool: pool.clone(),
+            email_client,
+            base_url: base_url.to_string(),
+            argon2_obj,
+        };
+
         // This uses `tower-sessions` to establish a layer that will provide the session
         // as a request extension.
         let session_store = axum_login::tower_sessions::MemoryStore::default();
@@ -110,7 +128,7 @@ impl Application {
 
         // This combines the session layer with our backend to establish the auth
         // service which will provide the auth session as a request extension.
-        let backend = crate::auth::users::UserBackend::new(pool.clone());
+        let backend = crate::auth::users::UserBackend::new(app_state.clone());
         let auth_service = ServiceBuilder::new()
             .layer(HandleErrorLayer::new(|e: BoxError| async move {
                 tracing::error!("GOT HANDLE ERROR: {}", e);
@@ -120,20 +138,13 @@ impl Application {
                 AuthManagerLayerBuilder::new(backend, session_layer).build(),
             );
 
-        // We do not wrap pool into arc because internally it alreaday has an
-        // `Arc`, and copying is cheap.
-        let app_state = AppState {
-            pool: pool.clone(),
-            email_client,
-            base_url: base_url.to_string(),
-        };
-
         let app = Router::new()
             .nest("/api/private", private_router())
             .nest("/api/open", open_router())
             .route("/health_check", routing::get(health_check))
+            .route("/signup", routing::post(auth::signup::signup))
             .with_state(app_state)
-            .merge(crate::auth::login_router())
+            .merge(auth::login_router())
             .layer(auth_service);
 
         axum::serve(listener, app)
