@@ -160,7 +160,7 @@ impl TestApp {
     /// This function sends Post request to our TestApp,
     /// to /subscriptions path. If successful, it will create
     /// a line in postgres db.
-    pub async fn post_subscriptions(
+    pub async fn _post_subscriptions(
         &self,
         body: &'static str,
     ) -> reqwest::Response {

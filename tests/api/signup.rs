@@ -3,9 +3,9 @@
 use crate::helpers::ConfirmationLink;
 use crate::helpers::{TestApp, TestUser};
 use mustore::config::Settings;
+use wiremock::matchers;
 use wiremock::Mock;
 use wiremock::ResponseTemplate;
-use wiremock::{matchers, MockServer};
 
 #[tokio::test]
 async fn signup_with_correct_data_creates_a_new_candidate() {

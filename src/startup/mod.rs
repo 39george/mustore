@@ -142,9 +142,13 @@ impl Application {
             .nest("/api/private", private_router())
             .nest("/api/open", open_router())
             .route("/health_check", routing::get(health_check))
-            .route("/signup", routing::post(auth::signup::signup))
+            .route("/signup", routing::post(auth::user_signup::signup))
+            .route(
+                "/confirm_user_account",
+                routing::get(auth::user_confirm_acc::confirm),
+            )
             .with_state(app_state)
-            .merge(auth::login_router())
+            .merge(auth::user_login::login_router())
             .layer(auth_service);
 
         axum::serve(listener, app)

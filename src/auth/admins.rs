@@ -8,7 +8,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::{startup::AppState, telemetry::spawn_blocking_with_tracing};
 
-use super::{AuthError, UserCredentials};
+use super::AuthError;
+use crate::auth::user_login::UserCredentials;
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct User {
@@ -48,12 +49,6 @@ impl AuthUser for User {
 #[derive(Debug, Clone)]
 pub struct UserBackend {
     app_state: AppState,
-}
-
-impl UserBackend {
-    pub fn new(app_state: AppState) -> Self {
-        Self { app_state }
-    }
 }
 
 #[async_trait]
@@ -110,6 +105,7 @@ impl AuthnBackend for UserBackend {
 // We use a type alias for convenience.
 //
 // Note that we've supplied our concrete backend here.
+#[allow(dead_code)]
 pub type AuthSession = axum_login::AuthSession<UserBackend>;
 
 #[tracing::instrument(name = "Get user data from db", skip_all)]

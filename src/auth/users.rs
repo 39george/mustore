@@ -6,9 +6,14 @@ use deadpool_postgres::Pool;
 use secrecy::{ExposeSecret, Secret};
 use serde::{Deserialize, Serialize};
 
-use crate::{startup::AppState, telemetry::spawn_blocking_with_tracing};
+// ───── Current Crate Imports ────────────────────────────────────────────── //
 
-use super::{AuthError, UserCredentials};
+use super::AuthError;
+use crate::auth::user_login::UserCredentials;
+use crate::startup::AppState;
+use crate::telemetry::spawn_blocking_with_tracing;
+
+// ───── Body ─────────────────────────────────────────────────────────────── //
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct User {

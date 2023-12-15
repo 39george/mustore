@@ -6,17 +6,30 @@ use axum::extract::State;
 use axum::Form;
 use http::StatusCode;
 use secrecy::{ExposeSecret, Secret};
+use serde::Deserialize;
+use serde::Serialize;
 
+// ───── Current Crate Imports ────────────────────────────────────────────── //
+
+use super::AuthError;
+use crate::domain::user_email::UserEmail;
 use crate::domain::user_name::UserName;
 use crate::domain::user_password::UserPassword;
 use crate::email_client::EmailClient;
 use crate::startup::AppState;
 use crate::telemetry::spawn_blocking_with_tracing;
-use crate::{
-    domain::user_email::UserEmail, validation::signup_token::SignupToken,
-};
+use crate::validation::signup_token::SignupToken;
 
-use super::{AuthError, UserSignupData};
+// ───── Types ────────────────────────────────────────────────────────────── //
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct UserSignupData {
+    username: String,
+    password: String,
+    email: String,
+}
+
+// ───── Handlers ─────────────────────────────────────────────────────────── //
 
 #[tracing::instrument(name = "Signup attempt", skip_all)]
 pub async fn signup(
