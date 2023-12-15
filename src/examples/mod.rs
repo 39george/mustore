@@ -1,5 +1,5 @@
 /// Can insert middleware like this:
-/// ```rust
+/// ```ignore
 /// .layer(ServiceBuilder::new()
 ///     .layer_fn(|inner| ErrorLoggingMiddleware::new(inner))
 /// )

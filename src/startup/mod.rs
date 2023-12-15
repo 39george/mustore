@@ -53,7 +53,7 @@ impl Application {
         let postgres_connection =
             get_postgres_connection_pool(&configuration.database);
 
-        // db_migration::run_migration(&postgres_connection).await;
+        db_migration::run_migration(&postgres_connection).await;
 
         let timeout = configuration.email_client.timeout_millis();
 

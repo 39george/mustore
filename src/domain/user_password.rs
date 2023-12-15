@@ -29,7 +29,7 @@ impl UserPassword {
             Err(anyhow::anyhow!("String is too long"))
         } else if is_too_short {
             Err(anyhow::anyhow!(
-                "String is too short, should be longer than 2 symbols"
+                "Password is too short, should be longer than 7 symbols"
             ))
         } else if contains_forbidden_chars {
             Err(anyhow::anyhow!("String contains forbidden chars"))

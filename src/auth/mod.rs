@@ -31,6 +31,7 @@ use users::AuthSession;
 
 // ───── Submodules ───────────────────────────────────────────────────────── //
 
+mod admins;
 pub mod signup;
 pub mod users;
 
@@ -43,9 +44,9 @@ pub enum AuthError {
     #[error(transparent)]
     UnexpectedError(#[from] anyhow::Error),
     #[error("Internal error")]
-    InternalError,
-    #[error("User creation failed")]
-    UserCreationFailed,
+    InternalError(#[source] anyhow::Error),
+    #[error("User creation failed: {0}")]
+    SignupFailed(#[source] anyhow::Error),
 }
 
 impl std::fmt::Debug for AuthError {
@@ -61,7 +62,7 @@ impl IntoResponse for AuthError {
             AuthError::UnexpectedError(_) => {
                 StatusCode::INTERNAL_SERVER_ERROR.into_response()
             }
-            AuthError::InternalError => {
+            AuthError::InternalError(_) => {
                 StatusCode::INTERNAL_SERVER_ERROR.into_response()
             }
             AuthError::InvalidCredentialsError(_) => Response::builder()
@@ -74,9 +75,9 @@ impl IntoResponse for AuthError {
                 )
                 .body(axum::body::Body::empty())
                 .unwrap(),
-            AuthError::UserCreationFailed => Response::builder()
+            AuthError::SignupFailed(_) => Response::builder()
                 .status(StatusCode::BAD_REQUEST)
-                .body("User creation failed".into())
+                .body("Failed to signup".into())
                 .unwrap(),
         }
     }
