@@ -12,11 +12,11 @@ async fn signup_with_correct_data_creates_a_new_candidate() {
     let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
     let test_user = TestUser::generate();
 
-    // Mock::given(matchers::path("/v1/smtp/send"))
-    //     .respond_with(ResponseTemplate::new(200))
-    //     .expect(1)
-    //     .mount(&app.email_server)
-    //     .await;
+    Mock::given(matchers::path("/v1/smtp/send"))
+        .respond_with(ResponseTemplate::new(200))
+        .expect(1)
+        .mount(&app.email_server)
+        .await;
 
     let response = test_user.post_signup(&app.address).await.unwrap();
     assert!(response.status().is_success());
@@ -57,6 +57,7 @@ async fn going_by_confirmation_link_confirmes_candidate_account() {
     let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
     let confirmation_link =
         reg_user_get_confirmation_link(TestUser::generate(), &app).await;
+    dbg!(&confirmation_link);
     let response = reqwest::get(confirmation_link.0).await.unwrap();
     assert_eq!(response.status().as_u16(), 200);
 }
