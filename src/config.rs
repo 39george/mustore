@@ -44,6 +44,7 @@ pub struct Settings {
     pub app_base_url: String,
     pub email_client: EmailClientSettings,
     pub email_delivery_service: EmailDeliveryService,
+    pub object_storage: ObjectStorageSettings,
 }
 
 impl Settings {
@@ -122,6 +123,15 @@ impl EmailClientSettings {
     pub fn timeout_millis(&self) -> std::time::Duration {
         std::time::Duration::from_millis(self.timeout)
     }
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ObjectStorageSettings {
+    pub endpoint_url: String,
+    pub region: String,
+    pub bucket_name: String,
+    pub access_key_id: Secret<String>,
+    pub secret_access_key: Secret<String>,
 }
 
 fn load_config_from_file<T: AsRef<Path>>(
