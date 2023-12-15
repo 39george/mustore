@@ -12,6 +12,7 @@ use serde::Serialize;
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
 use super::AuthError;
+use crate::cornucopia::queries::user_auth_queries;
 use crate::domain::user_email::UserEmail;
 use crate::domain::user_name::UserName;
 use crate::domain::user_password::UserPassword;
@@ -63,15 +64,16 @@ pub async fn signup(
 
     let validation_token = SignupToken::generate();
 
-    let rows_count = client
-        .execute(
-            "INSERT INTO user_candidates (username, email, password_hash, validation_token)
-                    VALUES ($1, $2, $3, $4)",
-            &[&username.as_ref(), &email.as_ref(), &password_hash, &validation_token.as_ref()],
+    let rows_count = user_auth_queries::insert_user_to_candidates()
+        .bind(
+            &client,
+            &username.as_ref(),
+            &email.as_ref(),
+            &password_hash,
+            &validation_token.as_ref(),
         )
         .await
         .context("Failed to insert user data to db")?;
-
     if rows_count != 1 {
         return Err(AuthError::SignupFailed(anyhow::anyhow!(
             "Inserted {rows_count} rows to db"

@@ -6,12 +6,15 @@ use deadpool_postgres::Pool;
 use fake::Fake;
 use secrecy::{ExposeSecret, Secret};
 use tokio_postgres::NoTls;
+use wiremock::Mock;
 use wiremock::MockServer;
 
 use mustore::config::DatabaseSettings;
 use mustore::config::Settings;
 use mustore::startup::get_postgres_connection_pool;
 use mustore::startup::Application;
+use wiremock::matchers;
+use wiremock::ResponseTemplate;
 
 pub struct TestUser {
     pub username: String,
@@ -155,6 +158,26 @@ impl TestApp {
             email_server,
             port,
         }
+    }
+
+    pub async fn reg_user_get_confirmation_link(
+        &self,
+        user: TestUser,
+    ) -> ConfirmationLink {
+        Mock::given(matchers::path("/v1/smtp/send"))
+            .and(matchers::method("POST"))
+            .and(matchers::header_exists("Authorization"))
+            .respond_with(ResponseTemplate::new(200))
+            .expect(1)
+            .mount(&self.email_server)
+            .await;
+
+        let response = user.post_signup(&self.address).await.unwrap();
+        assert!(response.status().is_success());
+
+        let request = &self.email_server.received_requests().await.unwrap()[0];
+
+        self.get_confirmation_link_urlencoded(request)
     }
 
     /// This function sends Post request to our TestApp,

@@ -4,6 +4,7 @@ mod examples;
 
 pub mod auth;
 pub mod config;
+pub mod cornucopia;
 pub mod domain;
 pub mod email_client;
 pub mod html_template_gen;

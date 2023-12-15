@@ -21,6 +21,5 @@ pub async fn confirm(
     State(app_state): State<AppState>,
     Query(UserConfirmationToken { token }): Query<UserConfirmationToken>,
 ) -> Result<StatusCode, AuthError> {
-    tracing::info!("Got token: {token}");
     Ok(StatusCode::OK)
 }

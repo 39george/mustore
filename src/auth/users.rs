@@ -10,6 +10,7 @@ use serde::{Deserialize, Serialize};
 
 use super::AuthError;
 use crate::auth::user_login::UserCredentials;
+use crate::cornucopia::queries::user_auth_queries;
 use crate::startup::AppState;
 use crate::telemetry::spawn_blocking_with_tracing;
 
@@ -128,48 +129,29 @@ async fn get_user_data(
         .await
         .context("Failed to get connection from db pool")?;
 
-    let row = match (username, id) {
-        (Some(username), None) => connection
-            .query_one(
-                "
-                SELECT id, username, password_hash
-                FROM users
-                WHERE username = $1
-                ",
-                &[&username],
-            )
+    let data = match (username, id) {
+        (Some(username), None) => {
+            user_auth_queries::get_auth_user_data_by_username()
+                .bind(&connection, &username)
+                .opt()
+                .await
+                .context("Failed to query user from db by username")
+                .map_err(AuthError::InvalidCredentialsError)?
+                .map(|r| (r.id, r.username, r.password_hash))
+        }
+        (None, Some(id)) => user_auth_queries::get_auth_user_data_by_id()
+            .bind(&connection, id)
+            .opt()
             .await
-            .context("Failed to query user from db")
-            .map_err(AuthError::InvalidCredentialsError)?,
-        (None, Some(id)) => connection
-            .query_one(
-                "
-                SELECT id, username, password_hash
-                FROM users
-                WHERE id = $1
-                ",
-                &[&id],
-            )
-            .await
-            .context("Failed to query user from db")
-            .map_err(AuthError::InvalidCredentialsError)?,
+            .context("Failed to query user from db by id")
+            .map_err(AuthError::InvalidCredentialsError)?
+            .map(|r| (r.id, r.username, r.password_hash)),
         _ => unreachable!(),
     };
 
-    let password_hash = row
-        .try_get::<&str, &str>("password_hash")
-        .context("Failed to get password from row")
-        .map_err(AuthError::UnexpectedError)?;
-
-    let id = row
-        .try_get("id")
-        .context("Failed to get user id from row")
-        .map_err(AuthError::UnexpectedError)?;
-
-    let username = row
-        .try_get("username")
-        .context("Failed to get username from row")
-        .map_err(AuthError::UnexpectedError)?;
+    let (id, username, password_hash) = data.ok_or(
+        AuthError::UnexpectedError(anyhow::anyhow!("No data for user in db")),
+    )?;
 
     Ok(User {
         id,
