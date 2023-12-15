@@ -13,7 +13,7 @@ use crate::error_chain_fmt;
 // ───── Submodules ───────────────────────────────────────────────────────── //
 
 mod admins;
-pub mod user_confirm_acc;
+pub mod user_confirm_account;
 pub mod user_login;
 pub mod user_signup;
 pub mod users;

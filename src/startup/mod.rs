@@ -145,7 +145,7 @@ impl Application {
             .route("/signup", routing::post(auth::user_signup::signup))
             .route(
                 "/confirm_user_account",
-                routing::get(auth::user_confirm_acc::confirm),
+                routing::get(auth::user_confirm_account::confirm),
             )
             .with_state(app_state)
             .merge(auth::user_login::login_router())
