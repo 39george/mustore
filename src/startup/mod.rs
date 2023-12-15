@@ -23,6 +23,7 @@ use crate::email_client::EmailClient;
 use crate::routes::health_check::health_check;
 use crate::routes::open::open_router;
 use crate::routes::private::private_router;
+use crate::service_providers::object_storage::YandexObjectStorage;
 pub mod db_migration;
 
 /// This is a central type of our codebase. `Application` type builds server
@@ -38,6 +39,7 @@ pub struct Application {
 pub struct AppState {
     pub base_url: String,
     pub pool: Pool,
+    pub object_storage: YandexObjectStorage,
     pub email_client: EmailClient,
     pub argon2_obj: argon2::Argon2<'static>,
 }
@@ -73,10 +75,13 @@ impl Application {
         let listener = TcpListener::bind(address).await?;
         let port = listener.local_addr()?.port();
 
+        let object_storage =
+            YandexObjectStorage::new(configuration.object_storage).await;
         let serve = Self::build_server(
             &configuration.app_base_url,
             listener,
             postgres_connection,
+            object_storage,
             email_client,
         );
 
@@ -98,6 +103,7 @@ impl Application {
         base_url: &str,
         listener: TcpListener,
         pool: Pool,
+        object_storage: YandexObjectStorage,
         email_client: EmailClient,
     ) -> Serve<Router, Router> {
         let argon2_obj = argon2::Argon2::new(
@@ -111,6 +117,7 @@ impl Application {
         // `Arc`, and copying is cheap.
         let app_state = AppState {
             pool: pool.clone(),
+            object_storage,
             email_client,
             base_url: base_url.to_string(),
             argon2_obj,
