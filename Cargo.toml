@@ -31,6 +31,8 @@ reqwest = { version = "0.11.22", default-features = false, features = [
 ] }
 tower = { version = "0.4.13", features = ["timeout"] }
 tower-http = { version = "0.5.0", features = ["trace"] }
+aws-config = "1.1.1"
+aws-sdk-s3 = "1.8.0"
 
 # Serialization-related dependencies
 serde = { version = "1.0.193", features = ["derive"] }
@@ -51,6 +53,7 @@ rand = { version = "0.8.5", features = ["std_rng"] }
 thiserror = "1.0.50"
 anyhow = "1.0.75"
 time = "0.3.30"
+identicon-rs = "4.0.1"
 
 # Security
 axum-login = "0.10.2"
