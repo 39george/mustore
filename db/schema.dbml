@@ -129,6 +129,7 @@ Table user_candidates {
   username VARCHAR(50) [not null, unique]
   password_hash VARCHAR(500) [not null]
   email VARCHAR(100) [not null, unique]
+  role UserRole [not null]
   validation_token VARCHAR(25) [not null]
 }
 
@@ -144,7 +145,7 @@ Table users {
   email VARCHAR(100) [not null, unique]
   password_hash VARCHAR(500) [not null]
   status VARCHAR(50)
-  role UserRole
+  role UserRole [not null]
   ban VARCHAR(500)
 }
 
