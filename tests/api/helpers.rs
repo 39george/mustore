@@ -1,14 +1,11 @@
 //! This is a module with common initialization functions.
 
-use argon2::password_hash::SaltString;
-use argon2::Argon2;
-use argon2::Params;
-use argon2::PasswordHasher;
-use deadpool_postgres::Client;
+use std::collections::HashMap;
+
 use deadpool_postgres::Pool;
+use fake::Fake;
 use secrecy::{ExposeSecret, Secret};
 use tokio_postgres::NoTls;
-use uuid::Uuid;
 use wiremock::MockServer;
 
 use mustore::config::DatabaseSettings;
@@ -17,40 +14,34 @@ use mustore::startup::get_postgres_connection_pool;
 use mustore::startup::Application;
 
 pub struct TestUser {
-    pub user_id: Uuid,
     pub username: String,
     pub password: String,
+    pub email: String,
 }
 
 impl TestUser {
     pub fn generate() -> Self {
         Self {
-            user_id: Uuid::new_v4(),
-            username: Uuid::new_v4().to_string(),
-            password: Uuid::new_v4().to_string(),
+            username: fake::faker::name::en::Name().fake(),
+            password: String::from("A23c(fds)Helloworld232r"),
+            email: fake::faker::internet::en::SafeEmail().fake(),
         }
     }
 
-    async fn store_in_db(&self, client: &Client) {
-        let salt = SaltString::generate(&mut rand::thread_rng());
-        // We don't care about the exact Argon2 parameters here
-        // given that it's for testing purposes!
-        let password_hash = Argon2::new(
-            argon2::Algorithm::Argon2id,
-            argon2::Version::V0x13,
-            Params::new(15000, 2, 1, None).unwrap(),
-        )
-        .hash_password(self.password.as_bytes(), &salt)
-        .unwrap()
-        .to_string();
+    pub async fn store_in_db(
+        &self,
+        host: &str,
+    ) -> Result<reqwest::Response, reqwest::Error> {
+        let client = reqwest::Client::new();
+        let mut form = HashMap::new();
+        form.insert("username", &self.username);
+        form.insert("password", &self.password);
+        form.insert("email", &self.email);
         client
-            .execute(
-                "INSERT INTO users (user_id, username, password_hash)
-                    VALUES ($1, $2, $3)",
-                &[&self.user_id, &self.username, &password_hash],
-            )
+            .post(format!("{}/signup", host))
+            .form(&form)
+            .send()
             .await
-            .expect("Failed to create test users");
     }
 }
 
@@ -146,7 +137,7 @@ impl TestApp {
         let _ = tokio::spawn(application.run_until_stopped());
 
         let test_user = TestUser::generate();
-        test_user.store_in_db(&pool.get().await.unwrap()).await;
+        test_user.store_in_db(&address).await;
 
         TestApp {
             db_username,
