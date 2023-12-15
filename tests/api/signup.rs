@@ -1,13 +1,24 @@
 //! tests/api/signup.rs
 
+use crate::helpers::ConfirmationLink;
 use crate::helpers::{TestApp, TestUser};
 use mustore::config::Settings;
+use wiremock::Mock;
+use wiremock::ResponseTemplate;
+use wiremock::{matchers, MockServer};
 
 #[tokio::test]
 async fn signup_with_correct_data_creates_a_new_candidate() {
     let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
     let test_user = TestUser::generate();
-    let response = test_user.store_in_db(&app.address).await.unwrap();
+
+    // Mock::given(matchers::path("/v1/smtp/send"))
+    //     .respond_with(ResponseTemplate::new(200))
+    //     .expect(1)
+    //     .mount(&app.email_server)
+    //     .await;
+
+    let response = test_user.post_signup(&app.address).await.unwrap();
     assert!(response.status().is_success());
 
     let db_client = app.pool.get().await.unwrap();
@@ -30,6 +41,44 @@ async fn signup_with_uncorrect_data_rejected() {
         password: String::from("abc"),
         email: String::from("definitely_not_email"),
     };
-    let response = test_user.store_in_db(&app.address).await.unwrap();
+    let response = test_user.post_signup(&app.address).await.unwrap();
     assert_eq!(response.status().as_u16(), 400);
+}
+
+#[tokio::test]
+async fn signup_with_correct_data_sends_confirmation_email_with_link_smtpbz() {
+    let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
+    let _confirmation_link =
+        reg_user_get_confirmation_link(TestUser::generate(), &app).await;
+}
+
+#[tokio::test]
+async fn going_by_confirmation_link_confirmes_candidate_account() {
+    let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
+    let confirmation_link =
+        reg_user_get_confirmation_link(TestUser::generate(), &app).await;
+    let response = reqwest::get(confirmation_link.0).await.unwrap();
+    assert_eq!(response.status().as_u16(), 200);
+}
+
+// ───── Helpers ──────────────────────────────────────────────────────────── //
+
+async fn reg_user_get_confirmation_link(
+    user: TestUser,
+    app: &TestApp,
+) -> ConfirmationLink {
+    Mock::given(matchers::path("/v1/smtp/send"))
+        .and(matchers::method("POST"))
+        .and(matchers::header_exists("Authorization"))
+        .respond_with(ResponseTemplate::new(200))
+        .expect(1)
+        .mount(&app.email_server)
+        .await;
+
+    let response = user.post_signup(&app.address).await.unwrap();
+    assert!(response.status().is_success());
+
+    let request = &app.email_server.received_requests().await.unwrap()[0];
+
+    app.get_confirmation_link_urlencoded(request)
 }

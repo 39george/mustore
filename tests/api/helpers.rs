@@ -28,7 +28,7 @@ impl TestUser {
         }
     }
 
-    pub async fn store_in_db(
+    pub async fn post_signup(
         &self,
         host: &str,
     ) -> Result<reqwest::Response, reqwest::Error> {
@@ -51,7 +51,6 @@ impl TestUser {
 pub struct TestApp {
     db_username: String,
     db_config_with_root_cred: DatabaseSettings,
-    pub test_user: TestUser,
     pub address: String,
     pub pool: Pool,
     pub email_server: MockServer,
@@ -59,17 +58,17 @@ pub struct TestApp {
 }
 
 /// Confirmation links embedded in the request to the email API.
+#[derive(Debug)]
 pub struct ConfirmationLink(pub reqwest::Url);
 
 impl TestApp {
     pub async fn spawn_app(mut config: Settings) -> TestApp {
-        if let Ok(_) = std::env::var("TEST_TRACING") {
-            use tracing_subscriber::fmt::format::FmtSpan;
-            use tracing_subscriber::layer::SubscriberExt;
-            use tracing_subscriber::util::SubscriberInitExt;
-            use tracing_subscriber::EnvFilter;
-            use tracing_subscriber::Layer;
-
+        use tracing_subscriber::fmt::format::FmtSpan;
+        use tracing_subscriber::layer::SubscriberExt;
+        use tracing_subscriber::util::SubscriberInitExt;
+        use tracing_subscriber::EnvFilter;
+        use tracing_subscriber::Layer;
+        if let Ok(_) = std::env::var("TEST_JAEGER") {
             // Opentelemetry
             let tracer = opentelemetry_jaeger::new_agent_pipeline()
                 .with_service_name("mustore_test")
@@ -89,6 +88,18 @@ impl TestApp {
                 .with(layer)
                 .try_init()
                 .unwrap();
+        } else if let Ok(_) = std::env::var("TEST_TRACING") {
+            let subscriber = tracing_subscriber::fmt()
+                .with_timer(
+                    tracing_subscriber::fmt::time::ChronoLocal::default(),
+                )
+                .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
+                .with_max_level(tracing::Level::INFO)
+                .compact()
+                .with_level(true)
+                .finish();
+
+            let _ = tracing::subscriber::set_global_default(subscriber);
         }
 
         // We should randomize app port
@@ -136,9 +147,6 @@ impl TestApp {
         // Very important step
         let _ = tokio::spawn(application.run_until_stopped());
 
-        let test_user = TestUser::generate();
-        test_user.store_in_db(&address).await;
-
         TestApp {
             db_username,
             db_config_with_root_cred,
@@ -146,7 +154,6 @@ impl TestApp {
             pool,
             email_server,
             port,
-            test_user,
         }
     }
 
@@ -166,8 +173,8 @@ impl TestApp {
             .expect("Failed to execute request.")
     }
 
-    /// Extract the confirmation links embedded in the email API.
-    pub fn get_confirmation_link(
+    /// Extract the confirmation links embedded in the email API in json.
+    pub fn _get_confirmation_link_json(
         &self,
         email_request: &wiremock::Request,
     ) -> ConfirmationLink {
@@ -194,21 +201,49 @@ impl TestApp {
         ConfirmationLink(link)
     }
 
-    pub async fn post_newsletters(
+    /// Extract the confirmation links embedded in the email API in urlencoded.
+    pub fn get_confirmation_link_urlencoded(
         &self,
-        body: serde_json::Value,
-    ) -> reqwest::Response {
-        reqwest::Client::new()
-            .post(&format!("{}/newsletters", self.address))
-            .json(&body)
-            .basic_auth(
-                &self.test_user.username,
-                Some(&self.test_user.password),
-            )
-            .send()
-            .await
-            .expect("Failed to execute request.")
+        email_request: &wiremock::Request,
+    ) -> ConfirmationLink {
+        let form_data: HashMap<String, String> =
+            serde_urlencoded::from_bytes(&email_request.body).unwrap();
+        let html_content = form_data.get("html").unwrap();
+
+        // Extract the link from one of the request fields.
+        let get_link = |s: &str| {
+            let links: Vec<_> = linkify::LinkFinder::new()
+                .links(s)
+                .filter(|l| *l.kind() == linkify::LinkKind::Url)
+                .collect();
+            let raw_link = links[6].as_str().to_string();
+            let mut confirmation_link = reqwest::Url::parse(&raw_link).unwrap();
+            // Let's make sure we don't call random APIs on the web
+            assert_eq!(confirmation_link.host_str().unwrap(), "127.0.0.1");
+            confirmation_link.set_port(Some(self.port)).unwrap();
+            confirmation_link
+        };
+
+        let link = get_link(&html_content);
+
+        ConfirmationLink(link)
     }
+
+    // pub async fn post_newsletters(
+    //     &self,
+    //     body: serde_json::Value,
+    // ) -> reqwest::Response {
+    //     reqwest::Client::new()
+    //         .post(&format!("{}/newsletters", self.address))
+    //         .json(&body)
+    //         .basic_auth(
+    //             &self.test_user.username,
+    //             Some(&self.test_user.password),
+    //         )
+    //         .send()
+    //         .await
+    //         .expect("Failed to execute request.")
+    // }
 }
 
 impl Drop for TestApp {
