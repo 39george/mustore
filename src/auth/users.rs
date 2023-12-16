@@ -74,7 +74,7 @@ impl AuthnBackend for UserBackend {
         creds: Self::Credentials,
     ) -> Result<Option<Self::User>, Self::Error> {
         let user =
-            get_user_data(&self.app_state.pool, Some(&creds.username), None)
+            get_user_data(&self.app_state.pg_pool, Some(&creds.username), None)
                 .await;
 
         let provided_password = creds.password.clone();
@@ -108,7 +108,7 @@ impl AuthnBackend for UserBackend {
         user_id: &UserId<Self>,
     ) -> Result<Option<Self::User>, Self::Error> {
         let user =
-            get_user_data(&self.app_state.pool, None, Some(user_id)).await?;
+            get_user_data(&self.app_state.pg_pool, None, Some(user_id)).await?;
         Ok(Some(user))
     }
 }

@@ -33,8 +33,8 @@ pub struct UserCredentials {
 
 pub fn login_router() -> Router {
     Router::new()
-        .route("/login", post(self::post::login))
-        .route("/logout", get(self::get::logout))
+        .route("/api/login", post(self::post::login))
+        .route("/api/logout", get(self::get::logout))
         .layer(
             ServiceBuilder::new().layer(
                 TraceLayer::new_for_http()

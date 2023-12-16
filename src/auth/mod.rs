@@ -1,13 +1,19 @@
 //! src/auth/mod.rs
 
+use std::collections::HashMap;
+
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::response::Response;
 use http::header::WWW_AUTHENTICATE;
 use http::HeaderValue;
+use secrecy::Secret;
+use serde::Deserialize;
+use serde::Serialize;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
+use crate::cornucopia::types::public::Userrole;
 use crate::error_chain_fmt;
 
 // ───── Submodules ───────────────────────────────────────────────────────── //
@@ -30,6 +36,8 @@ pub enum AuthError {
     InternalError(#[source] anyhow::Error),
     #[error("User creation failed: {0}")]
     SignupFailed(#[source] anyhow::Error),
+    #[error("Account confirmation failed: {0}")]
+    AccountConfirmationFailed(#[source] anyhow::Error),
 }
 
 impl std::fmt::Debug for AuthError {
@@ -62,6 +70,131 @@ impl IntoResponse for AuthError {
                 .status(StatusCode::BAD_REQUEST)
                 .body("Failed to signup".into())
                 .unwrap(),
+            AuthError::AccountConfirmationFailed(_) => {
+                axum::response::Redirect::to(
+                    // FIXME: replace this to the real path
+                    "react-router/accountconfirmationfailed",
+                )
+                .into_response()
+            }
         }
+    }
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub enum UserRole {
+    #[serde(rename = "creator")]
+    Creator,
+    #[serde(rename = "consumer")]
+    Consumer,
+    #[serde(rename = "fullstack")]
+    Fullstack,
+}
+
+impl std::fmt::Display for UserRole {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            UserRole::Creator => f.write_str("creator"),
+            UserRole::Consumer => f.write_str("consumer"),
+            UserRole::Fullstack => f.write_str("fullstack"),
+        }
+    }
+}
+
+impl TryFrom<&str> for UserRole {
+    type Error = String;
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "creator" => Ok(UserRole::Creator),
+            "consumer" => Ok(UserRole::Consumer),
+            "fullstack" => Ok(UserRole::Fullstack),
+            other => {
+                Err(format!("Can't create UserRole instance from {other}"))
+            }
+        }
+    }
+}
+
+impl Into<Userrole> for UserRole {
+    fn into(self) -> Userrole {
+        match self {
+            UserRole::Creator => Userrole::creator,
+            UserRole::Consumer => Userrole::consumer,
+            UserRole::Fullstack => Userrole::fullstack,
+        }
+    }
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct UserCandidate {
+    username: String,
+    email: String,
+    // We need to serialize that, so don't use `Secret`
+    password_hash: String,
+    role: UserRole,
+    validation_token: String,
+}
+
+impl UserCandidate {
+    pub fn new(
+        username: &str,
+        email: &str,
+        password_hash: &str,
+        role: UserRole,
+        validation_token: &str,
+    ) -> Self {
+        UserCandidate {
+            username: username.to_string(),
+            email: email.to_string(),
+            password_hash: password_hash.to_string(),
+            role,
+            validation_token: validation_token.to_string(),
+        }
+    }
+
+    pub fn to_redis_fields(self) -> Vec<(&'static str, String)> {
+        vec![
+            ("username", self.username),
+            ("email", self.email),
+            ("password_hash", self.password_hash),
+            ("role", self.role.to_string()),
+            ("validation_token", self.validation_token),
+        ]
+    }
+
+    fn from_map(
+        mut fields: HashMap<String, String>,
+    ) -> Result<UserCandidate, redis::RedisError> {
+        Ok(UserCandidate {
+            username: fields.remove("username").ok_or(
+                redis::RedisError::from((
+                    redis::ErrorKind::TypeError,
+                    "Missing field: username",
+                )),
+            )?,
+            email: fields.remove("email").ok_or(redis::RedisError::from((
+                redis::ErrorKind::TypeError,
+                "Missing field: email",
+            )))?,
+            password_hash: fields.remove("password_hash").ok_or(
+                redis::RedisError::from((
+                    redis::ErrorKind::TypeError,
+                    "Missing field: password_hash",
+                )),
+            )?,
+            role: fields
+                .remove("role")
+                .and_then(|r| UserRole::try_from(r.as_str()).ok())
+                .ok_or(redis::RedisError::from((
+                    redis::ErrorKind::TypeError,
+                    "Invalid or missing field: role",
+                )))?,
+            validation_token: fields.remove("validation_token").ok_or(
+                redis::RedisError::from((
+                    redis::ErrorKind::TypeError,
+                    "Missing field: validation_token",
+                )),
+            )?,
+        })
     }
 }
