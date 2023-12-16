@@ -3,7 +3,7 @@
 use std::time::Duration;
 
 use anyhow::Context;
-use aws_config::{BehaviorVersion, Region};
+use aws_config::BehaviorVersion;
 use aws_sdk_s3::{
     config::Credentials,
     presigning::PresigningConfig,
