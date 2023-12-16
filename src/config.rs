@@ -39,6 +39,7 @@ impl TryFrom<String> for Environment {
 #[derive(Deserialize, Debug)]
 pub struct Settings {
     pub database: DatabaseSettings,
+    pub redis: RedisSettings,
     pub app_port: u16,
     pub app_addr: Ipv4Addr,
     pub app_base_url: String,
@@ -100,6 +101,26 @@ impl DatabaseSettings {
     }
 }
 
+#[derive(Deserialize, Debug, Clone)]
+pub struct RedisSettings {
+    pub password: Secret<String>,
+    pub host: String,
+    pub port: u16,
+    pub db_number: u16,
+}
+
+impl RedisSettings {
+    pub fn connection_string(&self) -> secrecy::Secret<String> {
+        secrecy::Secret::new(format!(
+            "redis://{}@{}:{}/{}",
+            self.password.expose_secret(),
+            self.host,
+            self.port,
+            self.db_number
+        ))
+    }
+}
+
 /// This type describes configuration
 /// for client, sending emails.
 #[derive(Debug, Deserialize)]
@@ -128,7 +149,6 @@ impl EmailClientSettings {
 #[derive(Debug, Deserialize)]
 pub struct ObjectStorageSettings {
     pub endpoint_url: String,
-    pub region: String,
     pub bucket_name: String,
     pub access_key_id: Secret<String>,
     pub secret_access_key: Secret<String>,
