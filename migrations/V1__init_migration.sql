@@ -71,15 +71,6 @@ CREATE TABLE user_settings (
     order_updates BOOL NOT NULL DEFAULT TRUE
 );
 
-CREATE TABLE user_candidates (
-    id SERIAL PRIMARY KEY,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    username VARCHAR(50) NOT NULL UNIQUE,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    password_hash VARCHAR(500) NOT NULL,
-    validation_token VARCHAR(25) NOT NULL
-);
-
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -91,7 +82,7 @@ CREATE TABLE users (
     email VARCHAR(100) NOT NULL UNIQUE,
     password_hash VARCHAR(500) NOT NULL,
     status VARCHAR(50),
-    role UserRole,
+    role UserRole NOT NULL,
     ban VARCHAR(500)
 );
 
