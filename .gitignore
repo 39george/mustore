@@ -3,4 +3,5 @@
 .DS_Store
 Cargo.lock
 config/
+scripts/
 refinery.toml
