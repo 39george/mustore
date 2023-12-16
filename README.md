@@ -108,3 +108,7 @@ Testing a backend application for user signup and login involves several layers 
    - Ensure that CORS is correctly configured so that only approved origins can make requests.
 
 When writing these tests, it is important to mock external dependencies and to create test doubles for parts of the system not under test. This way, you can isolate each component and ensure the reliability of your tests. Always consider the balance between different types of tests—while unit tests are great for testing small units of code, integration, and end-to-end tests help guarantee that the system works as a whole.
+
+### Future features:
+   1. Blog section
+   2. Implement rejection of product/service with possibility to correct files that required corrections.
