@@ -14,6 +14,8 @@ deadpool = "0.10.0"
 deadpool-postgres = "0.11.0"
 refinery = { version = "0.8.11", features = ["tokio-postgres"] }
 cornucopia_async = { path = "../../crates/open-source/backend/cornucopia/crates/client_async" }
+redis = { version = "0.24.0", features = ["tokio-comp"] }
+deadpool-redis = "0.14.0"
 
 # Web-related dependencies
 axum = { version = "0.7.2", features = ["macros"] }
@@ -54,6 +56,7 @@ thiserror = "1.0.50"
 anyhow = "1.0.75"
 time = "0.3.30"
 identicon-rs = "4.0.1"
+image = "0.24.7"
 
 # Security
 axum-login = "0.10.2"
