@@ -6,8 +6,8 @@ use axum::Router;
 use axum_login::AuthManagerLayerBuilder;
 use deadpool_postgres::Manager;
 use deadpool_postgres::ManagerConfig;
-use deadpool_postgres::Pool;
 
+use deadpool_postgres::Pool;
 use http::StatusCode;
 use secrecy::ExposeSecret;
 
@@ -24,6 +24,8 @@ use crate::routes::health_check::health_check;
 use crate::routes::open::open_router;
 use crate::routes::private::private_router;
 use crate::service_providers::object_storage::YandexObjectStorage;
+use crate::types::RedisPool;
+
 pub mod db_migration;
 
 /// This is a central type of our codebase. `Application` type builds server
@@ -38,7 +40,8 @@ pub struct Application {
 #[derive(Clone, Debug)]
 pub struct AppState {
     pub base_url: String,
-    pub pool: Pool,
+    pub pg_pool: Pool,
+    pub redis_pool: RedisPool,
     pub object_storage: YandexObjectStorage,
     pub email_client: EmailClient,
     pub argon2_obj: argon2::Argon2<'static>,
@@ -52,10 +55,9 @@ impl Application {
     pub async fn build(
         configuration: Settings,
     ) -> Result<Application, anyhow::Error> {
-        let postgres_connection =
-            get_postgres_connection_pool(&configuration.database);
+        let pg_pool = get_postgres_connection_pool(&configuration.database);
 
-        db_migration::run_migration(&postgres_connection).await;
+        db_migration::run_migration(&pg_pool).await;
 
         let timeout = configuration.email_client.timeout_millis();
 
@@ -77,10 +79,20 @@ impl Application {
 
         let object_storage =
             YandexObjectStorage::new(configuration.object_storage).await;
+
+        let cfg = deadpool_redis::Config::from_url(
+            configuration.redis.connection_string().expose_secret(),
+        );
+        let redis_pool = RedisPool::new(
+            cfg.create_pool(Some(deadpool::Runtime::Tokio1))
+                .expect("Failed to create redis connection pool"),
+        );
+
         let serve = Self::build_server(
             &configuration.app_base_url,
             listener,
-            postgres_connection,
+            pg_pool,
+            redis_pool,
             object_storage,
             email_client,
         );
@@ -102,7 +114,8 @@ impl Application {
     fn build_server(
         base_url: &str,
         listener: TcpListener,
-        pool: Pool,
+        pg_pool: Pool,
+        redis_pool: RedisPool,
         object_storage: YandexObjectStorage,
         email_client: EmailClient,
     ) -> Serve<Router, Router> {
@@ -116,7 +129,8 @@ impl Application {
         // We do not wrap pool into arc because internally it alreaday has an
         // `Arc`, and copying is cheap.
         let app_state = AppState {
-            pool: pool.clone(),
+            pg_pool: pg_pool.clone(),
+            redis_pool,
             object_storage,
             email_client,
             base_url: base_url.to_string(),
@@ -148,10 +162,10 @@ impl Application {
         let app = Router::new()
             .nest("/api/private", private_router())
             .nest("/api/open", open_router())
-            .route("/health_check", routing::get(health_check))
-            .route("/signup", routing::post(auth::user_signup::signup))
+            .route("/api/health_check", routing::get(health_check))
+            .route("/api/signup", routing::post(auth::user_signup::signup))
             .route(
-                "/confirm_user_account",
+                "/api/confirm_user_account",
                 routing::get(auth::user_confirm_account::confirm),
             )
             .with_state(app_state)

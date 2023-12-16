@@ -41,7 +41,7 @@ impl TestUser {
         form.insert("password", &self.password);
         form.insert("email", &self.email);
         client
-            .post(format!("{}/signup", host))
+            .post(format!("{}/api/signup", host))
             .form(&form)
             .send()
             .await

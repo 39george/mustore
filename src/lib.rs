@@ -10,8 +10,10 @@ pub mod email_client;
 pub mod html_template_gen;
 pub mod middleware;
 pub mod routes;
+pub mod service_providers;
 pub mod startup;
 pub mod telemetry;
+pub mod types;
 pub mod validation;
 
 // ───── Helpers ──────────────────────────────────────────────────────────── //
