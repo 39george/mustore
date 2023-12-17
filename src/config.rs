@@ -112,7 +112,7 @@ pub struct RedisSettings {
 impl RedisSettings {
     pub fn connection_string(&self) -> secrecy::Secret<String> {
         secrecy::Secret::new(format!(
-            "redis://{}@{}:{}/{}",
+            "redis://:{}@{}:{}/{}",
             self.password.expose_secret(),
             self.host,
             self.port,

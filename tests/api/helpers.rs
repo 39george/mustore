@@ -4,6 +4,8 @@ use std::collections::HashMap;
 
 use deadpool_postgres::Pool;
 use fake::Fake;
+// use mustore::types::RedisPool;
+// use redis::AsyncCommands;
 use secrecy::{ExposeSecret, Secret};
 use tokio_postgres::NoTls;
 use wiremock::Mock;
@@ -20,6 +22,7 @@ pub struct TestUser {
     pub username: String,
     pub password: String,
     pub email: String,
+    pub role: String,
 }
 
 impl TestUser {
@@ -28,6 +31,7 @@ impl TestUser {
             username: fake::faker::name::en::Name().fake(),
             password: String::from("A23c(fds)Helloworld232r"),
             email: fake::faker::internet::en::SafeEmail().fake(),
+            role: String::from("consumer"),
         }
     }
 
@@ -40,6 +44,7 @@ impl TestUser {
         form.insert("username", &self.username);
         form.insert("password", &self.password);
         form.insert("email", &self.email);
+        form.insert("user_role", &self.role);
         client
             .post(format!("{}/api/signup", host))
             .form(&form)
@@ -50,13 +55,14 @@ impl TestUser {
 
 /// This type contains MockServer, and it's address.
 /// MockServer represents a email delivery service,
-/// such as Postmark.
+/// such as Postmark or SMTP.bz
 pub struct TestApp {
-    db_username: String,
-    db_config_with_root_cred: DatabaseSettings,
+    pg_username: String,
+    pg_config_with_root_cred: DatabaseSettings,
     pub address: String,
-    pub pool: Pool,
+    pub pg_pool: Pool,
     pub email_server: MockServer,
+    pub object_storage_server: MockServer,
     pub port: u16,
 }
 
@@ -66,10 +72,22 @@ pub struct ConfirmationLink(pub reqwest::Url);
 
 impl TestApp {
     pub async fn spawn_app(mut config: Settings) -> TestApp {
-        prepare_tracing();
+        init_tracing();
 
-        let (db_username, pool, email_server, db_config_with_root_cred) =
-            prepare_postgres(&mut config).await;
+        let email_server = MockServer::start().await;
+        config.email_client.base_url = email_server.uri();
+
+        let object_storage_server = MockServer::start().await;
+        config.object_storage.endpoint_url = object_storage_server.uri();
+
+        config.app_port = 0;
+
+        let pg_config_with_root_cred = config.database.clone();
+        let (pg_config, pg_pool, pg_username) =
+            prepare_postgres(config.database.clone()).await;
+        config.database = pg_config;
+
+        config.redis.db_number = 1;
 
         let application = Application::build(config)
             .await
@@ -83,12 +101,13 @@ impl TestApp {
         let _ = tokio::spawn(application.run_until_stopped());
 
         TestApp {
-            db_username,
-            db_config_with_root_cred,
+            pg_username,
+            pg_config_with_root_cred,
             address,
-            pool,
+            pg_pool,
             email_server,
             port,
+            object_storage_server,
         }
     }
 
@@ -105,6 +124,7 @@ impl TestApp {
             .await;
 
         let response = user.post_signup(&self.address).await.unwrap();
+        dbg!(&response);
         assert!(response.status().is_success());
 
         let request = &self.email_server.received_requests().await.unwrap()[0];
@@ -157,7 +177,27 @@ impl TestApp {
     // }
 }
 
-fn prepare_tracing() {
+impl Drop for TestApp {
+    fn drop(&mut self) {
+        opentelemetry::global::shutdown_tracer_provider();
+        // Clean pg
+        let db_config = self.pg_config_with_root_cred.clone();
+        let db_username = self.pg_username.clone();
+        // Spawn a new thread, because internally sync postgres client uses
+        // tokio runtime, but we are already in tokio runtime here. To
+        // spawn a new tokio runtime, we should do it inside new thread.
+        let _ = std::thread::spawn(move || {
+            let mut client = get_sync_postgres_client(&db_config);
+            let create_role = format!("DROP SCHEMA {0} CASCADE;", db_username);
+            let create_schema = format!("DROP ROLE {0};", db_username);
+            client.simple_query(&create_role).unwrap();
+            client.simple_query(&create_schema).unwrap();
+        })
+        .join();
+    }
+}
+
+fn init_tracing() {
     use tracing_subscriber::fmt::format::FmtSpan;
     use tracing_subscriber::layer::SubscriberExt;
     use tracing_subscriber::util::SubscriberInitExt;
@@ -196,83 +236,41 @@ fn prepare_tracing() {
 }
 
 async fn prepare_postgres(
-    config: &mut Settings,
-) -> (
-    String,
-    deadpool::managed::Pool<deadpool_postgres::Manager>,
-    MockServer,
-    DatabaseSettings,
-) {
-    // We should randomize app port
-    let mut db_config = config.database.clone();
-
-    // Connect as an admin user
-    let pool = get_postgres_connection_pool(&db_config);
-    let db_username = generate_username();
-
-    // Create new random user account in pg
+    mut pg_config: DatabaseSettings,
+) -> (DatabaseSettings, Pool, String) {
+    let pool = get_postgres_connection_pool(&pg_config);
+    let pg_username = generate_username();
     let create_role =
-        format!("CREATE ROLE {0} WITH LOGIN PASSWORD '{0}';", &db_username);
+        format!("CREATE ROLE {0} WITH LOGIN PASSWORD '{0}';", &pg_username);
     let create_schema =
-        format!("CREATE SCHEMA {0} AUTHORIZATION {0};", &db_username);
+        format!("CREATE SCHEMA {0} AUTHORIZATION {0};", &pg_username);
     let client = &pool.get().await.unwrap();
     client.simple_query(&create_role).await.unwrap();
     client.simple_query(&create_schema).await.unwrap();
-
     drop(pool);
-    db_config.username = db_username.clone();
-    db_config.password = Secret::new(db_username.clone());
-
-    // Connect as a new user
-    let pool = get_postgres_connection_pool(&db_config);
-
-    let email_server = MockServer::start().await;
-
-    // Set base_url to our MockServer instead of real email delivery service.
-    config.email_client.base_url = email_server.uri();
-    config.app_port = 0;
-    // For Drop
-    let db_config_with_root_cred = config.database.clone();
-
-    // Store db_config with test user in config destined for Application::build
-    config.database = db_config;
-    (db_username, pool, email_server, db_config_with_root_cred)
-}
-
-impl Drop for TestApp {
-    fn drop(&mut self) {
-        opentelemetry::global::shutdown_tracer_provider();
-        // Clean pg
-        let db_config = self.db_config_with_root_cred.clone();
-        let db_username = self.db_username.clone();
-        // Spawn a new thread, because internally sync postgres client uses
-        // tokio runtime, but we are already in tokio runtime here. To
-        // spawn a new tokio runtime, we should do it inside new thread.
-        let _ = std::thread::spawn(move || {
-            let mut client = get_sync_postgres_client(&db_config);
-            let create_role = format!("DROP SCHEMA {0} CASCADE;", db_username);
-            let create_schema = format!("DROP ROLE {0};", db_username);
-            client.simple_query(&create_role).unwrap();
-            client.simple_query(&create_schema).unwrap();
-        })
-        .join();
-    }
+    pg_config.username = pg_username.clone();
+    pg_config.password = Secret::new(pg_username.clone());
+    let pg_pool = get_postgres_connection_pool(&pg_config);
+    (pg_config, pg_pool, pg_username)
 }
 
 // Function to create a pool for database with index 100
-fn create_pool() -> deadpool_redis::Pool {
-    let mut cfg = deadpool_redis::Config::default();
-    cfg.url = Some(format!("redis://127.0.0.1:6379/100")); // Database index 100
-    cfg.pool.size = 5; // Set the desired pool size
-    cfg.create_pool(Some(redis::Client::open))
-        .expect("Pool creation failed")
-}
+// fn create_pool() -> deadpool_redis::Pool {
+//     let mut cfg = deadpool_redis::Config::default();
+//     cfg.url = Some(format!("redis://127.0.0.1:6379/100")); // Database index 100
+//     cfg.pool = Some(deadpool::managed::PoolConfig::new(5));
+//     cfg.create_pool(Some(deadpool::Runtime::Tokio1))
+//         .expect("Pool creation failed")
+// }
 
-// Function to clear the entire contents of the selected database (in this case database 100).
-async fn clear_database(pool: &Pool) -> redis::RedisResult<()> {
-    let mut conn = pool.get().await?;
-    cmd("FLUSHDB").query_async(&mut *conn).await
-}
+// // Function to clear the entire contents of the selected database (in this case database 100).
+// async fn clear_database(pool: &RedisPool) -> String {
+//     let mut conn = pool.get().await.unwrap();
+//     redis::cmd("FLUSHDB")
+//         .query_async::<_, String>(&mut *conn)
+//         .await
+//         .unwrap()
+// }
 
 // ───── Helpers ──────────────────────────────────────────────────────────── //
 

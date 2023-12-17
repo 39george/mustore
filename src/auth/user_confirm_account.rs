@@ -2,9 +2,12 @@ use crate::cornucopia::queries::user_auth_queries;
 use anyhow::Context;
 use axum::extract::Query;
 use axum::extract::State;
+use fred::clients::RedisPool;
+use fred::interfaces::HashesInterface;
+use fred::interfaces::KeysInterface;
+use fred::interfaces::RedisResult;
 use http::StatusCode;
 use identicon_rs::Identicon;
-use redis::AsyncCommands;
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::io::Cursor;
@@ -38,15 +41,8 @@ pub async fn confirm(
         .context("Failed to get connection from postgres pool")
         .map_err(AuthError::AccountConfirmationFailed)?;
 
-    let mut redis_client = app_state
-        .redis_pool
-        .get()
-        .await
-        .context("Failed to get redis connection from pool")
-        .map_err(AuthError::InternalError)?;
-
     let user_candidate_data =
-        get_user_candidate_data(&mut redis_client, &email)
+        get_user_candidate_data(&app_state.redis_pool, &email)
             .await
             .context("Failed to get data from redis")
             .map_err(AuthError::AccountConfirmationFailed)?;
@@ -131,9 +127,9 @@ pub async fn confirm(
 
 #[tracing::instrument(name = "Get user candidate data from redis", skip_all)]
 async fn get_user_candidate_data(
-    con: &mut redis::aio::Connection,
+    con: &RedisPool,
     user_email: &str,
-) -> redis::RedisResult<UserCandidate> {
+) -> RedisResult<UserCandidate> {
     let key = format!("user_candidate:{}", user_email);
     let result: HashMap<String, String> = con.hgetall(&key).await?;
     con.del(&key).await?;

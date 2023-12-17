@@ -4,8 +4,11 @@ use argon2::PasswordHasher;
 use askama::Template;
 use axum::extract::State;
 use axum::Form;
+use fred::clients::RedisPool;
+use fred::interfaces::HashesInterface;
+use fred::interfaces::KeysInterface;
+use fred::interfaces::RedisResult;
 use http::StatusCode;
-use redis::AsyncCommands;
 use secrecy::{ExposeSecret, Secret};
 use serde::Deserialize;
 use serde::Serialize;
@@ -78,14 +81,6 @@ pub async fn signup(
         return Err(anyhow::anyhow!("User is already exists!"))
             .map_err(AuthError::SignupFailed);
     }
-
-    let mut redis_client = app_state
-        .redis_pool
-        .get()
-        .await
-        .context("Failed to get redis connection from pool")
-        .map_err(AuthError::InternalError)?;
-
     let validation_token = SignupToken::generate();
 
     let user_candidate = UserCandidate::new(
@@ -96,10 +91,14 @@ pub async fn signup(
         validation_token.as_ref(),
     );
 
-    set_user_candidate_data(&mut redis_client, email.as_ref(), user_candidate)
-        .await
-        .context("Failed to store user candidate data in redis")
-        .map_err(AuthError::SignupFailed)?;
+    set_user_candidate_data(
+        &app_state.redis_pool,
+        email.as_ref(),
+        user_candidate,
+    )
+    .await
+    .context("Failed to store user candidate data in redis")
+    .map_err(AuthError::SignupFailed)?;
 
     send_confirmation_email(
         &app_state.email_client,
@@ -117,12 +116,12 @@ pub async fn signup(
 /// By default if the given `user_email` already exists,
 /// value will be overwritten.
 async fn set_user_candidate_data(
-    con: &mut redis::aio::Connection,
+    con: &RedisPool,
     user_email: &str,
     user_candidate: UserCandidate,
-) -> redis::RedisResult<()> {
+) -> RedisResult<()> {
     let key = format!("user_candidate:{}", user_email);
-    con.hset_multiple(&key, &user_candidate.to_redis_fields())
+    con.hset(&key, &user_candidate.to_redis_fields().try_into().unwrap())
         .await?;
     con.expire(&key, 60 * 30).await?; // 30 minutes
     Ok(())

@@ -5,6 +5,8 @@ use std::collections::HashMap;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::response::Response;
+use fred::error::RedisError;
+use fred::error::RedisErrorKind;
 use http::header::WWW_AUTHENTICATE;
 use http::HeaderValue;
 use secrecy::Secret;
@@ -152,48 +154,54 @@ impl UserCandidate {
         }
     }
 
-    pub fn to_redis_fields(self) -> Vec<(&'static str, String)> {
-        vec![
-            ("username", self.username),
-            ("email", self.email),
-            ("password_hash", self.password_hash),
-            ("role", self.role.to_string()),
-            ("validation_token", self.validation_token),
-        ]
+    pub fn to_redis_fields(self) -> HashMap<String, String> {
+        let mut map = HashMap::new();
+        map.insert("username".to_string(), self.username);
+        map.insert("email".to_string(), self.email);
+        map.insert("password_hash".to_string(), self.password_hash);
+        map.insert("role".to_string(), self.role.to_string());
+        map.insert("validation_token".to_string(), self.validation_token);
+        map
     }
 
     fn from_map(
         mut fields: HashMap<String, String>,
-    ) -> Result<UserCandidate, redis::RedisError> {
+    ) -> Result<UserCandidate, RedisError> {
         Ok(UserCandidate {
-            username: fields.remove("username").ok_or(
-                redis::RedisError::from((
-                    redis::ErrorKind::TypeError,
+            username: fields.remove("username").ok_or_else(|| {
+                RedisError::new(
+                    RedisErrorKind::NotFound,
                     "Missing field: username",
-                )),
-            )?,
-            email: fields.remove("email").ok_or(redis::RedisError::from((
-                redis::ErrorKind::TypeError,
-                "Missing field: email",
-            )))?,
-            password_hash: fields.remove("password_hash").ok_or(
-                redis::RedisError::from((
-                    redis::ErrorKind::TypeError,
+                )
+            })?,
+            email: fields.remove("email").ok_or_else(|| {
+                RedisError::new(
+                    RedisErrorKind::NotFound,
+                    "Missing field: email",
+                )
+            })?,
+            password_hash: fields.remove("password_hash").ok_or_else(|| {
+                RedisError::new(
+                    RedisErrorKind::NotFound,
                     "Missing field: password_hash",
-                )),
-            )?,
+                )
+            })?,
             role: fields
                 .remove("role")
                 .and_then(|r| UserRole::try_from(r.as_str()).ok())
-                .ok_or(redis::RedisError::from((
-                    redis::ErrorKind::TypeError,
-                    "Invalid or missing field: role",
-                )))?,
-            validation_token: fields.remove("validation_token").ok_or(
-                redis::RedisError::from((
-                    redis::ErrorKind::TypeError,
-                    "Missing field: validation_token",
-                )),
+                .ok_or_else(|| {
+                    RedisError::new(
+                        RedisErrorKind::NotFound,
+                        "Invalid or missing field: role",
+                    )
+                })?,
+            validation_token: fields.remove("validation_token").ok_or_else(
+                || {
+                    RedisError::new(
+                        RedisErrorKind::NotFound,
+                        "Missing field: validation_token",
+                    )
+                },
             )?,
         })
     }

@@ -8,6 +8,10 @@ use deadpool_postgres::Manager;
 use deadpool_postgres::ManagerConfig;
 
 use deadpool_postgres::Pool;
+use fred::clients::RedisPool;
+use fred::types::RedisConfig;
+use fred::types::Server;
+use fred::types::ServerConfig;
 use http::StatusCode;
 use secrecy::ExposeSecret;
 
@@ -15,6 +19,8 @@ use time::Duration;
 use tokio::net::TcpListener;
 use tokio_postgres::NoTls;
 use tower::ServiceBuilder;
+
+// ───── Current Crate Imports ────────────────────────────────────────────── //
 
 use crate::auth;
 use crate::config::DatabaseSettings;
@@ -24,9 +30,13 @@ use crate::routes::health_check::health_check;
 use crate::routes::open::open_router;
 use crate::routes::private::private_router;
 use crate::service_providers::object_storage::YandexObjectStorage;
-use crate::types::RedisPool;
+// use crate::types::RedisPool;
+
+// ───── Submodules ───────────────────────────────────────────────────────── //
 
 pub mod db_migration;
+
+// ───── Body ─────────────────────────────────────────────────────────────── //
 
 /// This is a central type of our codebase. `Application` type builds server
 /// for both production and testing purposes.
@@ -80,13 +90,16 @@ impl Application {
         let object_storage =
             YandexObjectStorage::new(configuration.object_storage).await;
 
-        let cfg = deadpool_redis::Config::from_url(
+        let redis_config = RedisConfig::from_url_centralized(
             configuration.redis.connection_string().expose_secret(),
-        );
-        let redis_pool = RedisPool::new(
-            cfg.create_pool(Some(deadpool::Runtime::Tokio1))
-                .expect("Failed to create redis connection pool"),
-        );
+        )
+        .unwrap();
+        let redis_pool = fred::types::Builder::default_centralized()
+            .set_config(redis_config)
+            .build_pool(5)
+            .expect("Failed to build redis connections pool");
+        fred::interfaces::ClientLike::connect(&redis_pool);
+        fred::interfaces::ClientLike::wait_for_connect(&redis_pool).await?;
 
         let serve = Self::build_server(
             &configuration.app_base_url,
@@ -139,7 +152,7 @@ impl Application {
 
         // This uses `tower-sessions` to establish a layer that will provide the session
         // as a request extension.
-        let session_store = axum_login::tower_sessions::MemoryStore::default();
+        let session_store = axum_login::tower_sessions::RedisStore::default();
         let session_layer =
             axum_login::tower_sessions::SessionManagerLayer::new(session_store)
                 .with_secure(true)
@@ -179,7 +192,6 @@ impl Application {
 /// Returns a connection pool to the PostgreSQL database.
 pub fn get_postgres_connection_pool(configuration: &DatabaseSettings) -> Pool {
     let pg_config = get_pg_conf(configuration);
-    // let connector = get_ssl_connector();
     let connector = NoTls;
     let manager_config = ManagerConfig {
         recycling_method: deadpool_postgres::RecyclingMethod::Fast,

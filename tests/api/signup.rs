@@ -22,7 +22,7 @@ async fn signup_with_correct_data_creates_a_new_candidate() {
     let response = test_user.post_signup(&app.address).await.unwrap();
     assert!(response.status().is_success());
 
-    let db_client = app.pool.get().await.unwrap();
+    let db_client = app.pg_pool.get().await.unwrap();
 
     let candidate = tests::get_user_candidate_by_username()
         .bind(&db_client, &test_user.username)
@@ -41,6 +41,7 @@ async fn signup_with_uncorrect_data_rejected() {
         username: String::from("a"),
         password: String::from("abc"),
         email: String::from("definitely_not_email"),
+        role: "consumer".to_string(),
     };
     let response = test_user.post_signup(&app.address).await.unwrap();
     assert_eq!(response.status().as_u16(), 400);
