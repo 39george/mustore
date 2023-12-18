@@ -8,6 +8,7 @@ use fake::Fake;
 // use redis::AsyncCommands;
 use secrecy::{ExposeSecret, Secret};
 use tokio_postgres::NoTls;
+use tracing::Level;
 use wiremock::Mock;
 use wiremock::MockServer;
 
@@ -62,7 +63,6 @@ pub struct TestApp {
     pub address: String,
     pub pg_pool: Pool,
     pub email_server: MockServer,
-    pub object_storage_server: MockServer,
     pub port: u16,
 }
 
@@ -76,9 +76,6 @@ impl TestApp {
 
         let email_server = MockServer::start().await;
         config.email_client.base_url = email_server.uri();
-
-        let object_storage_server = MockServer::start().await;
-        config.object_storage.endpoint_url = object_storage_server.uri();
 
         config.app_port = 0;
 
@@ -107,7 +104,6 @@ impl TestApp {
             pg_pool,
             email_server,
             port,
-            object_storage_server,
         }
     }
 
@@ -124,7 +120,6 @@ impl TestApp {
             .await;
 
         let response = user.post_signup(&self.address).await.unwrap();
-        dbg!(&response);
         assert!(response.status().is_success());
 
         let request = &self.email_server.received_requests().await.unwrap()[0];
@@ -147,7 +142,7 @@ impl TestApp {
                 .links(s)
                 .filter(|l| *l.kind() == linkify::LinkKind::Url)
                 .collect();
-            let raw_link = links[6].as_str().to_string();
+            let raw_link = links[1].as_str().to_string();
             let mut confirmation_link = reqwest::Url::parse(&raw_link).unwrap();
             // Let's make sure we don't call random APIs on the web
             assert_eq!(confirmation_link.host_str().unwrap(), "127.0.0.1");
@@ -226,7 +221,11 @@ fn init_tracing() {
         let subscriber = tracing_subscriber::fmt()
             .with_timer(tracing_subscriber::fmt::time::ChronoLocal::default())
             .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
-            .with_max_level(tracing::Level::INFO)
+            .with_env_filter(
+                tracing_subscriber::EnvFilter::from_default_env()
+                    .add_directive(Level::INFO.into())
+                    .add_directive("aws_config=warn".parse().unwrap()),
+            )
             .compact()
             .with_level(true)
             .finish();
