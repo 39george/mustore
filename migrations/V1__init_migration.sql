@@ -18,14 +18,13 @@ CREATE TYPE ProductStatus AS ENUM ('moderation', 'denied', 'active', 'hidden', '
 CREATE TYPE ServiceStatus AS ENUM ('moderation', 'denied', 'active', 'hidden');
 
 CREATE TYPE OfferStatus
-AS ENUM
-(
-    'pending', 'accepted', 'revision', 'delivered', 'dispute',
-    'fulfiled', 'rejected'
-);
+AS ENUM ('pending', 'accepted');
 
 CREATE TYPE OrderStatus
-AS ENUM ('created', 'paid', 'rejected', 'fulfiled');
+AS ENUM ('paid', 'delivered', 'on_revision', 'dispute', 'rejected', 'fulfiled');
+
+CREATE TYPE ObjectType
+AS ENUM ('image', 'audio', 'multitrack', 'video', 'attachment');
 
 -- Basic tables
 CREATE TABLE genres (
@@ -78,12 +77,11 @@ CREATE TABLE users (
     user_settings_id INTEGER NOT NULL REFERENCES user_settings(id) ON DELETE RESTRICT,
     username VARCHAR(50) NOT NULL UNIQUE,
     bio VARCHAR(400),
-    avatar_url VARCHAR(1000) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
     password_hash VARCHAR(500) NOT NULL,
     status VARCHAR(50),
     role UserRole NOT NULL,
-    ban VARCHAR(500)
+    ban BOOL
 );
 
 -- Products & tags
@@ -91,12 +89,11 @@ CREATE TABLE products (
     id SERIAL PRIMARY KEY,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    creator_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    owner_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(30) NOT NULL,
     description VARCHAR(400),
     price NUMERIC(10, 2) NOT NULL,
-    status ProductStatus NOT NULL,
-    cover_url VARCHAR(1000)
+    status ProductStatus NOT NULL
 );
 
 -- If product is not sold and creator wants to delete it,
@@ -116,8 +113,6 @@ CREATE TABLE songs (
     tempo SMALLINT NOT NULL,
     key MusicKey NOT NULL,
     duration REAL NOT NULL,
-    master_url VARCHAR(1000) NOT NULL,
-    multitrack_url VARCHAR(1000) NOT NULL,
     lyric VARCHAR(1000) NOT NULL
 );
 
@@ -128,9 +123,7 @@ CREATE TABLE beats (
     secondary_genre INTEGER REFERENCES genres(id) ON DELETE RESTRICT,
     tempo SMALLINT NOT NULL,
     key MusicKey NOT NULL,
-    duration REAL NOT NULL,
-    master_url VARCHAR(1000) NOT NULL,
-    multitrack_url VARCHAR(1000) NOT NULL
+    duration REAL NOT NULL
 );
 
 CREATE TABLE lyrics (
@@ -153,7 +146,7 @@ CREATE TABLE likes (
     beats_id INTEGER REFERENCES beats(id) ON DELETE CASCADE,
     lyrics_id INTEGER REFERENCES lyrics(id) ON DELETE CASCADE,
     covers_id INTEGER REFERENCES covers(id) ON DELETE CASCADE,
-        CHECK(
+    CHECK(
         COALESCE((songs_id)::BOOLEAN::INTEGER, 0)
         +
         COALESCE((beats_id)::BOOLEAN::INTEGER, 0)
@@ -223,8 +216,6 @@ CREATE TABLE services (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     creator_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(30) NOT NULL,
-    cover_url VARCHAR(1000),
-    video_desc_url VARCHAR(1000),
     description VARCHAR(400),
     display_price NUMERIC(10, 2) NOT NULL,
     status ServiceStatus NOT NULL DEFAULT 'active'
@@ -232,23 +223,17 @@ CREATE TABLE services (
 
 CREATE TABLE mixing (
     id SERIAL PRIMARY KEY,
-    services_id INTEGER NOT NULL REFERENCES services(id) ON DELETE CASCADE,
-    mixing_credits VARCHAR(1000)[],
-    CHECK (array_length(mixing_credits, 1) < 4)
+    services_id INTEGER NOT NULL REFERENCES services(id) ON DELETE CASCADE
 );
 
 CREATE TABLE song_writing (
     id SERIAL PRIMARY KEY,
-    services_id INTEGER NOT NULL REFERENCES services(id) ON DELETE CASCADE,
-    song_credits VARCHAR(1000)[],
-    CHECK (array_length(song_credits, 1) < 4)
+    services_id INTEGER NOT NULL REFERENCES services(id) ON DELETE CASCADE
 );
 
 CREATE TABLE beat_writing (
     id SERIAL PRIMARY KEY,
-    services_id INTEGER NOT NULL REFERENCES services(id) ON DELETE CASCADE,
-    beat_credits VARCHAR(1000)[],
-    CHECK (array_length(beat_credits, 1) < 4)
+    services_id INTEGER NOT NULL REFERENCES services(id) ON DELETE CASCADE
 );
 
 CREATE TABLE ghost_writing (
@@ -260,9 +245,7 @@ CREATE TABLE ghost_writing (
 
 CREATE TABLE cover_design (
     id SERIAL PRIMARY KEY,
-    services_id INTEGER NOT NULL REFERENCES services(id) ON DELETE CASCADE,
-    cover_credits VARCHAR(1000)[],
-    CHECK (array_length(cover_credits, 1) < 6)
+    services_id INTEGER NOT NULL REFERENCES services(id) ON DELETE CASCADE
 );
 
 CREATE TABLE music_services_genres (
@@ -307,9 +290,17 @@ CREATE TABLE service_orders (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     consumers_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
     services_id INTEGER REFERENCES services(id) ON DELETE SET NULL,
+    conversations_id INTEGER NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+    delivery_date TIMESTAMP NOT NULL,
+    revisions INTEGER NOT NULL,
+    revision_price NUMERIC(10, 2) NOT NULL,
     name VARCHAR(30) NOT NULL,
     price NUMERIC(10, 2) NOT NULL,
-    status OrderStatus NOT NULL DEFAULT 'created'
+    status OrderStatus NOT NULL DEFAULT 'paid',
+
+    -- Value should be nulled every time when delivery time changes,
+    -- except creator is already failed delivery time
+    delivered_on_time BOOL DEFAULT NULL
 );
 
 CREATE TABLE transactions (
@@ -439,11 +430,12 @@ CREATE TABLE participants (
     )
 );
 
+-- If offer is rejected, just delete it
 CREATE TABLE offers (
 	id SERIAL PRIMARY KEY,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     conversations_id INTEGER NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+    services_id INTEGER NOT NULL REFERENCES services(id) ON DELETE CASCADE,
     price NUMERIC(10, 2) NOT NULL,
     delivery_date TIMESTAMP NOT NULL,
     free_revisions INTEGER NOT NULL,
@@ -516,3 +508,116 @@ CREATE TABLE support_tickets (
     is_open BOOL NOT NULL DEFAULT TRUE,
     CHECK (array_length(attachments, 1) < 4)
 );
+
+CREATE TABLE objects (
+    id SERIAL PRIMARY KEY,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    key VARCHAR(500) NOT NULL UNIQUE,
+    object_type ObjectType NOT NULL
+    -- we need to delete all objects in storage at first, so RESTRICT
+    -- Images
+    avatar_users_id INTEGER REFERENCES users(id) ON DELETE RESTRICT UNIQUE,
+    cover_products_id INTEGER REFERENCES products(id) ON DELETE RESTRICT UNIQUE,
+    cover_credits_cover_design_id INTEGER REFERENCES cover_design(id) ON DELETE RESTRICT,
+    cover_services_id INTEGER REFERENCES services(id) ON DELETE CASCADE UNIQUE,
+
+    -- Audio
+    master_songs_id INTEGER REFERENCES songs(id) ON DELETE RESTRICT UNIQUE,
+    multitrack_songs_id INTEGER REFERENCES songs(id) ON DELETE RESTRICT UNIQUE,
+    master_beats_id INTEGER REFERENCES beats(id) ON DELETE RESTRICT UNIQUE,
+    multitrack_beats_id INTEGER REFERENCES beats(id) ON DELETE RESTRICT UNIQUE,
+    mixing_credits_mixing_id INTEGER REFERENCES mixing(id) ON DELETE RESTRICT,
+    song_credits_songs_id INTEGER REFERENCES song_writing(id) ON DELETE RESTRICT,
+    beat_credits_beat_writing_id INTEGER REFERENCES beat_writing(id) ON DELETE RESTRICT,
+
+    -- Other
+    video_description_services_id INTEGER REFERENCES services(id) ON DELETE RESTRICT UNIQUE,
+    message_attachment INTEGER REFERENCES messages(id) ON DELETE RESTRICT,
+    CHECK(
+        COALESCE((avatar_users_id)::BOOLEAN::INTEGER, 0)
+        +
+        COALESCE((cover_products_id)::BOOLEAN::INTEGER, 0)
+        +
+        COALESCE((master_songs_id)::BOOLEAN::INTEGER, 0)
+        +
+        COALESCE((multitrack_songs_id)::BOOLEAN::INTEGER, 0)
+        +
+        COALESCE((master_beats_id)::BOOLEAN::INTEGER, 0)
+        +
+        COALESCE((multitrack_beats_id)::BOOLEAN::INTEGER, 0)
+        +
+        COALESCE((cover_services_id)::BOOLEAN::INTEGER, 0)
+        +
+        COALESCE((video_description_services_id)::BOOLEAN::INTEGER, 0)
+        +
+        COALESCE((mixing_credits_mixing_id)::BOOLEAN::INTEGER, 0)
+        +
+        COALESCE((song_credits_songs_id)::BOOLEAN::INTEGER, 0)
+        +
+        COALESCE((beat_credits_beat_writing_id)::BOOLEAN::INTEGER, 0)
+        +
+        COALESCE((cover_credits_cover_design_id)::BOOLEAN::INTEGER, 0)
+        +
+        COALESCE((message_attach)::BOOLEAN::INTEGER, 0)
+        = 1
+    )
+);
+
+CREATE OR REPLACE FUNCTION check_cover_credits_cover_design_limit()
+    RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.cover_credits_cover_design_id IS NOT NULL THEN
+        IF (SELECT COUNT(*) FROM objects WHERE cover_credits_cover_design_id = NEW.cover_credits_cover_design_id) >= 3 THEN
+            RAISE EXCEPTION 'Only 3 cover_credits_cover_design_id values allowed per cover_design service';
+        END IF;
+    END IF;
+
+    IF NEW.mixing_credits_mixing_id IS NOT NULL THEN
+        IF (SELECT COUNT(*) FROM objects WHERE mixing_credits_mixing_id = NEW.mixing_credits_mixing_id) >= 3 THEN
+            RAISE EXCEPTION 'Only 3 mixing_credits_mixing_id values allowed per mixing service';
+        END IF;
+    END IF;
+
+    IF NEW.song_credits_songs_id IS NOT NULL THEN
+        IF (SELECT COUNT(*) FROM objects WHERE song_credits_songs_id = NEW.song_credits_songs_id) >= 3 THEN
+            RAISE EXCEPTION 'Only 3 song_credits_songs_id values allowed per song';
+        END IF;
+    END IF;
+
+    IF NEW.beat_credits_beat_writing_id IS NOT NULL THEN
+        IF (SELECT COUNT(*) FROM objects WHERE beat_credits_beat_writing_id = NEW.beat_credits_beat_writing_id) >= 3 THEN
+            RAISE EXCEPTION 'Only 3 beat_credits_beat_writing_id values allowed per beat writing service';
+        END IF;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER enforce_cover_credits_cover_design_limit
+    BEFORE INSERT OR UPDATE ON objects
+    FOR EACH ROW
+    EXECUTE FUNCTION check_cover_credits_cover_design_limit();
+
+-- Give a ban to a user, every time his strikes amount %3 = 0
+-- If there are more than 1 ban, next bans should be delegated to the superuser
+CREATE TABLE strikes (
+    id SERIAL PRIMARY KEY,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    users_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    administrators_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    comment VARCHAR(1000) NOT NULL
+);
+
+-- I should create unban function in backend. And run it every 5 days for example.
+CREATE TABLE bans (
+    id SERIAL PRIMARY KEY,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    duration INTERVAL NOT NULL,
+    users_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    administrators_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    comment VARCHAR(1000) NOT NULL
+);
+
