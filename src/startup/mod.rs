@@ -23,8 +23,11 @@ use tower::ServiceBuilder;
 
 use crate::auth;
 use crate::config::DatabaseSettings;
+use crate::config::EmailClientSettings;
+use crate::config::RedisSettings;
 use crate::config::Settings;
 use crate::email_client::EmailClient;
+use crate::email_client::EmailDeliveryService;
 use crate::routes::health_check::health_check;
 use crate::routes::open::open_router;
 use crate::routes::private::private_router;
@@ -65,40 +68,22 @@ impl Application {
         configuration: Settings,
     ) -> Result<Application, anyhow::Error> {
         let pg_pool = get_postgres_connection_pool(&configuration.database);
-
-        db_migration::run_migration(&pg_pool).await;
-
-        let timeout = configuration.email_client.timeout_millis();
-
-        let sender_email = configuration.email_client.sender()?;
-
-        let email_client = EmailClient::new(
-            configuration.email_client.base_url,
-            sender_email,
-            configuration.email_client.authorization_token,
-            timeout,
+        let redis_pool =
+            get_redis_connection_pool(&configuration.redis).await?;
+        let object_storage =
+            YandexObjectStorage::new(configuration.object_storage).await;
+        let email_client = get_email_client(
+            &configuration.email_client,
             configuration.email_delivery_service,
         )?;
+
+        db_migration::run_migration(&pg_pool).await;
 
         let address =
             format!("{}:{}", configuration.app_addr, configuration.app_port);
         tracing::info!("running on {} address", address);
         let listener = TcpListener::bind(address).await?;
         let port = listener.local_addr()?.port();
-
-        let object_storage =
-            YandexObjectStorage::new(configuration.object_storage).await;
-
-        let redis_config = RedisConfig::from_url_centralized(
-            configuration.redis.connection_string().expose_secret(),
-        )
-        .unwrap();
-        let redis_pool = fred::types::Builder::default_centralized()
-            .set_config(redis_config)
-            .build_pool(5)
-            .expect("Failed to build redis connections pool");
-        fred::interfaces::ClientLike::connect(&redis_pool);
-        fred::interfaces::ClientLike::wait_for_connect(&redis_pool).await?;
 
         let serve = Self::build_server(
             &configuration.app_base_url,
@@ -203,7 +188,38 @@ impl Application {
     }
 }
 
-/// Returns a connection pool to the PostgreSQL database.
+fn get_email_client(
+    configuration: &EmailClientSettings,
+    email_delivery_service: EmailDeliveryService,
+) -> Result<EmailClient, anyhow::Error> {
+    let timeout = configuration.timeout_millis();
+    let sender_email = configuration.sender()?;
+    let email_client = EmailClient::new(
+        configuration.base_url.clone(),
+        sender_email,
+        configuration.authorization_token.clone(),
+        timeout,
+        email_delivery_service,
+    )?;
+    Ok(email_client)
+}
+
+async fn get_redis_connection_pool(
+    configuration: &RedisSettings,
+) -> Result<RedisPool, anyhow::Error> {
+    let redis_config = RedisConfig::from_url_centralized(
+        configuration.connection_string().expose_secret(),
+    )
+    .unwrap();
+    let redis_pool = fred::types::Builder::default_centralized()
+        .set_config(redis_config)
+        .build_pool(5)
+        .expect("Failed to build redis connections pool");
+    fred::interfaces::ClientLike::connect(&redis_pool);
+    fred::interfaces::ClientLike::wait_for_connect(&redis_pool).await?;
+    Ok(redis_pool)
+}
+
 pub fn get_postgres_connection_pool(configuration: &DatabaseSettings) -> Pool {
     let pg_config = get_pg_conf(configuration);
     let connector = NoTls;
