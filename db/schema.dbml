@@ -51,13 +51,18 @@ Enum "OfferStatus" {
   "accepted"
 }
 
-Enum "OrderStatus" {
+Enum "ServiceOrderStatus" {
   "paid"
   "delivered"
   "on_revision"
   "dispute"
   "rejected"
   "fulfiled"
+}
+
+Enum "ProductOrderStatus" {
+  "created"
+  "paid"
 }
 
 Enum "ObectType" {
@@ -372,7 +377,7 @@ Table product_orders {
   products_id INTEGER
   name VARCHAR(30) [not null]
   price NUMERIC(10, 2) [not null]
-  status OrderStatus [not null, default: "created"]
+  status ProductOrderStatus [not null, default: "created"]
 }
 
 Ref:product_orders.id < transactions.product_orders_id [delete: restrict]
@@ -548,3 +553,5 @@ Table bans {
   administrators_id INTEGER 
   comment VARCHAR(1000) [not null]
 }
+
+Ref: "product_orders"."status" < "consumer_reviews"."id"
