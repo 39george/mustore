@@ -10,8 +10,6 @@ use deadpool_postgres::ManagerConfig;
 use deadpool_postgres::Pool;
 use fred::clients::RedisPool;
 use fred::types::RedisConfig;
-use fred::types::Server;
-use fred::types::ServerConfig;
 use http::StatusCode;
 use secrecy::ExposeSecret;
 
@@ -19,6 +17,7 @@ use time::Duration;
 use tokio::net::TcpListener;
 use tokio_postgres::NoTls;
 use tower::ServiceBuilder;
+// use tower_http::trace::TraceLayer;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
@@ -183,6 +182,21 @@ impl Application {
             )
             .with_state(app_state)
             .merge(auth::user_login::login_router())
+            // .layer(
+            //     TraceLayer::new_for_http()
+            //         .make_span_with(
+            //             tower_http::trace::DefaultMakeSpan::new()
+            //                 .level(tracing::Level::INFO),
+            //         )
+            //         .on_response(
+            //             tower_http::trace::DefaultOnResponse::new()
+            //                 .level(tracing::Level::INFO),
+            //         )
+            //         .on_failure(
+            //             tower_http::trace::DefaultOnFailure::new()
+            //                 .level(tracing::Level::ERROR),
+            //         ),
+            // )
             .layer(auth_service);
 
         axum::serve(listener, app)
