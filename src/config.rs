@@ -149,6 +149,7 @@ impl EmailClientSettings {
 #[derive(Debug, Deserialize)]
 pub struct ObjectStorageSettings {
     pub endpoint_url: String,
+    pub region: String,
     pub bucket_name: String,
     pub access_key_id: Secret<String>,
     pub secret_access_key: Secret<String>,
