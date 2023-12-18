@@ -9,7 +9,6 @@ use fred::error::RedisError;
 use fred::error::RedisErrorKind;
 use http::header::WWW_AUTHENTICATE;
 use http::HeaderValue;
-use secrecy::Secret;
 use serde::Deserialize;
 use serde::Serialize;
 
