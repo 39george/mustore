@@ -20,7 +20,10 @@ CREATE TYPE ServiceStatus AS ENUM ('moderation', 'denied', 'active', 'hidden');
 CREATE TYPE OfferStatus
 AS ENUM ('pending', 'accepted');
 
-CREATE TYPE OrderStatus
+CREATE TYPE ProductOrderStatus
+AS ENUM ('created', 'paid');
+
+CREATE TYPE ServiceOrderStatus
 AS ENUM ('paid', 'delivered', 'on_revision', 'dispute', 'rejected', 'fulfiled');
 
 CREATE TYPE ObjectType
@@ -281,7 +284,14 @@ CREATE TABLE product_orders (
     products_id INTEGER REFERENCES products(id) ON DELETE SET NULL,
     name VARCHAR(30) NOT NULL,
     price NUMERIC(10, 2) NOT NULL,
-    status OrderStatus NOT NULL DEFAULT 'created'
+    status ProductOrderStatus NOT NULL DEFAULT 'created'
+);
+
+-- Messages & Conversations & Offers
+CREATE TABLE conversations (
+	id SERIAL PRIMARY KEY,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE service_orders (
@@ -296,7 +306,7 @@ CREATE TABLE service_orders (
     revision_price NUMERIC(10, 2) NOT NULL,
     name VARCHAR(30) NOT NULL,
     price NUMERIC(10, 2) NOT NULL,
-    status OrderStatus NOT NULL DEFAULT 'paid',
+    status ServiceOrderStatus NOT NULL DEFAULT 'paid',
 
     -- Value should be nulled every time when delivery time changes,
     -- except creator is already failed delivery time
@@ -346,13 +356,6 @@ CREATE TABLE consumer_reviews (
     text VARCHAR(400) NOT NULL,
     mark SMALLINT NOT NULL,
     CHECK(mark < 6 AND mark > 0)
-);
-
--- Messages & Conversations & Offers
-CREATE TABLE conversations (
-	id SERIAL PRIMARY KEY,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE messages (
@@ -514,7 +517,7 @@ CREATE TABLE objects (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     key VARCHAR(500) NOT NULL UNIQUE,
-    object_type ObjectType NOT NULL
+    object_type ObjectType NOT NULL,
     -- we need to delete all objects in storage at first, so RESTRICT
     -- Images
     avatar_users_id INTEGER REFERENCES users(id) ON DELETE RESTRICT UNIQUE,
@@ -559,7 +562,7 @@ CREATE TABLE objects (
         +
         COALESCE((cover_credits_cover_design_id)::BOOLEAN::INTEGER, 0)
         +
-        COALESCE((message_attach)::BOOLEAN::INTEGER, 0)
+        COALESCE((message_attachment)::BOOLEAN::INTEGER, 0)
         = 1
     )
 );
