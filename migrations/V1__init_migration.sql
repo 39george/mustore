@@ -84,7 +84,7 @@ CREATE TABLE users (
     password_hash VARCHAR(500) NOT NULL,
     status VARCHAR(50),
     role UserRole NOT NULL,
-    ban BOOL
+    ban BOOL NOT NULL DEFAULT FALSE
 );
 
 -- Products & tags

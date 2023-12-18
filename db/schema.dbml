@@ -146,7 +146,7 @@ Table users {
   password_hash VARCHAR(500) [not null]
   status VARCHAR(50)
   role UserRole [not null]
-  ban BOOL
+  ban BOOL [not null, default: `FALSE`]
 }
 
 Ref:users.id < products.owner_id [delete: cascade]
