@@ -32,7 +32,6 @@ use crate::routes::health_check::health_check;
 use crate::routes::open::open_router;
 use crate::routes::private::private_router;
 use crate::service_providers::object_storage::YandexObjectStorage;
-// use crate::types::RedisPool;
 
 // ───── Submodules ───────────────────────────────────────────────────────── //
 
@@ -123,6 +122,8 @@ impl Application {
             argon2::Params::new(15000, 2, 1, None).unwrap(),
         );
 
+        let redis_client = redis_pool.next().clone_new();
+
         // We do not wrap pool into arc because internally it alreaday has an
         // `Arc`, and copying is cheap.
         let app_state = AppState {
@@ -136,7 +137,8 @@ impl Application {
 
         // This uses `tower-sessions` to establish a layer that will provide the session
         // as a request extension.
-        let session_store = axum_login::tower_sessions::RedisStore::default();
+        let session_store =
+            axum_login::tower_sessions::RedisStore::new(redis_client);
         let session_layer =
             axum_login::tower_sessions::SessionManagerLayer::new(session_store)
                 .with_secure(true)

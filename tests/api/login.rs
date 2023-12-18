@@ -17,14 +17,11 @@ async fn signup_and_login_creates_user() {
     let response = reqwest::get(confirmation_link.0).await.unwrap();
     assert!(response.status().is_success());
     let pg_client = app.pg_pool.get().await.unwrap();
+    // FIXME: add join with avatar
     let rows = pg_client.query("SELECT * FROM users", &[]).await.unwrap();
     for row in rows.into_iter() {
         let username: &str = row.get("username");
         let email: &str = row.get("email");
-        let avatar_url: &str = row.get("avatar_url");
-        println!(
-            "username: {}, email: {}, avatar_url: {}",
-            username, email, avatar_url
-        );
+        println!("username: {}, email: {}", username, email);
     }
 }

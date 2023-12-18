@@ -56,7 +56,6 @@ pub async fn signup(
     let password =
         UserPassword::parse(&password, &[username.as_ref(), email.as_ref()])
             .map_err(AuthError::SignupFailed)?;
-
     let password_hash = spawn_blocking_with_tracing(move || {
         hash_password(password.as_ref(), app_state.argon2_obj)
     })
@@ -71,14 +70,14 @@ pub async fn signup(
         .context("Failed to get  pg connection from pool")
         .map_err(AuthError::InternalError)?;
 
-    let users_count = user_auth_queries::check_if_user_exists_already()
+    let if_id_exists = user_auth_queries::check_if_user_exists_already()
         .bind(&pg_client, &username.as_ref(), &email.as_ref())
-        .one()
+        .opt()
         .await
         .context("Failed to get user data from db")
-        .map_err(AuthError::SignupFailed)?;
+        .map_err(AuthError::InternalError)?;
 
-    if users_count != 0 {
+    if if_id_exists.is_some() {
         return Err(anyhow::anyhow!("User is already exists!"))
             .map_err(AuthError::SignupFailed);
     }
@@ -99,7 +98,7 @@ pub async fn signup(
     )
     .await
     .context("Failed to store user candidate data in redis")
-    .map_err(AuthError::SignupFailed)?;
+    .map_err(AuthError::InternalError)?;
 
     send_confirmation_email(
         &app_state.email_client,

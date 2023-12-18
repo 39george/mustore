@@ -29,6 +29,9 @@ pub struct UserConfirmationQuery {
 
 // ───── Handlers ─────────────────────────────────────────────────────────── //
 
+/// If error, we return here only an `AccountConfirmationFailed`
+/// to redirect user to a special page, because React app will not handle
+/// our `internal error` case.
 #[tracing::instrument(name = "Account confirmation", skip_all)]
 pub async fn confirm(
     State(app_state): State<AppState>,
@@ -44,7 +47,7 @@ pub async fn confirm(
     let user_candidate_data =
         get_user_candidate_data(&app_state.redis_pool, &email)
             .await
-            .context("Failed to get data from redis")
+            .context("Failed to get user candidate data from redis, it is possible that 30 minutes are over.")
             .map_err(AuthError::AccountConfirmationFailed)?;
 
     if user_candidate_data.validation_token != token {
@@ -57,7 +60,7 @@ pub async fn confirm(
     let identicon = spawn_blocking_with_tracing(move || {
         generate_identicon_png(&email_c)
             .context("Failed to generate identicon")
-            .map_err(AuthError::InternalError)
+            .map_err(AuthError::AccountConfirmationFailed)
     })
     .await
     .context("Failed to join tokio thread handle")??;
@@ -66,29 +69,50 @@ pub async fn confirm(
         .transaction()
         .await
         .context("Failed to get a transaction from pg")
-        .map_err(AuthError::InternalError)?;
+        .map_err(AuthError::AccountConfirmationFailed)?;
 
     let user_settings_id = user_auth_queries::insert_new_user_settings()
         .bind(&transaction)
         .one()
         .await
         .context("Failed to insert user_settings")
-        .map_err(AuthError::InternalError)?;
+        .map_err(AuthError::AccountConfirmationFailed)?;
 
     // Upload identicon to the object storage
     let avatar_key = format!("avatar_{}.png", &email);
     app_state.object_storage.put(&avatar_key, identicon).await?;
 
-    if let Err(e) = user_auth_queries::insert_new_user()
+    let user_id = match user_auth_queries::insert_new_user()
         .bind(
             &transaction,
             &user_settings_id,
             &user_candidate_data.username,
-            &avatar_key,
             &user_candidate_data.email,
             &user_candidate_data.password_hash,
             &user_candidate_data.role.into(),
         )
+        .one()
+        .await
+        .context("Failed to insert a new user to the pg")
+        .map_err(AuthError::AccountConfirmationFailed)
+    {
+        Ok(id) => id,
+        Err(e) => {
+            app_state
+                .object_storage
+                .delete_object_by_uri(&avatar_key)
+                .await?;
+            transaction
+                .rollback()
+                .await
+                .context("Failed to rollback pg transaction")
+                .map_err(AuthError::AccountConfirmationFailed)?;
+            return Err(e);
+        }
+    };
+
+    if let Err(e) = user_auth_queries::insert_user_image()
+        .bind(&transaction, &avatar_key, &user_id)
         .await
         .context("Failed to insert a new user to the pg")
         .map_err(AuthError::AccountConfirmationFailed)
@@ -101,7 +125,7 @@ pub async fn confirm(
             .rollback()
             .await
             .context("Failed to rollback pg transaction")
-            .map_err(AuthError::InternalError)?;
+            .map_err(AuthError::AccountConfirmationFailed)?;
         return Err(e);
     }
 
@@ -109,7 +133,7 @@ pub async fn confirm(
         .commit()
         .await
         .context("Failed to commit a pg transaction")
-        .map_err(AuthError::InternalError)
+        .map_err(AuthError::AccountConfirmationFailed)
     {
         app_state
             .object_storage
