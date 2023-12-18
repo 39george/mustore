@@ -76,18 +76,15 @@ pub async fn confirm(
         .map_err(AuthError::InternalError)?;
 
     // Upload identicon to the object storage
-    let avatar_filename = format!("avatar_{}.png", &email);
-    let avatar_uri = app_state
-        .object_storage
-        .put(&avatar_filename, identicon)
-        .await?;
+    let avatar_key = format!("avatar_{}.png", &email);
+    app_state.object_storage.put(&avatar_key, identicon).await?;
 
     if let Err(e) = user_auth_queries::insert_new_user()
         .bind(
             &transaction,
             &user_settings_id,
             &user_candidate_data.username,
-            &avatar_uri,
+            &avatar_key,
             &user_candidate_data.email,
             &user_candidate_data.password_hash,
             &user_candidate_data.role.into(),
@@ -98,7 +95,7 @@ pub async fn confirm(
     {
         app_state
             .object_storage
-            .delete_object_by_uri(&avatar_uri)
+            .delete_object_by_uri(&avatar_key)
             .await?;
         transaction
             .rollback()
@@ -116,7 +113,7 @@ pub async fn confirm(
     {
         app_state
             .object_storage
-            .delete_object_by_uri(&avatar_uri)
+            .delete_object_by_uri(&avatar_key)
             .await?;
 
         return Err(e);

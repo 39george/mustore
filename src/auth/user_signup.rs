@@ -3,6 +3,7 @@ use argon2::password_hash::SaltString;
 use argon2::PasswordHasher;
 use askama::Template;
 use axum::extract::State;
+use axum::http::Request;
 use axum::Form;
 use fred::clients::RedisPool;
 use fred::interfaces::HashesInterface;

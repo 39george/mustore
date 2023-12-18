@@ -80,7 +80,7 @@ impl YandexObjectStorage {
     ///
     /// # Arguments
     ///
-    /// * `file_name` - A reference to a string slice that holds the name of the file to upload.
+    /// * `key` - A reference to a string slice that holds the name of the file to upload.
     /// * `bytes` - A vector of bytes that constitute the file content to upload.
     ///
     /// # Returns
@@ -95,14 +95,14 @@ impl YandexObjectStorage {
     /// provided or if the S3 client fails to upload the file to object storage.
     pub async fn put(
         &self,
-        file_name: &str,
+        key: &str,
         bytes: Vec<u8>,
-    ) -> Result<String, anyhow::Error> {
+    ) -> Result<(), anyhow::Error> {
         let _put_response = self
             .client
             .put_object()
             .bucket(&self.bucket_name)
-            .key(file_name)
+            .key(key)
             .body(
                 ByteStream::try_from(SdkBody::from(bytes))
                     .context("Failed to create ByteStream from bytes")?,
@@ -111,11 +111,7 @@ impl YandexObjectStorage {
             .await
             .context("Failed to upload file to the object storage")?;
 
-        let object_uri = format!(
-            "https://{}.storage.yandexcloud.net/{}",
-            &self.bucket_name, file_name
-        );
-        Ok(object_uri)
+        Ok(())
     }
 
     /// Generates a pre-signed URL for accessing an object stored in Yandex Object Storage.
