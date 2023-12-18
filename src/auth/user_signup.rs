@@ -152,7 +152,7 @@ pub async fn send_confirmation_email(
     signup_token: &SignupToken,
 ) -> Result<(), reqwest::Error> {
     let confirmation_link = format!(
-        "{}/confirm_user_account?email={}&token={}",
+        "{}/api/confirm_user_account?email={}&token={}",
         base_url,
         user_email.as_ref(),
         signup_token.as_ref()
