@@ -1,7 +1,11 @@
 use askama::Template;
 
 #[derive(Template)]
-#[template(path = "email_verification.html")]
+// escape = "none": override the template's extension used
+// for the purpose of determining the escaper for this template.
+// {{ "Escape <>&"|e }} with escape will be this: Escape &lt;&gt;&amp;
+// So we disable this
+#[template(path = "email_verification.html", escape = "none")]
 pub struct VerifyEmailTemplate<'a> {
     name: &'a str,
     link: &'a str,
