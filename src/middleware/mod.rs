@@ -17,7 +17,7 @@ where
     S: Service<Request<B>, Response = Response<B>> + Send + 'static,
     B: Send + 'static + std::fmt::Debug,
     S::Future: Send + 'static,
-    S::Error: Display,
+    S::Error: Display + std::fmt::Debug,
 {
     type Response = S::Response;
     type Error = S::Error;
