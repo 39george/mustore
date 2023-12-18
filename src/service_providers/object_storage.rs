@@ -3,13 +3,12 @@
 use std::time::Duration;
 
 use anyhow::Context;
-use aws_config::BehaviorVersion;
-use aws_sdk_s3::{
-    config::Credentials,
-    presigning::PresigningConfig,
-    primitives::{ByteStream, SdkBody},
-    Client,
-};
+use aws_config::{BehaviorVersion, Region};
+use aws_sdk_s3::config::Credentials;
+use aws_sdk_s3::presigning::PresigningConfig;
+use aws_sdk_s3::primitives::ByteStream;
+use aws_sdk_s3::primitives::SdkBody;
+use aws_sdk_s3::Client;
 use secrecy::ExposeSecret;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
@@ -49,8 +48,6 @@ impl YandexObjectStorage {
     /// let yandex_storage = YandexObjectStorage::new(storage_settings).await;
     /// ```
     pub async fn new(settings: ObjectStorageSettings) -> Self {
-        let yandex_endpoint = "https://storage.yandexcloud.net";
-
         // Create Credentials object directly.
         let credentials = Credentials::new(
             settings.access_key_id.expose_secret(),
@@ -61,8 +58,9 @@ impl YandexObjectStorage {
         );
 
         let config = aws_config::defaults(BehaviorVersion::latest())
+            .region(Region::new(settings.region))
             .credentials_provider(credentials)
-            .endpoint_url(yandex_endpoint)
+            .endpoint_url(settings.endpoint_url)
             .load()
             .await;
 
