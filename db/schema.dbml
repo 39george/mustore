@@ -190,6 +190,18 @@ Table objects {
   message_attachment INTEGER
 }
 
+Ref:objects.id < images.objects_id[delete: cascade]
+
+Table images {
+  id SERIAL [pk, increment]
+  created_at TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
+  updated_at TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+  objects_id INTEGER [not null]
+  scale REAL 
+  offset_x REAL
+  offset_y REAL
+}
+
 Table products {
   id SERIAL [pk, increment]
   created_at TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]

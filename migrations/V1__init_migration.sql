@@ -567,6 +567,16 @@ CREATE TABLE objects (
     )
 );
 
+CREATE TABLE images (
+    id SERIAL PRIMARY KEY,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    objects_id INTEGER NOT NULL REFERENCES objects(id) ON DELETE CASCADE,
+    scale REAL, 
+    offset_x REAL,
+    offset_y REAL
+);
+
 CREATE OR REPLACE FUNCTION check_cover_credits_cover_design_limit()
     RETURNS TRIGGER AS $$
 BEGIN
