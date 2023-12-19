@@ -44,6 +44,9 @@ impl YandexObjectStorage {
     /// # Examples
     ///
     /// ```
+    /// use mustore::config::ObjectStorageSettings;
+    /// use mustore::service_providers::object_storage::YandexObjectStorage;
+    ///
     /// let storage_settings = ObjectStorageSettings::new("access_key", "secret_key", "bucket_name", "region");
     /// let yandex_storage = YandexObjectStorage::new(storage_settings).await;
     /// ```
@@ -77,22 +80,6 @@ impl YandexObjectStorage {
     ///
     /// This method takes a file name and bytes, uploads them to the configured bucket, and
     /// returns the URI of the newly uploaded object.
-    ///
-    /// # Arguments
-    ///
-    /// * `key` - A reference to a string slice that holds the name of the file to upload.
-    /// * `bytes` - A vector of bytes that constitute the file content to upload.
-    ///
-    /// # Returns
-    ///
-    /// Returns a `Result` which is either an `Ok` variant with the object URI as a `String`
-    /// if the operation is successful, or an `Err` variant with an `anyhow::Error` if the
-    /// upload fails.
-    ///
-    /// # Errors
-    ///
-    /// This function will return an error if the byte stream cannot be created from the bytes
-    /// provided or if the S3 client fails to upload the file to object storage.
     pub async fn put(
         &self,
         key: &str,
@@ -118,31 +105,6 @@ impl YandexObjectStorage {
     ///
     /// This method creates a pre-signed URL which clients can use to directly access an object in
     /// the bucket for a limited duration, without needing further authentication.
-    ///
-    /// # Arguments
-    ///
-    /// * `key` - A reference to a string slice that holds the object's key within the storage bucket.
-    /// * `expiration` - A `Duration` specifying how long until the pre-signed URL expires.
-    ///
-    /// # Returns
-    ///
-    /// Returns a `Result` which is either an `Ok` variant with the pre-signed URL as a `String`
-    /// if the operation succeeds, or an `Err` variant with an `anyhow::Error` if the operation
-    /// fails to generate the URL.
-    ///
-    /// # Errors
-    ///
-    /// This function will return an error if the pre-signing configuration cannot be built, or if
-    /// the SDK encounters a problem creating the pre-signed URL.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// let object_key = "path/to/my/file.txt";
-    /// let expiration = Duration::from_secs(3600); // 1 hour
-    /// let presigned_url = yandex_storage.generate_presigned_url(object_key, expiration).await?;
-    /// println!("Use this URL to access the object for the next hour: {}", presigned_url);
-    /// ```
     pub async fn generate_presigned_url(
         &self,
         key: &str,
@@ -166,29 +128,12 @@ impl YandexObjectStorage {
     }
 
     /// Deletes an object from the bucket specified by the object's URI.
-    ///
-    /// # Arguments
-    ///
-    /// * `object_uri` - The URI of the object to delete.
-    ///
-    /// # Returns
-    ///
-    /// A result that, when successful, returns (), or Err(anyhow::Error) in case of failure.
-    pub async fn delete_object_by_uri(
+    pub async fn delete_object_by_key(
         &self,
-        object_uri: &str,
+        key: &str,
     ) -> Result<(), anyhow::Error> {
-        // Extract the object key from the URI.
-        // Assuming the object_uri is of the format "https://bucketname.storage.yandexcloud.net/filename"
-        let object_key = object_uri
-            .trim_start_matches(&format!(
-                "https://{}.storage.yandexcloud.net/",
-                &self.bucket_name
-            ))
-            .to_string();
-
         // Make sure something was actually extracted to prevent erroneous deletions
-        if object_key.is_empty() || object_key == "/" {
+        if key.is_empty() || key == "/" {
             return Err(anyhow::Error::msg(
                 "Invalid object URI provided for deletion",
             ));
@@ -197,12 +142,10 @@ impl YandexObjectStorage {
         self.client
             .delete_object()
             .bucket(&self.bucket_name)
-            .key(&object_key)
+            .key(key)
             .send()
             .await
-            .with_context(|| {
-                format!("Failed to delete object: {}", object_key)
-            })?;
+            .with_context(|| format!("Failed to delete object: {}", key))?;
 
         Ok(())
     }
