@@ -1,20 +1,13 @@
 //! src/auth/mod.rs
 
-use std::collections::HashMap;
-
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::response::Response;
-use fred::error::RedisError;
-use fred::error::RedisErrorKind;
 use http::header::WWW_AUTHENTICATE;
 use http::HeaderValue;
-use serde::Deserialize;
-use serde::Serialize;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
-use crate::cornucopia::types::public::Userrole;
 use crate::error_chain_fmt;
 
 // ───── Submodules ───────────────────────────────────────────────────────── //
@@ -79,134 +72,5 @@ impl IntoResponse for AuthError {
                 .into_response()
             }
         }
-    }
-}
-
-#[derive(Clone, Serialize, Deserialize)]
-pub enum UserRole {
-    #[serde(rename = "creator")]
-    Creator,
-    #[serde(rename = "consumer")]
-    Consumer,
-    #[serde(rename = "fullstack")]
-    Fullstack,
-}
-
-impl std::fmt::Display for UserRole {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            UserRole::Creator => f.write_str("creator"),
-            UserRole::Consumer => f.write_str("consumer"),
-            UserRole::Fullstack => f.write_str("fullstack"),
-        }
-    }
-}
-
-impl TryFrom<&str> for UserRole {
-    type Error = String;
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        match value {
-            "creator" => Ok(UserRole::Creator),
-            "consumer" => Ok(UserRole::Consumer),
-            "fullstack" => Ok(UserRole::Fullstack),
-            other => {
-                Err(format!("Can't create UserRole instance from {other}"))
-            }
-        }
-    }
-}
-
-impl Into<Userrole> for UserRole {
-    fn into(self) -> Userrole {
-        match self {
-            UserRole::Creator => Userrole::creator,
-            UserRole::Consumer => Userrole::consumer,
-            UserRole::Fullstack => Userrole::fullstack,
-        }
-    }
-}
-
-#[derive(Clone, Serialize, Deserialize)]
-pub struct UserCandidate {
-    username: String,
-    email: String,
-    // We need to serialize that, so don't use `Secret`
-    password_hash: String,
-    role: UserRole,
-    validation_token: String,
-}
-
-impl UserCandidate {
-    pub fn new(
-        username: &str,
-        email: &str,
-        password_hash: &str,
-        role: UserRole,
-        validation_token: &str,
-    ) -> Self {
-        UserCandidate {
-            username: username.to_string(),
-            email: email.to_string(),
-            password_hash: password_hash.to_string(),
-            role,
-            validation_token: validation_token.to_string(),
-        }
-    }
-}
-
-impl TryFrom<HashMap<String, String>> for UserCandidate {
-    type Error = RedisError;
-    fn try_from(
-        mut value: HashMap<String, String>,
-    ) -> Result<Self, Self::Error> {
-        Ok(UserCandidate {
-            username: value.remove("username").ok_or_else(|| {
-                RedisError::new(
-                    RedisErrorKind::NotFound,
-                    "Missing field: username",
-                )
-            })?,
-            email: value.remove("email").ok_or_else(|| {
-                RedisError::new(
-                    RedisErrorKind::NotFound,
-                    "Missing field: email",
-                )
-            })?,
-            password_hash: value.remove("password_hash").ok_or_else(|| {
-                RedisError::new(
-                    RedisErrorKind::NotFound,
-                    "Missing field: password_hash",
-                )
-            })?,
-            role: value
-                .remove("role")
-                .and_then(|r| UserRole::try_from(r.as_str()).ok())
-                .ok_or_else(|| {
-                    RedisError::new(
-                        RedisErrorKind::NotFound,
-                        "Invalid or missing field: role",
-                    )
-                })?,
-            validation_token: value.remove("validation_token").ok_or_else(
-                || {
-                    RedisError::new(
-                        RedisErrorKind::NotFound,
-                        "Missing field: validation_token",
-                    )
-                },
-            )?,
-        })
-    }
-}
-
-impl From<UserCandidate> for HashMap<String, String> {
-    fn from(value: UserCandidate) -> Self {
-        let mut map = HashMap::new();
-        map.insert("username".to_string(), value.username);
-        map.insert("email".to_string(), value.email);
-        map.insert("password_hash".to_string(), value.password_hash);
-        map.insert("role".to_string(), value.role.to_string());
-        map.insert("validation_token".to_string(), value.validation_token);
-        map
     }
 }
