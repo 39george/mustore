@@ -14,7 +14,9 @@ function App() {
             path="/"
             element={
               <>
-                <h1>Home page</h1>
+                <h1 style={{ width: "fit-content", margin: "0 auto" }}>
+                  Home page
+                </h1>
               </>
             }
           />
@@ -22,7 +24,9 @@ function App() {
             path="products"
             element={
               <>
-                <h1>Products page</h1>
+                <h1 style={{ width: "fit-content", margin: "0 auto" }}>
+                  Products page
+                </h1>
               </>
             }
           />
@@ -30,7 +34,9 @@ function App() {
             path="services"
             element={
               <>
-                <h1>Services page</h1>
+                <h1 style={{ width: "fit-content", margin: "0 auto" }}>
+                  Services page
+                </h1>
               </>
             }
           />
@@ -38,7 +44,9 @@ function App() {
             path="help"
             element={
               <>
-                <h1>Help page</h1>
+                <h1 style={{ width: "fit-content", margin: "0 auto" }}>
+                  Help page
+                </h1>
               </>
             }
           />
@@ -46,7 +54,9 @@ function App() {
             path="*"
             element={
               <>
-                <h1>Page not found</h1>
+                <h1 style={{ width: "fit-content", margin: "0 auto" }}>
+                  Page not found
+                </h1>
               </>
             }
           />

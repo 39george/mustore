@@ -1,4 +1,72 @@
 @import "../colors.scss";
 
 .nav_bar {
+  display: flex;
+  align-items: center;
+
+  padding: 2em 3em;
+
+  font-family: "Geologica", sans-serif;
+  font-weight: 300;
+  font-size: 0.875rem;
+  letter-spacing: 0.1rem;
+}
+
+.nav_links {
+  display: flex;
+  align-items: center;
+
+  .logo {
+    margin-right: 3rem;
+  }
+
+  .nav_link {
+    display: flex;
+    align-items: center;
+
+    margin-right: 2rem;
+
+    .chevron {
+      margin-left: 0.5rem;
+
+      color: $main_dark;
+
+      transition: 0.2s ease-out;
+    }
+
+    &:hover {
+      .chevron {
+        color: $accent_pink;
+        transform: rotate(-180deg);
+      }
+    }
+  }
+
+  a {
+    text-decoration: none;
+    color: $main_dark;
+  }
+}
+.logging {
+  display: flex;
+  gap: 0.5em;
+
+  margin-left: auto;
+
+  .divider {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+
+  .log {
+    cursor: pointer;
+
+    transition: color 0.2s ease-out;
+
+    &:hover {
+      color: $accent_pink;
+    }
+  }
 }
