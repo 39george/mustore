@@ -100,7 +100,7 @@ pub async fn confirm(
         Err(e) => {
             app_state
                 .object_storage
-                .delete_object_by_uri(&avatar_key)
+                .delete_object_by_key(&avatar_key)
                 .await?;
             transaction
                 .rollback()
@@ -119,7 +119,7 @@ pub async fn confirm(
     {
         app_state
             .object_storage
-            .delete_object_by_uri(&avatar_key)
+            .delete_object_by_key(&avatar_key)
             .await?;
         transaction
             .rollback()
@@ -137,7 +137,7 @@ pub async fn confirm(
     {
         app_state
             .object_storage
-            .delete_object_by_uri(&avatar_key)
+            .delete_object_by_key(&avatar_key)
             .await?;
 
         return Err(e);
