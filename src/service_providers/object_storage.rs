@@ -26,30 +26,6 @@ pub struct YandexObjectStorage {
 }
 
 impl YandexObjectStorage {
-    /// Constructs a new instance of `YandexObjectStorage`.
-    ///
-    /// This method initializes a new `YandexObjectStorage` client using the provided
-    /// `ObjectStorageSettings`. It directly sets credentials for use with Yandex and configures
-    /// the client to use Yandex's Object Storage endpoint.
-    ///
-    /// # Arguments
-    ///
-    /// * `settings` - An instance of `ObjectStorageSettings` struct containing configuration
-    ///   settings such as access keys, secret keys, and bucket name.
-    ///
-    /// # Returns
-    ///
-    /// Returns an instance of `YandexObjectStorage`.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use mustore::config::ObjectStorageSettings;
-    /// use mustore::service_providers::object_storage::YandexObjectStorage;
-    ///
-    /// let storage_settings = ObjectStorageSettings::new("access_key", "secret_key", "bucket_name", "region");
-    /// let yandex_storage = YandexObjectStorage::new(storage_settings).await;
-    /// ```
     pub async fn new(settings: ObjectStorageSettings) -> Self {
         // Create Credentials object directly.
         let credentials = Credentials::new(
