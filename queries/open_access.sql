@@ -19,3 +19,5 @@ UNION ALL
     FROM lyrics
 );
 
+--! get_genres_list
+SELECT name from genres;
