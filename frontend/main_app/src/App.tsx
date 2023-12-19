@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.scss";
 import MainLayout from "./layouts/MainLayout";
+import HomePage from "./Pages/Home/HomePage";
 
 function App() {
   return (
@@ -12,13 +13,7 @@ function App() {
         >
           <Route
             path="/"
-            element={
-              <>
-                <h1 style={{ width: "fit-content", margin: "0 auto" }}>
-                  Home page
-                </h1>
-              </>
-            }
+            element={<HomePage />}
           />
           <Route
             path="products"
