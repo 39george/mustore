@@ -21,7 +21,8 @@ impl UserName {
             Err(anyhow::anyhow!("String is too long"))
         } else if is_too_short {
             Err(anyhow::anyhow!(
-                "Username is too short, should be longer than 2 symbols"
+                "Username is too short, should be longer than 2 symbols: {}",
+                name
             ))
         } else if contains_forbidden_chars {
             Err(anyhow::anyhow!("String contains forbidden chars"))
