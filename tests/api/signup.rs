@@ -1,38 +1,39 @@
 //! tests/api/signup.rs
 
+use std::collections::HashMap;
+
 use crate::helpers::{TestApp, TestUser};
+use fred::interfaces::HashesInterface;
 use mustore::config::Settings;
+use mustore::domain::user_candidate::UserCandidate;
 use wiremock::matchers;
 use wiremock::Mock;
 use wiremock::ResponseTemplate;
 
-use mustore::cornucopia::queries::tests;
+#[tokio::test]
+async fn signup_with_correct_data_creates_a_new_candidate() {
+    let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
 
-// #[tokio::test]
-// async fn signup_with_correct_data_creates_a_new_candidate() {
-//     let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
-//     let test_user = TestUser::generate();
+    let test_user = TestUser::generate();
 
-//     Mock::given(matchers::path("/v1/smtp/send"))
-//         .respond_with(ResponseTemplate::new(200))
-//         .expect(1)
-//         .mount(&app.email_server)
-//         .await;
+    Mock::given(matchers::path("/v1/smtp/send"))
+        .respond_with(ResponseTemplate::new(200))
+        .expect(1)
+        .mount(&app.email_server)
+        .await;
 
-//     let response = test_user.post_signup(&app.address).await.unwrap();
-//     assert!(response.status().is_success());
+    let response = test_user.post_signup(&app.address).await.unwrap();
+    assert!(response.status().is_success());
 
-//     let db_client = app.pg_pool.get().await.unwrap();
+    let key = format!("user_candidate:{}", test_user.email);
+    let candidate: HashMap<String, String> =
+        app.redis_client.hgetall(&key).await.unwrap();
 
-//     let candidate = tests::get_user_candidate_by_username()
-//         .bind(&db_client, &test_user.username)
-//         .one()
-//         .await
-//         .unwrap();
+    let candidate = UserCandidate::try_from(candidate).unwrap();
 
-//     assert_eq!(&candidate.email, &test_user.email);
-//     assert_eq!(&candidate.username, &test_user.username);
-// }
+    assert_eq!(&candidate.email, &test_user.email);
+    assert_eq!(&candidate.username, &test_user.username);
+}
 
 #[tokio::test]
 async fn signup_with_uncorrect_data_rejected() {
