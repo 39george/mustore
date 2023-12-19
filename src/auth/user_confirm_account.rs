@@ -1,4 +1,3 @@
-use crate::cornucopia::queries::user_auth_queries;
 use anyhow::Context;
 use axum::extract::Query;
 use axum::extract::State;
@@ -15,7 +14,8 @@ use std::io::Cursor;
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
 use super::AuthError;
-use super::UserCandidate;
+use crate::cornucopia::queries::user_auth_queries;
+use crate::domain::user_candidate::UserCandidate;
 use crate::startup::AppState;
 use crate::telemetry::spawn_blocking_with_tracing;
 
@@ -154,7 +154,7 @@ async fn get_user_candidate_data(
     let key = format!("user_candidate:{}", user_email);
     let result: HashMap<String, String> = con.hgetall(&key).await?;
     con.del(&key).await?;
-    UserCandidate::from_map(result)
+    UserCandidate::try_from(result)
 }
 
 #[tracing::instrument(name = "Generate identicon")]

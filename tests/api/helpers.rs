@@ -4,6 +4,8 @@ use std::collections::HashMap;
 
 use deadpool_postgres::Pool;
 use fake::Fake;
+use fred::clients::RedisClient;
+use mustore::startup::get_redis_connection_pool;
 // use mustore::types::RedisPool;
 // use redis::AsyncCommands;
 use secrecy::{ExposeSecret, Secret};
@@ -62,6 +64,7 @@ pub struct TestApp {
     pg_config_with_root_cred: DatabaseSettings,
     pub address: String,
     pub pg_pool: Pool,
+    pub redis_client: RedisClient,
     pub email_server: MockServer,
     pub port: u16,
 }
@@ -74,6 +77,19 @@ impl TestApp {
     pub async fn spawn_app(mut config: Settings) -> TestApp {
         init_tracing();
 
+        // Run tests on 1st redis database
+        config.redis.db_number = 1;
+        let redis_client = get_redis_connection_pool(&config.redis)
+            .await
+            .unwrap()
+            .next()
+            .clone_new();
+
+        fred::interfaces::ClientLike::connect(&redis_client);
+        fred::interfaces::ClientLike::wait_for_connect(&redis_client)
+            .await
+            .unwrap();
+
         let email_server = MockServer::start().await;
         config.email_client.base_url = email_server.uri();
 
@@ -83,8 +99,6 @@ impl TestApp {
         let (pg_config, pg_pool, pg_username) =
             prepare_postgres(config.database.clone()).await;
         config.database = pg_config;
-
-        config.redis.db_number = 1;
 
         let application = Application::build(config)
             .await
@@ -104,6 +118,7 @@ impl TestApp {
             pg_pool,
             email_server,
             port,
+            redis_client,
         }
     }
 

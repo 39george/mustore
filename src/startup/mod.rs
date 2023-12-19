@@ -206,7 +206,7 @@ fn get_email_client(
     Ok(email_client)
 }
 
-async fn get_redis_connection_pool(
+pub async fn get_redis_connection_pool(
     configuration: &RedisSettings,
 ) -> Result<RedisPool, anyhow::Error> {
     let redis_config = RedisConfig::from_url_centralized(

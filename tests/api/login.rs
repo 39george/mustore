@@ -1,8 +1,5 @@
 //! tests/api/login.rs
 use mustore::cornucopia::queries::tests;
-use wiremock::matchers::AnyMatcher;
-use wiremock::Mock;
-use wiremock::ResponseTemplate;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 use crate::helpers::{TestApp, TestUser};

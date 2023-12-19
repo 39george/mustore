@@ -1,9 +1,12 @@
+//! src/auth/user_signup.rs
+
+use std::collections::HashMap;
+
 use anyhow::Context;
 use argon2::password_hash::SaltString;
 use argon2::PasswordHasher;
 use askama::Template;
 use axum::extract::State;
-use axum::http::Request;
 use axum::Form;
 use fred::clients::RedisPool;
 use fred::interfaces::HashesInterface;
@@ -17,12 +20,12 @@ use serde::Serialize;
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
 use super::AuthError;
-use super::UserCandidate;
-use super::UserRole;
 use crate::cornucopia::queries::user_auth_queries;
+use crate::domain::user_candidate::UserCandidate;
 use crate::domain::user_email::UserEmail;
 use crate::domain::user_name::UserName;
 use crate::domain::user_password::UserPassword;
+use crate::domain::user_role::UserRole;
 use crate::email_client::EmailClient;
 use crate::startup::AppState;
 use crate::telemetry::spawn_blocking_with_tracing;
@@ -91,7 +94,7 @@ pub async fn signup(
         validation_token.as_ref(),
     );
 
-    set_user_candidate_data(
+    store_user_candidate_data(
         &app_state.redis_pool,
         email.as_ref(),
         user_candidate,
@@ -115,14 +118,15 @@ pub async fn signup(
 
 /// By default if the given `user_email` already exists,
 /// value will be overwritten.
-async fn set_user_candidate_data(
+#[tracing::instrument(name = "Store candidate data in the redis", skip_all)]
+async fn store_user_candidate_data(
     con: &RedisPool,
     user_email: &str,
     user_candidate: UserCandidate,
 ) -> RedisResult<()> {
     let key = format!("user_candidate:{}", user_email);
-    con.hset(&key, &user_candidate.to_redis_fields().try_into().unwrap())
-        .await?;
+    let hash_map: HashMap<String, String> = user_candidate.into();
+    con.hset(&key, &hash_map.try_into().unwrap()).await?;
     con.expire(&key, 60 * 30).await?; // 30 minutes
     Ok(())
 }
