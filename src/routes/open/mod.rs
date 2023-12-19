@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use anyhow::Context;
-use axum::debug_handler;
 use axum::extract::State;
 use axum::response::IntoResponse;
 use axum::response::Response;
@@ -83,9 +82,13 @@ impl TryFrom<Vec<GetStats>> for Stats {
 // ───── Body ─────────────────────────────────────────────────────────────── //
 
 pub fn open_router() -> Router<AppState> {
-    Router::new().route("/stats", routing::get(stats))
+    Router::new()
+        .route("/stats", routing::get(stats))
+        .route("/genres", routing::get(genres))
+        .route("/tags", routing::get(tags))
 }
 
+#[tracing::instrument(name = "Get products counts (stats)", skip_all)]
 async fn stats(
     State(app_state): State<AppState>,
 ) -> Result<Json<Stats>, ResponseError> {
@@ -102,4 +105,12 @@ async fn stats(
         .try_into()?;
 
     Ok(Json::from(stats))
+}
+
+async fn genres() -> StatusCode {
+    StatusCode::OK
+}
+
+async fn tags() -> StatusCode {
+    StatusCode::OK
 }
