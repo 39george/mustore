@@ -103,6 +103,131 @@ pub mod types {
 #[allow(unused_imports)]
 #[allow(dead_code)]
 pub mod queries {
+    pub mod open_access {
+        use cornucopia_async::GenericClient;
+        use futures;
+        use futures::{StreamExt, TryStreamExt};
+        #[derive(Debug, Clone, PartialEq)]
+        pub struct GetStats {
+            pub table_name: String,
+            pub count: i64,
+        }
+        pub struct GetStatsBorrowed<'a> {
+            pub table_name: &'a str,
+            pub count: i64,
+        }
+        impl<'a> From<GetStatsBorrowed<'a>> for GetStats {
+            fn from(
+                GetStatsBorrowed { table_name, count }: GetStatsBorrowed<'a>,
+            ) -> Self {
+                Self {
+                    table_name: table_name.into(),
+                    count,
+                }
+            }
+        }
+        pub struct GetStatsQuery<'a, C: GenericClient, T, const N: usize> {
+            client: &'a C,
+            params: [&'a (dyn postgres_types::ToSql + Sync); N],
+            stmt: &'a mut cornucopia_async::private::Stmt,
+            extractor: fn(&tokio_postgres::Row) -> GetStatsBorrowed,
+            mapper: fn(GetStatsBorrowed) -> T,
+        }
+        impl<'a, C, T: 'a, const N: usize> GetStatsQuery<'a, C, T, N>
+        where
+            C: GenericClient,
+        {
+            pub fn map<R>(
+                self,
+                mapper: fn(GetStatsBorrowed) -> R,
+            ) -> GetStatsQuery<'a, C, R, N> {
+                GetStatsQuery {
+                    client: self.client,
+                    params: self.params,
+                    stmt: self.stmt,
+                    extractor: self.extractor,
+                    mapper,
+                }
+            }
+            pub async fn one(self) -> Result<T, tokio_postgres::Error> {
+                let stmt = self.stmt.prepare(self.client).await?;
+                let row = self.client.query_one(stmt, &self.params).await?;
+                Ok((self.mapper)((self.extractor)(&row)))
+            }
+            pub async fn all(self) -> Result<Vec<T>, tokio_postgres::Error> {
+                self.iter().await?.try_collect().await
+            }
+            pub async fn opt(self) -> Result<Option<T>, tokio_postgres::Error> {
+                let stmt = self.stmt.prepare(self.client).await?;
+                Ok(self
+                    .client
+                    .query_opt(stmt, &self.params)
+                    .await?
+                    .map(|row| (self.mapper)((self.extractor)(&row))))
+            }
+            pub async fn iter(
+                self,
+            ) -> Result<
+                impl futures::Stream<Item = Result<T, tokio_postgres::Error>> + 'a,
+                tokio_postgres::Error,
+            > {
+                let stmt = self.stmt.prepare(self.client).await?;
+                let it = self
+                    .client
+                    .query_raw(
+                        stmt,
+                        cornucopia_async::private::slice_iter(&self.params),
+                    )
+                    .await?
+                    .map(move |res| {
+                        res.map(|row| (self.mapper)((self.extractor)(&row)))
+                    })
+                    .into_stream();
+                Ok(it)
+            }
+        }
+        pub fn get_stats() -> GetStatsStmt {
+            GetStatsStmt(cornucopia_async::private::Stmt::new(
+                "(
+    SELECT 'songs' AS table_name, COUNT(*) as count
+    FROM songs
+)
+UNION ALL
+(
+    SELECT 'beats' AS table_name, COUNT(*) as count
+    FROM beats
+)
+UNION ALL
+(
+    SELECT 'covers' AS table_name, COUNT(*) as count
+    FROM covers
+)
+UNION ALL
+(
+    SELECT 'lyrics' AS table_name, COUNT(*) as count
+    FROM lyrics
+)",
+            ))
+        }
+        pub struct GetStatsStmt(cornucopia_async::private::Stmt);
+        impl GetStatsStmt {
+            pub fn bind<'a, C: GenericClient>(
+                &'a mut self,
+                client: &'a C,
+            ) -> GetStatsQuery<'a, C, GetStats, 0> {
+                GetStatsQuery {
+                    client,
+                    params: [],
+                    stmt: &mut self.0,
+                    extractor: |row| GetStatsBorrowed {
+                        table_name: row.get(0),
+                        count: row.get(1),
+                    },
+                    mapper: |it| <GetStats>::from(it),
+                }
+            }
+        }
+    }
     pub mod tests {
         use cornucopia_async::GenericClient;
         use futures;
