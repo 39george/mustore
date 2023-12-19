@@ -1,4 +1,5 @@
 //! tests/api/login.rs
+use mustore::cornucopia::queries::tests;
 use wiremock::matchers::AnyMatcher;
 use wiremock::Mock;
 use wiremock::ResponseTemplate;
@@ -17,11 +18,15 @@ async fn signup_and_login_creates_user() {
     let response = reqwest::get(confirmation_link.0).await.unwrap();
     assert!(response.status().is_success());
     let pg_client = app.pg_pool.get().await.unwrap();
-    // FIXME: add join with avatar
-    let rows = pg_client.query("SELECT * FROM users", &[]).await.unwrap();
+    let rows = tests::select_user_data_with_avatar_key()
+        .bind(&pg_client)
+        .all()
+        .await
+        .unwrap();
     for row in rows.into_iter() {
-        let username: &str = row.get("username");
-        let email: &str = row.get("email");
-        println!("username: {}, email: {}", username, email);
+        println!(
+            "username: {}, email: {}, avatar_key: {}",
+            row.username, row.email, row.key
+        );
     }
 }
