@@ -152,40 +152,33 @@ impl UserCandidate {
             validation_token: validation_token.to_string(),
         }
     }
+}
 
-    pub fn to_redis_fields(self) -> HashMap<String, String> {
-        let mut map = HashMap::new();
-        map.insert("username".to_string(), self.username);
-        map.insert("email".to_string(), self.email);
-        map.insert("password_hash".to_string(), self.password_hash);
-        map.insert("role".to_string(), self.role.to_string());
-        map.insert("validation_token".to_string(), self.validation_token);
-        map
-    }
-
-    fn from_map(
-        mut fields: HashMap<String, String>,
-    ) -> Result<UserCandidate, RedisError> {
+impl TryFrom<HashMap<String, String>> for UserCandidate {
+    type Error = RedisError;
+    fn try_from(
+        mut value: HashMap<String, String>,
+    ) -> Result<Self, Self::Error> {
         Ok(UserCandidate {
-            username: fields.remove("username").ok_or_else(|| {
+            username: value.remove("username").ok_or_else(|| {
                 RedisError::new(
                     RedisErrorKind::NotFound,
                     "Missing field: username",
                 )
             })?,
-            email: fields.remove("email").ok_or_else(|| {
+            email: value.remove("email").ok_or_else(|| {
                 RedisError::new(
                     RedisErrorKind::NotFound,
                     "Missing field: email",
                 )
             })?,
-            password_hash: fields.remove("password_hash").ok_or_else(|| {
+            password_hash: value.remove("password_hash").ok_or_else(|| {
                 RedisError::new(
                     RedisErrorKind::NotFound,
                     "Missing field: password_hash",
                 )
             })?,
-            role: fields
+            role: value
                 .remove("role")
                 .and_then(|r| UserRole::try_from(r.as_str()).ok())
                 .ok_or_else(|| {
@@ -194,7 +187,7 @@ impl UserCandidate {
                         "Invalid or missing field: role",
                     )
                 })?,
-            validation_token: fields.remove("validation_token").ok_or_else(
+            validation_token: value.remove("validation_token").ok_or_else(
                 || {
                     RedisError::new(
                         RedisErrorKind::NotFound,
@@ -203,5 +196,17 @@ impl UserCandidate {
                 },
             )?,
         })
+    }
+}
+
+impl From<UserCandidate> for HashMap<String, String> {
+    fn from(value: UserCandidate) -> Self {
+        let mut map = HashMap::new();
+        map.insert("username".to_string(), value.username);
+        map.insert("email".to_string(), value.email);
+        map.insert("password_hash".to_string(), value.password_hash);
+        map.insert("role".to_string(), value.role.to_string());
+        map.insert("validation_token".to_string(), value.validation_token);
+        map
     }
 }
