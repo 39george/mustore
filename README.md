@@ -112,3 +112,7 @@ When writing these tests, it is important to mock external dependencies and to c
 ### Future features:
    1. Blog section
    2. Implement rejection of product/service with possibility to correct files that required corrections.
+
+### NOTEBOOK SECTION
+
+I need to get x new songs sorted from new to old keeping in mind likes and listenings count.
