@@ -577,6 +577,28 @@ CREATE TABLE images (
     offset_y REAL
 );
 
+CREATE OR REPLACE FUNCTION validate_avatar_users_id()
+    RETURNS TRIGGER AS $$
+    BEGIN
+        IF NEW.objects_id IS NOT NULL THEN
+            IF NOT EXISTS (
+                SELECT 1
+                FROM objects
+                WHERE id = NEW.objects_id
+                AND avatar_users_id IS NOT NULL
+            ) THEN
+                RAISE EXCEPTION 'Invalid avatar_users_id';
+            END IF;
+        END IF;
+        RETURN NEW;
+    END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER check_avatar_users_id
+    BEFORE INSERT OR UPDATE ON images
+    FOR EACH ROW
+    EXECUTE FUNCTION validate_avatar_users_id();
+
 CREATE OR REPLACE FUNCTION check_cover_credits_cover_design_limit()
     RETURNS TRIGGER AS $$
 BEGIN
