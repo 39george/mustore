@@ -29,7 +29,7 @@ async fn signup_and_confirm_email_creates_user() {
 }
 
 #[tokio::test]
-async fn create_user_and_login() {
+async fn access_to_protected_with_login_is_allowed() {
     let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
 
     let test_user = TestUser::generate();
@@ -38,7 +38,12 @@ async fn create_user_and_login() {
     let response = reqwest::get(confirmation_link.0).await.unwrap();
     assert!(response.status().is_success());
 
-    let response = reqwest::Client::new()
+    let client = reqwest::Client::builder()
+        .cookie_store(true)
+        .build()
+        .unwrap();
+
+    let response = client
         .post(format!("{}/api/login", app.address))
         .json(&serde_json::json!({
             "username": test_user.username,
@@ -47,8 +52,36 @@ async fn create_user_and_login() {
         .send()
         .await
         .unwrap();
-    dbg!(response);
-    // FINISH TEST
+    let cookie = response.cookies().collect::<Vec<_>>();
+    dbg!(cookie);
+
+    let response = client
+        .get(format!(
+            "{}/api/protected/health_check_protected",
+            app.address
+        ))
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(response.status().as_u16(), 200);
 }
 
-// login with wrong credentials should fail
+#[tokio::test]
+async fn acces_to_protected_without_login_is_restricted() {
+    let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
+    let client = reqwest::Client::builder()
+        .cookie_store(true)
+        .build()
+        .unwrap();
+
+    let response = client
+        .get(format!(
+            "{}/api/protected/health_check_protected",
+            app.address
+        ))
+        .send()
+        .await
+        .unwrap();
+    dbg!(&response);
+    assert_eq!(response.status().as_u16(), 401);
+}

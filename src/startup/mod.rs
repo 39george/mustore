@@ -165,7 +165,7 @@ impl Application {
             );
 
         let mut app = Router::new()
-            .nest("/api/private", private_router())
+            .nest("/api/protected", private_router())
             .nest("/api/open", open_router())
             .route("/api/health_check", routing::get(health_check))
             .route("/api/signup", routing::post(auth::user_signup::signup))

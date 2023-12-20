@@ -1,12 +1,9 @@
 use anyhow::anyhow;
-use anyhow::Context;
 use axum::response::IntoResponse;
 use axum::response::Redirect;
 use axum::routing::get;
 use axum::routing::post;
 use axum::Router;
-use base64::Engine;
-use http::HeaderMap;
 use http::StatusCode;
 use secrecy::Secret;
 use serde::Deserialize;
