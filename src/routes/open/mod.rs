@@ -13,7 +13,9 @@ use serde::Serialize;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
+use crate::cornucopia::queries::open_access::get_genres_list;
 use crate::cornucopia::queries::open_access::get_stats;
+use crate::cornucopia::queries::open_access::get_tags_list;
 use crate::cornucopia::queries::open_access::GetStats;
 use crate::error_chain_fmt;
 use crate::startup::AppState;
@@ -33,6 +35,7 @@ impl std::fmt::Debug for ResponseError {
         error_chain_fmt(self, f)
     }
 }
+
 impl IntoResponse for ResponseError {
     fn into_response(self) -> Response {
         tracing::error!("{:?}", self);
@@ -107,10 +110,41 @@ async fn stats(
     Ok(Json::from(stats))
 }
 
-async fn genres() -> StatusCode {
-    StatusCode::OK
+/// We should return json list with genres
+#[tracing::instrument(name = "Get genres list", skip_all)]
+async fn genres(
+    State(app_state): State<AppState>,
+) -> Result<Json<Vec<String>>, ResponseError> {
+    let pg_pool = app_state
+        .pg_pool
+        .get()
+        .await
+        .context("Failed to get pool from pg")?;
+
+    let genres = get_genres_list()
+        .bind(&pg_pool)
+        .all()
+        .await
+        .context("Failed to get genres list from pg")?;
+
+    Ok(Json(genres))
 }
 
-async fn tags() -> StatusCode {
-    StatusCode::OK
+#[tracing::instrument(name = "Get tags list", skip_all)]
+async fn tags(
+    State(app_state): State<AppState>,
+) -> Result<Json<Vec<String>>, ResponseError> {
+    let pg_pool = app_state
+        .pg_pool
+        .get()
+        .await
+        .context("Failed to get pool from pg")?;
+
+    let tags = get_tags_list()
+        .bind(&pg_pool)
+        .all()
+        .await
+        .context("Failed to get genres list from pg")?;
+
+    Ok(Json(tags))
 }

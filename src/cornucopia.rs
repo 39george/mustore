@@ -307,6 +307,26 @@ UNION ALL
                 }
             }
         }
+        pub fn get_tags_list() -> GetTagsListStmt {
+            GetTagsListStmt(cornucopia_async::private::Stmt::new(
+                "SELECT name from tags",
+            ))
+        }
+        pub struct GetTagsListStmt(cornucopia_async::private::Stmt);
+        impl GetTagsListStmt {
+            pub fn bind<'a, C: GenericClient>(
+                &'a mut self,
+                client: &'a C,
+            ) -> StringQuery<'a, C, String, 0> {
+                StringQuery {
+                    client,
+                    params: [],
+                    stmt: &mut self.0,
+                    extractor: |row| row.get(0),
+                    mapper: |it| it.into(),
+                }
+            }
+        }
     }
     pub mod tests {
         use cornucopia_async::GenericClient;

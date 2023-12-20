@@ -21,3 +21,6 @@ UNION ALL
 
 --! get_genres_list
 SELECT name from genres;
+
+--! get_tags_list
+SELECT name from tags;
