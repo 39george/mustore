@@ -51,17 +51,17 @@ async fn signup_with_uncorrect_data_rejected() {
 #[tokio::test]
 async fn signup_with_correct_data_sends_confirmation_email_with_link_smtpbz() {
     let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
-    let _confirmation_link = app
-        .reg_user_get_confirmation_link(TestUser::generate())
-        .await;
+    let test_user = TestUser::generate();
+    let _confirmation_link =
+        app.reg_user_get_confirmation_link(&test_user).await;
 }
 
 #[tokio::test]
 async fn going_by_confirmation_link_confirmes_candidate_account() {
     let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
-    let confirmation_link = app
-        .reg_user_get_confirmation_link(TestUser::generate())
-        .await;
+    let test_user = TestUser::generate();
+    let confirmation_link =
+        app.reg_user_get_confirmation_link(&test_user).await;
     let response = reqwest::get(confirmation_link.0).await.unwrap();
     assert_eq!(response.status().as_u16(), 200);
 }

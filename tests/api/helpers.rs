@@ -124,7 +124,7 @@ impl TestApp {
 
     pub async fn reg_user_get_confirmation_link(
         &self,
-        user: TestUser,
+        user: &TestUser,
     ) -> ConfirmationLink {
         Mock::given(matchers::path("/v1/smtp/send"))
             .and(matchers::method("POST"))
