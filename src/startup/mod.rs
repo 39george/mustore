@@ -8,6 +8,7 @@ use deadpool_postgres::Manager;
 use deadpool_postgres::ManagerConfig;
 
 use deadpool_postgres::Pool;
+use fred::clients::RedisClient;
 use fred::clients::RedisPool;
 use fred::types::RedisConfig;
 use http::StatusCode;
@@ -17,7 +18,7 @@ use time::Duration;
 use tokio::net::TcpListener;
 use tokio_postgres::NoTls;
 use tower::ServiceBuilder;
-// use tower_http::trace::TraceLayer;
+use tower_http::trace::TraceLayer;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
@@ -69,6 +70,11 @@ impl Application {
         let pg_pool = get_postgres_connection_pool(&configuration.database);
         let redis_pool =
             get_redis_connection_pool(&configuration.redis).await?;
+
+        let redis_client = redis_pool.next().clone_new();
+        fred::interfaces::ClientLike::connect(&redis_client);
+        fred::interfaces::ClientLike::wait_for_connect(&redis_client).await?;
+
         let object_storage =
             YandexObjectStorage::new(configuration.object_storage).await;
         let email_client = get_email_client(
@@ -89,6 +95,7 @@ impl Application {
             listener,
             pg_pool,
             redis_pool,
+            redis_client,
             object_storage,
             email_client,
         );
@@ -112,6 +119,7 @@ impl Application {
         listener: TcpListener,
         pg_pool: Pool,
         redis_pool: RedisPool,
+        redis_client: RedisClient,
         object_storage: YandexObjectStorage,
         email_client: EmailClient,
     ) -> Serve<Router, Router> {
@@ -121,8 +129,6 @@ impl Application {
             // Params are good
             argon2::Params::new(15000, 2, 1, None).unwrap(),
         );
-
-        let redis_client = redis_pool.next().clone_new();
 
         // We do not wrap pool into arc because internally it alreaday has an
         // `Arc`, and copying is cheap.
@@ -158,7 +164,7 @@ impl Application {
                 AuthManagerLayerBuilder::new(backend, session_layer).build(),
             );
 
-        let app = Router::new()
+        let mut app = Router::new()
             .nest("/api/private", private_router())
             .nest("/api/open", open_router())
             .route("/api/health_check", routing::get(health_check))
@@ -169,22 +175,25 @@ impl Application {
             )
             .with_state(app_state)
             .merge(auth::user_login::login_router())
-            // .layer(
-            //     TraceLayer::new_for_http()
-            //         .make_span_with(
-            //             tower_http::trace::DefaultMakeSpan::new()
-            //                 .level(tracing::Level::INFO),
-            //         )
-            //         .on_response(
-            //             tower_http::trace::DefaultOnResponse::new()
-            //                 .level(tracing::Level::INFO),
-            //         )
-            //         .on_failure(
-            //             tower_http::trace::DefaultOnFailure::new()
-            //                 .level(tracing::Level::ERROR),
-            //         ),
-            // )
             .layer(auth_service);
+
+        if let Ok(_) = std::env::var("TEST_TRACING") {
+            app = app.layer(
+                TraceLayer::new_for_http()
+                    .make_span_with(
+                        tower_http::trace::DefaultMakeSpan::new()
+                            .level(tracing::Level::INFO),
+                    )
+                    .on_response(
+                        tower_http::trace::DefaultOnResponse::new()
+                            .level(tracing::Level::INFO),
+                    )
+                    .on_failure(
+                        tower_http::trace::DefaultOnFailure::new()
+                            .level(tracing::Level::ERROR),
+                    ),
+            );
+        }
 
         axum::serve(listener, app)
     }
