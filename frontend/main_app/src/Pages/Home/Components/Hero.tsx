@@ -46,8 +46,14 @@ const Hero = () => {
           src={bg_decor_2}
           alt="background decor 2"
         />
+        <img
+          className={`${styles.bg_decor} ${styles.decor_3}`}
+          src={bg_decor_3}
+          alt="background decor 3"
+        />
       </div>
       <div className={styles.text_block}>
+        <div className={styles.empty_space}></div>
         <div className={styles.title}>MUSTORE</div>
         <div className={styles.tagline}>
           Сервис для тех, кто хочет найти или предложить свои{" "}
@@ -79,6 +85,11 @@ const Hero = () => {
           className={`${styles.bg_decor} ${styles.decor_3}`}
           src={bg_decor_3}
           alt="background decor 3"
+        />
+        <img
+          className={`${styles.bg_decor} ${styles.decor_2}`}
+          src={bg_decor_2}
+          alt="background decor 2"
         />
         <img
           className={`${styles.bg_decor} ${styles.decor_4}`}
