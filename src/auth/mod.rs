@@ -52,13 +52,7 @@ impl IntoResponse for AuthError {
             }
             AuthError::InvalidCredentialsError(_) => Response::builder()
                 .status(StatusCode::UNAUTHORIZED)
-                .header(
-                    WWW_AUTHENTICATE,
-                    HeaderValue::from_static(
-                        r#"Basic realm="Mustore User Access""#,
-                    ),
-                )
-                .body(axum::body::Body::empty())
+                .body("Json auth is required".into())
                 .unwrap(),
             AuthError::SignupFailed(_) => Response::builder()
                 .status(StatusCode::BAD_REQUEST)
