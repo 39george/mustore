@@ -1,4 +1,5 @@
 import styles from "./Hero.module.scss";
+import { GoChevronDown } from "react-icons/go";
 import bg_decor_1 from "../../../assets/Home page/bg_decor_1.png";
 import bg_decor_2 from "../../../assets/Home page/bg_decor_2.png";
 import bg_decor_3 from "../../../assets/Home page/bg_decor_3.png";
@@ -97,6 +98,7 @@ const Hero = () => {
           alt="background decor 4"
         />
       </div>
+      <GoChevronDown className={styles.chevron} />
     </div>
   );
 };
