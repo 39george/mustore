@@ -6,6 +6,7 @@ use crate::helpers::{TestApp, TestUser};
 use fred::interfaces::HashesInterface;
 use mustore::config::Settings;
 use mustore::domain::user_candidate::UserCandidate;
+use reqwest::redirect::Policy;
 use wiremock::matchers;
 use wiremock::Mock;
 use wiremock::ResponseTemplate;
@@ -64,4 +65,31 @@ async fn going_by_confirmation_link_confirmes_candidate_account() {
         app.reg_user_get_confirmation_link(&test_user).await;
     let response = reqwest::get(confirmation_link.0).await.unwrap();
     assert_eq!(response.status().as_u16(), 200);
+}
+
+#[tokio::test]
+async fn wrong_confirmation_link_should_redirect_to_specific_route() {
+    let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
+    let confirmation_link = format!(
+        "{}/api/confirm_user_account?email=unexistent@shouldfail.net&token=26mxZMNiMnErAUd2hONzgymaw",
+        app.address);
+
+    let response = reqwest::Client::builder()
+        .redirect(Policy::none())
+        .build()
+        .unwrap()
+        .get(confirmation_link)
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(response.status().as_u16(), 303);
+    assert_eq!(
+        response
+            .headers()
+            .get("location")
+            .unwrap()
+            .to_str()
+            .unwrap(),
+        "react-router/accountconfirmationfailed"
+    );
 }

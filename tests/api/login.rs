@@ -48,4 +48,7 @@ async fn create_user_and_login() {
         .await
         .unwrap();
     dbg!(response);
+    // FINISH TEST
 }
+
+// login with wrong credentials should fail
