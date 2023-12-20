@@ -27,9 +27,7 @@
 
     .chevron {
       margin-left: 0.5rem;
-
       color: $main_dark;
-
       transition: 0.2s ease-out;
     }
 
@@ -61,7 +59,6 @@
 
   .log {
     cursor: pointer;
-
     transition: color 0.2s ease-out;
 
     &:hover {
