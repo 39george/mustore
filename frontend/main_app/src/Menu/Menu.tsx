@@ -1,8 +1,32 @@
 import { NavLink } from "react-router-dom";
 import { GoChevronDown } from "react-icons/go";
 import styles from "./Menu.module.scss";
+import { FC, useState } from "react";
 
-const Menu = () => {
+interface ToggledLinks {
+  products: boolean;
+  services: boolean;
+  help: boolean;
+  about: boolean;
+}
+
+type LinkName = keyof ToggledLinks;
+
+const Menu: FC = () => {
+  const [link_toggled, set_link_toggled] = useState<ToggledLinks>({
+    products: false,
+    services: false,
+    help: false,
+    about: false,
+  });
+
+  const toggle_link = (link_name: LinkName) => {
+    set_link_toggled((prev_state) => ({
+      ...prev_state,
+      [link_name]: !prev_state[link_name],
+    }));
+  };
+
   return (
     <nav className={styles.nav_bar}>
       <ul className={styles.nav_links}>
@@ -157,6 +181,134 @@ const Menu = () => {
         <div className={styles.log}>войти</div>
         <div className={styles.divider}>|</div>
         <div className={styles.log}>создать аккаунт</div>
+      </div>
+      {
+        // Sidebar
+      }
+      <div className={styles.mobile_sidebar}>
+        sidebar
+        <div className={styles.sidebar_nav_links}>
+          <li
+            className={
+              link_toggled.products
+                ? `${styles.link_container} ${styles.link_toggled}`
+                : styles.link_container
+            }
+          >
+            <div
+              className={styles.nav_link}
+              onClick={() => toggle_link("products")}
+            >
+              <div>Товары</div>
+              <GoChevronDown className={styles.chevron} />
+            </div>
+            <ul className={styles.sidebar_submenu}>
+              <li>
+                <NavLink to="products">Песни</NavLink>
+              </li>
+              <li>
+                <NavLink to="products">Биты</NavLink>
+              </li>
+              <li>
+                <NavLink to="products">Обложки</NavLink>
+              </li>
+              <li>
+                <NavLink to="products">Тексты</NavLink>
+              </li>
+            </ul>
+          </li>
+          <li
+            className={
+              link_toggled.services
+                ? `${styles.link_container} ${styles.link_toggled}`
+                : styles.link_container
+            }
+          >
+            <div
+              className={styles.nav_link}
+              onClick={() => toggle_link("services")}
+            >
+              <div>Услуги</div>
+              <GoChevronDown className={styles.chevron} />
+            </div>
+            <ul className={styles.sidebar_submenu}>
+              <li>
+                <NavLink to="services">Создание песни</NavLink>
+              </li>
+              <li>
+                <NavLink to="services">Сведение / Мастеринг</NavLink>
+              </li>
+              <li>
+                <NavLink to="services">Написание бита</NavLink>
+              </li>
+              <li>
+                <NavLink to="services">Гострайтинг</NavLink>
+              </li>
+              <li>
+                <NavLink to="services">Дизайн обложки</NavLink>
+              </li>
+            </ul>
+          </li>
+          <li
+            className={
+              link_toggled.help
+                ? `${styles.link_container} ${styles.link_toggled}`
+                : styles.link_container
+            }
+          >
+            <div
+              className={styles.nav_link}
+              onClick={() => toggle_link("help")}
+            >
+              <div>Помощь</div>
+              <GoChevronDown className={styles.chevron} />
+            </div>
+            <ul className={styles.sidebar_submenu}>
+              <li>
+                <NavLink to="help">FAQ</NavLink>
+              </li>
+              <li>
+                <NavLink to="help">Обратиться в поддержку</NavLink>
+              </li>
+              <li>
+                <NavLink to="help">Покупателям</NavLink>
+              </li>
+              <li>
+                <NavLink to="help">Продавцам</NavLink>
+              </li>
+              <li>
+                <NavLink to="help">Политика конфиденциальности</NavLink>
+              </li>
+              <li>
+                <NavLink to="help">Правила сообщества</NavLink>
+              </li>
+            </ul>
+          </li>
+          <li
+            className={
+              link_toggled.about
+                ? `${styles.link_container} ${styles.link_toggled}`
+                : styles.link_container
+            }
+          >
+            <div
+              className={styles.nav_link}
+              onClick={() => toggle_link("about")}
+            >
+              <div>О нас</div>
+              <GoChevronDown className={styles.chevron} />
+            </div>
+            <ul className={styles.sidebar_submenu}>
+              <li>
+                <NavLink to="about">Блог</NavLink>
+              </li>
+              <li>
+                <NavLink to="about">Наша команда</NavLink>
+              </li>
+            </ul>
+          </li>
+        </div>
+        <hr />
       </div>
     </nav>
   );

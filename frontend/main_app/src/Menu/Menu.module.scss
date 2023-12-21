@@ -146,3 +146,104 @@ a {
     }
   }
 }
+
+// Sidebar
+.mobile_sidebar {
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  padding: 2rem 0 0.75rem;
+
+  width: 18.75rem;
+  height: 100vh;
+
+  font-size: 1rem;
+  font-weight: 300;
+
+  color: $main_bright;
+  background-color: rgba($color: $main_dark, $alpha: 0.9);
+  backdrop-filter: blur(9px);
+
+  z-index: 3;
+}
+
+.sidebar_nav_links {
+  display: flex;
+  flex-direction: column;
+
+  width: fit-content;
+
+  margin: 1.5rem 1rem 0.75rem;
+
+  .link_container {
+    position: relative;
+    margin: 0;
+    padding: 0;
+
+    .nav_link {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+
+    &:not(:last-child) {
+      margin-bottom: 0.75rem;
+    }
+
+    // &:hover {
+    //   .sidebar_submenu {
+    //     display: block;
+    //   }
+    // }
+  }
+
+  a,
+  .chevron {
+    color: $main_bright;
+  }
+
+  &:hover {
+    .chevron {
+      color: $main_bright;
+      transform: initial;
+    }
+  }
+
+  .sidebar_submenu {
+    margin-left: 1rem;
+    margin-top: 0.875rem;
+
+    font-size: 0.875rem;
+
+    li {
+      a {
+        color: $main_bright;
+        transition: color 0.1s ease-out;
+        &:hover {
+          color: $accent_pink;
+        }
+      }
+    }
+    & li:not(:last-child) {
+      margin-bottom: 0.75rem;
+    }
+
+    display: none;
+  }
+}
+
+// Add this class if link is toggled
+.link_toggled {
+  .sidebar_submenu {
+    display: block;
+  }
+
+  .nav_link {
+    .chevron {
+      color: $accent_pink;
+      transform: rotate(-180deg);
+    }
+  }
+}
