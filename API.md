@@ -8,7 +8,7 @@ Form: {
     username: String,
     password: String,
     email: String,
-    user_role: UserRole ('creator', 'consumer', 'fullstack'),
+    user_role: UserRole ('creator', 'consumer') OR admin_token: Uuid,
 }
 ← FROM
 If OK, StatusCode::Created (201)
