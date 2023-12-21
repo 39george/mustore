@@ -143,15 +143,17 @@ impl TestApp {
         }
     }
 
-    pub async fn reg_user_get_confirmation_link(
+    /// `WARNING`: This function will create a new email delivery mock server.
+    pub async fn signup_user_get_confirmation_link(
         &self,
         user: &TestUser,
+        email_mock_expect_times_match: u64,
     ) -> ConfirmationLink {
         Mock::given(matchers::path("/v1/smtp/send"))
             .and(matchers::method("POST"))
             .and(matchers::header_exists("Authorization"))
             .respond_with(ResponseTemplate::new(200))
-            .expect(1)
+            .expect(email_mock_expect_times_match)
             .mount(&self.email_server)
             .await;
 
@@ -163,12 +165,18 @@ impl TestApp {
         self.get_confirmation_link_urlencoded(request)
     }
 
+    /// `WARNING`: This function will create a new email delivery mock server.
     pub async fn register_user(
         &self,
         test_user: &TestUser,
+        email_mock_expect_times_match: u64,
     ) -> reqwest::StatusCode {
-        let confirmation_link =
-            self.reg_user_get_confirmation_link(&test_user).await;
+        let confirmation_link = self
+            .signup_user_get_confirmation_link(
+                &test_user,
+                email_mock_expect_times_match,
+            )
+            .await;
         let response = reqwest::get(confirmation_link.0).await.unwrap();
         response.status()
     }
@@ -217,22 +225,6 @@ impl TestApp {
 
         ConfirmationLink(link)
     }
-
-    // pub async fn post_newsletters(
-    //     &self,
-    //     body: serde_json::Value,
-    // ) -> reqwest::Response {
-    //     reqwest::Client::new()
-    //         .post(&format!("{}/newsletters", self.address))
-    //         .json(&body)
-    //         .basic_auth(
-    //             &self.test_user.username,
-    //             Some(&self.test_user.password),
-    //         )
-    //         .send()
-    //         .await
-    //         .expect("Failed to execute request.")
-    // }
 }
 
 impl Drop for TestApp {

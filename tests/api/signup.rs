@@ -55,7 +55,7 @@ async fn signup_with_correct_data_sends_confirmation_email_with_link_smtpbz() {
     let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
     let test_user = TestUser::generate_user(String::from("creator"));
     let _confirmation_link =
-        app.reg_user_get_confirmation_link(&test_user).await;
+        app.signup_user_get_confirmation_link(&test_user, 1).await;
 }
 
 #[tokio::test]
@@ -63,7 +63,7 @@ async fn going_by_confirmation_link_confirmes_candidate_account() {
     let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
     let test_user = TestUser::generate_user(String::from("consumer"));
     let confirmation_link =
-        app.reg_user_get_confirmation_link(&test_user).await;
+        app.signup_user_get_confirmation_link(&test_user, 1).await;
     let response = reqwest::get(confirmation_link.0).await.unwrap();
     assert_eq!(response.status().as_u16(), 200);
 }
