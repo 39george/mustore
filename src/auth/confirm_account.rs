@@ -1,6 +1,7 @@
 use anyhow::Context;
 use axum::extract::Query;
 use axum::extract::State;
+use deadpool_postgres::Transaction;
 use fred::clients::RedisPool;
 use fred::interfaces::HashesInterface;
 use fred::interfaces::KeysInterface;
@@ -110,15 +111,40 @@ pub async fn confirm(
         }
     };
 
-    if let Err(e) = user_auth_queries::store_user_permission()
-        .bind(
-            &transaction,
-            &user_id,
-            &user_candidate_data.role.to_permission_string(),
-        )
-        .await
-        .context("Failed to insert a new user to the pg")
-        .map_err(AuthError::AccountConfirmationFailed)
+    if let Err(e) =
+        match (user_candidate_data.role, user_candidate_data.admin_token) {
+            (None, Some(admin_token)) => {
+                if let Err(e) =
+                    verify_admin_token(&transaction, admin_token).await
+                {
+                    Err(e)
+                } else {
+                    user_auth_queries::store_user_permission()
+                        .bind(&transaction, &user_id, &"group.administrators")
+                        .await
+                        .context(
+                            "Failed to insert an admin permission to the pg",
+                        )
+                        .map_err(AuthError::AccountConfirmationFailed)
+                }
+            }
+            (Some(user_role), None) => {
+                user_auth_queries::store_user_permission()
+                    .bind(
+                        &transaction,
+                        &user_id,
+                        &user_role.to_permission_string(),
+                    )
+                    .await
+                    .context("Failed to insert an user permission to the pg")
+                    .map_err(AuthError::AccountConfirmationFailed)
+            }
+            _ => {
+                return Err(AuthError::SignupFailed(anyhow::anyhow!(
+                    "User should have only role, or only admin token!"
+                )))
+            }
+        }
     {
         app_state
             .object_storage
@@ -193,4 +219,39 @@ fn generate_identicon_png(from_str: &str) -> Result<Vec<u8>, anyhow::Error> {
         )
         .context("Failed to write DynamicImage into Vec<u8>")?;
     Ok(image_bytes)
+}
+
+#[tracing::instrument(name = "Trying to validate admin token", skip_all)]
+async fn verify_admin_token(
+    client: &Transaction<'_>,
+    admin_token: uuid::Uuid,
+) -> Result<(), AuthError> {
+    // Token exists
+    let token = user_auth_queries::get_admin_token()
+        .bind(client, &admin_token)
+        .one()
+        .await
+        .context("Failed to get admin token from pg")
+        .map_err(AuthError::AccountConfirmationFailed)?;
+
+    // Token is not used
+    if token.used {
+        return Err(AuthError::AccountConfirmationFailed(anyhow::anyhow!(
+            "Admin token is already activated!"
+        )));
+    }
+
+    let rows_count = user_auth_queries::use_admin_token()
+        .bind(client, &token.token)
+        .await
+        .context("Failed to set admin token to 'used'")?;
+
+    // Just in case
+    if rows_count != 1 {
+        return Err(AuthError::UnexpectedError(anyhow::anyhow!(
+            "When was updating admin token, {rows_count} rows was updated"
+        )));
+    }
+
+    Ok(())
 }

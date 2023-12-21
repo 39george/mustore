@@ -23,16 +23,28 @@ pub struct TestUser {
     pub username: String,
     pub password: String,
     pub email: String,
-    pub role: String,
+    pub role: Option<String>,
+    pub admin_token: Option<uuid::Uuid>,
 }
 
 impl TestUser {
-    pub fn generate(role: String) -> Self {
+    pub fn generate_user(role: String) -> Self {
         Self {
             username: fake::faker::name::en::Name().fake(),
             password: String::from("A23c(fds)Helloworld232r"),
             email: fake::faker::internet::en::SafeEmail().fake(),
-            role,
+            role: Some(role),
+            admin_token: None,
+        }
+    }
+
+    pub fn generate_admin(admin_token: uuid::Uuid) -> Self {
+        Self {
+            username: fake::faker::name::en::Name().fake(),
+            password: String::from("A23c(fds)Helloworld232r"),
+            email: fake::faker::internet::en::SafeEmail().fake(),
+            role: None,
+            admin_token: Some(admin_token),
         }
     }
 
@@ -42,10 +54,21 @@ impl TestUser {
     ) -> Result<reqwest::Response, reqwest::Error> {
         let client = reqwest::Client::new();
         let mut form = HashMap::new();
-        form.insert("username", &self.username);
-        form.insert("password", &self.password);
-        form.insert("email", &self.email);
-        form.insert("user_role", &self.role);
+        form.insert("username", self.username.clone());
+        form.insert("password", self.password.clone());
+        form.insert("email", self.email.clone());
+        match (&self.role, self.admin_token) {
+            (None, Some(admin_token)) => {
+                form.insert(
+                    "admin_token",
+                    admin_token.hyphenated().to_string(),
+                );
+            }
+            (Some(role), None) => {
+                form.insert("user_role", role.clone());
+            }
+            _ => unreachable!(),
+        }
         client
             .post(format!("{}/api/signup", host))
             .form(&form)
@@ -138,6 +161,33 @@ impl TestApp {
         let request = &self.email_server.received_requests().await.unwrap()[0];
 
         self.get_confirmation_link_urlencoded(request)
+    }
+
+    pub async fn register_user(
+        &self,
+        test_user: &TestUser,
+    ) -> reqwest::StatusCode {
+        let confirmation_link =
+            self.reg_user_get_confirmation_link(&test_user).await;
+        let response = reqwest::get(confirmation_link.0).await.unwrap();
+        response.status()
+    }
+
+    pub async fn login_user(
+        &self,
+        test_user: &TestUser,
+        client: &reqwest::Client,
+    ) -> reqwest::StatusCode {
+        let response = client
+            .post(format!("{}/api/login", &self.address))
+            .json(&serde_json::json!({
+                "username": test_user.username,
+                "password": test_user.password
+            }))
+            .send()
+            .await
+            .unwrap();
+        response.status()
     }
 
     /// Extract the confirmation links embedded in the email API in urlencoded.

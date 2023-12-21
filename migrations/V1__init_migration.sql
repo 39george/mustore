@@ -91,7 +91,7 @@ CREATE TABLE groups_permissions (
 -- Insert "users" and "administrators" groups.
 INSERT INTO groups (name) VALUES ('group.creators');
 INSERT INTO groups (name) VALUES ('group.consumers');
-INSERT INTO groups (name) VALUES ('administrators');
+INSERT INTO groups (name) VALUES ('group.administrators');
 
 -- Insert individual permissions.
 INSERT INTO permissions (name) VALUES ('user');
@@ -114,17 +114,17 @@ VALUES (
     (SELECT id FROM groups WHERE name = 'group.consumers'),
     (SELECT id FROM permissions WHERE name = 'consumer')
 ), (
-    (SELECT id FROM groups WHERE name = 'administrators'),
+    (SELECT id FROM groups WHERE name = 'group.administrators'),
     (SELECT id FROM permissions WHERE name = 'user')
 ), (
-    (SELECT id FROM groups WHERE name = 'administrators'),
+    (SELECT id FROM groups WHERE name = 'group.administrators'),
     (SELECT id FROM permissions WHERE name = 'administrator')
 );
 
 
 CREATE TABLE admin_signup_tokens(
     id SERIAL PRIMARY KEY,
-    token VARCHAR(255) NOT NULL,
+    token UUID NOT NULL UNIQUE,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     used BOOLEAN NOT NULL DEFAULT FALSE,
     users_id INTEGER REFERENCES users(id) ON DELETE SET NULL

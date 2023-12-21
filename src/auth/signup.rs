@@ -38,7 +38,8 @@ pub struct UserSignupData {
     username: String,
     password: String,
     email: String,
-    user_role: UserRole,
+    user_role: Option<UserRole>,
+    admin_token: Option<uuid::Uuid>,
 }
 
 // ───── Handlers ─────────────────────────────────────────────────────────── //
@@ -51,8 +52,17 @@ pub async fn signup(
         password,
         email,
         user_role,
+        admin_token,
     }): Form<UserSignupData>,
 ) -> Result<StatusCode, AuthError> {
+    if user_role.is_some() && admin_token.is_some()
+        || user_role.is_none() && admin_token.is_none()
+    {
+        return Err(AuthError::SignupFailed(anyhow::anyhow!(
+            "User should have only role, or only admin token!"
+        )));
+    }
+
     let username =
         UserName::parse(&username).map_err(AuthError::SignupFailed)?;
     let email = UserEmail::parse(&email).map_err(AuthError::SignupFailed)?;
@@ -92,6 +102,7 @@ pub async fn signup(
         &password_hash.as_str(),
         user_role,
         validation_token.as_ref(),
+        admin_token,
     );
 
     store_user_candidate_data(

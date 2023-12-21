@@ -660,6 +660,71 @@ WHERE users.username = $1",
                 Ok(it)
             }
         }
+        #[derive(Debug, Clone, PartialEq, Copy)]
+        pub struct GetAdminToken {
+            pub token: uuid::Uuid,
+            pub used: bool,
+        }
+        pub struct GetAdminTokenQuery<'a, C: GenericClient, T, const N: usize> {
+            client: &'a C,
+            params: [&'a (dyn postgres_types::ToSql + Sync); N],
+            stmt: &'a mut cornucopia_async::private::Stmt,
+            extractor: fn(&tokio_postgres::Row) -> GetAdminToken,
+            mapper: fn(GetAdminToken) -> T,
+        }
+        impl<'a, C, T: 'a, const N: usize> GetAdminTokenQuery<'a, C, T, N>
+        where
+            C: GenericClient,
+        {
+            pub fn map<R>(
+                self,
+                mapper: fn(GetAdminToken) -> R,
+            ) -> GetAdminTokenQuery<'a, C, R, N> {
+                GetAdminTokenQuery {
+                    client: self.client,
+                    params: self.params,
+                    stmt: self.stmt,
+                    extractor: self.extractor,
+                    mapper,
+                }
+            }
+            pub async fn one(self) -> Result<T, tokio_postgres::Error> {
+                let stmt = self.stmt.prepare(self.client).await?;
+                let row = self.client.query_one(stmt, &self.params).await?;
+                Ok((self.mapper)((self.extractor)(&row)))
+            }
+            pub async fn all(self) -> Result<Vec<T>, tokio_postgres::Error> {
+                self.iter().await?.try_collect().await
+            }
+            pub async fn opt(self) -> Result<Option<T>, tokio_postgres::Error> {
+                let stmt = self.stmt.prepare(self.client).await?;
+                Ok(self
+                    .client
+                    .query_opt(stmt, &self.params)
+                    .await?
+                    .map(|row| (self.mapper)((self.extractor)(&row))))
+            }
+            pub async fn iter(
+                self,
+            ) -> Result<
+                impl futures::Stream<Item = Result<T, tokio_postgres::Error>> + 'a,
+                tokio_postgres::Error,
+            > {
+                let stmt = self.stmt.prepare(self.client).await?;
+                let it = self
+                    .client
+                    .query_raw(
+                        stmt,
+                        cornucopia_async::private::slice_iter(&self.params),
+                    )
+                    .await?
+                    .map(move |res| {
+                        res.map(|row| (self.mapper)((self.extractor)(&row)))
+                    })
+                    .into_stream();
+                Ok(it)
+            }
+        }
         pub struct I32Query<'a, C: GenericClient, T, const N: usize> {
             client: &'a C,
             params: [&'a (dyn postgres_types::ToSql + Sync); N],
@@ -811,6 +876,72 @@ WHERE users.id = $1",
                     extractor: |row| row.get(0),
                     mapper: |it| it.into(),
                 }
+            }
+        }
+        pub fn insert_a_new_admin_signup_token(
+        ) -> InsertANewAdminSignupTokenStmt {
+            InsertANewAdminSignupTokenStmt(
+                cornucopia_async::private::Stmt::new(
+                    "INSERT INTO admin_signup_tokens (token)
+VALUES ($1)",
+                ),
+            )
+        }
+        pub struct InsertANewAdminSignupTokenStmt(
+            cornucopia_async::private::Stmt,
+        );
+        impl InsertANewAdminSignupTokenStmt {
+            pub async fn bind<'a, C: GenericClient>(
+                &'a mut self,
+                client: &'a C,
+                token: &'a uuid::Uuid,
+            ) -> Result<u64, tokio_postgres::Error> {
+                let stmt = self.0.prepare(client).await?;
+                client.execute(stmt, &[token]).await
+            }
+        }
+        pub fn get_admin_token() -> GetAdminTokenStmt {
+            GetAdminTokenStmt(cornucopia_async::private::Stmt::new(
+                "SELECT token, used
+FROM admin_signup_tokens
+WHERE token = $1",
+            ))
+        }
+        pub struct GetAdminTokenStmt(cornucopia_async::private::Stmt);
+        impl GetAdminTokenStmt {
+            pub fn bind<'a, C: GenericClient>(
+                &'a mut self,
+                client: &'a C,
+                token: &'a uuid::Uuid,
+            ) -> GetAdminTokenQuery<'a, C, GetAdminToken, 1> {
+                GetAdminTokenQuery {
+                    client,
+                    params: [token],
+                    stmt: &mut self.0,
+                    extractor: |row| GetAdminToken {
+                        token: row.get(0),
+                        used: row.get(1),
+                    },
+                    mapper: |it| <GetAdminToken>::from(it),
+                }
+            }
+        }
+        pub fn use_admin_token() -> UseAdminTokenStmt {
+            UseAdminTokenStmt(cornucopia_async::private::Stmt::new(
+                "UPDATE admin_signup_tokens
+SET used = TRUE
+WHERE token = $1",
+            ))
+        }
+        pub struct UseAdminTokenStmt(cornucopia_async::private::Stmt);
+        impl UseAdminTokenStmt {
+            pub async fn bind<'a, C: GenericClient>(
+                &'a mut self,
+                client: &'a C,
+                token: &'a uuid::Uuid,
+            ) -> Result<u64, tokio_postgres::Error> {
+                let stmt = self.0.prepare(client).await?;
+                client.execute(stmt, &[token]).await
             }
         }
         pub fn check_if_user_exists_already() -> CheckIfUserExistsAlreadyStmt {

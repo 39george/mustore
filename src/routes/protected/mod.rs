@@ -5,11 +5,13 @@ use http::StatusCode;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
+use self::admin::admin_router;
 use self::creator::creator_router;
 use crate::startup::AppState;
 
 // ───── Submodules ───────────────────────────────────────────────────────── //
 
+mod admin;
 mod creator;
 
 // ───── Body ─────────────────────────────────────────────────────────────── //
@@ -19,6 +21,7 @@ pub fn protected_router() -> Router<AppState> {
         .route("/health_check", routing::get(health_check))
         .route_layer(permission_required!(crate::auth::users::Backend, "user"))
         .nest("/creator", creator_router())
+        .nest("/admin", admin_router())
 }
 
 #[tracing::instrument(name = "Protected health check", skip_all)]

@@ -19,6 +19,20 @@ JOIN permissions
 ON groups_permissions.permissions_id = permissions.id
 WHERE users.id = :user_id;
 
+--! insert_a_new_admin_signup_token
+INSERT INTO admin_signup_tokens (token)
+VALUES (:token);
+
+--! get_admin_token
+SELECT token, used
+FROM admin_signup_tokens
+WHERE token = :token;
+
+--! use_admin_token
+UPDATE admin_signup_tokens
+SET used = TRUE
+WHERE token = :token;
+
 --! check_if_user_exists_already
 SELECT id FROM users
 WHERE email = :email OR username = :username;

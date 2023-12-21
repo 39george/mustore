@@ -12,8 +12,9 @@ pub struct UserCandidate {
     pub email: String,
     // We need to serialize that, so don't use `Secret`
     pub password_hash: String,
-    pub role: UserRole,
     pub validation_token: String,
+    pub role: Option<UserRole>,
+    pub admin_token: Option<uuid::Uuid>,
 }
 
 impl UserCandidate {
@@ -21,8 +22,9 @@ impl UserCandidate {
         username: &str,
         email: &str,
         password_hash: &str,
-        role: UserRole,
+        role: Option<UserRole>,
         validation_token: &str,
+        admin_token: Option<uuid::Uuid>,
     ) -> Self {
         UserCandidate {
             username: username.to_string(),
@@ -30,6 +32,7 @@ impl UserCandidate {
             password_hash: password_hash.to_string(),
             role,
             validation_token: validation_token.to_string(),
+            admin_token,
         }
     }
 }
@@ -60,13 +63,7 @@ impl TryFrom<HashMap<String, String>> for UserCandidate {
             })?,
             role: value
                 .remove("role")
-                .and_then(|r| UserRole::try_from(r.as_str()).ok())
-                .ok_or_else(|| {
-                    RedisError::new(
-                        RedisErrorKind::NotFound,
-                        "Invalid or missing field: role",
-                    )
-                })?,
+                .and_then(|r| UserRole::try_from(r.as_str()).ok()),
             validation_token: value.remove("validation_token").ok_or_else(
                 || {
                     RedisError::new(
@@ -75,6 +72,14 @@ impl TryFrom<HashMap<String, String>> for UserCandidate {
                     )
                 },
             )?,
+            admin_token: value
+                .remove("admin_token")
+                .map(|v| {
+                    uuid::Uuid::parse_str(&v).map_err(|e| {
+                        RedisError::new(RedisErrorKind::Parse, e.to_string())
+                    })
+                })
+                .transpose()?,
         })
     }
 }
@@ -85,7 +90,14 @@ impl From<UserCandidate> for HashMap<String, String> {
         map.insert("username".to_string(), value.username);
         map.insert("email".to_string(), value.email);
         map.insert("password_hash".to_string(), value.password_hash);
-        map.insert("role".to_string(), value.role.to_string());
+        if let Some(role) = value.role {
+            map.insert("role".to_string(), role.to_string());
+        } else if let Some(admin_token) = value.admin_token {
+            map.insert(
+                "admin_token".to_string(),
+                admin_token.hyphenated().to_string(),
+            );
+        }
         map.insert("validation_token".to_string(), value.validation_token);
         map
     }
