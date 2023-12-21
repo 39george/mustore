@@ -8,6 +8,8 @@ li {
   display: flex;
   align-items: center;
 
+  position: relative;
+
   padding: 0 3em;
 
   font-family: "Geologica", sans-serif;
@@ -147,17 +149,42 @@ a {
   }
 }
 
+.toggle_icons_container {
+  position: absolute;
+  right: 0;
+
+  display: none;
+  transform: translateX(-1rem);
+
+  font-size: 1.5rem;
+  color: $main_bright;
+  z-index: 4;
+}
+
+.burger_icon {
+  display: none;
+  color: $main_dark;
+  cursor: pointer;
+}
+
+.close_icon {
+  display: block;
+  cursor: pointer;
+}
+
 // Sidebar
 .mobile_sidebar {
   position: absolute;
   top: 0;
   right: 0;
 
-  padding: 2rem 0 0.75rem;
+  display: none;
 
-  width: 18.75rem;
+  padding: 5rem 0 0.75rem;
+
+  width: 16rem;
   height: 100vh;
-
+  transition: width 0.5s ease-out;
   font-size: 1rem;
   font-weight: 300;
 
@@ -165,7 +192,31 @@ a {
   background-color: rgba($color: $main_dark, $alpha: 0.9);
   backdrop-filter: blur(9px);
 
+  transition: right 0.2s ease-out;
   z-index: 3;
+
+  .logging {
+    flex-direction: column;
+    margin: 2rem 1rem;
+    gap: 1rem;
+  }
+}
+
+// .sidebar_visible {
+//   right: -16rem;
+// }
+
+.show {
+  display: block;
+}
+
+.hide {
+  display: none;
+}
+
+.sidebar_content {
+  height: 80%;
+  overflow-y: auto;
 }
 
 .sidebar_nav_links {
@@ -174,7 +225,7 @@ a {
 
   width: fit-content;
 
-  margin: 1.5rem 1rem 0.75rem;
+  margin: 0 1rem 0.75rem;
 
   .link_container {
     position: relative;
@@ -191,12 +242,6 @@ a {
     &:not(:last-child) {
       margin-bottom: 0.75rem;
     }
-
-    // &:hover {
-    //   .sidebar_submenu {
-    //     display: block;
-    //   }
-    // }
   }
 
   a,
@@ -234,6 +279,34 @@ a {
   }
 }
 
+.sidebar_footer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+
+  position: absolute;
+  bottom: 0.875rem;
+  left: 50%;
+  transform: translateX(-50%);
+
+  width: 10rem;
+}
+.copyright {
+  font-size: 0.875rem;
+}
+
+.social_media_container {
+  display: flex;
+  gap: 0.875rem;
+  font-size: 1.5rem;
+
+  .social_media {
+    cursor: pointer;
+  }
+}
+
 // Add this class if link is toggled
 .link_toggled {
   .sidebar_submenu {
@@ -245,5 +318,27 @@ a {
       color: $accent_pink;
       transform: rotate(-180deg);
     }
+  }
+}
+
+@media (max-width: 1010px) {
+  .nav_bar {
+    padding: 1.375em 3em;
+  }
+
+  // .link_container {
+  //   display: none;
+  // }
+
+  // .logging {
+  //   display: none;
+  // }
+
+  .toggle_icons_container {
+    display: block;
+  }
+
+  .mobile_sidebar {
+    display: block;
   }
 }
