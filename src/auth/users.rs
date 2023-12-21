@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
 use super::AuthError;
-use crate::auth::user_login::UserCredentials;
+use crate::auth::login::UserCredentials;
 use crate::cornucopia::queries::user_auth_queries;
 use crate::startup::AppState;
 use crate::telemetry::spawn_blocking_with_tracing;

@@ -168,13 +168,13 @@ impl Application {
             .nest("/api/protected", protected_router())
             .nest("/api/open", open_router())
             .route("/api/health_check", routing::get(health_check))
-            .route("/api/signup", routing::post(auth::user_signup::signup))
+            .route("/api/signup", routing::post(auth::signup::signup))
             .route(
                 "/api/confirm_user_account",
-                routing::get(auth::user_confirm_account::confirm),
+                routing::get(auth::confirm_account::confirm),
             )
             .with_state(app_state)
-            .merge(auth::user_login::login_router())
+            .merge(auth::login::login_router())
             .layer(auth_service);
 
         if let Ok(_) = std::env::var("TEST_TRACING") {

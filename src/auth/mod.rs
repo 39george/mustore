@@ -10,9 +10,9 @@ use crate::error_chain_fmt;
 
 // ───── Submodules ───────────────────────────────────────────────────────── //
 
-pub mod user_confirm_account;
-pub mod user_login;
-pub mod user_signup;
+pub mod confirm_account;
+pub mod login;
+pub mod signup;
 pub mod users;
 
 // ───── Auth Types ───────────────────────────────────────────────────────── //
