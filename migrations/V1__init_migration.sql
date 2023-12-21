@@ -1,6 +1,4 @@
 -- Enums
-CREATE TYPE UserRole
-AS ENUM ('creator', 'consumer', 'fullstack');
 
 CREATE TYPE MusicKey
 AS ENUM
@@ -42,28 +40,6 @@ CREATE TABLE tags (
     name VARCHAR(50) NOT NULL
 );
 
-CREATE TABLE superusers (
-    id SERIAL PRIMARY KEY,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE administrators (
-    id SERIAL PRIMARY KEY,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    name VARCHAR(50) NOT NULL,
-    password_hash VARCHAR(500) NOT NULL
-);
-
-CREATE TABLE admin_signup_tokens(
-    id SERIAL PRIMARY KEY,
-    token VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    used BOOLEAN NOT NULL DEFAULT FALSE,
-    admin_id INTEGER REFERENCES administrators(id)
-);
-
 CREATE TABLE user_settings (
     id SERIAL PRIMARY KEY,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -83,8 +59,75 @@ CREATE TABLE users (
     email VARCHAR(100) NOT NULL UNIQUE,
     password_hash VARCHAR(500) NOT NULL,
     status VARCHAR(50),
-    role UserRole NOT NULL,
     ban BOOL NOT NULL DEFAULT FALSE
+);
+
+CREATE TABLE groups (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE permissions (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+);
+
+-- Create `users_groups` table for many-to-many
+-- relationships between users and groups.
+CREATE TABLE users_groups (
+    users_id INTEGER REFERENCES users(id) ON DELETE CASCADE,    
+    groups_id INTEGER REFERENCES groups(id) ON DELETE RESTRICT,
+    PRIMARY KEY (users_id, groups_id)
+);
+
+-- Create `groups_permissions` table for many-to-many relationships
+-- between groups and permissions.
+CREATE TABLE groups_permissions (
+    groups_id INTEGER REFERENCES groups(id),
+    permissions_id INTEGER REFERENCES permissions(id),
+    PRIMARY KEY (groups_id, permissions_id)
+);
+
+-- Insert "users" and "administrators" groups.
+INSERT INTO groups (name) VALUES ('group.creators');
+INSERT INTO groups (name) VALUES ('group.consumers');
+INSERT INTO groups (name) VALUES ('administrators');
+
+-- Insert individual permissions.
+INSERT INTO permissions (name) VALUES ('user');
+INSERT INTO permissions (name) VALUES ('creator');
+INSERT INTO permissions (name) VALUES ('consumer');
+INSERT INTO permissions (name) VALUES ('administrator');
+
+-- Insert group permissions.
+INSERT INTO groups_permissions (groups_id, permissions_id)
+VALUES (
+    (SELECT id FROM groups WHERE name = 'group.creators'),
+    (SELECT id FROM permissions WHERE name = 'user')
+), (
+    (SELECT id FROM groups WHERE name = 'group.creators'),
+    (SELECT id FROM permissions WHERE name = 'creator')
+), (
+    (SELECT id FROM groups WHERE name = 'group.consumers'),
+    (SELECT id FROM permissions WHERE name = 'user')
+), (
+    (SELECT id FROM groups WHERE name = 'group.consumers'),
+    (SELECT id FROM permissions WHERE name = 'consumer')
+), (
+    (SELECT id FROM groups WHERE name = 'administrators'),
+    (SELECT id FROM permissions WHERE name = 'user')
+), (
+    (SELECT id FROM groups WHERE name = 'administrators'),
+    (SELECT id FROM permissions WHERE name = 'administrator')
+);
+
+
+CREATE TABLE admin_signup_tokens(
+    id SERIAL PRIMARY KEY,
+    token VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    used BOOLEAN NOT NULL DEFAULT FALSE,
+    users_id INTEGER REFERENCES users(id)
 );
 
 -- Products & tags
@@ -365,22 +408,12 @@ CREATE TABLE messages (
     conversations_id INTEGER NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
     service_orders_id INTEGER REFERENCES service_orders(id) ON DELETE CASCADE,
     users_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
-	administrators_id INTEGER REFERENCES administrators(id) ON DELETE SET NULL,
-    superusers_id INTEGER REFERENCES superusers(id) ON DELETE SET NULL,
     messages_id INTEGER REFERENCES messages(id) ON DELETE SET NULL,
 	text VARCHAR(2500) NOT NULL,
     CHECK(
         COALESCE((conversations_id)::BOOLEAN::INTEGER, 0)
         +
         COALESCE((service_orders_id)::BOOLEAN::INTEGER, 0)
-        = 1
-    ),
-    CHECK(
-        COALESCE((users_id)::BOOLEAN::INTEGER, 0)
-        +
-        COALESCE((administrators_id)::BOOLEAN::INTEGER, 0)
-        +
-        COALESCE((superusers_id)::BOOLEAN::INTEGER, 0)
         = 1
     ),
     CHECK (
@@ -415,20 +448,10 @@ CREATE TABLE participants (
     conversations_id INTEGER REFERENCES conversations(id) ON DELETE CASCADE,
     service_orders_id INTEGER REFERENCES service_orders(id) ON DELETE CASCADE,
     users_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-	administrators_id INTEGER REFERENCES administrators(id) ON DELETE CASCADE,
-    superusers_id INTEGER REFERENCES superusers(id) ON DELETE CASCADE,
     CHECK(
         COALESCE((conversations_id)::BOOLEAN::INTEGER, 0)
         +
         COALESCE((service_orders_id)::BOOLEAN::INTEGER, 0)
-        = 1
-    ),
-    CHECK(
-        COALESCE((users_id)::BOOLEAN::INTEGER, 0)
-        +
-        COALESCE((administrators_id)::BOOLEAN::INTEGER, 0)
-        +
-        COALESCE((superusers_id)::BOOLEAN::INTEGER, 0)
         = 1
     )
 );

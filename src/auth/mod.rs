@@ -3,8 +3,6 @@
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::response::Response;
-use http::header::WWW_AUTHENTICATE;
-use http::HeaderValue;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
@@ -12,7 +10,6 @@ use crate::error_chain_fmt;
 
 // ───── Submodules ───────────────────────────────────────────────────────── //
 
-mod admins;
 pub mod user_confirm_account;
 pub mod user_login;
 pub mod user_signup;

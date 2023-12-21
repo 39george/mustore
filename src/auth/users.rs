@@ -1,7 +1,9 @@
+use std::collections::HashSet;
+
 use anyhow::Context;
 use argon2::{PasswordHash, PasswordVerifier};
 use async_trait::async_trait;
-use axum_login::{AuthUser, AuthnBackend, UserId};
+use axum_login::{AuthUser, AuthnBackend, AuthzBackend, UserId};
 use deadpool_postgres::Pool;
 use secrecy::{ExposeSecret, Secret};
 use serde::{Deserialize, Serialize};
@@ -52,18 +54,18 @@ impl AuthUser for User {
 }
 
 #[derive(Debug, Clone)]
-pub struct UserBackend {
+pub struct Backend {
     app_state: AppState,
 }
 
-impl UserBackend {
+impl Backend {
     pub fn new(app_state: AppState) -> Self {
         Self { app_state }
     }
 }
 
 #[async_trait]
-impl AuthnBackend for UserBackend {
+impl AuthnBackend for Backend {
     type User = User;
     type Credentials = UserCredentials;
     type Error = AuthError;
@@ -116,7 +118,7 @@ impl AuthnBackend for UserBackend {
 // We use a type alias for convenience.
 //
 // Note that we've supplied our concrete backend here.
-pub type AuthSession = axum_login::AuthSession<UserBackend>;
+pub type AuthSession = axum_login::AuthSession<Backend>;
 
 #[tracing::instrument(name = "Get user data from db", skip_all)]
 async fn get_user_data(
@@ -177,4 +179,46 @@ fn verify_password_hash(
         )
         .context("Invalid password")
         .map_err(AuthError::InvalidCredentialsError)
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+pub struct Permission {
+    pub name: String,
+}
+
+impl<T> From<T> for Permission
+where
+    T: std::fmt::Display,
+{
+    fn from(name: T) -> Self {
+        Permission {
+            name: name.to_string(),
+        }
+    }
+}
+
+#[async_trait]
+impl AuthzBackend for Backend {
+    type Permission = Permission;
+
+    async fn get_group_permissions(
+        &self,
+        user: &Self::User,
+    ) -> Result<HashSet<Self::Permission>, Self::Error> {
+        let pg_client = self
+            .app_state
+            .pg_pool
+            .get()
+            .await
+            .context("Failed to get connection from db pool")?;
+        let permissions = user_auth_queries::get_user_permissions()
+            .bind(&pg_client, &user.id)
+            .all()
+            .await
+            .context("Failed to get user permissions from pg")?
+            .into_iter()
+            .map(Into::into)
+            .collect();
+        Ok(permissions)
+    }
 }

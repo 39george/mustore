@@ -89,7 +89,6 @@ pub async fn confirm(
             &user_candidate_data.username,
             &user_candidate_data.email,
             &user_candidate_data.password_hash,
-            &user_candidate_data.role.into(),
         )
         .one()
         .await
@@ -110,6 +109,28 @@ pub async fn confirm(
             return Err(e);
         }
     };
+
+    if let Err(e) = user_auth_queries::store_user_permission()
+        .bind(
+            &transaction,
+            &user_id,
+            &user_candidate_data.role.to_permission_string(),
+        )
+        .await
+        .context("Failed to insert a new user to the pg")
+        .map_err(AuthError::AccountConfirmationFailed)
+    {
+        app_state
+            .object_storage
+            .delete_object_by_key(&avatar_key)
+            .await?;
+        transaction
+            .rollback()
+            .await
+            .context("Failed to rollback pg transaction")
+            .map_err(AuthError::AccountConfirmationFailed)?;
+        return Err(e);
+    }
 
     if let Err(e) = user_auth_queries::insert_user_image()
         .bind(&transaction, &avatar_key, &user_id)

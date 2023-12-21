@@ -15,7 +15,7 @@ use wiremock::ResponseTemplate;
 async fn signup_with_correct_data_creates_a_new_candidate() {
     let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
 
-    let test_user = TestUser::generate();
+    let test_user = TestUser::generate(String::from("consumer"));
 
     Mock::given(matchers::path("/v1/smtp/send"))
         .respond_with(ResponseTemplate::new(200))
@@ -52,7 +52,7 @@ async fn signup_with_uncorrect_data_rejected() {
 #[tokio::test]
 async fn signup_with_correct_data_sends_confirmation_email_with_link_smtpbz() {
     let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
-    let test_user = TestUser::generate();
+    let test_user = TestUser::generate(String::from("creator"));
     let _confirmation_link =
         app.reg_user_get_confirmation_link(&test_user).await;
 }
@@ -60,7 +60,7 @@ async fn signup_with_correct_data_sends_confirmation_email_with_link_smtpbz() {
 #[tokio::test]
 async fn going_by_confirmation_link_confirmes_candidate_account() {
     let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
-    let test_user = TestUser::generate();
+    let test_user = TestUser::generate(String::from("consumer"));
     let confirmation_link =
         app.reg_user_get_confirmation_link(&test_user).await;
     let response = reqwest::get(confirmation_link.0).await.unwrap();

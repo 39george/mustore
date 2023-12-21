@@ -2,12 +2,10 @@
 
 use std::collections::HashMap;
 
-use deadpool_postgres::Pool;
+use deadpool_postgres::Client;
 use fake::Fake;
 use fred::clients::RedisClient;
 use mustore::startup::get_redis_connection_pool;
-// use mustore::types::RedisPool;
-// use redis::AsyncCommands;
 use secrecy::{ExposeSecret, Secret};
 use tokio_postgres::NoTls;
 use tracing::Level;
@@ -29,12 +27,12 @@ pub struct TestUser {
 }
 
 impl TestUser {
-    pub fn generate() -> Self {
+    pub fn generate(role: String) -> Self {
         Self {
             username: fake::faker::name::en::Name().fake(),
             password: String::from("A23c(fds)Helloworld232r"),
             email: fake::faker::internet::en::SafeEmail().fake(),
-            role: String::from("consumer"),
+            role,
         }
     }
 
@@ -63,7 +61,7 @@ pub struct TestApp {
     pg_username: String,
     pg_config_with_root_cred: DatabaseSettings,
     pub address: String,
-    pub pg_pool: Pool,
+    pub pg_client: Client,
     pub redis_client: RedisClient,
     pub email_server: MockServer,
     pub port: u16,
@@ -115,7 +113,7 @@ impl TestApp {
             pg_username,
             pg_config_with_root_cred,
             address,
-            pg_pool,
+            pg_client: pg_pool,
             email_server,
             port,
             redis_client,
@@ -251,21 +249,22 @@ fn init_tracing() {
 
 async fn prepare_postgres(
     mut pg_config: DatabaseSettings,
-) -> (DatabaseSettings, Pool, String) {
+) -> (DatabaseSettings, Client, String) {
     let pool = get_postgres_connection_pool(&pg_config);
     let pg_username = generate_username();
     let create_role =
         format!("CREATE ROLE {0} WITH LOGIN PASSWORD '{0}';", &pg_username);
     let create_schema =
         format!("CREATE SCHEMA {0} AUTHORIZATION {0};", &pg_username);
-    let client = &pool.get().await.unwrap();
+    let client = pool.get().await.unwrap();
     client.simple_query(&create_role).await.unwrap();
     client.simple_query(&create_schema).await.unwrap();
     drop(pool);
     pg_config.username = pg_username.clone();
     pg_config.password = Secret::new(pg_username.clone());
     let pg_pool = get_postgres_connection_pool(&pg_config);
-    (pg_config, pg_pool, pg_username)
+    let client = pg_pool.get().await.unwrap();
+    (pg_config, client, pg_username)
 }
 
 // Function to create a pool for database with index 100

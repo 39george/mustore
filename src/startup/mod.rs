@@ -31,7 +31,7 @@ use crate::email_client::EmailClient;
 use crate::email_client::EmailDeliveryService;
 use crate::routes::health_check::health_check;
 use crate::routes::open::open_router;
-use crate::routes::private::private_router;
+use crate::routes::protected::protected_router;
 use crate::service_providers::object_storage::YandexObjectStorage;
 
 // ───── Submodules ───────────────────────────────────────────────────────── //
@@ -154,7 +154,7 @@ impl Application {
 
         // This combines the session layer with our backend to establish the auth
         // service which will provide the auth session as a request extension.
-        let backend = crate::auth::users::UserBackend::new(app_state.clone());
+        let backend = crate::auth::users::Backend::new(app_state.clone());
         let auth_service = ServiceBuilder::new()
             .layer(HandleErrorLayer::new(|e: BoxError| async move {
                 tracing::error!("GOT HANDLE ERROR: {}", e);
@@ -165,7 +165,7 @@ impl Application {
             );
 
         let mut app = Router::new()
-            .nest("/api/protected", private_router())
+            .nest("/api/protected", protected_router())
             .nest("/api/open", open_router())
             .route("/api/health_check", routing::get(health_check))
             .route("/api/signup", routing::post(auth::user_signup::signup))

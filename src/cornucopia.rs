@@ -4,100 +4,7 @@
 #[allow(unused_variables)]
 #[allow(unused_imports)]
 #[allow(dead_code)]
-pub mod types {
-    pub mod public {
-        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-        #[allow(non_camel_case_types)]
-        pub enum Userrole {
-            creator,
-            consumer,
-            fullstack,
-        }
-        impl<'a> postgres_types::ToSql for Userrole {
-            fn to_sql(
-                &self,
-                ty: &postgres_types::Type,
-                buf: &mut postgres_types::private::BytesMut,
-            ) -> Result<
-                postgres_types::IsNull,
-                Box<dyn std::error::Error + Sync + Send>,
-            > {
-                let s = match *self {
-                    Userrole::creator => "creator",
-                    Userrole::consumer => "consumer",
-                    Userrole::fullstack => "fullstack",
-                };
-                buf.extend_from_slice(s.as_bytes());
-                std::result::Result::Ok(postgres_types::IsNull::No)
-            }
-            fn accepts(ty: &postgres_types::Type) -> bool {
-                if ty.name() != "userrole" {
-                    return false;
-                }
-                match *ty.kind() {
-                    postgres_types::Kind::Enum(ref variants) => {
-                        if variants.len() != 3 {
-                            return false;
-                        }
-                        variants.iter().all(|v| match &**v {
-                            "creator" => true,
-                            "consumer" => true,
-                            "fullstack" => true,
-                            _ => false,
-                        })
-                    }
-                    _ => false,
-                }
-            }
-            fn to_sql_checked(
-                &self,
-                ty: &postgres_types::Type,
-                out: &mut postgres_types::private::BytesMut,
-            ) -> Result<
-                postgres_types::IsNull,
-                Box<dyn std::error::Error + Sync + Send>,
-            > {
-                postgres_types::__to_sql_checked(self, ty, out)
-            }
-        }
-        impl<'a> postgres_types::FromSql<'a> for Userrole {
-            fn from_sql(
-                ty: &postgres_types::Type,
-                buf: &'a [u8],
-            ) -> Result<Userrole, Box<dyn std::error::Error + Sync + Send>>
-            {
-                match std::str::from_utf8(buf)? {
-                    "creator" => Ok(Userrole::creator),
-                    "consumer" => Ok(Userrole::consumer),
-                    "fullstack" => Ok(Userrole::fullstack),
-                    s => Result::Err(Into::into(format!(
-                        "invalid variant `{}`",
-                        s
-                    ))),
-                }
-            }
-            fn accepts(ty: &postgres_types::Type) -> bool {
-                if ty.name() != "userrole" {
-                    return false;
-                }
-                match *ty.kind() {
-                    postgres_types::Kind::Enum(ref variants) => {
-                        if variants.len() != 3 {
-                            return false;
-                        }
-                        variants.iter().all(|v| match &**v {
-                            "creator" => true,
-                            "consumer" => true,
-                            "fullstack" => true,
-                            _ => false,
-                        })
-                    }
-                    _ => false,
-                }
-            }
-        }
-    }
-}
+pub mod types {}
 #[allow(clippy::all, clippy::pedantic)]
 #[allow(unused_variables)]
 #[allow(unused_imports)]
@@ -334,33 +241,33 @@ UNION ALL
         use futures::{StreamExt, TryStreamExt};
         #[derive(Debug, Clone, PartialEq)]
         pub struct SelectUserDataWithAvatarKey {
+            pub id: i32,
             pub key: String,
             pub username: String,
             pub email: String,
-            pub role: super::super::types::public::Userrole,
         }
         pub struct SelectUserDataWithAvatarKeyBorrowed<'a> {
+            pub id: i32,
             pub key: &'a str,
             pub username: &'a str,
             pub email: &'a str,
-            pub role: super::super::types::public::Userrole,
         }
         impl<'a> From<SelectUserDataWithAvatarKeyBorrowed<'a>>
             for SelectUserDataWithAvatarKey
         {
             fn from(
                 SelectUserDataWithAvatarKeyBorrowed {
+                    id,
                     key,
                     username,
                     email,
-                    role,
                 }: SelectUserDataWithAvatarKeyBorrowed<'a>,
             ) -> Self {
                 Self {
+                    id,
                     key: key.into(),
                     username: username.into(),
                     email: email.into(),
-                    role,
                 }
             }
         }
@@ -434,10 +341,11 @@ UNION ALL
         ) -> SelectUserDataWithAvatarKeyStmt {
             SelectUserDataWithAvatarKeyStmt(
                 cornucopia_async::private::Stmt::new(
-                    "SELECT objects.key, username, email, role
+                    "SELECT users.id, objects.key, username, email
 FROM users
 JOIN objects
-ON users.id = objects.avatar_users_id",
+ON users.id = objects.avatar_users_id
+WHERE users.username = $1",
                 ),
             )
         }
@@ -445,24 +353,29 @@ ON users.id = objects.avatar_users_id",
             cornucopia_async::private::Stmt,
         );
         impl SelectUserDataWithAvatarKeyStmt {
-            pub fn bind<'a, C: GenericClient>(
+            pub fn bind<
+                'a,
+                C: GenericClient,
+                T1: cornucopia_async::StringSql,
+            >(
                 &'a mut self,
                 client: &'a C,
+                username: &'a T1,
             ) -> SelectUserDataWithAvatarKeyQuery<
                 'a,
                 C,
                 SelectUserDataWithAvatarKey,
-                0,
+                1,
             > {
                 SelectUserDataWithAvatarKeyQuery {
                     client,
-                    params: [],
+                    params: [username],
                     stmt: &mut self.0,
                     extractor: |row| SelectUserDataWithAvatarKeyBorrowed {
-                        key: row.get(0),
-                        username: row.get(1),
-                        email: row.get(2),
-                        role: row.get(3),
+                        id: row.get(0),
+                        key: row.get(1),
+                        username: row.get(2),
+                        email: row.get(3),
                     },
                     mapper: |it| <SelectUserDataWithAvatarKey>::from(it),
                 }
@@ -491,7 +404,11 @@ ON users.id = objects.avatar_users_id",
             pub username: T1,
             pub email: T2,
             pub password_hash: T3,
-            pub role: super::super::types::public::Userrole,
+        }
+        #[derive(Debug)]
+        pub struct StoreUserPermissionParams<T1: cornucopia_async::StringSql> {
+            pub user_id: i32,
+            pub permission: T1,
         }
         #[derive(Debug)]
         pub struct InsertUserImageParams<T1: cornucopia_async::StringSql> {
@@ -683,6 +600,66 @@ ON users.id = objects.avatar_users_id",
                 Ok(it)
             }
         }
+        pub struct StringQuery<'a, C: GenericClient, T, const N: usize> {
+            client: &'a C,
+            params: [&'a (dyn postgres_types::ToSql + Sync); N],
+            stmt: &'a mut cornucopia_async::private::Stmt,
+            extractor: fn(&tokio_postgres::Row) -> &str,
+            mapper: fn(&str) -> T,
+        }
+        impl<'a, C, T: 'a, const N: usize> StringQuery<'a, C, T, N>
+        where
+            C: GenericClient,
+        {
+            pub fn map<R>(
+                self,
+                mapper: fn(&str) -> R,
+            ) -> StringQuery<'a, C, R, N> {
+                StringQuery {
+                    client: self.client,
+                    params: self.params,
+                    stmt: self.stmt,
+                    extractor: self.extractor,
+                    mapper,
+                }
+            }
+            pub async fn one(self) -> Result<T, tokio_postgres::Error> {
+                let stmt = self.stmt.prepare(self.client).await?;
+                let row = self.client.query_one(stmt, &self.params).await?;
+                Ok((self.mapper)((self.extractor)(&row)))
+            }
+            pub async fn all(self) -> Result<Vec<T>, tokio_postgres::Error> {
+                self.iter().await?.try_collect().await
+            }
+            pub async fn opt(self) -> Result<Option<T>, tokio_postgres::Error> {
+                let stmt = self.stmt.prepare(self.client).await?;
+                Ok(self
+                    .client
+                    .query_opt(stmt, &self.params)
+                    .await?
+                    .map(|row| (self.mapper)((self.extractor)(&row))))
+            }
+            pub async fn iter(
+                self,
+            ) -> Result<
+                impl futures::Stream<Item = Result<T, tokio_postgres::Error>> + 'a,
+                tokio_postgres::Error,
+            > {
+                let stmt = self.stmt.prepare(self.client).await?;
+                let it = self
+                    .client
+                    .query_raw(
+                        stmt,
+                        cornucopia_async::private::slice_iter(&self.params),
+                    )
+                    .await?
+                    .map(move |res| {
+                        res.map(|row| (self.mapper)((self.extractor)(&row)))
+                    })
+                    .into_stream();
+                Ok(it)
+            }
+        }
         pub struct I32Query<'a, C: GenericClient, T, const N: usize> {
             client: &'a C,
             params: [&'a (dyn postgres_types::ToSql + Sync); N],
@@ -807,6 +784,35 @@ WHERE id = $1",
                 }
             }
         }
+        pub fn get_user_permissions() -> GetUserPermissionsStmt {
+            GetUserPermissionsStmt(cornucopia_async::private::Stmt::new(
+                "SELECT DISTINCT permissions.name
+FROM users
+JOIN users_groups
+ON users.id = users_groups.users_id
+JOIN groups_permissions
+ON users_groups.groups_id = groups_permissions.groups_id
+JOIN permissions
+ON groups_permissions.permissions_id = permissions.id
+WHERE users.id = $1",
+            ))
+        }
+        pub struct GetUserPermissionsStmt(cornucopia_async::private::Stmt);
+        impl GetUserPermissionsStmt {
+            pub fn bind<'a, C: GenericClient>(
+                &'a mut self,
+                client: &'a C,
+                user_id: &'a i32,
+            ) -> StringQuery<'a, C, String, 1> {
+                StringQuery {
+                    client,
+                    params: [user_id],
+                    stmt: &mut self.0,
+                    extractor: |row| row.get(0),
+                    mapper: |it| it.into(),
+                }
+            }
+        }
         pub fn check_if_user_exists_already() -> CheckIfUserExistsAlreadyStmt {
             CheckIfUserExistsAlreadyStmt(cornucopia_async::private::Stmt::new(
                 "SELECT id FROM users
@@ -881,8 +887,8 @@ WHERE email = $1 OR username = $2",
         pub fn insert_new_user() -> InsertNewUserStmt {
             InsertNewUserStmt(cornucopia_async::private::Stmt::new(
                 "INSERT INTO users
-(user_settings_id, username, bio, email, password_hash, status, role)
-VALUES ($1, $2, NULL, $3, $4, NULL, $5) returning id",
+(user_settings_id, username, bio, email, password_hash, status)
+VALUES ($1, $2, NULL, $3, $4, NULL) returning id",
             ))
         }
         pub struct InsertNewUserStmt(cornucopia_async::private::Stmt);
@@ -900,17 +906,10 @@ VALUES ($1, $2, NULL, $3, $4, NULL, $5) returning id",
                 username: &'a T1,
                 email: &'a T2,
                 password_hash: &'a T3,
-                role: &'a super::super::types::public::Userrole,
-            ) -> I32Query<'a, C, i32, 5> {
+            ) -> I32Query<'a, C, i32, 4> {
                 I32Query {
                     client,
-                    params: [
-                        user_settings_id,
-                        username,
-                        email,
-                        password_hash,
-                        role,
-                    ],
+                    params: [user_settings_id, username, email, password_hash],
                     stmt: &mut self.0,
                     extractor: |row| row.get(0),
                     mapper: |it| it,
@@ -927,7 +926,7 @@ VALUES ($1, $2, NULL, $3, $4, NULL, $5) returning id",
             cornucopia_async::Params<
                 'a,
                 InsertNewUserParams<T1, T2, T3>,
-                I32Query<'a, C, i32, 5>,
+                I32Query<'a, C, i32, 4>,
                 C,
             > for InsertNewUserStmt
         {
@@ -935,15 +934,73 @@ VALUES ($1, $2, NULL, $3, $4, NULL, $5) returning id",
                 &'a mut self,
                 client: &'a C,
                 params: &'a InsertNewUserParams<T1, T2, T3>,
-            ) -> I32Query<'a, C, i32, 5> {
+            ) -> I32Query<'a, C, i32, 4> {
                 self.bind(
                     client,
                     &params.user_settings_id,
                     &params.username,
                     &params.email,
                     &params.password_hash,
-                    &params.role,
                 )
+            }
+        }
+        pub fn store_user_permission() -> StoreUserPermissionStmt {
+            StoreUserPermissionStmt(cornucopia_async::private::Stmt::new(
+                "INSERT INTO users_groups (users_id, groups_id)
+VALUES (
+    $1,
+    (SELECT id FROM groups WHERE name = $2)
+)",
+            ))
+        }
+        pub struct StoreUserPermissionStmt(cornucopia_async::private::Stmt);
+        impl StoreUserPermissionStmt {
+            pub async fn bind<
+                'a,
+                C: GenericClient,
+                T1: cornucopia_async::StringSql,
+            >(
+                &'a mut self,
+                client: &'a C,
+                user_id: &'a i32,
+                permission: &'a T1,
+            ) -> Result<u64, tokio_postgres::Error> {
+                let stmt = self.0.prepare(client).await?;
+                client.execute(stmt, &[user_id, permission]).await
+            }
+        }
+        impl<
+                'a,
+                C: GenericClient + Send + Sync,
+                T1: cornucopia_async::StringSql,
+            >
+            cornucopia_async::Params<
+                'a,
+                StoreUserPermissionParams<T1>,
+                std::pin::Pin<
+                    Box<
+                        dyn futures::Future<
+                                Output = Result<u64, tokio_postgres::Error>,
+                            > + Send
+                            + 'a,
+                    >,
+                >,
+                C,
+            > for StoreUserPermissionStmt
+        {
+            fn params(
+                &'a mut self,
+                client: &'a C,
+                params: &'a StoreUserPermissionParams<T1>,
+            ) -> std::pin::Pin<
+                Box<
+                    dyn futures::Future<
+                            Output = Result<u64, tokio_postgres::Error>,
+                        > + Send
+                        + 'a,
+                >,
+            > {
+                Box::pin(self.bind(client, &params.user_id, &params.permission))
             }
         }
         pub fn insert_user_image() -> InsertUserImageStmt {

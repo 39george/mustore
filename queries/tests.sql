@@ -1,5 +1,6 @@
 --! select_user_data_with_avatar_key
-SELECT objects.key, username, email, role
+SELECT users.id, objects.key, username, email
 FROM users
 JOIN objects
-ON users.id = objects.avatar_users_id;
+ON users.id = objects.avatar_users_id
+WHERE users.username = :username;
