@@ -46,6 +46,16 @@ function App() {
             }
           />
           <Route
+            path="about"
+            element={
+              <>
+                <h1 style={{ width: "fit-content", margin: "0 auto" }}>
+                  About page
+                </h1>
+              </>
+            }
+          />
+          <Route
             path="*"
             element={
               <>

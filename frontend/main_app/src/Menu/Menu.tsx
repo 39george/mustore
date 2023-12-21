@@ -5,8 +5,8 @@ import styles from "./Menu.module.scss";
 const Menu = () => {
   return (
     <nav className={styles.nav_bar}>
-      <div className={styles.nav_links}>
-        <div className={styles.logo}>
+      <ul className={styles.nav_links}>
+        <li className={styles.logo}>
           <NavLink
             to="."
             end
@@ -56,20 +56,103 @@ const Menu = () => {
               />
             </svg>
           </NavLink>
-        </div>
-        <div className={styles.nav_link}>
-          <NavLink to="products">Товары</NavLink>
-          <GoChevronDown className={styles.chevron} />
-        </div>
-        <div className={styles.nav_link}>
-          <NavLink to="services">Услуги</NavLink>
-          <GoChevronDown className={styles.chevron} />
-        </div>
-        <div className={styles.nav_link}>
-          <NavLink to="help">Помощь</NavLink>
-          <GoChevronDown className={styles.chevron} />
-        </div>
-      </div>
+        </li>
+        <li className={styles.link_container}>
+          <div className={styles.nav_link}>
+            <NavLink to="products">Товары</NavLink>
+            <GoChevronDown className={styles.chevron} />
+          </div>
+          <ul className={styles.submenu}>
+            <li className={styles.submenu_header}>Товары</li>
+            <div className={styles.submenu_body}>
+              <li>
+                <NavLink to="products">Песни</NavLink>
+              </li>
+              <li>
+                <NavLink to="products">Биты</NavLink>
+              </li>
+              <li>
+                <NavLink to="products">Обложки</NavLink>
+              </li>
+              <li>
+                <NavLink to="products">Тексты</NavLink>
+              </li>
+            </div>
+          </ul>
+        </li>
+        <li className={styles.link_container}>
+          <div className={styles.nav_link}>
+            <NavLink to="services">Услуги</NavLink>
+            <GoChevronDown className={styles.chevron} />
+          </div>
+          <ul className={styles.submenu}>
+            <li className={styles.submenu_header}>Услуги</li>
+            <div className={styles.submenu_body}>
+              <li>
+                <NavLink to="services">Создание песни</NavLink>
+              </li>
+              <li>
+                <NavLink to="services">Сведение / Мастеринг</NavLink>
+              </li>
+              <li>
+                <NavLink to="services">Написание бита</NavLink>
+              </li>
+              <li>
+                <NavLink to="services">Гострайтинг</NavLink>
+              </li>
+              <li>
+                <NavLink to="services">Дизайн обложки</NavLink>
+              </li>
+            </div>
+          </ul>
+        </li>
+        <li className={styles.link_container}>
+          <div className={styles.nav_link}>
+            <NavLink to="help">Помощь</NavLink>
+            <GoChevronDown className={styles.chevron} />
+          </div>
+          <ul className={styles.submenu}>
+            <li className={styles.submenu_header}>Помощь</li>
+            <div className={styles.submenu_body}>
+              <li>
+                <NavLink to="help">FAQ</NavLink>
+              </li>
+              <li>
+                <NavLink to="help">Обратиться в поддержку</NavLink>
+              </li>
+              <li>
+                <NavLink to="help">Покупателям</NavLink>
+              </li>
+              <li>
+                <NavLink to="help">Продавцам</NavLink>
+              </li>
+              <li>
+                <NavLink to="help">Политика конфиденциальности</NavLink>
+              </li>
+              <li>
+                <NavLink to="help">Правила сообщества</NavLink>
+              </li>
+            </div>
+          </ul>
+        </li>
+        <li className={styles.link_container}>
+          <div className={styles.nav_link}>
+            <NavLink to="about">О нас</NavLink>
+            <GoChevronDown className={styles.chevron} />
+          </div>
+          <ul className={styles.submenu}>
+            <li className={styles.submenu_header}>О нас</li>
+            <div className={styles.submenu_body}>
+              <li>
+                <NavLink to="about">Блог</NavLink>
+              </li>
+              <li>
+                <NavLink to="about">Наша команда</NavLink>
+              </li>
+            </div>
+          </ul>
+        </li>
+      </ul>
       <div className={styles.logging}>
         <div className={styles.log}>войти</div>
         <div className={styles.divider}>|</div>

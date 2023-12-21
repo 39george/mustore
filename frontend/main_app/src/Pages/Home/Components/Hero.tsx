@@ -55,11 +55,11 @@ const Hero = () => {
       </div>
       <div className={styles.text_block}>
         <div className={styles.empty_space}></div>
-        <div className={styles.title}>MUSTORE</div>
-        <div className={styles.tagline}>
+        <h1 className={styles.title}>MUSTORE</h1>
+        <h2 className={styles.tagline}>
           Сервис для тех, кто хочет найти или предложить свои{" "}
           <span>музыкальные решения.</span>
-        </div>
+        </h2>
       </div>
       <div className={styles.content_block_right}>
         <img
