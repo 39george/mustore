@@ -1,9 +1,3 @@
-Enum "UserRole" {
-  "creator"
-  "consumer"
-  "fullstack"
-}
-
 Enum "MusicKey" {
   "a-minor"
   "a-major"
@@ -93,36 +87,6 @@ Table tags {
 
 Ref:tags.id < products_tags.tags_id [delete: restrict]
 
-Table superusers {
-  id SERIAL [pk, increment]
-  created_at TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
-  updated_at TIMESTAMP [default: `CURRENT_TIMESTAMP`]
-}
-
-Ref:superusers.id < messages.superusers_id [delete: set null]
-Ref:superusers.id < participants.superusers_id [delete: cascade]
-
-Table admin_signup_tokens {
-    id SERIAL [pk, increment]
-    token VARCHAR(255) [not null]
-    created_at TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
-    used BOOLEAN [not null, default: `FALSE`]
-    administrators_id INTEGER
-}
-
-Table administrators {
-  id SERIAL [pk, increment]
-  created_at TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
-  updated_at TIMESTAMP [default: `CURRENT_TIMESTAMP`]
-  name VARCHAR(50) [not null]
-  password_hash VARCHAR(500) [not null]
-}
-
-Ref:administrators.id < messages.administrators_id [delete: set null]
-Ref:administrators.id < participants.administrators_id [delete: cascade]
-Ref:administrators.id < admin_signup_tokens.administrators_id [delete: set null]
-Ref:administrators.id < strikes.administrators_id [delete: set null]
-Ref:administrators.id < bans.administrators_id [delete: set null]
 
 Table user_settings {
   id SERIAL [pk, increment]
@@ -145,7 +109,6 @@ Table users {
   email VARCHAR(100) [not null, unique]
   password_hash VARCHAR(500) [not null]
   status VARCHAR(50)
-  role UserRole [not null]
   ban BOOL [not null, default: `FALSE`]
 }
 
@@ -168,6 +131,43 @@ Ref:users.id < support_tickets.users_id [delete: cascade]
 Ref:users.id < objects.avatar_users_id [delete: restrict]
 Ref:users.id < strikes.users_id [delete: cascade]
 Ref:users.id < bans.users_id [delete: cascade]
+Ref:users.id < admin_signup_tokens.users_id [delete: set null]
+Ref:users.id < strikes.administrators_id [delete: set null]
+Ref:users.id < bans.administrators_id [delete: set null]
+Ref:users.id < users_groups.users_id [delete: cascade]
+
+Table groups {
+  id SERIAL [pk, increment]
+  name VARCHAR(50) [not null, unique]
+}
+
+Ref:groups.id < users_groups.groups_id [delete: restrict]
+Ref:groups.id < groups_permissions.groups_id [delete: cascade]
+
+Table permissions {
+  id SERIAL [pk, increment]
+  name VARCHAR(50) [not null, unique]
+}
+
+Ref:permissions.id < groups_permissions.permissions_id [delete: cascade]
+
+Table users_groups {
+  users_id INTEGER [not null, unique]
+  groups_id INTEGER [not null, unique]
+}
+
+Table groups_permissions {
+  groups_id INTEGER [not null, unique]
+  permissions_id INTEGER [not null, unique]
+}
+
+Table admin_signup_tokens {
+    id SERIAL [pk, increment]
+    token VARCHAR(255) [not null]
+    created_at TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
+    used BOOLEAN [not null, default: `FALSE`]
+    users_id INTEGER
+}
 
 Table objects {
   id SERIAL [pk, increment]
@@ -470,8 +470,6 @@ Table messages {
   conversations_id INTEGER [not null]
   service_orders_id INTEGER
   users_id INTEGER
-  administrators_id INTEGER
-  superusers_id INTEGER
   messages_id INTEGER
   text VARCHAR(2500) [not null]
 }
@@ -486,8 +484,6 @@ Table participants {
   conversations_id INTEGER
   service_orders_id INTEGER
   users_id INTEGER
-  administrators_id INTEGER
-  superusers_id INTEGER
 }
 
 Table offers {
@@ -565,5 +561,3 @@ Table bans {
   administrators_id INTEGER 
   comment VARCHAR(1000) [not null]
 }
-
-Ref: "product_orders"."status" < "consumer_reviews"."id"
