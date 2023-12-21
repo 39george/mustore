@@ -83,8 +83,8 @@ CREATE TABLE users_groups (
 -- Create `groups_permissions` table for many-to-many relationships
 -- between groups and permissions.
 CREATE TABLE groups_permissions (
-    groups_id INTEGER REFERENCES groups(id),
-    permissions_id INTEGER REFERENCES permissions(id),
+    groups_id INTEGER REFERENCES groups(id) ON DELETE CASCADE,
+    permissions_id INTEGER REFERENCES permissions(id) ON DELETE CASCADE,
     PRIMARY KEY (groups_id, permissions_id)
 );
 
@@ -127,7 +127,7 @@ CREATE TABLE admin_signup_tokens(
     token VARCHAR(255) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     used BOOLEAN NOT NULL DEFAULT FALSE,
-    users_id INTEGER REFERENCES users(id)
+    users_id INTEGER REFERENCES users(id) ON DELETE SET NULL
 );
 
 -- Products & tags
