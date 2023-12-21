@@ -152,18 +152,18 @@ Table permissions {
 Ref:permissions.id < groups_permissions.permissions_id [delete: cascade]
 
 Table users_groups {
-  users_id INTEGER [not null, unique]
-  groups_id INTEGER [not null, unique]
+  users_id INTEGER [not null]
+  groups_id INTEGER [not null]
 }
 
 Table groups_permissions {
-  groups_id INTEGER [not null, unique]
-  permissions_id INTEGER [not null, unique]
+  groups_id INTEGER [not null]
+  permissions_id INTEGER [not null]
 }
 
 Table admin_signup_tokens {
     id SERIAL [pk, increment]
-    token VARCHAR(255) [not null]
+    token UUID [not null, unique]
     created_at TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
     used BOOLEAN [not null, default: `FALSE`]
     users_id INTEGER
