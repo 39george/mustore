@@ -70,7 +70,7 @@ Enum "ObectType" {
 Table genres {
   id SERIAL [pk, increment]
   created_at TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
-  name VARCHAR(50) [not null]
+  name VARCHAR(50) [not null, unique]
 }
 
 Ref:genres.id < songs.primary_genre [delete: restrict]
@@ -82,7 +82,7 @@ Ref:genres.id < music_services_genres.genres_id [delete: restrict]
 Table tags {
   id SERIAL [pk, increment]
   created_at TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
-  name VARCHAR(50) [not null]
+  name VARCHAR(50) [not null, unique]
 }
 
 Ref:tags.id < products_tags.tags_id [delete: restrict]
