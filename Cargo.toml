@@ -58,6 +58,7 @@ time = "0.3.30"
 identicon-rs = "4.0.1"
 image = "0.24.7"
 rust_decimal = { version = "1.33.1", features = ["db-postgres"] }
+tokio-cron-scheduler = "0.9.4"
 
 # Security
 axum-login = "0.10.2"

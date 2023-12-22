@@ -100,6 +100,12 @@ impl Application {
             email_client,
         );
 
+        tokio::spawn(async {
+            if let Err(e) = run_scheduler().await {
+                tracing::error!("Scheduler failed with: {e}");
+            }
+        });
+
         Ok(Self { serve, port })
     }
 
@@ -249,4 +255,34 @@ fn get_pg_conf(configuration: &DatabaseSettings) -> tokio_postgres::Config {
     config.host(&configuration.host);
     config.password(&configuration.password.expose_secret());
     config
+}
+
+async fn run_scheduler() -> Result<(), tokio_cron_scheduler::JobSchedulerError>
+{
+    let sched = tokio_cron_scheduler::JobScheduler::new().await?;
+
+    sched
+        .add(tokio_cron_scheduler::Job::new_async(
+            "1/7 * * * * *",
+            |uuid, mut l| {
+                Box::pin(async move {
+                    println!("I run async every 7 seconds");
+                    match l.next_tick_for_job(uuid).await {
+                        Ok(Some(ts)) => {
+                            tracing::info!("Next time for 7s is {:?}", ts)
+                        }
+                        _ => {
+                            tracing::warn!("Could not get next tick for 7s job")
+                        }
+                    }
+                })
+            },
+        )?)
+        .await?;
+
+    if let Err(e) = sched.start().await {
+        tracing::error!("Cheduler failed with {e}");
+    }
+
+    Ok(())
 }
