@@ -206,7 +206,7 @@ const Menu: FC = () => {
       }
       <div
         className={`${styles.mobile_sidebar} ${
-          sidebar_open ? "" : styles.sidebar_visible
+          sidebar_open ? styles.sidebar_visible : ""
         }`}
       >
         <div className={styles.sidebar_content}>
@@ -214,16 +214,16 @@ const Menu: FC = () => {
             <li
               className={
                 link_toggled.products
-                  ? `${styles.link_container} ${styles.link_toggled}`
-                  : styles.link_container
+                  ? `${styles.sidebar_link_container} ${styles.link_toggled}`
+                  : styles.sidebar_link_container
               }
             >
               <div
-                className={styles.nav_link}
+                className={styles.sidebar_nav_link}
                 onClick={() => toggle_link("products")}
               >
                 <div>Товары</div>
-                <GoChevronDown className={styles.chevron} />
+                <GoChevronDown className={styles.sidebar_chevron} />
               </div>
               <ul className={styles.sidebar_submenu}>
                 <li>
@@ -243,16 +243,16 @@ const Menu: FC = () => {
             <li
               className={
                 link_toggled.services
-                  ? `${styles.link_container} ${styles.link_toggled}`
-                  : styles.link_container
+                  ? `${styles.sidebar_link_container} ${styles.link_toggled}`
+                  : styles.sidebar_link_container
               }
             >
               <div
-                className={styles.nav_link}
+                className={styles.sidebar_nav_link}
                 onClick={() => toggle_link("services")}
               >
                 <div>Услуги</div>
-                <GoChevronDown className={styles.chevron} />
+                <GoChevronDown className={styles.sidebar_chevron} />
               </div>
               <ul className={styles.sidebar_submenu}>
                 <li>
@@ -275,16 +275,16 @@ const Menu: FC = () => {
             <li
               className={
                 link_toggled.help
-                  ? `${styles.link_container} ${styles.link_toggled}`
-                  : styles.link_container
+                  ? `${styles.sidebar_link_container} ${styles.link_toggled}`
+                  : styles.sidebar_link_container
               }
             >
               <div
-                className={styles.nav_link}
+                className={styles.sidebar_nav_link}
                 onClick={() => toggle_link("help")}
               >
                 <div>Помощь</div>
-                <GoChevronDown className={styles.chevron} />
+                <GoChevronDown className={styles.sidebar_chevron} />
               </div>
               <ul className={styles.sidebar_submenu}>
                 <li>
@@ -310,16 +310,16 @@ const Menu: FC = () => {
             <li
               className={
                 link_toggled.about
-                  ? `${styles.link_container} ${styles.link_toggled}`
-                  : styles.link_container
+                  ? `${styles.sidebar_link_container} ${styles.link_toggled}`
+                  : styles.sidebar_link_container
               }
             >
               <div
-                className={styles.nav_link}
+                className={styles.sidebar_nav_link}
                 onClick={() => toggle_link("about")}
               >
                 <div>О нас</div>
-                <GoChevronDown className={styles.chevron} />
+                <GoChevronDown className={styles.sidebar_chevron} />
               </div>
               <ul className={styles.sidebar_submenu}>
                 <li>
@@ -332,9 +332,9 @@ const Menu: FC = () => {
             </li>
           </div>
           <hr />
-          <div className={styles.logging}>
-            <div className={styles.log}>войти</div>
-            <div className={styles.log}>создать аккаунт</div>
+          <div className={styles.sidebar_logging}>
+            <div className={styles.sidebar_log}>войти</div>
+            <div className={styles.sidebar_log}>создать аккаунт</div>
           </div>
         </div>
         <div className={styles.sidebar_footer}>

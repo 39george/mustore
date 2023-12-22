@@ -172,6 +172,14 @@ a {
   cursor: pointer;
 }
 
+.show {
+  display: block;
+}
+
+.hide {
+  display: none;
+}
+
 // Sidebar
 .mobile_sidebar {
   position: absolute;
@@ -179,12 +187,11 @@ a {
   right: 0;
 
   display: none;
-
   padding: 5rem 0 0.75rem;
 
-  width: 16rem;
+  width: 14rem;
   height: 100vh;
-  transition: width 0.5s ease-out;
+
   font-size: 1rem;
   font-weight: 300;
 
@@ -192,26 +199,23 @@ a {
   background-color: rgba($color: $main_dark, $alpha: 0.9);
   backdrop-filter: blur(9px);
 
-  transition: right 0.2s ease-out;
   z-index: 3;
 
-  .logging {
+  .sidebar_logging {
+    display: flex;
     flex-direction: column;
     margin: 2rem 1rem;
     gap: 1rem;
+
+    .sidebar_log {
+      cursor: pointer;
+      transition: color 0.2s ease-out;
+
+      &:hover {
+        color: $accent_pink;
+      }
+    }
   }
-}
-
-// .sidebar_visible {
-//   right: -16rem;
-// }
-
-.show {
-  display: block;
-}
-
-.hide {
-  display: none;
 }
 
 .sidebar_content {
@@ -227,12 +231,21 @@ a {
 
   margin: 0 1rem 0.75rem;
 
-  .link_container {
+  .sidebar_link_container {
     position: relative;
     margin: 0;
     padding: 0;
 
-    .nav_link {
+    .sidebar_chevron {
+      margin-left: 0.5rem;
+    }
+
+    .sidebar_nav_link {
+      display: flex;
+      align-items: center;
+
+      cursor: pointer;
+
       -webkit-user-select: none;
       -moz-user-select: none;
       -ms-user-select: none;
@@ -241,18 +254,6 @@ a {
 
     &:not(:last-child) {
       margin-bottom: 0.75rem;
-    }
-  }
-
-  a,
-  .chevron {
-    color: $main_bright;
-  }
-
-  &:hover {
-    .chevron {
-      color: $main_bright;
-      transform: initial;
     }
   }
 
@@ -279,6 +280,20 @@ a {
   }
 }
 
+// Add this class if link is toggled
+.link_toggled {
+  .sidebar_submenu {
+    display: block;
+  }
+
+  .sidebar_nav_link {
+    .sidebar_chevron {
+      color: $accent_pink;
+      transform: rotate(-180deg);
+    }
+  }
+}
+
 .sidebar_footer {
   display: flex;
   flex-direction: column;
@@ -293,6 +308,7 @@ a {
 
   width: 10rem;
 }
+
 .copyright {
   font-size: 0.875rem;
 }
@@ -307,38 +323,25 @@ a {
   }
 }
 
-// Add this class if link is toggled
-.link_toggled {
-  .sidebar_submenu {
-    display: block;
-  }
-
-  .nav_link {
-    .chevron {
-      color: $accent_pink;
-      transform: rotate(-180deg);
-    }
-  }
-}
-
+// Media queries
 @media (max-width: 1010px) {
   .nav_bar {
-    padding: 1.375em 3em;
+    padding: 1.375em 1em;
   }
 
-  // .link_container {
-  //   display: none;
-  // }
+  .link_container {
+    display: none;
+  }
 
-  // .logging {
-  //   display: none;
-  // }
+  .logging {
+    display: none;
+  }
 
   .toggle_icons_container {
     display: block;
   }
 
-  .mobile_sidebar {
+  .sidebar_visible {
     display: block;
   }
 }
