@@ -28,7 +28,7 @@ SELECT token, used
 FROM admin_signup_tokens
 WHERE token = :token;
 
---! use_admin_token
+--! use_admin_signup_token
 UPDATE admin_signup_tokens
 SET used = TRUE
 WHERE token = :token;

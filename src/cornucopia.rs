@@ -1880,15 +1880,15 @@ WHERE token = $1",
                 }
             }
         }
-        pub fn use_admin_token() -> UseAdminTokenStmt {
-            UseAdminTokenStmt(cornucopia_async::private::Stmt::new(
+        pub fn use_admin_signup_token() -> UseAdminSignupTokenStmt {
+            UseAdminSignupTokenStmt(cornucopia_async::private::Stmt::new(
                 "UPDATE admin_signup_tokens
 SET used = TRUE
 WHERE token = $1",
             ))
         }
-        pub struct UseAdminTokenStmt(cornucopia_async::private::Stmt);
-        impl UseAdminTokenStmt {
+        pub struct UseAdminSignupTokenStmt(cornucopia_async::private::Stmt);
+        impl UseAdminSignupTokenStmt {
             pub async fn bind<'a, C: GenericClient>(
                 &'a mut self,
                 client: &'a C,

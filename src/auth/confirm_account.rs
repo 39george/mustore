@@ -241,7 +241,7 @@ async fn verify_admin_token(
         )));
     }
 
-    let rows_count = user_auth_queries::use_admin_token()
+    let rows_count = user_auth_queries::use_admin_signup_token()
         .bind(client, &token.token)
         .await
         .context("Failed to set admin token's used to 'true'")?;
