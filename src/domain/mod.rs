@@ -1,5 +1,6 @@
 //! src/domain/mod.rs
 
+pub mod music_parameters;
 pub mod user_candidate;
 pub mod user_email;
 pub mod user_name;
