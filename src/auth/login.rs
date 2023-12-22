@@ -22,7 +22,7 @@ use crate::auth::{users::AuthSession, AuthError};
 // ───── Types ────────────────────────────────────────────────────────────── //
 
 #[derive(Clone, Deserialize)]
-pub struct UserCredentials {
+pub struct Credentials {
     pub username: String,
     pub password: Secret<String>,
 }
@@ -60,7 +60,7 @@ mod post {
     #[tracing::instrument(name = "Login attempt", skip_all)]
     pub async fn login(
         mut auth_session: AuthSession,
-        Json(creds): Json<UserCredentials>,
+        Json(creds): Json<Credentials>,
     ) -> Result<StatusCode, AuthError> {
         let user = match auth_session.authenticate(creds.clone()).await {
             Ok(Some(user)) => user,
@@ -84,6 +84,7 @@ mod get {
 
     pub async fn logout(mut auth_session: AuthSession) -> impl IntoResponse {
         match auth_session.logout() {
+            // FIX: write where to redirecto to
             Ok(_) => Redirect::to("/login").into_response(),
             Err(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
         }
