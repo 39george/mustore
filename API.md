@@ -84,4 +84,22 @@ if Err, 1. If internal error > StatusCode::InternalError (500)
         2. If bad input > StatusCode::BadRequest (400) 
 ```
 
+- Get new songs:
+```
+→ TO
+GET /api/open/new_songs?amount=<arg>
+← FROM
+If OK, Json [..list], StatusCode::OK (200)
+if Err, 1. If internal error > StatusCode::InternalError (500)
+        2. If bad input > StatusCode::BadRequest (400) 
+```
+- Get recommended songs:
+```
+→ TO
+GET /api/open/recommended_songs?amount=<arg>
+← FROM
+If OK, Json [..list], StatusCode::OK (200)
+if Err, 1. If internal error > StatusCode::InternalError (500)
+        2. If bad input > StatusCode::BadRequest (400) 
+```
 

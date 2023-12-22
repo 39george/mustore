@@ -584,6 +584,113 @@ pub mod queries {
                 Ok(it)
             }
         }
+        #[derive(serde::Serialize, Debug, Clone, PartialEq)]
+        pub struct GetRecommendedSongs {
+            pub song_id: i32,
+            pub created_at: time::OffsetDateTime,
+            pub cover_url: String,
+            pub name: String,
+            pub author: String,
+            pub likes: i64,
+            pub price: rust_decimal::Decimal,
+        }
+        pub struct GetRecommendedSongsBorrowed<'a> {
+            pub song_id: i32,
+            pub created_at: time::OffsetDateTime,
+            pub cover_url: &'a str,
+            pub name: &'a str,
+            pub author: &'a str,
+            pub likes: i64,
+            pub price: rust_decimal::Decimal,
+        }
+        impl<'a> From<GetRecommendedSongsBorrowed<'a>> for GetRecommendedSongs {
+            fn from(
+                GetRecommendedSongsBorrowed {
+                    song_id,
+                    created_at,
+                    cover_url,
+                    name,
+                    author,
+                    likes,
+                    price,
+                }: GetRecommendedSongsBorrowed<'a>,
+            ) -> Self {
+                Self {
+                    song_id,
+                    created_at,
+                    cover_url: cover_url.into(),
+                    name: name.into(),
+                    author: author.into(),
+                    likes,
+                    price,
+                }
+            }
+        }
+        pub struct GetRecommendedSongsQuery<
+            'a,
+            C: GenericClient,
+            T,
+            const N: usize,
+        > {
+            client: &'a C,
+            params: [&'a (dyn postgres_types::ToSql + Sync); N],
+            stmt: &'a mut cornucopia_async::private::Stmt,
+            extractor: fn(&tokio_postgres::Row) -> GetRecommendedSongsBorrowed,
+            mapper: fn(GetRecommendedSongsBorrowed) -> T,
+        }
+        impl<'a, C, T: 'a, const N: usize> GetRecommendedSongsQuery<'a, C, T, N>
+        where
+            C: GenericClient,
+        {
+            pub fn map<R>(
+                self,
+                mapper: fn(GetRecommendedSongsBorrowed) -> R,
+            ) -> GetRecommendedSongsQuery<'a, C, R, N> {
+                GetRecommendedSongsQuery {
+                    client: self.client,
+                    params: self.params,
+                    stmt: self.stmt,
+                    extractor: self.extractor,
+                    mapper,
+                }
+            }
+            pub async fn one(self) -> Result<T, tokio_postgres::Error> {
+                let stmt = self.stmt.prepare(self.client).await?;
+                let row = self.client.query_one(stmt, &self.params).await?;
+                Ok((self.mapper)((self.extractor)(&row)))
+            }
+            pub async fn all(self) -> Result<Vec<T>, tokio_postgres::Error> {
+                self.iter().await?.try_collect().await
+            }
+            pub async fn opt(self) -> Result<Option<T>, tokio_postgres::Error> {
+                let stmt = self.stmt.prepare(self.client).await?;
+                Ok(self
+                    .client
+                    .query_opt(stmt, &self.params)
+                    .await?
+                    .map(|row| (self.mapper)((self.extractor)(&row))))
+            }
+            pub async fn iter(
+                self,
+            ) -> Result<
+                impl futures::Stream<Item = Result<T, tokio_postgres::Error>> + 'a,
+                tokio_postgres::Error,
+            > {
+                let stmt = self.stmt.prepare(self.client).await?;
+                let it = self
+                    .client
+                    .query_raw(
+                        stmt,
+                        cornucopia_async::private::slice_iter(&self.params),
+                    )
+                    .await?
+                    .map(move |res| {
+                        res.map(|row| (self.mapper)((self.extractor)(&row)))
+                    })
+                    .into_stream();
+                Ok(it)
+            }
+        }
         pub fn get_stats() -> GetStatsStmt {
             GetStatsStmt(cornucopia_async::private::Stmt::new(
                 "(
@@ -816,6 +923,56 @@ LIMIT $1",
                         price: row.get(6),
                     },
                     mapper: |it| <GetNewSongs>::from(it),
+                }
+            }
+        }
+        pub fn get_recommended_songs() -> GetRecommendedSongsStmt {
+            GetRecommendedSongsStmt(cornucopia_async::private::Stmt::new(
+                "SELECT 
+song_id,
+created_at,
+cover_url,
+name,
+author,
+likes,
+price
+FROM available_songs s
+RIGHT JOIN (
+    SELECT likes.songs_id
+    FROM likes
+    JOIN users ON likes.users_id = users.id
+    JOIN users_groups ON users.id = users_groups.users_id
+    JOIN groups ON users_groups.groups_id = groups.id
+    WHERE songs_id IS NOT NULL AND groups.name = 'group.administrators'
+) AS admin_likes
+ON song_id = admin_likes.songs_id
+WHERE current_timestamp - created_at < '1 month'::interval
+ORDER BY created_at DESC
+LIMIT $1",
+            ))
+        }
+        pub struct GetRecommendedSongsStmt(cornucopia_async::private::Stmt);
+        impl GetRecommendedSongsStmt {
+            pub fn bind<'a, C: GenericClient>(
+                &'a mut self,
+                client: &'a C,
+                amount: &'a i64,
+            ) -> GetRecommendedSongsQuery<'a, C, GetRecommendedSongs, 1>
+            {
+                GetRecommendedSongsQuery {
+                    client,
+                    params: [amount],
+                    stmt: &mut self.0,
+                    extractor: |row| GetRecommendedSongsBorrowed {
+                        song_id: row.get(0),
+                        created_at: row.get(1),
+                        cover_url: row.get(2),
+                        name: row.get(3),
+                        author: row.get(4),
+                        likes: row.get(5),
+                        price: row.get(6),
+                    },
+                    mapper: |it| <GetRecommendedSongs>::from(it),
                 }
             }
         }

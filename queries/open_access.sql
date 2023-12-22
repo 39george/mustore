@@ -67,3 +67,26 @@ FROM available_songs s
 WHERE current_timestamp - created_at < '2 weeks'::interval
 ORDER BY created_at DESC
 LIMIT :amount;
+
+--! get_recommended_songs
+SELECT 
+song_id,
+created_at,
+cover_url,
+name,
+author,
+likes,
+price
+FROM available_songs s
+RIGHT JOIN (
+    SELECT likes.songs_id
+    FROM likes
+    JOIN users ON likes.users_id = users.id
+    JOIN users_groups ON users.id = users_groups.users_id
+    JOIN groups ON users_groups.groups_id = groups.id
+    WHERE songs_id IS NOT NULL AND groups.name = 'group.administrators'
+) AS admin_likes
+ON song_id = admin_likes.songs_id
+WHERE current_timestamp - created_at < '1 month'::interval
+ORDER BY created_at DESC
+LIMIT :amount;

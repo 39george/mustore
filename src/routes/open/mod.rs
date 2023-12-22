@@ -17,6 +17,7 @@ use serde::Serialize;
 
 use crate::cornucopia::queries::open_access;
 use crate::cornucopia::queries::open_access::GetNewSongs;
+use crate::cornucopia::queries::open_access::GetRecommendedSongs;
 use crate::cornucopia::queries::open_access::GetSongs;
 use crate::domain::music_parameters::*;
 use crate::error_chain_fmt;
@@ -103,7 +104,7 @@ struct GetSongsListQuery {
 }
 
 #[derive(Deserialize, Debug)]
-struct GetNewSongsListQuery {
+struct GetSongsAmountQuery {
     amount: i64,
 }
 
@@ -115,6 +116,7 @@ pub fn open_router() -> Router<AppState> {
         .route("/:what", routing::get(get_values_list))
         .route("/songs", routing::get(get_songs))
         .route("/new_songs", routing::get(get_new_songs))
+        .route("/recommended_songs", routing::get(get_recommended_songs))
 }
 
 #[tracing::instrument(name = "Get products counts (stats)", skip_all)]
@@ -217,7 +219,7 @@ async fn get_songs(
 #[tracing::instrument(name = "Get new songs query", skip(app_state))]
 async fn get_new_songs(
     State(app_state): State<AppState>,
-    Query(GetNewSongsListQuery { amount }): Query<GetNewSongsListQuery>,
+    Query(GetSongsAmountQuery { amount }): Query<GetSongsAmountQuery>,
 ) -> Result<Json<Vec<GetNewSongs>>, ResponseError> {
     if amount > 50 || amount < 1 {
         return Err(ResponseError::BadRequest(anyhow::anyhow!(
@@ -233,6 +235,33 @@ async fn get_new_songs(
         .context("Failed to get pool from pg")?;
 
     let songs = open_access::get_new_songs()
+        .bind(&pg_pool, &amount)
+        .all()
+        .await
+        .context("Failed to fetch songs data from pg")?;
+
+    Ok(Json(songs))
+}
+
+#[tracing::instrument(name = "Get recommended songs query", skip(app_state))]
+async fn get_recommended_songs(
+    State(app_state): State<AppState>,
+    Query(GetSongsAmountQuery { amount }): Query<GetSongsAmountQuery>,
+) -> Result<Json<Vec<GetRecommendedSongs>>, ResponseError> {
+    if amount > 50 || amount < 1 {
+        return Err(ResponseError::BadRequest(anyhow::anyhow!(
+            "Amount of tracks should be between 1 and 50, requested: {}",
+            amount
+        )));
+    }
+
+    let pg_pool = app_state
+        .pg_pool
+        .get()
+        .await
+        .context("Failed to get pool from pg")?;
+
+    let songs = open_access::get_recommended_songs()
         .bind(&pg_pool, &amount)
         .all()
         .await
