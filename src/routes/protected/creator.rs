@@ -11,7 +11,7 @@ use crate::startup::AppState;
 
 pub fn creator_router() -> Router<AppState> {
     Router::new()
-        .route("/health_check", routing::get(creator))
+        .route("/health_check", routing::get(health_check))
         .route_layer(permission_required!(
             crate::auth::users::Backend,
             "creator",
@@ -19,6 +19,6 @@ pub fn creator_router() -> Router<AppState> {
 }
 
 #[tracing::instrument(name = "Creator's health check", skip_all)]
-async fn creator() -> StatusCode {
+async fn health_check() -> StatusCode {
     StatusCode::OK
 }

@@ -14,7 +14,7 @@ use secrecy::ExposeSecret;
 use tokio_postgres::NoTls;
 
 #[tokio::test]
-// #[ignore]
+#[ignore]
 async fn fill_with_test_data() {
     let mut rng = rand::thread_rng();
     let mut songs = Vec::new();
