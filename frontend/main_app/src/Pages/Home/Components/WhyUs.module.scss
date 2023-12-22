@@ -1,0 +1,69 @@
+@import "../../../colors.scss";
+
+.why_us_section {
+  background-image: linear-gradient(rgba(1, 6, 30, 0.94), rgba(1, 6, 30, 0.94)),
+    url(../../../assets/HomePage/bg_guitars.jpeg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.main_content {
+  margin: 0 auto;
+  padding: 10.25rem 1.375rem;
+
+  width: fit-content;
+  max-width: 34.25rem;
+
+  color: white;
+
+  .reason:not(:last-child) {
+    margin-bottom: 2.625rem;
+  }
+}
+
+.h2 {
+  margin-bottom: 1.5em;
+
+  font-weight: 600;
+  font-size: 1.75rem;
+}
+
+.reason_title {
+  display: flex;
+  align-items: center;
+
+  margin-bottom: 0.625rem;
+}
+
+.h3 {
+  font-weight: 500;
+  font-size: 1.125rem;
+
+  margin-left: 1em;
+}
+
+.reason_description {
+  font-weight: 400;
+  font-size: 0.875rem;
+
+  opacity: 0.8;
+}
+
+// Media queries
+@media (max-width: 620px) {
+  .main_content {
+    padding: 6rem 1.375rem;
+  }
+
+  .h2 {
+    width: fit-content;
+
+    font-size: 1.625rem;
+    text-align: center;
+  }
+
+  .h3 {
+    font-size: 1rem;
+  }
+}

@@ -1,17 +1,17 @@
 import styles from "./Hero.module.scss";
 import { GoChevronDown } from "react-icons/go";
-import bg_decor_1 from "../../../assets/Home page/bg_decor_1.png";
-import bg_decor_2 from "../../../assets/Home page/bg_decor_2.png";
-import bg_decor_3 from "../../../assets/Home page/bg_decor_3.png";
-import bg_decor_4 from "../../../assets/Home page/bg_decor_4.png";
-import cover_1 from "../../../assets/Home page/album_covers/ablum_cover_1.png";
-import cover_2 from "../../../assets/Home page/album_covers/ablum_cover_2.png";
-import cover_3 from "../../../assets/Home page/album_covers/ablum_cover_3.png";
-import cover_4 from "../../../assets/Home page/album_covers/ablum_cover_4.png";
-import cover_5 from "../../../assets/Home page/album_covers/ablum_cover_5.png";
-import cover_6 from "../../../assets/Home page/album_covers/ablum_cover_6.png";
-import cover_7 from "../../../assets/Home page/album_covers/ablum_cover_7.png";
-import cover_8 from "../../../assets/Home page/album_covers/ablum_cover_8.png";
+import bg_decor_1 from "../../../assets/HomePage/bg_decor_1.png";
+import bg_decor_2 from "../../../assets/HomePage/bg_decor_2.png";
+import bg_decor_3 from "../../../assets/HomePage/bg_decor_3.png";
+import bg_decor_4 from "../../../assets/HomePage/bg_decor_4.png";
+import cover_1 from "../../../assets/HomePage/album_covers/ablum_cover_1.png";
+import cover_2 from "../../../assets/HomePage/album_covers/ablum_cover_2.png";
+import cover_3 from "../../../assets/HomePage/album_covers/ablum_cover_3.png";
+import cover_4 from "../../../assets/HomePage/album_covers/ablum_cover_4.png";
+import cover_5 from "../../../assets/HomePage/album_covers/ablum_cover_5.png";
+import cover_6 from "../../../assets/HomePage/album_covers/ablum_cover_6.png";
+import cover_7 from "../../../assets/HomePage/album_covers/ablum_cover_7.png";
+import cover_8 from "../../../assets/HomePage/album_covers/ablum_cover_8.png";
 
 const Hero = () => {
   return (
