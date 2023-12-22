@@ -3,12 +3,12 @@
 CREATE TYPE MusicKey
 AS ENUM
 (
-    'a-minor', 'a-major', 'b-flat-minor', 'b-flat-major',
-    'b-minor', 'b-major', 'c-minor', 'c-major',
-    'c-sharp-minor', 'c-sharp-major', 'd-minor', 'd-major',
-    'e-flat-minor', 'e-flat-major', 'e-minor', 'e-major',
-    'f-minor', 'f-major', 'f-sharp-minor', 'f-sharp-major',
-    'g-minor', 'g-major', 'a-flat-minor', 'a-flat-major'
+    'a_minor', 'a_major', 'b_flat_minor', 'b_flat_major',
+    'b_minor', 'b_major', 'c_minor', 'c_major',
+    'c_sharp_minor', 'c_sharp_major', 'd_minor', 'd_major',
+    'e_flat_minor', 'e_flat_major', 'e_minor', 'e_major',
+    'f_minor', 'f_major', 'f_sharp_minor', 'f_sharp_major',
+    'g_minor', 'g_major', 'a_flat_minor', 'a_flat_major'
 );
 
 CREATE TYPE ProductStatus AS ENUM ('moderation', 'denied', 'active', 'hidden', 'sold');
@@ -145,8 +145,8 @@ CREATE TABLE products (
 -- If product is not sold and creator wants to delete it,
 -- we can delete it safely.
 CREATE TABLE products_tags (
-    products_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-    tags_id INTEGER NOT NULL REFERENCES tags(id) ON DELETE RESTRICT,
+    products_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
+    tags_id INTEGER REFERENCES tags(id) ON DELETE RESTRICT,
     CONSTRAINT pk_products_tags PRIMARY KEY (products_id, tags_id)
 );
 
@@ -155,7 +155,7 @@ CREATE TABLE songs (
     products_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
     primary_genre INTEGER NOT NULL REFERENCES genres(id) ON DELETE RESTRICT,
     secondary_genre INTEGER REFERENCES genres(id) ON DELETE RESTRICT,
-    sex CHAR(1) NOT NULL CHECK (sex IN ('m', 'f')),
+    sex VARCHAR(6) NOT NULL CHECK (sex IN ('male', 'female')),
     tempo SMALLINT NOT NULL,
     key MusicKey NOT NULL,
     duration REAL NOT NULL,
@@ -179,19 +179,20 @@ CREATE TABLE lyrics (
 );
 
 CREATE TABLE covers (
-    products_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-    id SERIAL PRIMARY KEY
+    id SERIAL PRIMARY KEY,
+    products_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE
 );
 
 -- Likes & listenings
 
 CREATE TABLE likes (
+    id SERIAL PRIMARY KEY,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     users_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    songs_id INTEGER REFERENCES songs(id) ON DELETE CASCADE,
-    beats_id INTEGER REFERENCES beats(id) ON DELETE CASCADE,
-    lyrics_id INTEGER REFERENCES lyrics(id) ON DELETE CASCADE,
-    covers_id INTEGER REFERENCES covers(id) ON DELETE CASCADE,
+    songs_id INTEGER DEFAULT NULL REFERENCES songs(id) ON DELETE CASCADE,
+    beats_id INTEGER DEFAULT NULL REFERENCES beats(id) ON DELETE CASCADE,
+    lyrics_id INTEGER DEFAULT NULL REFERENCES lyrics(id) ON DELETE CASCADE,
+    covers_id INTEGER DEFAULT NULL REFERENCES covers(id) ON DELETE CASCADE,
     CHECK(
         COALESCE((songs_id)::BOOLEAN::INTEGER, 0)
         +
@@ -202,34 +203,35 @@ CREATE TABLE likes (
         COALESCE((covers_id)::BOOLEAN::INTEGER, 0)
         = 1
     ),
-    CONSTRAINT pk_likes PRIMARY KEY (users_id, songs_id, beats_id, lyrics_id, covers_id)
+    UNIQUE (users_id, songs_id, beats_id, lyrics_id, covers_id)
 );
 
 CREATE TABLE listenings (
+    id SERIAL PRIMARY KEY,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     users_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    songs_id INTEGER REFERENCES songs(id) ON DELETE CASCADE,
-    beats_id INTEGER REFERENCES beats(id) ON DELETE CASCADE,
+    songs_id INTEGER DEFAULT NULL REFERENCES songs(id) ON DELETE CASCADE,
+    beats_id INTEGER DEFAULT NULL REFERENCES beats(id) ON DELETE CASCADE,
     CHECK(
         COALESCE((songs_id)::BOOLEAN::INTEGER, 0)
         +
         COALESCE((beats_id)::BOOLEAN::INTEGER, 0)
         = 1
     ),
-    CONSTRAINT pk_listenings PRIMARY KEY (users_id, songs_id, beats_id)
+    UNIQUE (users_id, songs_id, beats_id)
 );
 
 CREATE OR REPLACE FUNCTION check_last_listening_duration() RETURNS TRIGGER AS $$
 DECLARE
     last_listening_time TIMESTAMP;
-    duration REAL;
+    v_duration REAL;
 BEGIN
     IF NEW.songs_id IS NOT NULL THEN
         SELECT MAX(created_at) INTO last_listening_time
         FROM listenings
         WHERE users_id = NEW.users_id AND songs_id = NEW.songs_id;
         
-        SELECT duration INTO duration
+        SELECT songs.duration INTO v_duration
         FROM songs
         WHERE id = NEW.songs_id;
     ELSEIF NEW.beats_id IS NOT NULL THEN
@@ -237,12 +239,12 @@ BEGIN
         FROM listenings
         WHERE users_id = NEW.users_id AND beats_id = NEW.beats_id;
         
-        SELECT duration INTO duration
+        SELECT beats.duration INTO v_duration
         FROM beats
         WHERE id = NEW.beats_id;
     END IF;
 
-    IF last_listening_time + (INTERVAL '1 second' * duration) > NEW.created_at THEN
+    IF last_listening_time + (INTERVAL '1 second' * v_duration) > NEW.created_at THEN
         RAISE EXCEPTION 'Cannot insert a new listening for the same user and song/beat if the time elapsed since the last listening is less than the duration of the song/beat.';
     END IF;
 
@@ -298,9 +300,9 @@ CREATE TABLE music_services_genres (
     id SERIAL PRIMARY KEY,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     genres_id INTEGER NOT NULL REFERENCES genres(id) ON DELETE RESTRICT,
-    beat_writing_id INTEGER REFERENCES songs(id) ON DELETE CASCADE,
-    song_writing_id INTEGER REFERENCES songs(id) ON DELETE CASCADE,
-    mixing_id INTEGER REFERENCES beats(id) ON DELETE CASCADE,
+    beat_writing_id INTEGER DEFAULT NULL REFERENCES songs(id) ON DELETE CASCADE,
+    song_writing_id INTEGER DEFAULT NULL REFERENCES songs(id) ON DELETE CASCADE,
+    mixing_id INTEGER DEFAULT NULL REFERENCES beats(id) ON DELETE CASCADE,
     CHECK (
         COALESCE((beat_writing_id)::BOOLEAN::INTEGER, 0)
         +
@@ -360,8 +362,8 @@ CREATE TABLE transactions (
     id SERIAL PRIMARY KEY,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     users_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
-    product_orders_id INTEGER REFERENCES product_orders(id) ON DELETE RESTRICT,
-    service_orders_id INTEGER REFERENCES service_orders(id) ON DELETE RESTRICT,
+    product_orders_id INTEGER DEFAULT NULL REFERENCES product_orders(id) ON DELETE RESTRICT,
+    service_orders_id INTEGER DEFAULT NULL REFERENCES service_orders(id) ON DELETE RESTRICT,
     description VARCHAR(200) NOT NULL,
     from_desc VARCHAR(200) NOT NULL,
     for_desc VARCHAR(200) NOT NULL,
@@ -405,8 +407,8 @@ CREATE TABLE messages (
 	id SERIAL PRIMARY KEY,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    conversations_id INTEGER NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
-    service_orders_id INTEGER REFERENCES service_orders(id) ON DELETE CASCADE,
+    conversations_id INTEGER DEFAULT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+    service_orders_id INTEGER DEFAULT NULL REFERENCES service_orders(id) ON DELETE CASCADE,
     users_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
     messages_id INTEGER REFERENCES messages(id) ON DELETE SET NULL,
 	text VARCHAR(2500) NOT NULL,
@@ -445,8 +447,8 @@ FOR EACH ROW EXECUTE FUNCTION check_conversations_id();
 CREATE TABLE participants (
 	id SERIAL PRIMARY KEY,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    conversations_id INTEGER REFERENCES conversations(id) ON DELETE CASCADE,
-    service_orders_id INTEGER REFERENCES service_orders(id) ON DELETE CASCADE,
+    conversations_id INTEGER DEFAULT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+    service_orders_id INTEGER DEFAULT NULL REFERENCES service_orders(id) ON DELETE CASCADE,
     users_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     CHECK(
         COALESCE((conversations_id)::BOOLEAN::INTEGER, 0)
@@ -479,13 +481,13 @@ CREATE TABLE system_notifications (
 CREATE TABLE views (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     users_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    services_id INTEGER REFERENCES services(id) ON DELETE CASCADE,
-    songs_id INTEGER REFERENCES songs(id) ON DELETE CASCADE,
-    beats_id INTEGER REFERENCES beats(id) ON DELETE CASCADE,
-    lyrics_id INTEGER REFERENCES lyrics(id) ON DELETE CASCADE,
-    covers_id INTEGER REFERENCES covers(id) ON DELETE CASCADE,
-    messages_id INTEGER REFERENCES messages(id) ON DELETE CASCADE,
-    system_notifications_id INTEGER REFERENCES system_notifications(id) ON DELETE CASCADE,
+    services_id INTEGER DEFAULT NULL REFERENCES services(id) ON DELETE CASCADE,
+    songs_id INTEGER DEFAULT NULL REFERENCES songs(id) ON DELETE CASCADE,
+    beats_id INTEGER DEFAULT NULL REFERENCES beats(id) ON DELETE CASCADE,
+    lyrics_id INTEGER DEFAULT NULL REFERENCES lyrics(id) ON DELETE CASCADE,
+    covers_id INTEGER DEFAULT NULL REFERENCES covers(id) ON DELETE CASCADE,
+    messages_id INTEGER DEFAULT NULL REFERENCES messages(id) ON DELETE CASCADE,
+    system_notifications_id INTEGER DEFAULT NULL REFERENCES system_notifications(id) ON DELETE CASCADE,
     CHECK(
         COALESCE((services_id)::BOOLEAN::INTEGER, 0)
         +
@@ -510,9 +512,9 @@ CREATE TABLE reports (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     users_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    messages_id INTEGER REFERENCES messages(id) ON DELETE CASCADE,
-    products_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-    services_id INTEGER NOT NULL REFERENCES services(id) ON DELETE CASCADE,
+    messages_id INTEGER DEFAULT NULL REFERENCES messages(id) ON DELETE CASCADE,
+    products_id INTEGER DEFAULT NULL REFERENCES products(id) ON DELETE CASCADE,
+    services_id INTEGER DEFAULT NULL REFERENCES services(id) ON DELETE CASCADE,
     is_open BOOL NOT NULL DEFAULT TRUE,
     CHECK(
         COALESCE((messages_id)::BOOLEAN::INTEGER, 0)
@@ -543,23 +545,23 @@ CREATE TABLE objects (
     object_type ObjectType NOT NULL,
     -- we need to delete all objects in storage at first, so RESTRICT
     -- Images
-    avatar_users_id INTEGER REFERENCES users(id) ON DELETE RESTRICT UNIQUE,
-    cover_products_id INTEGER REFERENCES products(id) ON DELETE RESTRICT UNIQUE,
-    cover_credits_cover_design_id INTEGER REFERENCES cover_design(id) ON DELETE RESTRICT,
-    cover_services_id INTEGER REFERENCES services(id) ON DELETE CASCADE UNIQUE,
+    avatar_users_id INTEGER DEFAULT NULL REFERENCES users(id) ON DELETE RESTRICT UNIQUE,
+    cover_products_id INTEGER DEFAULT NULL REFERENCES products(id) ON DELETE RESTRICT UNIQUE,
+    cover_credits_cover_design_id INTEGER DEFAULT NULL REFERENCES cover_design(id) ON DELETE RESTRICT,
+    cover_services_id INTEGER DEFAULT NULL REFERENCES services(id) ON DELETE CASCADE UNIQUE,
 
     -- Audio
-    master_songs_id INTEGER REFERENCES songs(id) ON DELETE RESTRICT UNIQUE,
-    multitrack_songs_id INTEGER REFERENCES songs(id) ON DELETE RESTRICT UNIQUE,
-    master_beats_id INTEGER REFERENCES beats(id) ON DELETE RESTRICT UNIQUE,
-    multitrack_beats_id INTEGER REFERENCES beats(id) ON DELETE RESTRICT UNIQUE,
-    mixing_credits_mixing_id INTEGER REFERENCES mixing(id) ON DELETE RESTRICT,
-    song_credits_songs_id INTEGER REFERENCES song_writing(id) ON DELETE RESTRICT,
-    beat_credits_beat_writing_id INTEGER REFERENCES beat_writing(id) ON DELETE RESTRICT,
+    master_songs_id INTEGER DEFAULT NULL REFERENCES songs(id) ON DELETE RESTRICT UNIQUE,
+    multitrack_songs_id INTEGER DEFAULT NULL REFERENCES songs(id) ON DELETE RESTRICT UNIQUE,
+    master_beats_id INTEGER DEFAULT NULL REFERENCES beats(id) ON DELETE RESTRICT UNIQUE,
+    multitrack_beats_id INTEGER DEFAULT NULL REFERENCES beats(id) ON DELETE RESTRICT UNIQUE,
+    mixing_credits_mixing_id INTEGER DEFAULT NULL REFERENCES mixing(id) ON DELETE RESTRICT,
+    song_credits_songs_id INTEGER DEFAULT NULL REFERENCES song_writing(id) ON DELETE RESTRICT,
+    beat_credits_beat_writing_id INTEGER DEFAULT NULL REFERENCES beat_writing(id) ON DELETE RESTRICT,
 
     -- Other
-    video_description_services_id INTEGER REFERENCES services(id) ON DELETE RESTRICT UNIQUE,
-    message_attachment INTEGER REFERENCES messages(id) ON DELETE RESTRICT,
+    video_description_services_id INTEGER DEFAULT NULL REFERENCES services(id) ON DELETE RESTRICT UNIQUE,
+    message_attachment INTEGER DEFAULT NULL REFERENCES messages(id) ON DELETE RESTRICT,
     CHECK(
         COALESCE((avatar_users_id)::BOOLEAN::INTEGER, 0)
         +

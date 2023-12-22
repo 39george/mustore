@@ -1,28 +1,28 @@
 Enum "MusicKey" {
-  "a-minor"
-  "a-major"
-  "b-flat-minor"
-  "b-flat-major"
-  "b-minor"
-  "b-major"
-  "c-minor"
-  "c-major"
-  "c-sharp-minor"
-  "c-sharp-major"
-  "d-minor"
-  "d-major"
-  "e-flat-minor"
-  "e-flat-major"
-  "e-minor"
-  "e-major"
-  "f-minor"
-  "f-major"
-  "f-sharp-minor"
-  "f-sharp-major"
-  "g-minor"
-  "g-major"
-  "a-flat-minor"
-  "a-flat-major"
+  "a_minor"
+  "a_major"
+  "b_flat_minor"
+  "b_flat_major"
+  "b_minor"
+  "b_major"
+  "c_minor"
+  "c_major"
+  "c_sharp_minor"
+  "c_sharp_major"
+  "d_minor"
+  "d_major"
+  "e_flat_minor"
+  "e_flat_major"
+  "e_minor"
+  "e_major"
+  "f_minor"
+  "f_major"
+  "f_sharp_minor"
+  "f_sharp_major"
+  "g_minor"
+  "g_major"
+  "a_flat_minor"
+  "a_flat_major"
 }
 
 Enum "ProductStatus" {
@@ -175,19 +175,19 @@ Table objects {
   updated_at TIMESTAMP [default: `CURRENT_TIMESTAMP`]
   key VARCHAR(500) [not null, unique]
   object_type "ObectType" [not null]
-  avatar_users_id INTEGER [unique]
-  cover_products_id INTEGER [unique]
-  master_songs_id INTEGER [unique]
-  multitrack_songs_id INTEGER [unique]
-  master_beats_id INTEGER [unique]
-  multitrack_beats_id INTEGER [unique]
-  cover_services_id INTEGER [unique]
-  video_description_services_id INTEGER [unique]
-  mixing_credits_mixing_id INTEGER 
-  song_credits_songs_id INTEGER
-  beat_credits_beat_writing_id INTEGER
-  cover_credits_cover_design_id INTEGER
-  message_attachment INTEGER
+  avatar_users_id INTEGER [unique, default: `NULL`]
+  cover_products_id INTEGER [unique, default: `NULL`]
+  master_songs_id INTEGER [unique, default: `NULL`]
+  multitrack_songs_id INTEGER [unique, default: `NULL`]
+  master_beats_id INTEGER [unique, default: `NULL`]
+  multitrack_beats_id INTEGER [unique, default: `NULL`]
+  cover_services_id INTEGER [unique, default: `NULL`]
+  video_description_services_id INTEGER [unique, default: `NULL`]
+  mixing_credits_mixing_id INTEGER  [default: `NULL`]
+  song_credits_songs_id INTEGER [default: `NULL`]
+  beat_credits_beat_writing_id INTEGER [default: `NULL`]
+  cover_credits_cover_design_id INTEGER [default: `NULL`]
+  message_attachment INTEGER [default: `NULL`]
 }
 
 Ref:objects.id < images.objects_id[delete: cascade]
@@ -235,7 +235,7 @@ Table songs {
   products_id INTEGER [not null]
   primary_genre INTEGER [not null]
   secondary_genre INTEGER
-  sex CHAR (1) [not null]
+  sex VARCHAR (6) [not null]
   tempo SMALLINT [not null]
   key MusicKey [not null]
   duration REAL [not null]
@@ -282,25 +282,21 @@ Ref:covers.id < likes.covers_id [delete: cascade]
 Ref:covers.id < views.covers_id [delete: cascade]
 
 Table likes {
+  id SERIAL [pk, increment]
   created_at TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
   users_id INTEGER [not null]
-  songs_id INTEGER
-  beats_id INTEGER
-  lyrics_id INTEGER
-  covers_id INTEGER
-  Indexes {
-  (users_id, songs_id, beats_id, lyrics_id, covers_id) [pk, name: "pk_likes"]
-  }
+  songs_id INTEGER [default: `NULL`]
+  beats_id INTEGER [default: `NULL`]
+  lyrics_id INTEGER [default: `NULL`]
+  covers_id INTEGER [default: `NULL`]
 }
 
 Table listenings {
+  id SERIAL [pk, increment]
   created_at TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
   users_id INTEGER [not null]
-  songs_id INTEGER
-  beats_id INTEGER
-  Indexes {
-    (users_id, songs_id, beats_id) [pk, name: "pk_listenings"]
-  }
+  songs_id INTEGER [default: `NULL`]
+  beats_id INTEGER [default: `NULL`]
 }
 
 Table services {
@@ -367,9 +363,9 @@ Table music_services_genres {
   id SERIAL [pk, increment]
   created_at TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
   genres_id INTEGER [not null]
-  beat_writing_id INTEGER
-  song_writing_id INTEGER
-  mixing_id INTEGER
+  beat_writing_id INTEGER [default: `NULL`]
+  song_writing_id INTEGER [default: `NULL`]
+  mixing_id INTEGER [default: `NULL`]
 }
 
 Table favorites {
@@ -423,8 +419,8 @@ Table transactions {
   id SERIAL [pk, increment]
   created_at TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
   users_id INTEGER
-  product_orders_id INTEGER
-  service_orders_id INTEGER
+  product_orders_id INTEGER [default: `NULL`]
+  service_orders_id INTEGER [default: `NULL`]
   description VARCHAR(200) [not null]
   from_desc VARCHAR(200) [not null]
   for_desc VARCHAR(200) [not null]
@@ -467,8 +463,8 @@ Table messages {
   id SERIAL [pk, increment]
   created_at TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
   updated_at TIMESTAMP [default: `CURRENT_TIMESTAMP`]
-  conversations_id INTEGER [not null]
-  service_orders_id INTEGER
+  conversations_id INTEGER [default: `NULL`]
+  service_orders_id INTEGER [default: `NULL`]
   users_id INTEGER
   messages_id INTEGER
   text VARCHAR(2500) [not null]
@@ -481,8 +477,8 @@ Ref:messages.id < objects.message_attachment [delete: restrict]
 Table participants {
   id SERIAL [pk, increment]
   created_at TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
-  conversations_id INTEGER
-  service_orders_id INTEGER
+  conversations_id INTEGER [default: `NULL`]
+  service_orders_id INTEGER [default: `NULL`]
   users_id INTEGER
 }
 
@@ -511,13 +507,13 @@ Ref: system_notifications.id < views.system_notifications_id [delete: cascade]
 Table views {
   created_at TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
   users_id INTEGER [not null]
-  services_id INTEGER
-  songs_id INTEGER
-  beats_id INTEGER
-  lyrics_id INTEGER
-  covers_id INTEGER
-  messages_id INTEGER
-  system_notifications_id INTEGER
+  services_id INTEGER [default: `NULL`]
+  songs_id INTEGER [default: `NULL`]
+  beats_id INTEGER [default: `NULL`]
+  lyrics_id INTEGER [default: `NULL`]
+  covers_id INTEGER [default: `NULL`]
+  messages_id INTEGER [default: `NULL`]
+  system_notifications_id INTEGER [default: `NULL`]
   Indexes {
     (users_id, songs_id, beats_id, lyrics_id, covers_id, messages_id) [pk, name: "pk_views"]
   }
@@ -528,9 +524,9 @@ Table reports {
   created_at TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
   updated_at TIMESTAMP [default: `CURRENT_TIMESTAMP`]
   users_id INTEGER [not null]
-  messages_id INTEGER
-  services_id INTEGER
-  products_id INTEGER
+  messages_id INTEGER [default: `NULL`]
+  services_id INTEGER [default: `NULL`]
+  products_id INTEGER [default: `NULL`]
   is_open BOOL [not null, default: true]
 }
 
