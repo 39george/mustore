@@ -227,7 +227,7 @@ async fn verify_admin_token(
     admin_token: uuid::Uuid,
 ) -> Result<(), AuthError> {
     // Token exists
-    let token = user_auth_queries::get_admin_token()
+    let token = user_auth_queries::get_admin_signup_token()
         .bind(client, &admin_token)
         .one()
         .await

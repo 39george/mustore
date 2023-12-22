@@ -263,10 +263,10 @@ async fn run_scheduler() -> Result<(), tokio_cron_scheduler::JobSchedulerError>
 
     sched
         .add(tokio_cron_scheduler::Job::new_async(
-            "1/7 * * * * *",
+            "0 * * * * *",
             |uuid, mut l| {
                 Box::pin(async move {
-                    println!("I run async every 7 seconds");
+                    println!("I run async every 1 hour!");
                     match l.next_tick_for_job(uuid).await {
                         Ok(Some(ts)) => {
                             tracing::info!("Next time for 7s is {:?}", ts)

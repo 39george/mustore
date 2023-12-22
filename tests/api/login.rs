@@ -110,7 +110,7 @@ async fn access_to_admin_with_permission_is_given_and_token_is_used() {
         .unwrap();
     assert_eq!(response.status().as_u16(), 200);
 
-    let token_info = user_auth_queries::get_admin_token()
+    let token_info = user_auth_queries::get_admin_signup_token()
         .bind(&app.pg_client, &admin_token)
         .one()
         .await
