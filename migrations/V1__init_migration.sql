@@ -376,10 +376,6 @@ CREATE TABLE transactions (
     )
 );
 
-CREATE TABLE reviews_data (
-    id SERIAL PRIMARY KEY
-);
-
 CREATE TABLE service_reviews (
     id SERIAL PRIMARY KEY,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,

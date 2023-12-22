@@ -45,6 +45,7 @@ if Err > StatusCode::InternalError (500)
 ```
 → TO
 GET /api/protected/health_check
+        OR /api/protected/user/health_check
         OR /api/protected/admin/health_check
         OR /api/protected/creator/health_check
         OR /api/protected/consumer/health_check

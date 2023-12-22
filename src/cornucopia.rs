@@ -208,6 +208,112 @@ pub mod types {
 #[allow(unused_imports)]
 #[allow(dead_code)]
 pub mod queries {
+    pub mod creator_access {
+        use cornucopia_async::GenericClient;
+        use futures;
+        use futures::{StreamExt, TryStreamExt};
+        #[derive(serde::Serialize, Debug, Clone, PartialEq, Copy)]
+        pub struct GetCreatorMarksAvg {
+            pub avg: rust_decimal::Decimal,
+            pub count: i64,
+        }
+        pub struct GetCreatorMarksAvgQuery<
+            'a,
+            C: GenericClient,
+            T,
+            const N: usize,
+        > {
+            client: &'a C,
+            params: [&'a (dyn postgres_types::ToSql + Sync); N],
+            stmt: &'a mut cornucopia_async::private::Stmt,
+            extractor: fn(&tokio_postgres::Row) -> GetCreatorMarksAvg,
+            mapper: fn(GetCreatorMarksAvg) -> T,
+        }
+        impl<'a, C, T: 'a, const N: usize> GetCreatorMarksAvgQuery<'a, C, T, N>
+        where
+            C: GenericClient,
+        {
+            pub fn map<R>(
+                self,
+                mapper: fn(GetCreatorMarksAvg) -> R,
+            ) -> GetCreatorMarksAvgQuery<'a, C, R, N> {
+                GetCreatorMarksAvgQuery {
+                    client: self.client,
+                    params: self.params,
+                    stmt: self.stmt,
+                    extractor: self.extractor,
+                    mapper,
+                }
+            }
+            pub async fn one(self) -> Result<T, tokio_postgres::Error> {
+                let stmt = self.stmt.prepare(self.client).await?;
+                let row = self.client.query_one(stmt, &self.params).await?;
+                Ok((self.mapper)((self.extractor)(&row)))
+            }
+            pub async fn all(self) -> Result<Vec<T>, tokio_postgres::Error> {
+                self.iter().await?.try_collect().await
+            }
+            pub async fn opt(self) -> Result<Option<T>, tokio_postgres::Error> {
+                let stmt = self.stmt.prepare(self.client).await?;
+                Ok(self
+                    .client
+                    .query_opt(stmt, &self.params)
+                    .await?
+                    .map(|row| (self.mapper)((self.extractor)(&row))))
+            }
+            pub async fn iter(
+                self,
+            ) -> Result<
+                impl futures::Stream<Item = Result<T, tokio_postgres::Error>> + 'a,
+                tokio_postgres::Error,
+            > {
+                let stmt = self.stmt.prepare(self.client).await?;
+                let it = self
+                    .client
+                    .query_raw(
+                        stmt,
+                        cornucopia_async::private::slice_iter(&self.params),
+                    )
+                    .await?
+                    .map(move |res| {
+                        res.map(|row| (self.mapper)((self.extractor)(&row)))
+                    })
+                    .into_stream();
+                Ok(it)
+            }
+        }
+        pub fn get_creator_marks_avg() -> GetCreatorMarksAvgStmt {
+            GetCreatorMarksAvgStmt(cornucopia_async::private::Stmt::new(
+                "SELECT AVG(mark), COUNT(mark)
+FROM service_reviews
+JOIN service_orders
+ON service_reviews.service_orders_id = service_orders.id
+JOIN services
+ON service_orders.services_id = services.id
+WHERE services.creator_id = $1",
+            ))
+        }
+        pub struct GetCreatorMarksAvgStmt(cornucopia_async::private::Stmt);
+        impl GetCreatorMarksAvgStmt {
+            pub fn bind<'a, C: GenericClient>(
+                &'a mut self,
+                client: &'a C,
+                creator_id: &'a i32,
+            ) -> GetCreatorMarksAvgQuery<'a, C, GetCreatorMarksAvg, 1>
+            {
+                GetCreatorMarksAvgQuery {
+                    client,
+                    params: [creator_id],
+                    stmt: &mut self.0,
+                    extractor: |row| GetCreatorMarksAvg {
+                        avg: row.get(0),
+                        count: row.get(1),
+                    },
+                    mapper: |it| <GetCreatorMarksAvg>::from(it),
+                }
+            }
+        }
+    }
     pub mod open_access {
         use cornucopia_async::GenericClient;
         use futures;
@@ -1124,6 +1230,106 @@ WHERE users.username = $1",
             }
         }
     }
+    pub mod user_access {
+        use cornucopia_async::GenericClient;
+        use futures;
+        use futures::{StreamExt, TryStreamExt};
+        #[derive(serde::Serialize, Debug, Clone, PartialEq, Copy)]
+        pub struct GetUserSettings {
+            pub inbox_messages: bool,
+            pub order_messages: bool,
+            pub order_updates: bool,
+        }
+        pub struct GetUserSettingsQuery<'a, C: GenericClient, T, const N: usize> {
+            client: &'a C,
+            params: [&'a (dyn postgres_types::ToSql + Sync); N],
+            stmt: &'a mut cornucopia_async::private::Stmt,
+            extractor: fn(&tokio_postgres::Row) -> GetUserSettings,
+            mapper: fn(GetUserSettings) -> T,
+        }
+        impl<'a, C, T: 'a, const N: usize> GetUserSettingsQuery<'a, C, T, N>
+        where
+            C: GenericClient,
+        {
+            pub fn map<R>(
+                self,
+                mapper: fn(GetUserSettings) -> R,
+            ) -> GetUserSettingsQuery<'a, C, R, N> {
+                GetUserSettingsQuery {
+                    client: self.client,
+                    params: self.params,
+                    stmt: self.stmt,
+                    extractor: self.extractor,
+                    mapper,
+                }
+            }
+            pub async fn one(self) -> Result<T, tokio_postgres::Error> {
+                let stmt = self.stmt.prepare(self.client).await?;
+                let row = self.client.query_one(stmt, &self.params).await?;
+                Ok((self.mapper)((self.extractor)(&row)))
+            }
+            pub async fn all(self) -> Result<Vec<T>, tokio_postgres::Error> {
+                self.iter().await?.try_collect().await
+            }
+            pub async fn opt(self) -> Result<Option<T>, tokio_postgres::Error> {
+                let stmt = self.stmt.prepare(self.client).await?;
+                Ok(self
+                    .client
+                    .query_opt(stmt, &self.params)
+                    .await?
+                    .map(|row| (self.mapper)((self.extractor)(&row))))
+            }
+            pub async fn iter(
+                self,
+            ) -> Result<
+                impl futures::Stream<Item = Result<T, tokio_postgres::Error>> + 'a,
+                tokio_postgres::Error,
+            > {
+                let stmt = self.stmt.prepare(self.client).await?;
+                let it = self
+                    .client
+                    .query_raw(
+                        stmt,
+                        cornucopia_async::private::slice_iter(&self.params),
+                    )
+                    .await?
+                    .map(move |res| {
+                        res.map(|row| (self.mapper)((self.extractor)(&row)))
+                    })
+                    .into_stream();
+                Ok(it)
+            }
+        }
+        pub fn get_user_settings() -> GetUserSettingsStmt {
+            GetUserSettingsStmt(cornucopia_async::private::Stmt::new(
+                "SELECT inbox_messages, order_messages, order_updates
+FROM user_settings
+JOIN users
+ON users.user_settings_id = user_settings.id
+WHERE users.id = $1",
+            ))
+        }
+        pub struct GetUserSettingsStmt(cornucopia_async::private::Stmt);
+        impl GetUserSettingsStmt {
+            pub fn bind<'a, C: GenericClient>(
+                &'a mut self,
+                client: &'a C,
+                user_id: &'a i32,
+            ) -> GetUserSettingsQuery<'a, C, GetUserSettings, 1> {
+                GetUserSettingsQuery {
+                    client,
+                    params: [user_id],
+                    stmt: &mut self.0,
+                    extractor: |row| GetUserSettings {
+                        inbox_messages: row.get(0),
+                        order_messages: row.get(1),
+                        order_updates: row.get(2),
+                    },
+                    mapper: |it| <GetUserSettings>::from(it),
+                }
+            }
+        }
+    }
     pub mod user_auth_queries {
         use cornucopia_async::GenericClient;
         use futures;
@@ -1403,26 +1609,31 @@ WHERE users.username = $1",
             }
         }
         #[derive(serde::Serialize, Debug, Clone, PartialEq, Copy)]
-        pub struct GetAdminToken {
+        pub struct GetAdminSignupToken {
             pub token: uuid::Uuid,
             pub used: bool,
         }
-        pub struct GetAdminTokenQuery<'a, C: GenericClient, T, const N: usize> {
+        pub struct GetAdminSignupTokenQuery<
+            'a,
+            C: GenericClient,
+            T,
+            const N: usize,
+        > {
             client: &'a C,
             params: [&'a (dyn postgres_types::ToSql + Sync); N],
             stmt: &'a mut cornucopia_async::private::Stmt,
-            extractor: fn(&tokio_postgres::Row) -> GetAdminToken,
-            mapper: fn(GetAdminToken) -> T,
+            extractor: fn(&tokio_postgres::Row) -> GetAdminSignupToken,
+            mapper: fn(GetAdminSignupToken) -> T,
         }
-        impl<'a, C, T: 'a, const N: usize> GetAdminTokenQuery<'a, C, T, N>
+        impl<'a, C, T: 'a, const N: usize> GetAdminSignupTokenQuery<'a, C, T, N>
         where
             C: GenericClient,
         {
             pub fn map<R>(
                 self,
-                mapper: fn(GetAdminToken) -> R,
-            ) -> GetAdminTokenQuery<'a, C, R, N> {
-                GetAdminTokenQuery {
+                mapper: fn(GetAdminSignupToken) -> R,
+            ) -> GetAdminSignupTokenQuery<'a, C, R, N> {
+                GetAdminSignupTokenQuery {
                     client: self.client,
                     params: self.params,
                     stmt: self.stmt,
@@ -1642,29 +1853,30 @@ VALUES ($1)",
                 client.execute(stmt, &[token]).await
             }
         }
-        pub fn get_admin_token() -> GetAdminTokenStmt {
-            GetAdminTokenStmt(cornucopia_async::private::Stmt::new(
+        pub fn get_admin_signup_token() -> GetAdminSignupTokenStmt {
+            GetAdminSignupTokenStmt(cornucopia_async::private::Stmt::new(
                 "SELECT token, used
 FROM admin_signup_tokens
 WHERE token = $1",
             ))
         }
-        pub struct GetAdminTokenStmt(cornucopia_async::private::Stmt);
-        impl GetAdminTokenStmt {
+        pub struct GetAdminSignupTokenStmt(cornucopia_async::private::Stmt);
+        impl GetAdminSignupTokenStmt {
             pub fn bind<'a, C: GenericClient>(
                 &'a mut self,
                 client: &'a C,
                 token: &'a uuid::Uuid,
-            ) -> GetAdminTokenQuery<'a, C, GetAdminToken, 1> {
-                GetAdminTokenQuery {
+            ) -> GetAdminSignupTokenQuery<'a, C, GetAdminSignupToken, 1>
+            {
+                GetAdminSignupTokenQuery {
                     client,
                     params: [token],
                     stmt: &mut self.0,
-                    extractor: |row| GetAdminToken {
+                    extractor: |row| GetAdminSignupToken {
                         token: row.get(0),
                         used: row.get(1),
                     },
-                    mapper: |it| <GetAdminToken>::from(it),
+                    mapper: |it| <GetAdminSignupToken>::from(it),
                 }
             }
         }

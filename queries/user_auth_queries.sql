@@ -23,7 +23,7 @@ WHERE users.id = :user_id;
 INSERT INTO admin_signup_tokens (token)
 VALUES (:token);
 
---! get_admin_token
+--! get_admin_signup_token
 SELECT token, used
 FROM admin_signup_tokens
 WHERE token = :token;
