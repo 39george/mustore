@@ -14,7 +14,7 @@ use secrecy::ExposeSecret;
 use tokio_postgres::NoTls;
 
 #[tokio::test]
-#[ignore]
+// #[ignore]
 async fn fill_with_test_data() {
     let mut rng = rand::thread_rng();
     let mut songs = Vec::new();
@@ -69,6 +69,16 @@ async fn fill_with_test_data() {
             .unwrap();
         users.push(user_id);
 
+        client
+            .query(
+                "
+                INSERT INTO objects (key, avatar_users_id, object_type)
+                VALUES ($1, $2, 'image')",
+                &[&format!("{}_avatar.png", test_user.email), &user_id],
+            )
+            .await
+            .unwrap();
+
         for _ in 1..rng.gen_range(3..30) {
             let song = TestSong::generate_song();
             let product_id: i32 = client
@@ -99,6 +109,27 @@ async fn fill_with_test_data() {
                 )
                 ",
                     &[&product_id, &rng.gen::<Tag>().to_string()],
+                )
+                .await
+                .unwrap();
+            client
+                .query(
+                    "
+                INSERT INTO objects (key, master_songs_id, object_type)
+                VALUES ($1, $2, 'audio')",
+                    &[
+                        &format!("{}_{}_cover.mp3", song.name, song_id),
+                        &song_id,
+                    ],
+                )
+                .await
+                .unwrap();
+            client
+                .query(
+                    "
+                INSERT INTO objects (key, cover_products_id, object_type)
+                VALUES ($1, $2, 'image')",
+                    &[&format!("{}_cover.png", product_id), &product_id],
                 )
                 .await
                 .unwrap();

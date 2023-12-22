@@ -53,3 +53,17 @@ ORDER BY
     CASE WHEN :sort_by = 'old_first' THEN created_at END ASC NULLS LAST,
     CASE WHEN :sort_by = 'relevance' THEN relevance_score END DESC
 LIMIT :amount;
+
+--! get_new_songs : (cover_url?)
+SELECT 
+song_id,
+created_at,
+cover_url,
+name,
+author,
+likes,
+price
+FROM available_songs s
+WHERE current_timestamp - created_at < '2 weeks'::interval
+ORDER BY created_at DESC
+LIMIT :amount;

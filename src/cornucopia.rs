@@ -1,193 +1,592 @@
 // This file was generated with `cornucopia`. Do not modify.
 
-#[allow(clippy :: all, clippy :: pedantic)] #[allow(unused_variables)]
-#[allow(unused_imports)] #[allow(dead_code)] pub mod types { pub mod public { #[derive(serde::Serialize, Debug, Clone, Copy, PartialEq, Eq)]
-#[allow(non_camel_case_types)] pub enum Musickey { a_minor,a_major,b_flat_minor,b_flat_major,b_minor,b_major,c_minor,c_major,c_sharp_minor,c_sharp_major,d_minor,d_major,e_flat_minor,e_flat_major,e_minor,e_major,f_minor,f_major,f_sharp_minor,f_sharp_major,g_minor,g_major,a_flat_minor,a_flat_major,}impl < 'a > postgres_types :: ToSql for Musickey
-{
-    fn
-    to_sql(& self, ty : & postgres_types :: Type, buf : & mut postgres_types
-    :: private :: BytesMut,) -> Result < postgres_types :: IsNull, Box < dyn
-    std :: error :: Error + Sync + Send >, >
-    {
-        let s = match * self { Musickey :: a_minor => "a_minor",Musickey :: a_major => "a_major",Musickey :: b_flat_minor => "b_flat_minor",Musickey :: b_flat_major => "b_flat_major",Musickey :: b_minor => "b_minor",Musickey :: b_major => "b_major",Musickey :: c_minor => "c_minor",Musickey :: c_major => "c_major",Musickey :: c_sharp_minor => "c_sharp_minor",Musickey :: c_sharp_major => "c_sharp_major",Musickey :: d_minor => "d_minor",Musickey :: d_major => "d_major",Musickey :: e_flat_minor => "e_flat_minor",Musickey :: e_flat_major => "e_flat_major",Musickey :: e_minor => "e_minor",Musickey :: e_major => "e_major",Musickey :: f_minor => "f_minor",Musickey :: f_major => "f_major",Musickey :: f_sharp_minor => "f_sharp_minor",Musickey :: f_sharp_major => "f_sharp_major",Musickey :: g_minor => "g_minor",Musickey :: g_major => "g_major",Musickey :: a_flat_minor => "a_flat_minor",Musickey :: a_flat_major => "a_flat_major",}
-        ; buf.extend_from_slice(s.as_bytes()) ; std :: result :: Result ::
-        Ok(postgres_types :: IsNull :: No)
-    } fn accepts(ty : & postgres_types :: Type) -> bool
-    {
-        if ty.name() != "musickey" { return false ; } match * ty.kind()
-        {
-            postgres_types :: Kind :: Enum(ref variants) =>
+#[allow(clippy::all, clippy::pedantic)]
+#[allow(unused_variables)]
+#[allow(unused_imports)]
+#[allow(dead_code)]
+pub mod types {
+    pub mod public {
+        #[derive(serde::Serialize, Debug, Clone, Copy, PartialEq, Eq)]
+        #[allow(non_camel_case_types)]
+        pub enum Musickey {
+            a_minor,
+            a_major,
+            b_flat_minor,
+            b_flat_major,
+            b_minor,
+            b_major,
+            c_minor,
+            c_major,
+            c_sharp_minor,
+            c_sharp_major,
+            d_minor,
+            d_major,
+            e_flat_minor,
+            e_flat_major,
+            e_minor,
+            e_major,
+            f_minor,
+            f_major,
+            f_sharp_minor,
+            f_sharp_major,
+            g_minor,
+            g_major,
+            a_flat_minor,
+            a_flat_major,
+        }
+        impl<'a> postgres_types::ToSql for Musickey {
+            fn to_sql(
+                &self,
+                ty: &postgres_types::Type,
+                buf: &mut postgres_types::private::BytesMut,
+            ) -> Result<
+                postgres_types::IsNull,
+                Box<dyn std::error::Error + Sync + Send>,
+            > {
+                let s = match *self {
+                    Musickey::a_minor => "a_minor",
+                    Musickey::a_major => "a_major",
+                    Musickey::b_flat_minor => "b_flat_minor",
+                    Musickey::b_flat_major => "b_flat_major",
+                    Musickey::b_minor => "b_minor",
+                    Musickey::b_major => "b_major",
+                    Musickey::c_minor => "c_minor",
+                    Musickey::c_major => "c_major",
+                    Musickey::c_sharp_minor => "c_sharp_minor",
+                    Musickey::c_sharp_major => "c_sharp_major",
+                    Musickey::d_minor => "d_minor",
+                    Musickey::d_major => "d_major",
+                    Musickey::e_flat_minor => "e_flat_minor",
+                    Musickey::e_flat_major => "e_flat_major",
+                    Musickey::e_minor => "e_minor",
+                    Musickey::e_major => "e_major",
+                    Musickey::f_minor => "f_minor",
+                    Musickey::f_major => "f_major",
+                    Musickey::f_sharp_minor => "f_sharp_minor",
+                    Musickey::f_sharp_major => "f_sharp_major",
+                    Musickey::g_minor => "g_minor",
+                    Musickey::g_major => "g_major",
+                    Musickey::a_flat_minor => "a_flat_minor",
+                    Musickey::a_flat_major => "a_flat_major",
+                };
+                buf.extend_from_slice(s.as_bytes());
+                std::result::Result::Ok(postgres_types::IsNull::No)
+            }
+            fn accepts(ty: &postgres_types::Type) -> bool {
+                if ty.name() != "musickey" {
+                    return false;
+                }
+                match *ty.kind() {
+                    postgres_types::Kind::Enum(ref variants) => {
+                        if variants.len() != 24 {
+                            return false;
+                        }
+                        variants.iter().all(|v| match &**v {
+                            "a_minor" => true,
+                            "a_major" => true,
+                            "b_flat_minor" => true,
+                            "b_flat_major" => true,
+                            "b_minor" => true,
+                            "b_major" => true,
+                            "c_minor" => true,
+                            "c_major" => true,
+                            "c_sharp_minor" => true,
+                            "c_sharp_major" => true,
+                            "d_minor" => true,
+                            "d_major" => true,
+                            "e_flat_minor" => true,
+                            "e_flat_major" => true,
+                            "e_minor" => true,
+                            "e_major" => true,
+                            "f_minor" => true,
+                            "f_major" => true,
+                            "f_sharp_minor" => true,
+                            "f_sharp_major" => true,
+                            "g_minor" => true,
+                            "g_major" => true,
+                            "a_flat_minor" => true,
+                            "a_flat_major" => true,
+                            _ => false,
+                        })
+                    }
+                    _ => false,
+                }
+            }
+            fn to_sql_checked(
+                &self,
+                ty: &postgres_types::Type,
+                out: &mut postgres_types::private::BytesMut,
+            ) -> Result<
+                postgres_types::IsNull,
+                Box<dyn std::error::Error + Sync + Send>,
+            > {
+                postgres_types::__to_sql_checked(self, ty, out)
+            }
+        }
+        impl<'a> postgres_types::FromSql<'a> for Musickey {
+            fn from_sql(
+                ty: &postgres_types::Type,
+                buf: &'a [u8],
+            ) -> Result<Musickey, Box<dyn std::error::Error + Sync + Send>>
             {
-                if variants.len() != 24 { return false ; }
-                variants.iter().all(| v | match & * * v
-                { "a_minor" => true,"a_major" => true,"b_flat_minor" => true,"b_flat_major" => true,"b_minor" => true,"b_major" => true,"c_minor" => true,"c_major" => true,"c_sharp_minor" => true,"c_sharp_major" => true,"d_minor" => true,"d_major" => true,"e_flat_minor" => true,"e_flat_major" => true,"e_minor" => true,"e_major" => true,"f_minor" => true,"f_major" => true,"f_sharp_minor" => true,"f_sharp_major" => true,"g_minor" => true,"g_major" => true,"a_flat_minor" => true,"a_flat_major" => true,_ => false, })
-            } _ => false,
-        }
-    } fn
-    to_sql_checked(& self, ty : & postgres_types :: Type, out : & mut
-    postgres_types :: private :: BytesMut,) -> Result < postgres_types ::
-    IsNull, Box < dyn std :: error :: Error + Sync + Send >>
-    { postgres_types :: __to_sql_checked(self, ty, out) }
-} impl < 'a > postgres_types :: FromSql < 'a > for Musickey
-{
-    fn from_sql(ty : & postgres_types :: Type, buf : & 'a [u8],) -> Result <
-    Musickey, Box < dyn std :: error :: Error + Sync + Send >, >
-    {
-        match std :: str :: from_utf8(buf) ?
-        {
-            "a_minor" => Ok(Musickey :: a_minor),"a_major" => Ok(Musickey :: a_major),"b_flat_minor" => Ok(Musickey :: b_flat_minor),"b_flat_major" => Ok(Musickey :: b_flat_major),"b_minor" => Ok(Musickey :: b_minor),"b_major" => Ok(Musickey :: b_major),"c_minor" => Ok(Musickey :: c_minor),"c_major" => Ok(Musickey :: c_major),"c_sharp_minor" => Ok(Musickey :: c_sharp_minor),"c_sharp_major" => Ok(Musickey :: c_sharp_major),"d_minor" => Ok(Musickey :: d_minor),"d_major" => Ok(Musickey :: d_major),"e_flat_minor" => Ok(Musickey :: e_flat_minor),"e_flat_major" => Ok(Musickey :: e_flat_major),"e_minor" => Ok(Musickey :: e_minor),"e_major" => Ok(Musickey :: e_major),"f_minor" => Ok(Musickey :: f_minor),"f_major" => Ok(Musickey :: f_major),"f_sharp_minor" => Ok(Musickey :: f_sharp_minor),"f_sharp_major" => Ok(Musickey :: f_sharp_major),"g_minor" => Ok(Musickey :: g_minor),"g_major" => Ok(Musickey :: g_major),"a_flat_minor" => Ok(Musickey :: a_flat_minor),"a_flat_major" => Ok(Musickey :: a_flat_major),s => Result ::
-            Err(Into :: into(format! ("invalid variant `{}`", s))),
-        }
-    } fn accepts(ty : & postgres_types :: Type) -> bool
-    {
-        if ty.name() != "musickey" { return false ; } match * ty.kind()
-        {
-            postgres_types :: Kind :: Enum(ref variants) =>
-            {
-                if variants.len() != 24 { return false ; }
-                variants.iter().all(| v | match & * * v
-                { "a_minor" => true,"a_major" => true,"b_flat_minor" => true,"b_flat_major" => true,"b_minor" => true,"b_major" => true,"c_minor" => true,"c_major" => true,"c_sharp_minor" => true,"c_sharp_major" => true,"d_minor" => true,"d_major" => true,"e_flat_minor" => true,"e_flat_major" => true,"e_minor" => true,"e_major" => true,"f_minor" => true,"f_major" => true,"f_sharp_minor" => true,"f_sharp_major" => true,"g_minor" => true,"g_major" => true,"a_flat_minor" => true,"a_flat_major" => true,_ => false, })
-            } _ => false,
+                match std::str::from_utf8(buf)? {
+                    "a_minor" => Ok(Musickey::a_minor),
+                    "a_major" => Ok(Musickey::a_major),
+                    "b_flat_minor" => Ok(Musickey::b_flat_minor),
+                    "b_flat_major" => Ok(Musickey::b_flat_major),
+                    "b_minor" => Ok(Musickey::b_minor),
+                    "b_major" => Ok(Musickey::b_major),
+                    "c_minor" => Ok(Musickey::c_minor),
+                    "c_major" => Ok(Musickey::c_major),
+                    "c_sharp_minor" => Ok(Musickey::c_sharp_minor),
+                    "c_sharp_major" => Ok(Musickey::c_sharp_major),
+                    "d_minor" => Ok(Musickey::d_minor),
+                    "d_major" => Ok(Musickey::d_major),
+                    "e_flat_minor" => Ok(Musickey::e_flat_minor),
+                    "e_flat_major" => Ok(Musickey::e_flat_major),
+                    "e_minor" => Ok(Musickey::e_minor),
+                    "e_major" => Ok(Musickey::e_major),
+                    "f_minor" => Ok(Musickey::f_minor),
+                    "f_major" => Ok(Musickey::f_major),
+                    "f_sharp_minor" => Ok(Musickey::f_sharp_minor),
+                    "f_sharp_major" => Ok(Musickey::f_sharp_major),
+                    "g_minor" => Ok(Musickey::g_minor),
+                    "g_major" => Ok(Musickey::g_major),
+                    "a_flat_minor" => Ok(Musickey::a_flat_minor),
+                    "a_flat_major" => Ok(Musickey::a_flat_major),
+                    s => Result::Err(Into::into(format!(
+                        "invalid variant `{}`",
+                        s
+                    ))),
+                }
+            }
+            fn accepts(ty: &postgres_types::Type) -> bool {
+                if ty.name() != "musickey" {
+                    return false;
+                }
+                match *ty.kind() {
+                    postgres_types::Kind::Enum(ref variants) => {
+                        if variants.len() != 24 {
+                            return false;
+                        }
+                        variants.iter().all(|v| match &**v {
+                            "a_minor" => true,
+                            "a_major" => true,
+                            "b_flat_minor" => true,
+                            "b_flat_major" => true,
+                            "b_minor" => true,
+                            "b_major" => true,
+                            "c_minor" => true,
+                            "c_major" => true,
+                            "c_sharp_minor" => true,
+                            "c_sharp_major" => true,
+                            "d_minor" => true,
+                            "d_major" => true,
+                            "e_flat_minor" => true,
+                            "e_flat_major" => true,
+                            "e_minor" => true,
+                            "e_major" => true,
+                            "f_minor" => true,
+                            "f_major" => true,
+                            "f_sharp_minor" => true,
+                            "f_sharp_major" => true,
+                            "g_minor" => true,
+                            "g_major" => true,
+                            "a_flat_minor" => true,
+                            "a_flat_major" => true,
+                            _ => false,
+                        })
+                    }
+                    _ => false,
+                }
+            }
         }
     }
-} }}#[allow(clippy :: all, clippy :: pedantic)] #[allow(unused_variables)]
-#[allow(unused_imports)] #[allow(dead_code)] pub mod queries
-{ pub mod open_access
-{ use futures::{{StreamExt, TryStreamExt}};use futures; use cornucopia_async::GenericClient;#[derive( Debug)] pub struct GetSongsParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::ArraySql<Item = i16>,T3 : cornucopia_async::ArraySql<Item = super::super::types::public::Musickey>,T4 : cornucopia_async::StringSql,T5 : cornucopia_async::ArraySql<Item = T4>,T6 : cornucopia_async::StringSql,T7 : cornucopia_async::ArraySql<Item = T6>,T8 : cornucopia_async::StringSql,> { pub sex : Option<T1>,pub tempo : Option<T2>,pub key : Option<T3>,pub genre : Option<T5>,pub tag : Option<T7>,pub sort_by : T8,pub amount : i64,}#[derive(serde::Serialize, Debug, Clone, PartialEq, )] pub struct GetStats
-{ pub table_name : String,pub count : i64,}pub struct GetStatsBorrowed < 'a >
-{ pub table_name : &'a str,pub count : i64,} impl < 'a > From < GetStatsBorrowed <
-'a >> for GetStats
-{
-    fn
-    from(GetStatsBorrowed { table_name,count,} : GetStatsBorrowed < 'a >)
-    -> Self { Self { table_name: table_name.into(),count,} }
-}pub struct GetStatsQuery < 'a, C : GenericClient, T, const N : usize >
-{
-    client : & 'a  C, params :
-    [& 'a (dyn postgres_types :: ToSql + Sync) ; N], stmt : & 'a mut cornucopia_async
-    :: private :: Stmt, extractor : fn(& tokio_postgres :: Row) -> GetStatsBorrowed,
-    mapper : fn(GetStatsBorrowed) -> T,
-} impl < 'a, C, T : 'a, const N : usize > GetStatsQuery < 'a, C, T, N >
-where C : GenericClient
-{
-    pub fn map < R > (self, mapper : fn(GetStatsBorrowed) -> R) -> GetStatsQuery
-    < 'a, C, R, N >
-    {
-        GetStatsQuery
-        {
-            client : self.client, params : self.params, stmt : self.stmt,
-            extractor : self.extractor, mapper,
+}
+#[allow(clippy::all, clippy::pedantic)]
+#[allow(unused_variables)]
+#[allow(unused_imports)]
+#[allow(dead_code)]
+pub mod queries {
+    pub mod open_access {
+        use cornucopia_async::GenericClient;
+        use futures;
+        use futures::{StreamExt, TryStreamExt};
+        #[derive(Debug)]
+        pub struct GetSongsParams<
+            T1: cornucopia_async::StringSql,
+            T2: cornucopia_async::ArraySql<Item = i16>,
+            T3: cornucopia_async::ArraySql<
+                Item = super::super::types::public::Musickey,
+            >,
+            T4: cornucopia_async::StringSql,
+            T5: cornucopia_async::ArraySql<Item = T4>,
+            T6: cornucopia_async::StringSql,
+            T7: cornucopia_async::ArraySql<Item = T6>,
+            T8: cornucopia_async::StringSql,
+        > {
+            pub sex: Option<T1>,
+            pub tempo: Option<T2>,
+            pub key: Option<T3>,
+            pub genre: Option<T5>,
+            pub tag: Option<T7>,
+            pub sort_by: T8,
+            pub amount: i64,
         }
-    } pub async fn one(self) -> Result < T, tokio_postgres :: Error >
-    {
-        let stmt = self.stmt.prepare(self.client) .await ? ; let row =
-        self.client.query_one(stmt, & self.params) .await ? ;
-        Ok((self.mapper) ((self.extractor) (& row)))
-    } pub async fn all(self) -> Result < Vec < T >, tokio_postgres :: Error >
-    { self.iter() .await ?.try_collect().await } pub async fn opt(self) -> Result
-    < Option < T >, tokio_postgres :: Error >
-    {
-        let stmt = self.stmt.prepare(self.client) .await ? ;
-        Ok(self.client.query_opt(stmt, & self.params) .await
-        ?.map(| row | (self.mapper) ((self.extractor) (& row))))
-    } pub async fn iter(self,) -> Result < impl futures::Stream < Item = Result
-    < T, tokio_postgres :: Error >> + 'a, tokio_postgres :: Error >
-    {
-        let stmt = self.stmt.prepare(self.client) .await ? ; let it =
-        self.client.query_raw(stmt, cornucopia_async :: private ::
-        slice_iter(& self.params)) .await ?
-        .map(move | res |
-        res.map(| row | (self.mapper) ((self.extractor) (& row)))) .into_stream() ;
-        Ok(it)
-    }
-}pub struct StringQuery < 'a, C : GenericClient, T, const N : usize >
-{
-    client : & 'a  C, params :
-    [& 'a (dyn postgres_types :: ToSql + Sync) ; N], stmt : & 'a mut cornucopia_async
-    :: private :: Stmt, extractor : fn(& tokio_postgres :: Row) -> & str,
-    mapper : fn(& str) -> T,
-} impl < 'a, C, T : 'a, const N : usize > StringQuery < 'a, C, T, N >
-where C : GenericClient
-{
-    pub fn map < R > (self, mapper : fn(& str) -> R) -> StringQuery
-    < 'a, C, R, N >
-    {
-        StringQuery
-        {
-            client : self.client, params : self.params, stmt : self.stmt,
-            extractor : self.extractor, mapper,
+        #[derive(serde::Serialize, Debug, Clone, PartialEq)]
+        pub struct GetStats {
+            pub table_name: String,
+            pub count: i64,
         }
-    } pub async fn one(self) -> Result < T, tokio_postgres :: Error >
-    {
-        let stmt = self.stmt.prepare(self.client) .await ? ; let row =
-        self.client.query_one(stmt, & self.params) .await ? ;
-        Ok((self.mapper) ((self.extractor) (& row)))
-    } pub async fn all(self) -> Result < Vec < T >, tokio_postgres :: Error >
-    { self.iter() .await ?.try_collect().await } pub async fn opt(self) -> Result
-    < Option < T >, tokio_postgres :: Error >
-    {
-        let stmt = self.stmt.prepare(self.client) .await ? ;
-        Ok(self.client.query_opt(stmt, & self.params) .await
-        ?.map(| row | (self.mapper) ((self.extractor) (& row))))
-    } pub async fn iter(self,) -> Result < impl futures::Stream < Item = Result
-    < T, tokio_postgres :: Error >> + 'a, tokio_postgres :: Error >
-    {
-        let stmt = self.stmt.prepare(self.client) .await ? ; let it =
-        self.client.query_raw(stmt, cornucopia_async :: private ::
-        slice_iter(& self.params)) .await ?
-        .map(move | res |
-        res.map(| row | (self.mapper) ((self.extractor) (& row)))) .into_stream() ;
-        Ok(it)
-    }
-}#[derive(serde::Serialize, Debug, Clone, PartialEq, )] pub struct GetSongs
-{ pub song_id : i32,pub created_at : time::OffsetDateTime,pub cover_url : Option<String>,pub name : String,pub author : String,pub likes : i64,pub listenings : i64,pub relevance_score : rust_decimal::Decimal,pub price : rust_decimal::Decimal,}pub struct GetSongsBorrowed < 'a >
-{ pub song_id : i32,pub created_at : time::OffsetDateTime,pub cover_url : Option<&'a str>,pub name : &'a str,pub author : &'a str,pub likes : i64,pub listenings : i64,pub relevance_score : rust_decimal::Decimal,pub price : rust_decimal::Decimal,} impl < 'a > From < GetSongsBorrowed <
-'a >> for GetSongs
-{
-    fn
-    from(GetSongsBorrowed { song_id,created_at,cover_url,name,author,likes,listenings,relevance_score,price,} : GetSongsBorrowed < 'a >)
-    -> Self { Self { song_id,created_at,cover_url: cover_url.map(|v| v.into()),name: name.into(),author: author.into(),likes,listenings,relevance_score,price,} }
-}pub struct GetSongsQuery < 'a, C : GenericClient, T, const N : usize >
-{
-    client : & 'a  C, params :
-    [& 'a (dyn postgres_types :: ToSql + Sync) ; N], stmt : & 'a mut cornucopia_async
-    :: private :: Stmt, extractor : fn(& tokio_postgres :: Row) -> GetSongsBorrowed,
-    mapper : fn(GetSongsBorrowed) -> T,
-} impl < 'a, C, T : 'a, const N : usize > GetSongsQuery < 'a, C, T, N >
-where C : GenericClient
-{
-    pub fn map < R > (self, mapper : fn(GetSongsBorrowed) -> R) -> GetSongsQuery
-    < 'a, C, R, N >
-    {
-        GetSongsQuery
-        {
-            client : self.client, params : self.params, stmt : self.stmt,
-            extractor : self.extractor, mapper,
+        pub struct GetStatsBorrowed<'a> {
+            pub table_name: &'a str,
+            pub count: i64,
         }
-    } pub async fn one(self) -> Result < T, tokio_postgres :: Error >
-    {
-        let stmt = self.stmt.prepare(self.client) .await ? ; let row =
-        self.client.query_one(stmt, & self.params) .await ? ;
-        Ok((self.mapper) ((self.extractor) (& row)))
-    } pub async fn all(self) -> Result < Vec < T >, tokio_postgres :: Error >
-    { self.iter() .await ?.try_collect().await } pub async fn opt(self) -> Result
-    < Option < T >, tokio_postgres :: Error >
-    {
-        let stmt = self.stmt.prepare(self.client) .await ? ;
-        Ok(self.client.query_opt(stmt, & self.params) .await
-        ?.map(| row | (self.mapper) ((self.extractor) (& row))))
-    } pub async fn iter(self,) -> Result < impl futures::Stream < Item = Result
-    < T, tokio_postgres :: Error >> + 'a, tokio_postgres :: Error >
-    {
-        let stmt = self.stmt.prepare(self.client) .await ? ; let it =
-        self.client.query_raw(stmt, cornucopia_async :: private ::
-        slice_iter(& self.params)) .await ?
-        .map(move | res |
-        res.map(| row | (self.mapper) ((self.extractor) (& row)))) .into_stream() ;
-        Ok(it)
-    }
-}pub fn get_stats() -> GetStatsStmt
-{ GetStatsStmt(cornucopia_async :: private :: Stmt :: new("(
+        impl<'a> From<GetStatsBorrowed<'a>> for GetStats {
+            fn from(
+                GetStatsBorrowed { table_name, count }: GetStatsBorrowed<'a>,
+            ) -> Self {
+                Self {
+                    table_name: table_name.into(),
+                    count,
+                }
+            }
+        }
+        pub struct GetStatsQuery<'a, C: GenericClient, T, const N: usize> {
+            client: &'a C,
+            params: [&'a (dyn postgres_types::ToSql + Sync); N],
+            stmt: &'a mut cornucopia_async::private::Stmt,
+            extractor: fn(&tokio_postgres::Row) -> GetStatsBorrowed,
+            mapper: fn(GetStatsBorrowed) -> T,
+        }
+        impl<'a, C, T: 'a, const N: usize> GetStatsQuery<'a, C, T, N>
+        where
+            C: GenericClient,
+        {
+            pub fn map<R>(
+                self,
+                mapper: fn(GetStatsBorrowed) -> R,
+            ) -> GetStatsQuery<'a, C, R, N> {
+                GetStatsQuery {
+                    client: self.client,
+                    params: self.params,
+                    stmt: self.stmt,
+                    extractor: self.extractor,
+                    mapper,
+                }
+            }
+            pub async fn one(self) -> Result<T, tokio_postgres::Error> {
+                let stmt = self.stmt.prepare(self.client).await?;
+                let row = self.client.query_one(stmt, &self.params).await?;
+                Ok((self.mapper)((self.extractor)(&row)))
+            }
+            pub async fn all(self) -> Result<Vec<T>, tokio_postgres::Error> {
+                self.iter().await?.try_collect().await
+            }
+            pub async fn opt(self) -> Result<Option<T>, tokio_postgres::Error> {
+                let stmt = self.stmt.prepare(self.client).await?;
+                Ok(self
+                    .client
+                    .query_opt(stmt, &self.params)
+                    .await?
+                    .map(|row| (self.mapper)((self.extractor)(&row))))
+            }
+            pub async fn iter(
+                self,
+            ) -> Result<
+                impl futures::Stream<Item = Result<T, tokio_postgres::Error>> + 'a,
+                tokio_postgres::Error,
+            > {
+                let stmt = self.stmt.prepare(self.client).await?;
+                let it = self
+                    .client
+                    .query_raw(
+                        stmt,
+                        cornucopia_async::private::slice_iter(&self.params),
+                    )
+                    .await?
+                    .map(move |res| {
+                        res.map(|row| (self.mapper)((self.extractor)(&row)))
+                    })
+                    .into_stream();
+                Ok(it)
+            }
+        }
+        pub struct StringQuery<'a, C: GenericClient, T, const N: usize> {
+            client: &'a C,
+            params: [&'a (dyn postgres_types::ToSql + Sync); N],
+            stmt: &'a mut cornucopia_async::private::Stmt,
+            extractor: fn(&tokio_postgres::Row) -> &str,
+            mapper: fn(&str) -> T,
+        }
+        impl<'a, C, T: 'a, const N: usize> StringQuery<'a, C, T, N>
+        where
+            C: GenericClient,
+        {
+            pub fn map<R>(
+                self,
+                mapper: fn(&str) -> R,
+            ) -> StringQuery<'a, C, R, N> {
+                StringQuery {
+                    client: self.client,
+                    params: self.params,
+                    stmt: self.stmt,
+                    extractor: self.extractor,
+                    mapper,
+                }
+            }
+            pub async fn one(self) -> Result<T, tokio_postgres::Error> {
+                let stmt = self.stmt.prepare(self.client).await?;
+                let row = self.client.query_one(stmt, &self.params).await?;
+                Ok((self.mapper)((self.extractor)(&row)))
+            }
+            pub async fn all(self) -> Result<Vec<T>, tokio_postgres::Error> {
+                self.iter().await?.try_collect().await
+            }
+            pub async fn opt(self) -> Result<Option<T>, tokio_postgres::Error> {
+                let stmt = self.stmt.prepare(self.client).await?;
+                Ok(self
+                    .client
+                    .query_opt(stmt, &self.params)
+                    .await?
+                    .map(|row| (self.mapper)((self.extractor)(&row))))
+            }
+            pub async fn iter(
+                self,
+            ) -> Result<
+                impl futures::Stream<Item = Result<T, tokio_postgres::Error>> + 'a,
+                tokio_postgres::Error,
+            > {
+                let stmt = self.stmt.prepare(self.client).await?;
+                let it = self
+                    .client
+                    .query_raw(
+                        stmt,
+                        cornucopia_async::private::slice_iter(&self.params),
+                    )
+                    .await?
+                    .map(move |res| {
+                        res.map(|row| (self.mapper)((self.extractor)(&row)))
+                    })
+                    .into_stream();
+                Ok(it)
+            }
+        }
+        #[derive(serde::Serialize, Debug, Clone, PartialEq)]
+        pub struct GetSongs {
+            pub song_id: i32,
+            pub created_at: time::OffsetDateTime,
+            pub cover_url: Option<String>,
+            pub name: String,
+            pub author: String,
+            pub likes: i64,
+            pub listenings: i64,
+            pub relevance_score: rust_decimal::Decimal,
+            pub price: rust_decimal::Decimal,
+        }
+        pub struct GetSongsBorrowed<'a> {
+            pub song_id: i32,
+            pub created_at: time::OffsetDateTime,
+            pub cover_url: Option<&'a str>,
+            pub name: &'a str,
+            pub author: &'a str,
+            pub likes: i64,
+            pub listenings: i64,
+            pub relevance_score: rust_decimal::Decimal,
+            pub price: rust_decimal::Decimal,
+        }
+        impl<'a> From<GetSongsBorrowed<'a>> for GetSongs {
+            fn from(
+                GetSongsBorrowed {
+                    song_id,
+                    created_at,
+                    cover_url,
+                    name,
+                    author,
+                    likes,
+                    listenings,
+                    relevance_score,
+                    price,
+                }: GetSongsBorrowed<'a>,
+            ) -> Self {
+                Self {
+                    song_id,
+                    created_at,
+                    cover_url: cover_url.map(|v| v.into()),
+                    name: name.into(),
+                    author: author.into(),
+                    likes,
+                    listenings,
+                    relevance_score,
+                    price,
+                }
+            }
+        }
+        pub struct GetSongsQuery<'a, C: GenericClient, T, const N: usize> {
+            client: &'a C,
+            params: [&'a (dyn postgres_types::ToSql + Sync); N],
+            stmt: &'a mut cornucopia_async::private::Stmt,
+            extractor: fn(&tokio_postgres::Row) -> GetSongsBorrowed,
+            mapper: fn(GetSongsBorrowed) -> T,
+        }
+        impl<'a, C, T: 'a, const N: usize> GetSongsQuery<'a, C, T, N>
+        where
+            C: GenericClient,
+        {
+            pub fn map<R>(
+                self,
+                mapper: fn(GetSongsBorrowed) -> R,
+            ) -> GetSongsQuery<'a, C, R, N> {
+                GetSongsQuery {
+                    client: self.client,
+                    params: self.params,
+                    stmt: self.stmt,
+                    extractor: self.extractor,
+                    mapper,
+                }
+            }
+            pub async fn one(self) -> Result<T, tokio_postgres::Error> {
+                let stmt = self.stmt.prepare(self.client).await?;
+                let row = self.client.query_one(stmt, &self.params).await?;
+                Ok((self.mapper)((self.extractor)(&row)))
+            }
+            pub async fn all(self) -> Result<Vec<T>, tokio_postgres::Error> {
+                self.iter().await?.try_collect().await
+            }
+            pub async fn opt(self) -> Result<Option<T>, tokio_postgres::Error> {
+                let stmt = self.stmt.prepare(self.client).await?;
+                Ok(self
+                    .client
+                    .query_opt(stmt, &self.params)
+                    .await?
+                    .map(|row| (self.mapper)((self.extractor)(&row))))
+            }
+            pub async fn iter(
+                self,
+            ) -> Result<
+                impl futures::Stream<Item = Result<T, tokio_postgres::Error>> + 'a,
+                tokio_postgres::Error,
+            > {
+                let stmt = self.stmt.prepare(self.client).await?;
+                let it = self
+                    .client
+                    .query_raw(
+                        stmt,
+                        cornucopia_async::private::slice_iter(&self.params),
+                    )
+                    .await?
+                    .map(move |res| {
+                        res.map(|row| (self.mapper)((self.extractor)(&row)))
+                    })
+                    .into_stream();
+                Ok(it)
+            }
+        }
+        #[derive(serde::Serialize, Debug, Clone, PartialEq)]
+        pub struct GetNewSongs {
+            pub song_id: i32,
+            pub created_at: time::OffsetDateTime,
+            pub cover_url: Option<String>,
+            pub name: String,
+            pub author: String,
+            pub likes: i64,
+            pub price: rust_decimal::Decimal,
+        }
+        pub struct GetNewSongsBorrowed<'a> {
+            pub song_id: i32,
+            pub created_at: time::OffsetDateTime,
+            pub cover_url: Option<&'a str>,
+            pub name: &'a str,
+            pub author: &'a str,
+            pub likes: i64,
+            pub price: rust_decimal::Decimal,
+        }
+        impl<'a> From<GetNewSongsBorrowed<'a>> for GetNewSongs {
+            fn from(
+                GetNewSongsBorrowed {
+                    song_id,
+                    created_at,
+                    cover_url,
+                    name,
+                    author,
+                    likes,
+                    price,
+                }: GetNewSongsBorrowed<'a>,
+            ) -> Self {
+                Self {
+                    song_id,
+                    created_at,
+                    cover_url: cover_url.map(|v| v.into()),
+                    name: name.into(),
+                    author: author.into(),
+                    likes,
+                    price,
+                }
+            }
+        }
+        pub struct GetNewSongsQuery<'a, C: GenericClient, T, const N: usize> {
+            client: &'a C,
+            params: [&'a (dyn postgres_types::ToSql + Sync); N],
+            stmt: &'a mut cornucopia_async::private::Stmt,
+            extractor: fn(&tokio_postgres::Row) -> GetNewSongsBorrowed,
+            mapper: fn(GetNewSongsBorrowed) -> T,
+        }
+        impl<'a, C, T: 'a, const N: usize> GetNewSongsQuery<'a, C, T, N>
+        where
+            C: GenericClient,
+        {
+            pub fn map<R>(
+                self,
+                mapper: fn(GetNewSongsBorrowed) -> R,
+            ) -> GetNewSongsQuery<'a, C, R, N> {
+                GetNewSongsQuery {
+                    client: self.client,
+                    params: self.params,
+                    stmt: self.stmt,
+                    extractor: self.extractor,
+                    mapper,
+                }
+            }
+            pub async fn one(self) -> Result<T, tokio_postgres::Error> {
+                let stmt = self.stmt.prepare(self.client).await?;
+                let row = self.client.query_one(stmt, &self.params).await?;
+                Ok((self.mapper)((self.extractor)(&row)))
+            }
+            pub async fn all(self) -> Result<Vec<T>, tokio_postgres::Error> {
+                self.iter().await?.try_collect().await
+            }
+            pub async fn opt(self) -> Result<Option<T>, tokio_postgres::Error> {
+                let stmt = self.stmt.prepare(self.client).await?;
+                Ok(self
+                    .client
+                    .query_opt(stmt, &self.params)
+                    .await?
+                    .map(|row| (self.mapper)((self.extractor)(&row))))
+            }
+            pub async fn iter(
+                self,
+            ) -> Result<
+                impl futures::Stream<Item = Result<T, tokio_postgres::Error>> + 'a,
+                tokio_postgres::Error,
+            > {
+                let stmt = self.stmt.prepare(self.client).await?;
+                let it = self
+                    .client
+                    .query_raw(
+                        stmt,
+                        cornucopia_async::private::slice_iter(&self.params),
+                    )
+                    .await?
+                    .map(move |res| {
+                        res.map(|row| (self.mapper)((self.extractor)(&row)))
+                    })
+                    .into_stream();
+                Ok(it)
+            }
+        }
+        pub fn get_stats() -> GetStatsStmt {
+            GetStatsStmt(cornucopia_async::private::Stmt::new(
+                "(
     SELECT 'songs' AS table_name, COUNT(*) as count
     FROM songs
 )
@@ -205,46 +604,70 @@ UNION ALL
 (
     SELECT 'lyrics' AS table_name, COUNT(*) as count
     FROM lyrics
-)")) } pub
-struct GetStatsStmt(cornucopia_async :: private :: Stmt) ; impl
-GetStatsStmt { pub fn bind < 'a, C : GenericClient, >
-(& 'a mut self, client : & 'a  C,
-) -> GetStatsQuery < 'a, C,
-GetStats, 0 >
-{
-    GetStatsQuery
-    {
-        client, params : [], stmt : & mut self.0, extractor :
-        | row | { GetStatsBorrowed { table_name : row.get(0),count : row.get(1),} }, mapper : | it | { <GetStats>::from(it) },
-    }
-} }pub fn get_genres_list() -> GetGenresListStmt
-{ GetGenresListStmt(cornucopia_async :: private :: Stmt :: new("SELECT name from genres")) } pub
-struct GetGenresListStmt(cornucopia_async :: private :: Stmt) ; impl
-GetGenresListStmt { pub fn bind < 'a, C : GenericClient, >
-(& 'a mut self, client : & 'a  C,
-) -> StringQuery < 'a, C,
-String, 0 >
-{
-    StringQuery
-    {
-        client, params : [], stmt : & mut self.0, extractor :
-        | row | { row.get(0) }, mapper : | it | { it.into() },
-    }
-} }pub fn get_tags_list() -> GetTagsListStmt
-{ GetTagsListStmt(cornucopia_async :: private :: Stmt :: new("SELECT name from tags")) } pub
-struct GetTagsListStmt(cornucopia_async :: private :: Stmt) ; impl
-GetTagsListStmt { pub fn bind < 'a, C : GenericClient, >
-(& 'a mut self, client : & 'a  C,
-) -> StringQuery < 'a, C,
-String, 0 >
-{
-    StringQuery
-    {
-        client, params : [], stmt : & mut self.0, extractor :
-        | row | { row.get(0) }, mapper : | it | { it.into() },
-    }
-} }pub fn get_songs() -> GetSongsStmt
-{ GetSongsStmt(cornucopia_async :: private :: Stmt :: new("SELECT 
+)",
+            ))
+        }
+        pub struct GetStatsStmt(cornucopia_async::private::Stmt);
+        impl GetStatsStmt {
+            pub fn bind<'a, C: GenericClient>(
+                &'a mut self,
+                client: &'a C,
+            ) -> GetStatsQuery<'a, C, GetStats, 0> {
+                GetStatsQuery {
+                    client,
+                    params: [],
+                    stmt: &mut self.0,
+                    extractor: |row| GetStatsBorrowed {
+                        table_name: row.get(0),
+                        count: row.get(1),
+                    },
+                    mapper: |it| <GetStats>::from(it),
+                }
+            }
+        }
+        pub fn get_genres_list() -> GetGenresListStmt {
+            GetGenresListStmt(cornucopia_async::private::Stmt::new(
+                "SELECT name from genres",
+            ))
+        }
+        pub struct GetGenresListStmt(cornucopia_async::private::Stmt);
+        impl GetGenresListStmt {
+            pub fn bind<'a, C: GenericClient>(
+                &'a mut self,
+                client: &'a C,
+            ) -> StringQuery<'a, C, String, 0> {
+                StringQuery {
+                    client,
+                    params: [],
+                    stmt: &mut self.0,
+                    extractor: |row| row.get(0),
+                    mapper: |it| it.into(),
+                }
+            }
+        }
+        pub fn get_tags_list() -> GetTagsListStmt {
+            GetTagsListStmt(cornucopia_async::private::Stmt::new(
+                "SELECT name from tags",
+            ))
+        }
+        pub struct GetTagsListStmt(cornucopia_async::private::Stmt);
+        impl GetTagsListStmt {
+            pub fn bind<'a, C: GenericClient>(
+                &'a mut self,
+                client: &'a C,
+            ) -> StringQuery<'a, C, String, 0> {
+                StringQuery {
+                    client,
+                    params: [],
+                    stmt: &mut self.0,
+                    extractor: |row| row.get(0),
+                    mapper: |it| it.into(),
+                }
+            }
+        }
+        pub fn get_songs() -> GetSongsStmt {
+            GetSongsStmt(cornucopia_async::private::Stmt::new(
+                "SELECT 
 song_id,
 created_at,
 cover_url,
@@ -270,337 +693,750 @@ ORDER BY
     CASE WHEN $6 = 'new_first' THEN created_at END DESC NULLS LAST,
     CASE WHEN $6 = 'old_first' THEN created_at END ASC NULLS LAST,
     CASE WHEN $6 = 'relevance' THEN relevance_score END DESC
-LIMIT $7")) } pub
-struct GetSongsStmt(cornucopia_async :: private :: Stmt) ; impl
-GetSongsStmt { pub fn bind < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,T2 : cornucopia_async::ArraySql<Item = i16>,T3 : cornucopia_async::ArraySql<Item = super::super::types::public::Musickey>,T4 : cornucopia_async::StringSql,T5 : cornucopia_async::ArraySql<Item = T4>,T6 : cornucopia_async::StringSql,T7 : cornucopia_async::ArraySql<Item = T6>,T8 : cornucopia_async::StringSql,>
-(& 'a mut self, client : & 'a  C,
-sex : & 'a Option<T1>,tempo : & 'a Option<T2>,key : & 'a Option<T3>,genre : & 'a Option<T5>,tag : & 'a Option<T7>,sort_by : & 'a T8,amount : & 'a i64,) -> GetSongsQuery < 'a, C,
-GetSongs, 7 >
-{
-    GetSongsQuery
-    {
-        client, params : [sex,tempo,key,genre,tag,sort_by,amount,], stmt : & mut self.0, extractor :
-        | row | { GetSongsBorrowed { song_id : row.get(0),created_at : row.get(1),cover_url : row.get(2),name : row.get(3),author : row.get(4),likes : row.get(5),listenings : row.get(6),relevance_score : row.get(7),price : row.get(8),} }, mapper : | it | { <GetSongs>::from(it) },
-    }
-} }impl < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,T2 : cornucopia_async::ArraySql<Item = i16>,T3 : cornucopia_async::ArraySql<Item = super::super::types::public::Musickey>,T4 : cornucopia_async::StringSql,T5 : cornucopia_async::ArraySql<Item = T4>,T6 : cornucopia_async::StringSql,T7 : cornucopia_async::ArraySql<Item = T6>,T8 : cornucopia_async::StringSql,> cornucopia_async ::
-Params < 'a, GetSongsParams < T1,T2,T3,T4,T5,T6,T7,T8,>, GetSongsQuery < 'a,
-C, GetSongs, 7 >, C > for GetSongsStmt
-{
-    fn
-    params(& 'a mut self, client : & 'a  C, params : & 'a
-    GetSongsParams < T1,T2,T3,T4,T5,T6,T7,T8,>) -> GetSongsQuery < 'a, C,
-    GetSongs, 7 >
-    { self.bind(client, & params.sex,& params.tempo,& params.key,& params.genre,& params.tag,& params.sort_by,& params.amount,) }
-}}pub mod tests
-{ use futures::{{StreamExt, TryStreamExt}};use futures; use cornucopia_async::GenericClient;#[derive(serde::Serialize, Debug, Clone, PartialEq, )] pub struct SelectUserDataWithAvatarKey
-{ pub id : i32,pub key : String,pub username : String,pub email : String,}pub struct SelectUserDataWithAvatarKeyBorrowed < 'a >
-{ pub id : i32,pub key : &'a str,pub username : &'a str,pub email : &'a str,} impl < 'a > From < SelectUserDataWithAvatarKeyBorrowed <
-'a >> for SelectUserDataWithAvatarKey
-{
-    fn
-    from(SelectUserDataWithAvatarKeyBorrowed { id,key,username,email,} : SelectUserDataWithAvatarKeyBorrowed < 'a >)
-    -> Self { Self { id,key: key.into(),username: username.into(),email: email.into(),} }
-}pub struct SelectUserDataWithAvatarKeyQuery < 'a, C : GenericClient, T, const N : usize >
-{
-    client : & 'a  C, params :
-    [& 'a (dyn postgres_types :: ToSql + Sync) ; N], stmt : & 'a mut cornucopia_async
-    :: private :: Stmt, extractor : fn(& tokio_postgres :: Row) -> SelectUserDataWithAvatarKeyBorrowed,
-    mapper : fn(SelectUserDataWithAvatarKeyBorrowed) -> T,
-} impl < 'a, C, T : 'a, const N : usize > SelectUserDataWithAvatarKeyQuery < 'a, C, T, N >
-where C : GenericClient
-{
-    pub fn map < R > (self, mapper : fn(SelectUserDataWithAvatarKeyBorrowed) -> R) -> SelectUserDataWithAvatarKeyQuery
-    < 'a, C, R, N >
-    {
-        SelectUserDataWithAvatarKeyQuery
-        {
-            client : self.client, params : self.params, stmt : self.stmt,
-            extractor : self.extractor, mapper,
+LIMIT $7",
+            ))
         }
-    } pub async fn one(self) -> Result < T, tokio_postgres :: Error >
-    {
-        let stmt = self.stmt.prepare(self.client) .await ? ; let row =
-        self.client.query_one(stmt, & self.params) .await ? ;
-        Ok((self.mapper) ((self.extractor) (& row)))
-    } pub async fn all(self) -> Result < Vec < T >, tokio_postgres :: Error >
-    { self.iter() .await ?.try_collect().await } pub async fn opt(self) -> Result
-    < Option < T >, tokio_postgres :: Error >
-    {
-        let stmt = self.stmt.prepare(self.client) .await ? ;
-        Ok(self.client.query_opt(stmt, & self.params) .await
-        ?.map(| row | (self.mapper) ((self.extractor) (& row))))
-    } pub async fn iter(self,) -> Result < impl futures::Stream < Item = Result
-    < T, tokio_postgres :: Error >> + 'a, tokio_postgres :: Error >
-    {
-        let stmt = self.stmt.prepare(self.client) .await ? ; let it =
-        self.client.query_raw(stmt, cornucopia_async :: private ::
-        slice_iter(& self.params)) .await ?
-        .map(move | res |
-        res.map(| row | (self.mapper) ((self.extractor) (& row)))) .into_stream() ;
-        Ok(it)
+        pub struct GetSongsStmt(cornucopia_async::private::Stmt);
+        impl GetSongsStmt {
+            pub fn bind<
+                'a,
+                C: GenericClient,
+                T1: cornucopia_async::StringSql,
+                T2: cornucopia_async::ArraySql<Item = i16>,
+                T3: cornucopia_async::ArraySql<
+                    Item = super::super::types::public::Musickey,
+                >,
+                T4: cornucopia_async::StringSql,
+                T5: cornucopia_async::ArraySql<Item = T4>,
+                T6: cornucopia_async::StringSql,
+                T7: cornucopia_async::ArraySql<Item = T6>,
+                T8: cornucopia_async::StringSql,
+            >(
+                &'a mut self,
+                client: &'a C,
+                sex: &'a Option<T1>,
+                tempo: &'a Option<T2>,
+                key: &'a Option<T3>,
+                genre: &'a Option<T5>,
+                tag: &'a Option<T7>,
+                sort_by: &'a T8,
+                amount: &'a i64,
+            ) -> GetSongsQuery<'a, C, GetSongs, 7> {
+                GetSongsQuery {
+                    client,
+                    params: [sex, tempo, key, genre, tag, sort_by, amount],
+                    stmt: &mut self.0,
+                    extractor: |row| GetSongsBorrowed {
+                        song_id: row.get(0),
+                        created_at: row.get(1),
+                        cover_url: row.get(2),
+                        name: row.get(3),
+                        author: row.get(4),
+                        likes: row.get(5),
+                        listenings: row.get(6),
+                        relevance_score: row.get(7),
+                        price: row.get(8),
+                    },
+                    mapper: |it| <GetSongs>::from(it),
+                }
+            }
+        }
+        impl<
+                'a,
+                C: GenericClient,
+                T1: cornucopia_async::StringSql,
+                T2: cornucopia_async::ArraySql<Item = i16>,
+                T3: cornucopia_async::ArraySql<
+                    Item = super::super::types::public::Musickey,
+                >,
+                T4: cornucopia_async::StringSql,
+                T5: cornucopia_async::ArraySql<Item = T4>,
+                T6: cornucopia_async::StringSql,
+                T7: cornucopia_async::ArraySql<Item = T6>,
+                T8: cornucopia_async::StringSql,
+            >
+            cornucopia_async::Params<
+                'a,
+                GetSongsParams<T1, T2, T3, T4, T5, T6, T7, T8>,
+                GetSongsQuery<'a, C, GetSongs, 7>,
+                C,
+            > for GetSongsStmt
+        {
+            fn params(
+                &'a mut self,
+                client: &'a C,
+                params: &'a GetSongsParams<T1, T2, T3, T4, T5, T6, T7, T8>,
+            ) -> GetSongsQuery<'a, C, GetSongs, 7> {
+                self.bind(
+                    client,
+                    &params.sex,
+                    &params.tempo,
+                    &params.key,
+                    &params.genre,
+                    &params.tag,
+                    &params.sort_by,
+                    &params.amount,
+                )
+            }
+        }
+        pub fn get_new_songs() -> GetNewSongsStmt {
+            GetNewSongsStmt(cornucopia_async::private::Stmt::new(
+                "SELECT 
+song_id,
+created_at,
+cover_url,
+name,
+author,
+likes,
+price
+FROM available_songs s
+WHERE current_timestamp - created_at < '2 weeks'::interval
+ORDER BY created_at DESC
+LIMIT $1",
+            ))
+        }
+        pub struct GetNewSongsStmt(cornucopia_async::private::Stmt);
+        impl GetNewSongsStmt {
+            pub fn bind<'a, C: GenericClient>(
+                &'a mut self,
+                client: &'a C,
+                amount: &'a i64,
+            ) -> GetNewSongsQuery<'a, C, GetNewSongs, 1> {
+                GetNewSongsQuery {
+                    client,
+                    params: [amount],
+                    stmt: &mut self.0,
+                    extractor: |row| GetNewSongsBorrowed {
+                        song_id: row.get(0),
+                        created_at: row.get(1),
+                        cover_url: row.get(2),
+                        name: row.get(3),
+                        author: row.get(4),
+                        likes: row.get(5),
+                        price: row.get(6),
+                    },
+                    mapper: |it| <GetNewSongs>::from(it),
+                }
+            }
+        }
     }
-}pub fn select_user_data_with_avatar_key() -> SelectUserDataWithAvatarKeyStmt
-{ SelectUserDataWithAvatarKeyStmt(cornucopia_async :: private :: Stmt :: new("SELECT users.id, objects.key, username, email
+    pub mod tests {
+        use cornucopia_async::GenericClient;
+        use futures;
+        use futures::{StreamExt, TryStreamExt};
+        #[derive(serde::Serialize, Debug, Clone, PartialEq)]
+        pub struct SelectUserDataWithAvatarKey {
+            pub id: i32,
+            pub key: String,
+            pub username: String,
+            pub email: String,
+        }
+        pub struct SelectUserDataWithAvatarKeyBorrowed<'a> {
+            pub id: i32,
+            pub key: &'a str,
+            pub username: &'a str,
+            pub email: &'a str,
+        }
+        impl<'a> From<SelectUserDataWithAvatarKeyBorrowed<'a>>
+            for SelectUserDataWithAvatarKey
+        {
+            fn from(
+                SelectUserDataWithAvatarKeyBorrowed {
+                    id,
+                    key,
+                    username,
+                    email,
+                }: SelectUserDataWithAvatarKeyBorrowed<'a>,
+            ) -> Self {
+                Self {
+                    id,
+                    key: key.into(),
+                    username: username.into(),
+                    email: email.into(),
+                }
+            }
+        }
+        pub struct SelectUserDataWithAvatarKeyQuery<
+            'a,
+            C: GenericClient,
+            T,
+            const N: usize,
+        > {
+            client: &'a C,
+            params: [&'a (dyn postgres_types::ToSql + Sync); N],
+            stmt: &'a mut cornucopia_async::private::Stmt,
+            extractor:
+                fn(&tokio_postgres::Row) -> SelectUserDataWithAvatarKeyBorrowed,
+            mapper: fn(SelectUserDataWithAvatarKeyBorrowed) -> T,
+        }
+        impl<'a, C, T: 'a, const N: usize> SelectUserDataWithAvatarKeyQuery<'a, C, T, N>
+        where
+            C: GenericClient,
+        {
+            pub fn map<R>(
+                self,
+                mapper: fn(SelectUserDataWithAvatarKeyBorrowed) -> R,
+            ) -> SelectUserDataWithAvatarKeyQuery<'a, C, R, N> {
+                SelectUserDataWithAvatarKeyQuery {
+                    client: self.client,
+                    params: self.params,
+                    stmt: self.stmt,
+                    extractor: self.extractor,
+                    mapper,
+                }
+            }
+            pub async fn one(self) -> Result<T, tokio_postgres::Error> {
+                let stmt = self.stmt.prepare(self.client).await?;
+                let row = self.client.query_one(stmt, &self.params).await?;
+                Ok((self.mapper)((self.extractor)(&row)))
+            }
+            pub async fn all(self) -> Result<Vec<T>, tokio_postgres::Error> {
+                self.iter().await?.try_collect().await
+            }
+            pub async fn opt(self) -> Result<Option<T>, tokio_postgres::Error> {
+                let stmt = self.stmt.prepare(self.client).await?;
+                Ok(self
+                    .client
+                    .query_opt(stmt, &self.params)
+                    .await?
+                    .map(|row| (self.mapper)((self.extractor)(&row))))
+            }
+            pub async fn iter(
+                self,
+            ) -> Result<
+                impl futures::Stream<Item = Result<T, tokio_postgres::Error>> + 'a,
+                tokio_postgres::Error,
+            > {
+                let stmt = self.stmt.prepare(self.client).await?;
+                let it = self
+                    .client
+                    .query_raw(
+                        stmt,
+                        cornucopia_async::private::slice_iter(&self.params),
+                    )
+                    .await?
+                    .map(move |res| {
+                        res.map(|row| (self.mapper)((self.extractor)(&row)))
+                    })
+                    .into_stream();
+                Ok(it)
+            }
+        }
+        pub fn select_user_data_with_avatar_key(
+        ) -> SelectUserDataWithAvatarKeyStmt {
+            SelectUserDataWithAvatarKeyStmt(
+                cornucopia_async::private::Stmt::new(
+                    "SELECT users.id, objects.key, username, email
 FROM users
 JOIN objects
 ON users.id = objects.avatar_users_id
-WHERE users.username = $1")) } pub
-struct SelectUserDataWithAvatarKeyStmt(cornucopia_async :: private :: Stmt) ; impl
-SelectUserDataWithAvatarKeyStmt { pub fn bind < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,>
-(& 'a mut self, client : & 'a  C,
-username : & 'a T1,) -> SelectUserDataWithAvatarKeyQuery < 'a, C,
-SelectUserDataWithAvatarKey, 1 >
-{
-    SelectUserDataWithAvatarKeyQuery
-    {
-        client, params : [username,], stmt : & mut self.0, extractor :
-        | row | { SelectUserDataWithAvatarKeyBorrowed { id : row.get(0),key : row.get(1),username : row.get(2),email : row.get(3),} }, mapper : | it | { <SelectUserDataWithAvatarKey>::from(it) },
-    }
-} }}pub mod user_auth_queries
-{ use futures::{{StreamExt, TryStreamExt}};use futures; use cornucopia_async::GenericClient;#[derive( Debug)] pub struct CheckIfUserExistsAlreadyParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,> { pub email : T1,pub username : T2,}#[derive( Debug)] pub struct InsertNewUserParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,T3 : cornucopia_async::StringSql,> { pub user_settings_id : i32,pub username : T1,pub email : T2,pub password_hash : T3,}#[derive( Debug)] pub struct StoreUserPermissionParams < T1 : cornucopia_async::StringSql,> { pub user_id : i32,pub permission : T1,}#[derive( Debug)] pub struct InsertUserImageParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub users_id : i32,}#[derive(serde::Serialize, Debug, Clone, PartialEq, )] pub struct GetAuthUserDataByUsername
-{ pub id : i32,pub username : String,pub password_hash : String,}pub struct GetAuthUserDataByUsernameBorrowed < 'a >
-{ pub id : i32,pub username : &'a str,pub password_hash : &'a str,} impl < 'a > From < GetAuthUserDataByUsernameBorrowed <
-'a >> for GetAuthUserDataByUsername
-{
-    fn
-    from(GetAuthUserDataByUsernameBorrowed { id,username,password_hash,} : GetAuthUserDataByUsernameBorrowed < 'a >)
-    -> Self { Self { id,username: username.into(),password_hash: password_hash.into(),} }
-}pub struct GetAuthUserDataByUsernameQuery < 'a, C : GenericClient, T, const N : usize >
-{
-    client : & 'a  C, params :
-    [& 'a (dyn postgres_types :: ToSql + Sync) ; N], stmt : & 'a mut cornucopia_async
-    :: private :: Stmt, extractor : fn(& tokio_postgres :: Row) -> GetAuthUserDataByUsernameBorrowed,
-    mapper : fn(GetAuthUserDataByUsernameBorrowed) -> T,
-} impl < 'a, C, T : 'a, const N : usize > GetAuthUserDataByUsernameQuery < 'a, C, T, N >
-where C : GenericClient
-{
-    pub fn map < R > (self, mapper : fn(GetAuthUserDataByUsernameBorrowed) -> R) -> GetAuthUserDataByUsernameQuery
-    < 'a, C, R, N >
-    {
-        GetAuthUserDataByUsernameQuery
-        {
-            client : self.client, params : self.params, stmt : self.stmt,
-            extractor : self.extractor, mapper,
+WHERE users.username = $1",
+                ),
+            )
         }
-    } pub async fn one(self) -> Result < T, tokio_postgres :: Error >
-    {
-        let stmt = self.stmt.prepare(self.client) .await ? ; let row =
-        self.client.query_one(stmt, & self.params) .await ? ;
-        Ok((self.mapper) ((self.extractor) (& row)))
-    } pub async fn all(self) -> Result < Vec < T >, tokio_postgres :: Error >
-    { self.iter() .await ?.try_collect().await } pub async fn opt(self) -> Result
-    < Option < T >, tokio_postgres :: Error >
-    {
-        let stmt = self.stmt.prepare(self.client) .await ? ;
-        Ok(self.client.query_opt(stmt, & self.params) .await
-        ?.map(| row | (self.mapper) ((self.extractor) (& row))))
-    } pub async fn iter(self,) -> Result < impl futures::Stream < Item = Result
-    < T, tokio_postgres :: Error >> + 'a, tokio_postgres :: Error >
-    {
-        let stmt = self.stmt.prepare(self.client) .await ? ; let it =
-        self.client.query_raw(stmt, cornucopia_async :: private ::
-        slice_iter(& self.params)) .await ?
-        .map(move | res |
-        res.map(| row | (self.mapper) ((self.extractor) (& row)))) .into_stream() ;
-        Ok(it)
-    }
-}#[derive(serde::Serialize, Debug, Clone, PartialEq, )] pub struct GetAuthUserDataById
-{ pub id : i32,pub username : String,pub password_hash : String,}pub struct GetAuthUserDataByIdBorrowed < 'a >
-{ pub id : i32,pub username : &'a str,pub password_hash : &'a str,} impl < 'a > From < GetAuthUserDataByIdBorrowed <
-'a >> for GetAuthUserDataById
-{
-    fn
-    from(GetAuthUserDataByIdBorrowed { id,username,password_hash,} : GetAuthUserDataByIdBorrowed < 'a >)
-    -> Self { Self { id,username: username.into(),password_hash: password_hash.into(),} }
-}pub struct GetAuthUserDataByIdQuery < 'a, C : GenericClient, T, const N : usize >
-{
-    client : & 'a  C, params :
-    [& 'a (dyn postgres_types :: ToSql + Sync) ; N], stmt : & 'a mut cornucopia_async
-    :: private :: Stmt, extractor : fn(& tokio_postgres :: Row) -> GetAuthUserDataByIdBorrowed,
-    mapper : fn(GetAuthUserDataByIdBorrowed) -> T,
-} impl < 'a, C, T : 'a, const N : usize > GetAuthUserDataByIdQuery < 'a, C, T, N >
-where C : GenericClient
-{
-    pub fn map < R > (self, mapper : fn(GetAuthUserDataByIdBorrowed) -> R) -> GetAuthUserDataByIdQuery
-    < 'a, C, R, N >
-    {
-        GetAuthUserDataByIdQuery
-        {
-            client : self.client, params : self.params, stmt : self.stmt,
-            extractor : self.extractor, mapper,
+        pub struct SelectUserDataWithAvatarKeyStmt(
+            cornucopia_async::private::Stmt,
+        );
+        impl SelectUserDataWithAvatarKeyStmt {
+            pub fn bind<
+                'a,
+                C: GenericClient,
+                T1: cornucopia_async::StringSql,
+            >(
+                &'a mut self,
+                client: &'a C,
+                username: &'a T1,
+            ) -> SelectUserDataWithAvatarKeyQuery<
+                'a,
+                C,
+                SelectUserDataWithAvatarKey,
+                1,
+            > {
+                SelectUserDataWithAvatarKeyQuery {
+                    client,
+                    params: [username],
+                    stmt: &mut self.0,
+                    extractor: |row| SelectUserDataWithAvatarKeyBorrowed {
+                        id: row.get(0),
+                        key: row.get(1),
+                        username: row.get(2),
+                        email: row.get(3),
+                    },
+                    mapper: |it| <SelectUserDataWithAvatarKey>::from(it),
+                }
+            }
         }
-    } pub async fn one(self) -> Result < T, tokio_postgres :: Error >
-    {
-        let stmt = self.stmt.prepare(self.client) .await ? ; let row =
-        self.client.query_one(stmt, & self.params) .await ? ;
-        Ok((self.mapper) ((self.extractor) (& row)))
-    } pub async fn all(self) -> Result < Vec < T >, tokio_postgres :: Error >
-    { self.iter() .await ?.try_collect().await } pub async fn opt(self) -> Result
-    < Option < T >, tokio_postgres :: Error >
-    {
-        let stmt = self.stmt.prepare(self.client) .await ? ;
-        Ok(self.client.query_opt(stmt, & self.params) .await
-        ?.map(| row | (self.mapper) ((self.extractor) (& row))))
-    } pub async fn iter(self,) -> Result < impl futures::Stream < Item = Result
-    < T, tokio_postgres :: Error >> + 'a, tokio_postgres :: Error >
-    {
-        let stmt = self.stmt.prepare(self.client) .await ? ; let it =
-        self.client.query_raw(stmt, cornucopia_async :: private ::
-        slice_iter(& self.params)) .await ?
-        .map(move | res |
-        res.map(| row | (self.mapper) ((self.extractor) (& row)))) .into_stream() ;
-        Ok(it)
     }
-}pub struct StringQuery < 'a, C : GenericClient, T, const N : usize >
-{
-    client : & 'a  C, params :
-    [& 'a (dyn postgres_types :: ToSql + Sync) ; N], stmt : & 'a mut cornucopia_async
-    :: private :: Stmt, extractor : fn(& tokio_postgres :: Row) -> & str,
-    mapper : fn(& str) -> T,
-} impl < 'a, C, T : 'a, const N : usize > StringQuery < 'a, C, T, N >
-where C : GenericClient
-{
-    pub fn map < R > (self, mapper : fn(& str) -> R) -> StringQuery
-    < 'a, C, R, N >
-    {
-        StringQuery
-        {
-            client : self.client, params : self.params, stmt : self.stmt,
-            extractor : self.extractor, mapper,
+    pub mod user_auth_queries {
+        use cornucopia_async::GenericClient;
+        use futures;
+        use futures::{StreamExt, TryStreamExt};
+        #[derive(Debug)]
+        pub struct CheckIfUserExistsAlreadyParams<
+            T1: cornucopia_async::StringSql,
+            T2: cornucopia_async::StringSql,
+        > {
+            pub email: T1,
+            pub username: T2,
         }
-    } pub async fn one(self) -> Result < T, tokio_postgres :: Error >
-    {
-        let stmt = self.stmt.prepare(self.client) .await ? ; let row =
-        self.client.query_one(stmt, & self.params) .await ? ;
-        Ok((self.mapper) ((self.extractor) (& row)))
-    } pub async fn all(self) -> Result < Vec < T >, tokio_postgres :: Error >
-    { self.iter() .await ?.try_collect().await } pub async fn opt(self) -> Result
-    < Option < T >, tokio_postgres :: Error >
-    {
-        let stmt = self.stmt.prepare(self.client) .await ? ;
-        Ok(self.client.query_opt(stmt, & self.params) .await
-        ?.map(| row | (self.mapper) ((self.extractor) (& row))))
-    } pub async fn iter(self,) -> Result < impl futures::Stream < Item = Result
-    < T, tokio_postgres :: Error >> + 'a, tokio_postgres :: Error >
-    {
-        let stmt = self.stmt.prepare(self.client) .await ? ; let it =
-        self.client.query_raw(stmt, cornucopia_async :: private ::
-        slice_iter(& self.params)) .await ?
-        .map(move | res |
-        res.map(| row | (self.mapper) ((self.extractor) (& row)))) .into_stream() ;
-        Ok(it)
-    }
-}#[derive(serde::Serialize, Debug, Clone, PartialEq, Copy)] pub struct GetAdminToken
-{ pub token : uuid::Uuid,pub used : bool,}pub struct GetAdminTokenQuery < 'a, C : GenericClient, T, const N : usize >
-{
-    client : & 'a  C, params :
-    [& 'a (dyn postgres_types :: ToSql + Sync) ; N], stmt : & 'a mut cornucopia_async
-    :: private :: Stmt, extractor : fn(& tokio_postgres :: Row) -> GetAdminToken,
-    mapper : fn(GetAdminToken) -> T,
-} impl < 'a, C, T : 'a, const N : usize > GetAdminTokenQuery < 'a, C, T, N >
-where C : GenericClient
-{
-    pub fn map < R > (self, mapper : fn(GetAdminToken) -> R) -> GetAdminTokenQuery
-    < 'a, C, R, N >
-    {
-        GetAdminTokenQuery
-        {
-            client : self.client, params : self.params, stmt : self.stmt,
-            extractor : self.extractor, mapper,
+        #[derive(Debug)]
+        pub struct InsertNewUserParams<
+            T1: cornucopia_async::StringSql,
+            T2: cornucopia_async::StringSql,
+            T3: cornucopia_async::StringSql,
+        > {
+            pub user_settings_id: i32,
+            pub username: T1,
+            pub email: T2,
+            pub password_hash: T3,
         }
-    } pub async fn one(self) -> Result < T, tokio_postgres :: Error >
-    {
-        let stmt = self.stmt.prepare(self.client) .await ? ; let row =
-        self.client.query_one(stmt, & self.params) .await ? ;
-        Ok((self.mapper) ((self.extractor) (& row)))
-    } pub async fn all(self) -> Result < Vec < T >, tokio_postgres :: Error >
-    { self.iter() .await ?.try_collect().await } pub async fn opt(self) -> Result
-    < Option < T >, tokio_postgres :: Error >
-    {
-        let stmt = self.stmt.prepare(self.client) .await ? ;
-        Ok(self.client.query_opt(stmt, & self.params) .await
-        ?.map(| row | (self.mapper) ((self.extractor) (& row))))
-    } pub async fn iter(self,) -> Result < impl futures::Stream < Item = Result
-    < T, tokio_postgres :: Error >> + 'a, tokio_postgres :: Error >
-    {
-        let stmt = self.stmt.prepare(self.client) .await ? ; let it =
-        self.client.query_raw(stmt, cornucopia_async :: private ::
-        slice_iter(& self.params)) .await ?
-        .map(move | res |
-        res.map(| row | (self.mapper) ((self.extractor) (& row)))) .into_stream() ;
-        Ok(it)
-    }
-}pub struct I32Query < 'a, C : GenericClient, T, const N : usize >
-{
-    client : & 'a  C, params :
-    [& 'a (dyn postgres_types :: ToSql + Sync) ; N], stmt : & 'a mut cornucopia_async
-    :: private :: Stmt, extractor : fn(& tokio_postgres :: Row) -> i32,
-    mapper : fn(i32) -> T,
-} impl < 'a, C, T : 'a, const N : usize > I32Query < 'a, C, T, N >
-where C : GenericClient
-{
-    pub fn map < R > (self, mapper : fn(i32) -> R) -> I32Query
-    < 'a, C, R, N >
-    {
-        I32Query
-        {
-            client : self.client, params : self.params, stmt : self.stmt,
-            extractor : self.extractor, mapper,
+        #[derive(Debug)]
+        pub struct StoreUserPermissionParams<T1: cornucopia_async::StringSql> {
+            pub user_id: i32,
+            pub permission: T1,
         }
-    } pub async fn one(self) -> Result < T, tokio_postgres :: Error >
-    {
-        let stmt = self.stmt.prepare(self.client) .await ? ; let row =
-        self.client.query_one(stmt, & self.params) .await ? ;
-        Ok((self.mapper) ((self.extractor) (& row)))
-    } pub async fn all(self) -> Result < Vec < T >, tokio_postgres :: Error >
-    { self.iter() .await ?.try_collect().await } pub async fn opt(self) -> Result
-    < Option < T >, tokio_postgres :: Error >
-    {
-        let stmt = self.stmt.prepare(self.client) .await ? ;
-        Ok(self.client.query_opt(stmt, & self.params) .await
-        ?.map(| row | (self.mapper) ((self.extractor) (& row))))
-    } pub async fn iter(self,) -> Result < impl futures::Stream < Item = Result
-    < T, tokio_postgres :: Error >> + 'a, tokio_postgres :: Error >
-    {
-        let stmt = self.stmt.prepare(self.client) .await ? ; let it =
-        self.client.query_raw(stmt, cornucopia_async :: private ::
-        slice_iter(& self.params)) .await ?
-        .map(move | res |
-        res.map(| row | (self.mapper) ((self.extractor) (& row)))) .into_stream() ;
-        Ok(it)
-    }
-}pub fn get_auth_user_data_by_username() -> GetAuthUserDataByUsernameStmt
-{ GetAuthUserDataByUsernameStmt(cornucopia_async :: private :: Stmt :: new("SELECT id, username, password_hash
+        #[derive(Debug)]
+        pub struct InsertUserImageParams<T1: cornucopia_async::StringSql> {
+            pub key: T1,
+            pub users_id: i32,
+        }
+        #[derive(serde::Serialize, Debug, Clone, PartialEq)]
+        pub struct GetAuthUserDataByUsername {
+            pub id: i32,
+            pub username: String,
+            pub password_hash: String,
+        }
+        pub struct GetAuthUserDataByUsernameBorrowed<'a> {
+            pub id: i32,
+            pub username: &'a str,
+            pub password_hash: &'a str,
+        }
+        impl<'a> From<GetAuthUserDataByUsernameBorrowed<'a>>
+            for GetAuthUserDataByUsername
+        {
+            fn from(
+                GetAuthUserDataByUsernameBorrowed {
+                    id,
+                    username,
+                    password_hash,
+                }: GetAuthUserDataByUsernameBorrowed<'a>,
+            ) -> Self {
+                Self {
+                    id,
+                    username: username.into(),
+                    password_hash: password_hash.into(),
+                }
+            }
+        }
+        pub struct GetAuthUserDataByUsernameQuery<
+            'a,
+            C: GenericClient,
+            T,
+            const N: usize,
+        > {
+            client: &'a C,
+            params: [&'a (dyn postgres_types::ToSql + Sync); N],
+            stmt: &'a mut cornucopia_async::private::Stmt,
+            extractor:
+                fn(&tokio_postgres::Row) -> GetAuthUserDataByUsernameBorrowed,
+            mapper: fn(GetAuthUserDataByUsernameBorrowed) -> T,
+        }
+        impl<'a, C, T: 'a, const N: usize> GetAuthUserDataByUsernameQuery<'a, C, T, N>
+        where
+            C: GenericClient,
+        {
+            pub fn map<R>(
+                self,
+                mapper: fn(GetAuthUserDataByUsernameBorrowed) -> R,
+            ) -> GetAuthUserDataByUsernameQuery<'a, C, R, N> {
+                GetAuthUserDataByUsernameQuery {
+                    client: self.client,
+                    params: self.params,
+                    stmt: self.stmt,
+                    extractor: self.extractor,
+                    mapper,
+                }
+            }
+            pub async fn one(self) -> Result<T, tokio_postgres::Error> {
+                let stmt = self.stmt.prepare(self.client).await?;
+                let row = self.client.query_one(stmt, &self.params).await?;
+                Ok((self.mapper)((self.extractor)(&row)))
+            }
+            pub async fn all(self) -> Result<Vec<T>, tokio_postgres::Error> {
+                self.iter().await?.try_collect().await
+            }
+            pub async fn opt(self) -> Result<Option<T>, tokio_postgres::Error> {
+                let stmt = self.stmt.prepare(self.client).await?;
+                Ok(self
+                    .client
+                    .query_opt(stmt, &self.params)
+                    .await?
+                    .map(|row| (self.mapper)((self.extractor)(&row))))
+            }
+            pub async fn iter(
+                self,
+            ) -> Result<
+                impl futures::Stream<Item = Result<T, tokio_postgres::Error>> + 'a,
+                tokio_postgres::Error,
+            > {
+                let stmt = self.stmt.prepare(self.client).await?;
+                let it = self
+                    .client
+                    .query_raw(
+                        stmt,
+                        cornucopia_async::private::slice_iter(&self.params),
+                    )
+                    .await?
+                    .map(move |res| {
+                        res.map(|row| (self.mapper)((self.extractor)(&row)))
+                    })
+                    .into_stream();
+                Ok(it)
+            }
+        }
+        #[derive(serde::Serialize, Debug, Clone, PartialEq)]
+        pub struct GetAuthUserDataById {
+            pub id: i32,
+            pub username: String,
+            pub password_hash: String,
+        }
+        pub struct GetAuthUserDataByIdBorrowed<'a> {
+            pub id: i32,
+            pub username: &'a str,
+            pub password_hash: &'a str,
+        }
+        impl<'a> From<GetAuthUserDataByIdBorrowed<'a>> for GetAuthUserDataById {
+            fn from(
+                GetAuthUserDataByIdBorrowed {
+                    id,
+                    username,
+                    password_hash,
+                }: GetAuthUserDataByIdBorrowed<'a>,
+            ) -> Self {
+                Self {
+                    id,
+                    username: username.into(),
+                    password_hash: password_hash.into(),
+                }
+            }
+        }
+        pub struct GetAuthUserDataByIdQuery<
+            'a,
+            C: GenericClient,
+            T,
+            const N: usize,
+        > {
+            client: &'a C,
+            params: [&'a (dyn postgres_types::ToSql + Sync); N],
+            stmt: &'a mut cornucopia_async::private::Stmt,
+            extractor: fn(&tokio_postgres::Row) -> GetAuthUserDataByIdBorrowed,
+            mapper: fn(GetAuthUserDataByIdBorrowed) -> T,
+        }
+        impl<'a, C, T: 'a, const N: usize> GetAuthUserDataByIdQuery<'a, C, T, N>
+        where
+            C: GenericClient,
+        {
+            pub fn map<R>(
+                self,
+                mapper: fn(GetAuthUserDataByIdBorrowed) -> R,
+            ) -> GetAuthUserDataByIdQuery<'a, C, R, N> {
+                GetAuthUserDataByIdQuery {
+                    client: self.client,
+                    params: self.params,
+                    stmt: self.stmt,
+                    extractor: self.extractor,
+                    mapper,
+                }
+            }
+            pub async fn one(self) -> Result<T, tokio_postgres::Error> {
+                let stmt = self.stmt.prepare(self.client).await?;
+                let row = self.client.query_one(stmt, &self.params).await?;
+                Ok((self.mapper)((self.extractor)(&row)))
+            }
+            pub async fn all(self) -> Result<Vec<T>, tokio_postgres::Error> {
+                self.iter().await?.try_collect().await
+            }
+            pub async fn opt(self) -> Result<Option<T>, tokio_postgres::Error> {
+                let stmt = self.stmt.prepare(self.client).await?;
+                Ok(self
+                    .client
+                    .query_opt(stmt, &self.params)
+                    .await?
+                    .map(|row| (self.mapper)((self.extractor)(&row))))
+            }
+            pub async fn iter(
+                self,
+            ) -> Result<
+                impl futures::Stream<Item = Result<T, tokio_postgres::Error>> + 'a,
+                tokio_postgres::Error,
+            > {
+                let stmt = self.stmt.prepare(self.client).await?;
+                let it = self
+                    .client
+                    .query_raw(
+                        stmt,
+                        cornucopia_async::private::slice_iter(&self.params),
+                    )
+                    .await?
+                    .map(move |res| {
+                        res.map(|row| (self.mapper)((self.extractor)(&row)))
+                    })
+                    .into_stream();
+                Ok(it)
+            }
+        }
+        pub struct StringQuery<'a, C: GenericClient, T, const N: usize> {
+            client: &'a C,
+            params: [&'a (dyn postgres_types::ToSql + Sync); N],
+            stmt: &'a mut cornucopia_async::private::Stmt,
+            extractor: fn(&tokio_postgres::Row) -> &str,
+            mapper: fn(&str) -> T,
+        }
+        impl<'a, C, T: 'a, const N: usize> StringQuery<'a, C, T, N>
+        where
+            C: GenericClient,
+        {
+            pub fn map<R>(
+                self,
+                mapper: fn(&str) -> R,
+            ) -> StringQuery<'a, C, R, N> {
+                StringQuery {
+                    client: self.client,
+                    params: self.params,
+                    stmt: self.stmt,
+                    extractor: self.extractor,
+                    mapper,
+                }
+            }
+            pub async fn one(self) -> Result<T, tokio_postgres::Error> {
+                let stmt = self.stmt.prepare(self.client).await?;
+                let row = self.client.query_one(stmt, &self.params).await?;
+                Ok((self.mapper)((self.extractor)(&row)))
+            }
+            pub async fn all(self) -> Result<Vec<T>, tokio_postgres::Error> {
+                self.iter().await?.try_collect().await
+            }
+            pub async fn opt(self) -> Result<Option<T>, tokio_postgres::Error> {
+                let stmt = self.stmt.prepare(self.client).await?;
+                Ok(self
+                    .client
+                    .query_opt(stmt, &self.params)
+                    .await?
+                    .map(|row| (self.mapper)((self.extractor)(&row))))
+            }
+            pub async fn iter(
+                self,
+            ) -> Result<
+                impl futures::Stream<Item = Result<T, tokio_postgres::Error>> + 'a,
+                tokio_postgres::Error,
+            > {
+                let stmt = self.stmt.prepare(self.client).await?;
+                let it = self
+                    .client
+                    .query_raw(
+                        stmt,
+                        cornucopia_async::private::slice_iter(&self.params),
+                    )
+                    .await?
+                    .map(move |res| {
+                        res.map(|row| (self.mapper)((self.extractor)(&row)))
+                    })
+                    .into_stream();
+                Ok(it)
+            }
+        }
+        #[derive(serde::Serialize, Debug, Clone, PartialEq, Copy)]
+        pub struct GetAdminToken {
+            pub token: uuid::Uuid,
+            pub used: bool,
+        }
+        pub struct GetAdminTokenQuery<'a, C: GenericClient, T, const N: usize> {
+            client: &'a C,
+            params: [&'a (dyn postgres_types::ToSql + Sync); N],
+            stmt: &'a mut cornucopia_async::private::Stmt,
+            extractor: fn(&tokio_postgres::Row) -> GetAdminToken,
+            mapper: fn(GetAdminToken) -> T,
+        }
+        impl<'a, C, T: 'a, const N: usize> GetAdminTokenQuery<'a, C, T, N>
+        where
+            C: GenericClient,
+        {
+            pub fn map<R>(
+                self,
+                mapper: fn(GetAdminToken) -> R,
+            ) -> GetAdminTokenQuery<'a, C, R, N> {
+                GetAdminTokenQuery {
+                    client: self.client,
+                    params: self.params,
+                    stmt: self.stmt,
+                    extractor: self.extractor,
+                    mapper,
+                }
+            }
+            pub async fn one(self) -> Result<T, tokio_postgres::Error> {
+                let stmt = self.stmt.prepare(self.client).await?;
+                let row = self.client.query_one(stmt, &self.params).await?;
+                Ok((self.mapper)((self.extractor)(&row)))
+            }
+            pub async fn all(self) -> Result<Vec<T>, tokio_postgres::Error> {
+                self.iter().await?.try_collect().await
+            }
+            pub async fn opt(self) -> Result<Option<T>, tokio_postgres::Error> {
+                let stmt = self.stmt.prepare(self.client).await?;
+                Ok(self
+                    .client
+                    .query_opt(stmt, &self.params)
+                    .await?
+                    .map(|row| (self.mapper)((self.extractor)(&row))))
+            }
+            pub async fn iter(
+                self,
+            ) -> Result<
+                impl futures::Stream<Item = Result<T, tokio_postgres::Error>> + 'a,
+                tokio_postgres::Error,
+            > {
+                let stmt = self.stmt.prepare(self.client).await?;
+                let it = self
+                    .client
+                    .query_raw(
+                        stmt,
+                        cornucopia_async::private::slice_iter(&self.params),
+                    )
+                    .await?
+                    .map(move |res| {
+                        res.map(|row| (self.mapper)((self.extractor)(&row)))
+                    })
+                    .into_stream();
+                Ok(it)
+            }
+        }
+        pub struct I32Query<'a, C: GenericClient, T, const N: usize> {
+            client: &'a C,
+            params: [&'a (dyn postgres_types::ToSql + Sync); N],
+            stmt: &'a mut cornucopia_async::private::Stmt,
+            extractor: fn(&tokio_postgres::Row) -> i32,
+            mapper: fn(i32) -> T,
+        }
+        impl<'a, C, T: 'a, const N: usize> I32Query<'a, C, T, N>
+        where
+            C: GenericClient,
+        {
+            pub fn map<R>(self, mapper: fn(i32) -> R) -> I32Query<'a, C, R, N> {
+                I32Query {
+                    client: self.client,
+                    params: self.params,
+                    stmt: self.stmt,
+                    extractor: self.extractor,
+                    mapper,
+                }
+            }
+            pub async fn one(self) -> Result<T, tokio_postgres::Error> {
+                let stmt = self.stmt.prepare(self.client).await?;
+                let row = self.client.query_one(stmt, &self.params).await?;
+                Ok((self.mapper)((self.extractor)(&row)))
+            }
+            pub async fn all(self) -> Result<Vec<T>, tokio_postgres::Error> {
+                self.iter().await?.try_collect().await
+            }
+            pub async fn opt(self) -> Result<Option<T>, tokio_postgres::Error> {
+                let stmt = self.stmt.prepare(self.client).await?;
+                Ok(self
+                    .client
+                    .query_opt(stmt, &self.params)
+                    .await?
+                    .map(|row| (self.mapper)((self.extractor)(&row))))
+            }
+            pub async fn iter(
+                self,
+            ) -> Result<
+                impl futures::Stream<Item = Result<T, tokio_postgres::Error>> + 'a,
+                tokio_postgres::Error,
+            > {
+                let stmt = self.stmt.prepare(self.client).await?;
+                let it = self
+                    .client
+                    .query_raw(
+                        stmt,
+                        cornucopia_async::private::slice_iter(&self.params),
+                    )
+                    .await?
+                    .map(move |res| {
+                        res.map(|row| (self.mapper)((self.extractor)(&row)))
+                    })
+                    .into_stream();
+                Ok(it)
+            }
+        }
+        pub fn get_auth_user_data_by_username() -> GetAuthUserDataByUsernameStmt
+        {
+            GetAuthUserDataByUsernameStmt(cornucopia_async::private::Stmt::new(
+                "SELECT id, username, password_hash
 FROM users
-WHERE username = $1")) } pub
-struct GetAuthUserDataByUsernameStmt(cornucopia_async :: private :: Stmt) ; impl
-GetAuthUserDataByUsernameStmt { pub fn bind < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,>
-(& 'a mut self, client : & 'a  C,
-username : & 'a T1,) -> GetAuthUserDataByUsernameQuery < 'a, C,
-GetAuthUserDataByUsername, 1 >
-{
-    GetAuthUserDataByUsernameQuery
-    {
-        client, params : [username,], stmt : & mut self.0, extractor :
-        | row | { GetAuthUserDataByUsernameBorrowed { id : row.get(0),username : row.get(1),password_hash : row.get(2),} }, mapper : | it | { <GetAuthUserDataByUsername>::from(it) },
-    }
-} }pub fn get_auth_user_data_by_id() -> GetAuthUserDataByIdStmt
-{ GetAuthUserDataByIdStmt(cornucopia_async :: private :: Stmt :: new("SELECT id, username, password_hash
+WHERE username = $1",
+            ))
+        }
+        pub struct GetAuthUserDataByUsernameStmt(
+            cornucopia_async::private::Stmt,
+        );
+        impl GetAuthUserDataByUsernameStmt {
+            pub fn bind<
+                'a,
+                C: GenericClient,
+                T1: cornucopia_async::StringSql,
+            >(
+                &'a mut self,
+                client: &'a C,
+                username: &'a T1,
+            ) -> GetAuthUserDataByUsernameQuery<
+                'a,
+                C,
+                GetAuthUserDataByUsername,
+                1,
+            > {
+                GetAuthUserDataByUsernameQuery {
+                    client,
+                    params: [username],
+                    stmt: &mut self.0,
+                    extractor: |row| GetAuthUserDataByUsernameBorrowed {
+                        id: row.get(0),
+                        username: row.get(1),
+                        password_hash: row.get(2),
+                    },
+                    mapper: |it| <GetAuthUserDataByUsername>::from(it),
+                }
+            }
+        }
+        pub fn get_auth_user_data_by_id() -> GetAuthUserDataByIdStmt {
+            GetAuthUserDataByIdStmt(cornucopia_async::private::Stmt::new(
+                "SELECT id, username, password_hash
 FROM users
-WHERE id = $1")) } pub
-struct GetAuthUserDataByIdStmt(cornucopia_async :: private :: Stmt) ; impl
-GetAuthUserDataByIdStmt { pub fn bind < 'a, C : GenericClient, >
-(& 'a mut self, client : & 'a  C,
-id : & 'a i32,) -> GetAuthUserDataByIdQuery < 'a, C,
-GetAuthUserDataById, 1 >
-{
-    GetAuthUserDataByIdQuery
-    {
-        client, params : [id,], stmt : & mut self.0, extractor :
-        | row | { GetAuthUserDataByIdBorrowed { id : row.get(0),username : row.get(1),password_hash : row.get(2),} }, mapper : | it | { <GetAuthUserDataById>::from(it) },
-    }
-} }pub fn get_user_permissions() -> GetUserPermissionsStmt
-{ GetUserPermissionsStmt(cornucopia_async :: private :: Stmt :: new("SELECT DISTINCT permissions.name
+WHERE id = $1",
+            ))
+        }
+        pub struct GetAuthUserDataByIdStmt(cornucopia_async::private::Stmt);
+        impl GetAuthUserDataByIdStmt {
+            pub fn bind<'a, C: GenericClient>(
+                &'a mut self,
+                client: &'a C,
+                id: &'a i32,
+            ) -> GetAuthUserDataByIdQuery<'a, C, GetAuthUserDataById, 1>
+            {
+                GetAuthUserDataByIdQuery {
+                    client,
+                    params: [id],
+                    stmt: &mut self.0,
+                    extractor: |row| GetAuthUserDataByIdBorrowed {
+                        id: row.get(0),
+                        username: row.get(1),
+                        password_hash: row.get(2),
+                    },
+                    mapper: |it| <GetAuthUserDataById>::from(it),
+                }
+            }
+        }
+        pub fn get_user_permissions() -> GetUserPermissionsStmt {
+            GetUserPermissionsStmt(cornucopia_async::private::Stmt::new(
+                "SELECT DISTINCT permissions.name
 FROM users
 JOIN users_groups
 ON users.id = users_groups.users_id
@@ -608,152 +1444,337 @@ JOIN groups_permissions
 ON users_groups.groups_id = groups_permissions.groups_id
 JOIN permissions
 ON groups_permissions.permissions_id = permissions.id
-WHERE users.id = $1")) } pub
-struct GetUserPermissionsStmt(cornucopia_async :: private :: Stmt) ; impl
-GetUserPermissionsStmt { pub fn bind < 'a, C : GenericClient, >
-(& 'a mut self, client : & 'a  C,
-user_id : & 'a i32,) -> StringQuery < 'a, C,
-String, 1 >
-{
-    StringQuery
-    {
-        client, params : [user_id,], stmt : & mut self.0, extractor :
-        | row | { row.get(0) }, mapper : | it | { it.into() },
-    }
-} }pub fn insert_a_new_admin_signup_token() -> InsertANewAdminSignupTokenStmt
-{ InsertANewAdminSignupTokenStmt(cornucopia_async :: private :: Stmt :: new("INSERT INTO admin_signup_tokens (token)
-VALUES ($1)")) } pub
-struct InsertANewAdminSignupTokenStmt(cornucopia_async :: private :: Stmt) ; impl
-InsertANewAdminSignupTokenStmt { pub async fn bind < 'a, C : GenericClient, >
-(& 'a mut self, client : & 'a  C,
-token : & 'a uuid::Uuid,) -> Result < u64, tokio_postgres :: Error >
-{
-    let stmt = self.0.prepare(client) .await ? ;
-    client.execute(stmt, & [token,]) .await
-} }pub fn get_admin_token() -> GetAdminTokenStmt
-{ GetAdminTokenStmt(cornucopia_async :: private :: Stmt :: new("SELECT token, used
+WHERE users.id = $1",
+            ))
+        }
+        pub struct GetUserPermissionsStmt(cornucopia_async::private::Stmt);
+        impl GetUserPermissionsStmt {
+            pub fn bind<'a, C: GenericClient>(
+                &'a mut self,
+                client: &'a C,
+                user_id: &'a i32,
+            ) -> StringQuery<'a, C, String, 1> {
+                StringQuery {
+                    client,
+                    params: [user_id],
+                    stmt: &mut self.0,
+                    extractor: |row| row.get(0),
+                    mapper: |it| it.into(),
+                }
+            }
+        }
+        pub fn insert_a_new_admin_signup_token(
+        ) -> InsertANewAdminSignupTokenStmt {
+            InsertANewAdminSignupTokenStmt(
+                cornucopia_async::private::Stmt::new(
+                    "INSERT INTO admin_signup_tokens (token)
+VALUES ($1)",
+                ),
+            )
+        }
+        pub struct InsertANewAdminSignupTokenStmt(
+            cornucopia_async::private::Stmt,
+        );
+        impl InsertANewAdminSignupTokenStmt {
+            pub async fn bind<'a, C: GenericClient>(
+                &'a mut self,
+                client: &'a C,
+                token: &'a uuid::Uuid,
+            ) -> Result<u64, tokio_postgres::Error> {
+                let stmt = self.0.prepare(client).await?;
+                client.execute(stmt, &[token]).await
+            }
+        }
+        pub fn get_admin_token() -> GetAdminTokenStmt {
+            GetAdminTokenStmt(cornucopia_async::private::Stmt::new(
+                "SELECT token, used
 FROM admin_signup_tokens
-WHERE token = $1")) } pub
-struct GetAdminTokenStmt(cornucopia_async :: private :: Stmt) ; impl
-GetAdminTokenStmt { pub fn bind < 'a, C : GenericClient, >
-(& 'a mut self, client : & 'a  C,
-token : & 'a uuid::Uuid,) -> GetAdminTokenQuery < 'a, C,
-GetAdminToken, 1 >
-{
-    GetAdminTokenQuery
-    {
-        client, params : [token,], stmt : & mut self.0, extractor :
-        | row | { GetAdminToken { token : row.get(0),used : row.get(1),} }, mapper : | it | { <GetAdminToken>::from(it) },
-    }
-} }pub fn use_admin_token() -> UseAdminTokenStmt
-{ UseAdminTokenStmt(cornucopia_async :: private :: Stmt :: new("UPDATE admin_signup_tokens
+WHERE token = $1",
+            ))
+        }
+        pub struct GetAdminTokenStmt(cornucopia_async::private::Stmt);
+        impl GetAdminTokenStmt {
+            pub fn bind<'a, C: GenericClient>(
+                &'a mut self,
+                client: &'a C,
+                token: &'a uuid::Uuid,
+            ) -> GetAdminTokenQuery<'a, C, GetAdminToken, 1> {
+                GetAdminTokenQuery {
+                    client,
+                    params: [token],
+                    stmt: &mut self.0,
+                    extractor: |row| GetAdminToken {
+                        token: row.get(0),
+                        used: row.get(1),
+                    },
+                    mapper: |it| <GetAdminToken>::from(it),
+                }
+            }
+        }
+        pub fn use_admin_token() -> UseAdminTokenStmt {
+            UseAdminTokenStmt(cornucopia_async::private::Stmt::new(
+                "UPDATE admin_signup_tokens
 SET used = TRUE
-WHERE token = $1")) } pub
-struct UseAdminTokenStmt(cornucopia_async :: private :: Stmt) ; impl
-UseAdminTokenStmt { pub async fn bind < 'a, C : GenericClient, >
-(& 'a mut self, client : & 'a  C,
-token : & 'a uuid::Uuid,) -> Result < u64, tokio_postgres :: Error >
-{
-    let stmt = self.0.prepare(client) .await ? ;
-    client.execute(stmt, & [token,]) .await
-} }pub fn check_if_user_exists_already() -> CheckIfUserExistsAlreadyStmt
-{ CheckIfUserExistsAlreadyStmt(cornucopia_async :: private :: Stmt :: new("SELECT id FROM users
-WHERE email = $1 OR username = $2")) } pub
-struct CheckIfUserExistsAlreadyStmt(cornucopia_async :: private :: Stmt) ; impl
-CheckIfUserExistsAlreadyStmt { pub fn bind < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,>
-(& 'a mut self, client : & 'a  C,
-email : & 'a T1,username : & 'a T2,) -> I32Query < 'a, C,
-i32, 2 >
-{
-    I32Query
-    {
-        client, params : [email,username,], stmt : & mut self.0, extractor :
-        | row | { row.get(0) }, mapper : | it | { it },
-    }
-} }impl < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,> cornucopia_async ::
-Params < 'a, CheckIfUserExistsAlreadyParams < T1,T2,>, I32Query < 'a,
-C, i32, 2 >, C > for CheckIfUserExistsAlreadyStmt
-{
-    fn
-    params(& 'a mut self, client : & 'a  C, params : & 'a
-    CheckIfUserExistsAlreadyParams < T1,T2,>) -> I32Query < 'a, C,
-    i32, 2 >
-    { self.bind(client, & params.email,& params.username,) }
-}pub fn insert_new_user_settings() -> InsertNewUserSettingsStmt
-{ InsertNewUserSettingsStmt(cornucopia_async :: private :: Stmt :: new("INSERT INTO user_settings DEFAULT VALUES returning id")) } pub
-struct InsertNewUserSettingsStmt(cornucopia_async :: private :: Stmt) ; impl
-InsertNewUserSettingsStmt { pub fn bind < 'a, C : GenericClient, >
-(& 'a mut self, client : & 'a  C,
-) -> I32Query < 'a, C,
-i32, 0 >
-{
-    I32Query
-    {
-        client, params : [], stmt : & mut self.0, extractor :
-        | row | { row.get(0) }, mapper : | it | { it },
-    }
-} }pub fn insert_new_user() -> InsertNewUserStmt
-{ InsertNewUserStmt(cornucopia_async :: private :: Stmt :: new("INSERT INTO users
+WHERE token = $1",
+            ))
+        }
+        pub struct UseAdminTokenStmt(cornucopia_async::private::Stmt);
+        impl UseAdminTokenStmt {
+            pub async fn bind<'a, C: GenericClient>(
+                &'a mut self,
+                client: &'a C,
+                token: &'a uuid::Uuid,
+            ) -> Result<u64, tokio_postgres::Error> {
+                let stmt = self.0.prepare(client).await?;
+                client.execute(stmt, &[token]).await
+            }
+        }
+        pub fn check_if_user_exists_already() -> CheckIfUserExistsAlreadyStmt {
+            CheckIfUserExistsAlreadyStmt(cornucopia_async::private::Stmt::new(
+                "SELECT id FROM users
+WHERE email = $1 OR username = $2",
+            ))
+        }
+        pub struct CheckIfUserExistsAlreadyStmt(
+            cornucopia_async::private::Stmt,
+        );
+        impl CheckIfUserExistsAlreadyStmt {
+            pub fn bind<
+                'a,
+                C: GenericClient,
+                T1: cornucopia_async::StringSql,
+                T2: cornucopia_async::StringSql,
+            >(
+                &'a mut self,
+                client: &'a C,
+                email: &'a T1,
+                username: &'a T2,
+            ) -> I32Query<'a, C, i32, 2> {
+                I32Query {
+                    client,
+                    params: [email, username],
+                    stmt: &mut self.0,
+                    extractor: |row| row.get(0),
+                    mapper: |it| it,
+                }
+            }
+        }
+        impl<
+                'a,
+                C: GenericClient,
+                T1: cornucopia_async::StringSql,
+                T2: cornucopia_async::StringSql,
+            >
+            cornucopia_async::Params<
+                'a,
+                CheckIfUserExistsAlreadyParams<T1, T2>,
+                I32Query<'a, C, i32, 2>,
+                C,
+            > for CheckIfUserExistsAlreadyStmt
+        {
+            fn params(
+                &'a mut self,
+                client: &'a C,
+                params: &'a CheckIfUserExistsAlreadyParams<T1, T2>,
+            ) -> I32Query<'a, C, i32, 2> {
+                self.bind(client, &params.email, &params.username)
+            }
+        }
+        pub fn insert_new_user_settings() -> InsertNewUserSettingsStmt {
+            InsertNewUserSettingsStmt(cornucopia_async::private::Stmt::new(
+                "INSERT INTO user_settings DEFAULT VALUES returning id",
+            ))
+        }
+        pub struct InsertNewUserSettingsStmt(cornucopia_async::private::Stmt);
+        impl InsertNewUserSettingsStmt {
+            pub fn bind<'a, C: GenericClient>(
+                &'a mut self,
+                client: &'a C,
+            ) -> I32Query<'a, C, i32, 0> {
+                I32Query {
+                    client,
+                    params: [],
+                    stmt: &mut self.0,
+                    extractor: |row| row.get(0),
+                    mapper: |it| it,
+                }
+            }
+        }
+        pub fn insert_new_user() -> InsertNewUserStmt {
+            InsertNewUserStmt(cornucopia_async::private::Stmt::new(
+                "INSERT INTO users
 (user_settings_id, username, bio, email, password_hash, status)
-VALUES ($1, $2, NULL, $3, $4, NULL) returning id")) } pub
-struct InsertNewUserStmt(cornucopia_async :: private :: Stmt) ; impl
-InsertNewUserStmt { pub fn bind < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,T3 : cornucopia_async::StringSql,>
-(& 'a mut self, client : & 'a  C,
-user_settings_id : & 'a i32,username : & 'a T1,email : & 'a T2,password_hash : & 'a T3,) -> I32Query < 'a, C,
-i32, 4 >
-{
-    I32Query
-    {
-        client, params : [user_settings_id,username,email,password_hash,], stmt : & mut self.0, extractor :
-        | row | { row.get(0) }, mapper : | it | { it },
-    }
-} }impl < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,T3 : cornucopia_async::StringSql,> cornucopia_async ::
-Params < 'a, InsertNewUserParams < T1,T2,T3,>, I32Query < 'a,
-C, i32, 4 >, C > for InsertNewUserStmt
-{
-    fn
-    params(& 'a mut self, client : & 'a  C, params : & 'a
-    InsertNewUserParams < T1,T2,T3,>) -> I32Query < 'a, C,
-    i32, 4 >
-    { self.bind(client, & params.user_settings_id,& params.username,& params.email,& params.password_hash,) }
-}pub fn store_user_permission() -> StoreUserPermissionStmt
-{ StoreUserPermissionStmt(cornucopia_async :: private :: Stmt :: new("INSERT INTO users_groups (users_id, groups_id)
+VALUES ($1, $2, NULL, $3, $4, NULL) returning id",
+            ))
+        }
+        pub struct InsertNewUserStmt(cornucopia_async::private::Stmt);
+        impl InsertNewUserStmt {
+            pub fn bind<
+                'a,
+                C: GenericClient,
+                T1: cornucopia_async::StringSql,
+                T2: cornucopia_async::StringSql,
+                T3: cornucopia_async::StringSql,
+            >(
+                &'a mut self,
+                client: &'a C,
+                user_settings_id: &'a i32,
+                username: &'a T1,
+                email: &'a T2,
+                password_hash: &'a T3,
+            ) -> I32Query<'a, C, i32, 4> {
+                I32Query {
+                    client,
+                    params: [user_settings_id, username, email, password_hash],
+                    stmt: &mut self.0,
+                    extractor: |row| row.get(0),
+                    mapper: |it| it,
+                }
+            }
+        }
+        impl<
+                'a,
+                C: GenericClient,
+                T1: cornucopia_async::StringSql,
+                T2: cornucopia_async::StringSql,
+                T3: cornucopia_async::StringSql,
+            >
+            cornucopia_async::Params<
+                'a,
+                InsertNewUserParams<T1, T2, T3>,
+                I32Query<'a, C, i32, 4>,
+                C,
+            > for InsertNewUserStmt
+        {
+            fn params(
+                &'a mut self,
+                client: &'a C,
+                params: &'a InsertNewUserParams<T1, T2, T3>,
+            ) -> I32Query<'a, C, i32, 4> {
+                self.bind(
+                    client,
+                    &params.user_settings_id,
+                    &params.username,
+                    &params.email,
+                    &params.password_hash,
+                )
+            }
+        }
+        pub fn store_user_permission() -> StoreUserPermissionStmt {
+            StoreUserPermissionStmt(cornucopia_async::private::Stmt::new(
+                "INSERT INTO users_groups (users_id, groups_id)
 VALUES (
     $1,
     (SELECT id FROM groups WHERE name = $2)
-)")) } pub
-struct StoreUserPermissionStmt(cornucopia_async :: private :: Stmt) ; impl
-StoreUserPermissionStmt { pub async fn bind < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,>
-(& 'a mut self, client : & 'a  C,
-user_id : & 'a i32,permission : & 'a T1,) -> Result < u64, tokio_postgres :: Error >
-{
-    let stmt = self.0.prepare(client) .await ? ;
-    client.execute(stmt, & [user_id,permission,]) .await
-} }impl < 'a, C : GenericClient + Send + Sync, T1 : cornucopia_async::StringSql,>
-cornucopia_async :: Params < 'a, StoreUserPermissionParams < T1,>, std::pin::Pin<Box<dyn futures::Future<Output = Result <
-u64, tokio_postgres :: Error > > + Send + 'a>>, C > for StoreUserPermissionStmt
-{
-    fn
-    params(& 'a mut self, client : & 'a  C, params : & 'a
-    StoreUserPermissionParams < T1,>) -> std::pin::Pin<Box<dyn futures::Future<Output = Result < u64, tokio_postgres ::
-    Error > > + Send + 'a>> { Box::pin(self.bind(client, & params.user_id,& params.permission,) ) }
-}pub fn insert_user_image() -> InsertUserImageStmt
-{ InsertUserImageStmt(cornucopia_async :: private :: Stmt :: new("INSERT INTO objects
+)",
+            ))
+        }
+        pub struct StoreUserPermissionStmt(cornucopia_async::private::Stmt);
+        impl StoreUserPermissionStmt {
+            pub async fn bind<
+                'a,
+                C: GenericClient,
+                T1: cornucopia_async::StringSql,
+            >(
+                &'a mut self,
+                client: &'a C,
+                user_id: &'a i32,
+                permission: &'a T1,
+            ) -> Result<u64, tokio_postgres::Error> {
+                let stmt = self.0.prepare(client).await?;
+                client.execute(stmt, &[user_id, permission]).await
+            }
+        }
+        impl<
+                'a,
+                C: GenericClient + Send + Sync,
+                T1: cornucopia_async::StringSql,
+            >
+            cornucopia_async::Params<
+                'a,
+                StoreUserPermissionParams<T1>,
+                std::pin::Pin<
+                    Box<
+                        dyn futures::Future<
+                                Output = Result<u64, tokio_postgres::Error>,
+                            > + Send
+                            + 'a,
+                    >,
+                >,
+                C,
+            > for StoreUserPermissionStmt
+        {
+            fn params(
+                &'a mut self,
+                client: &'a C,
+                params: &'a StoreUserPermissionParams<T1>,
+            ) -> std::pin::Pin<
+                Box<
+                    dyn futures::Future<
+                            Output = Result<u64, tokio_postgres::Error>,
+                        > + Send
+                        + 'a,
+                >,
+            > {
+                Box::pin(self.bind(client, &params.user_id, &params.permission))
+            }
+        }
+        pub fn insert_user_image() -> InsertUserImageStmt {
+            InsertUserImageStmt(cornucopia_async::private::Stmt::new(
+                "INSERT INTO objects
 (key, object_type, avatar_users_id)
-VALUES ($1, 'image', $2)")) } pub
-struct InsertUserImageStmt(cornucopia_async :: private :: Stmt) ; impl
-InsertUserImageStmt { pub async fn bind < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,>
-(& 'a mut self, client : & 'a  C,
-key : & 'a T1,users_id : & 'a i32,) -> Result < u64, tokio_postgres :: Error >
-{
-    let stmt = self.0.prepare(client) .await ? ;
-    client.execute(stmt, & [key,users_id,]) .await
-} }impl < 'a, C : GenericClient + Send + Sync, T1 : cornucopia_async::StringSql,>
-cornucopia_async :: Params < 'a, InsertUserImageParams < T1,>, std::pin::Pin<Box<dyn futures::Future<Output = Result <
-u64, tokio_postgres :: Error > > + Send + 'a>>, C > for InsertUserImageStmt
-{
-    fn
-    params(& 'a mut self, client : & 'a  C, params : & 'a
-    InsertUserImageParams < T1,>) -> std::pin::Pin<Box<dyn futures::Future<Output = Result < u64, tokio_postgres ::
-    Error > > + Send + 'a>> { Box::pin(self.bind(client, & params.key,& params.users_id,) ) }
-}}}
+VALUES ($1, 'image', $2)",
+            ))
+        }
+        pub struct InsertUserImageStmt(cornucopia_async::private::Stmt);
+        impl InsertUserImageStmt {
+            pub async fn bind<
+                'a,
+                C: GenericClient,
+                T1: cornucopia_async::StringSql,
+            >(
+                &'a mut self,
+                client: &'a C,
+                key: &'a T1,
+                users_id: &'a i32,
+            ) -> Result<u64, tokio_postgres::Error> {
+                let stmt = self.0.prepare(client).await?;
+                client.execute(stmt, &[key, users_id]).await
+            }
+        }
+        impl<
+                'a,
+                C: GenericClient + Send + Sync,
+                T1: cornucopia_async::StringSql,
+            >
+            cornucopia_async::Params<
+                'a,
+                InsertUserImageParams<T1>,
+                std::pin::Pin<
+                    Box<
+                        dyn futures::Future<
+                                Output = Result<u64, tokio_postgres::Error>,
+                            > + Send
+                            + 'a,
+                    >,
+                >,
+                C,
+            > for InsertUserImageStmt
+        {
+            fn params(
+                &'a mut self,
+                client: &'a C,
+                params: &'a InsertUserImageParams<T1>,
+            ) -> std::pin::Pin<
+                Box<
+                    dyn futures::Future<
+                            Output = Result<u64, tokio_postgres::Error>,
+                        > + Send
+                        + 'a,
+                >,
+            > {
+                Box::pin(self.bind(client, &params.key, &params.users_id))
+            }
+        }
+    }
+}

@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use anyhow::Context;
 use axum::extract::Path;
+use axum::extract::Query;
 use axum::extract::State;
 use axum::response::IntoResponse;
 use axum::response::Response;
@@ -15,6 +16,7 @@ use serde::Serialize;
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
 use crate::cornucopia::queries::open_access;
+use crate::cornucopia::queries::open_access::GetNewSongs;
 use crate::cornucopia::queries::open_access::GetSongs;
 use crate::domain::music_parameters::*;
 use crate::error_chain_fmt;
@@ -100,6 +102,11 @@ struct GetSongsListQuery {
     amount: i64,
 }
 
+#[derive(Deserialize, Debug)]
+struct GetNewSongsListQuery {
+    amount: i64,
+}
+
 // ───── Body ─────────────────────────────────────────────────────────────── //
 
 pub fn open_router() -> Router<AppState> {
@@ -107,6 +114,7 @@ pub fn open_router() -> Router<AppState> {
         .route("/stats", routing::get(stats))
         .route("/:what", routing::get(get_values_list))
         .route("/songs", routing::get(get_songs))
+        .route("/new_songs", routing::get(get_new_songs))
 }
 
 #[tracing::instrument(name = "Get products counts (stats)", skip_all)]
@@ -203,5 +211,32 @@ async fn get_songs(
         .all()
         .await
         .context("Failed to fetch songs data from pg")?;
+    Ok(Json(songs))
+}
+
+#[tracing::instrument(name = "Get new songs query", skip(app_state))]
+async fn get_new_songs(
+    State(app_state): State<AppState>,
+    Query(GetNewSongsListQuery { amount }): Query<GetNewSongsListQuery>,
+) -> Result<Json<Vec<GetNewSongs>>, ResponseError> {
+    if amount > 50 || amount < 1 {
+        return Err(ResponseError::BadRequest(anyhow::anyhow!(
+            "Amount of tracks should be between 1 and 50, requested: {}",
+            amount
+        )));
+    }
+
+    let pg_pool = app_state
+        .pg_pool
+        .get()
+        .await
+        .context("Failed to get pool from pg")?;
+
+    let songs = open_access::get_new_songs()
+        .bind(&pg_pool, &amount)
+        .all()
+        .await
+        .context("Failed to fetch songs data from pg")?;
+
     Ok(Json(songs))
 }

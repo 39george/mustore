@@ -100,11 +100,11 @@ impl Application {
             email_client,
         );
 
-        tokio::spawn(async {
-            if let Err(e) = run_scheduler().await {
-                tracing::error!("Scheduler failed with: {e}");
-            }
-        });
+        // tokio::spawn(async {
+        //     if let Err(e) = run_scheduler().await {
+        //         tracing::error!("Scheduler failed with: {e}");
+        //     }
+        // });
 
         Ok(Self { serve, port })
     }
