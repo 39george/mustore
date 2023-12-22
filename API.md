@@ -41,6 +41,18 @@ If OK, browser will be redirected (we should make decision where to)
 if Err > StatusCode::InternalError (500)
 ```
 
+- Check user permissions:
+```
+→ TO
+GET /api/protected/health_check
+        OR /api/protected/admin/health_check
+        OR /api/protected/creator/health_check
+        OR /api/protected/consumer/health_check
+← FROM
+If OK > StatusCode::OK (200)
+if Err > StatusCode::Forbidden (403)
+```
+
 - Get beats, songs, covers, lyrics COUNTS:
 ```
 → TO
