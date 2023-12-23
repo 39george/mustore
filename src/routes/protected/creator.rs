@@ -1,3 +1,4 @@
+use anyhow::anyhow;
 use axum::extract::State;
 use axum::routing;
 use axum::Router;
@@ -6,6 +7,8 @@ use http::StatusCode;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
+use crate::auth::users::AuthSession;
+use crate::routes::ResponseError;
 use crate::startup::AppState;
 
 // ───── Types ────────────────────────────────────────────────────────────── //
@@ -30,6 +33,13 @@ async fn health_check() -> StatusCode {
 }
 
 #[tracing::instrument(name = "Upload a new song", skip_all)]
-async fn upload_song(State(app_state): State<AppState>) -> StatusCode {
-    todo!()
+async fn upload_song(
+    State(app_state): State<AppState>,
+    auth_session: AuthSession,
+) -> Result<StatusCode, ResponseError> {
+    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
+        anyhow::anyhow!("No such user in AuthSession!"),
+    ))?;
+
+    Ok(StatusCode::CREATED)
 }

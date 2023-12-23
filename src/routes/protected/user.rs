@@ -12,7 +12,7 @@ use crate::startup::AppState;
 pub fn user_router() -> Router<AppState> {
     Router::new()
         .route("/health_check", routing::get(health_check))
-        .route_layer(permission_required!(crate::auth::users::Backend, "user",))
+        .layer(permission_required!(crate::auth::users::Backend, "user",))
 }
 
 #[tracing::instrument(name = "User's health check", skip_all)]

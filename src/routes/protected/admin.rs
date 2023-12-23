@@ -12,7 +12,7 @@ use crate::startup::AppState;
 pub fn admin_router() -> Router<AppState> {
     Router::new()
         .route("/health_check", routing::get(health_check))
-        .route_layer(permission_required!(
+        .layer(permission_required!(
             crate::auth::users::Backend,
             "administrator",
         ))
