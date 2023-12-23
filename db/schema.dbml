@@ -514,9 +514,6 @@ Table views {
   covers_id INTEGER [default: `NULL`]
   messages_id INTEGER [default: `NULL`]
   system_notifications_id INTEGER [default: `NULL`]
-  Indexes {
-    (users_id, songs_id, beats_id, lyrics_id, covers_id, messages_id) [pk, name: "pk_views"]
-  }
 }
 
 Table reports {

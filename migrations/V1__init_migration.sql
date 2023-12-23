@@ -475,6 +475,7 @@ CREATE TABLE system_notifications (
 );
 
 CREATE TABLE views (
+    id SERIAL PRIMARY KEY,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     users_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     services_id INTEGER DEFAULT NULL REFERENCES services(id) ON DELETE CASCADE,
@@ -500,7 +501,7 @@ CREATE TABLE views (
         COALESCE((system_notifications_id)::BOOLEAN::INTEGER, 0)
         = 1
     ),
-    CONSTRAINT pk_views PRIMARY KEY (users_id, songs_id, beats_id, lyrics_id, covers_id, messages_id)
+    UNIQUE (users_id, songs_id, beats_id, lyrics_id, covers_id, messages_id, system_notifications_id)
 );
 
 CREATE TABLE reports (
