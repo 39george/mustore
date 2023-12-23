@@ -221,42 +221,6 @@ CREATE TABLE listenings (
     UNIQUE (users_id, songs_id, beats_id)
 );
 
-CREATE OR REPLACE FUNCTION check_last_listening_duration() RETURNS TRIGGER AS $$
-DECLARE
-    last_listening_time TIMESTAMP;
-    v_duration REAL;
-BEGIN
-    IF NEW.songs_id IS NOT NULL THEN
-        SELECT MAX(created_at) INTO last_listening_time
-        FROM listenings
-        WHERE users_id = NEW.users_id AND songs_id = NEW.songs_id;
-        
-        SELECT songs.duration INTO v_duration
-        FROM songs
-        WHERE id = NEW.songs_id;
-    ELSEIF NEW.beats_id IS NOT NULL THEN
-        SELECT MAX(created_at) INTO last_listening_time
-        FROM listenings
-        WHERE users_id = NEW.users_id AND beats_id = NEW.beats_id;
-        
-        SELECT beats.duration INTO v_duration
-        FROM beats
-        WHERE id = NEW.beats_id;
-    END IF;
-
-    IF last_listening_time + (INTERVAL '1 second' * v_duration) > NEW.created_at THEN
-        RAISE EXCEPTION 'Cannot insert a new listening for the same user and song/beat if the time elapsed since the last listening is less than the duration of the song/beat.';
-    END IF;
-
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER check_last_listening_duration_trigger
-BEFORE INSERT ON listenings
-FOR EACH ROW
-EXECUTE FUNCTION check_last_listening_duration();
-
 -- Services
 CREATE TABLE services (
     id SERIAL PRIMARY KEY,
@@ -419,27 +383,6 @@ CREATE TABLE messages (
     )
 );
 
-CREATE OR REPLACE FUNCTION check_conversations_id()
-RETURNS TRIGGER AS $$
-BEGIN
-    IF NEW.conversations_id IS NULL THEN
-        RETURN NEW;
-    END IF;
-
-    IF EXISTS (
-        SELECT 1 FROM messages WHERE id = NEW.messages_id AND conversations_id = NEW.conversations_id
-    ) THEN
-        RETURN NEW;
-    ELSE
-        RAISE EXCEPTION 'Invalid conversations_id';
-    END IF;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER check_conversations_id_trigger
-BEFORE INSERT OR UPDATE ON messages
-FOR EACH ROW EXECUTE FUNCTION check_conversations_id();
-
 CREATE TABLE participants (
 	id SERIAL PRIMARY KEY,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -599,6 +542,86 @@ CREATE TABLE images (
     offset_y REAL
 );
 
+-- Give a ban to a user, every time his strikes amount %3 = 0
+-- If there are more than 1 ban, next bans should be delegated to the superuser
+CREATE TABLE strikes (
+    id SERIAL PRIMARY KEY,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    users_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    administrators_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    comment VARCHAR(1000) NOT NULL
+);
+
+-- I should create unban function in backend. And run it every 5 days for example.
+CREATE TABLE bans (
+    id SERIAL PRIMARY KEY,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    duration INTERVAL NOT NULL,
+    users_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    administrators_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    comment VARCHAR(1000) NOT NULL
+);
+
+-- Functions
+
+CREATE OR REPLACE FUNCTION check_last_listening_duration() RETURNS TRIGGER AS $$
+DECLARE
+    last_listening_time TIMESTAMP;
+    v_duration REAL;
+BEGIN
+    IF NEW.songs_id IS NOT NULL THEN
+        SELECT MAX(created_at) INTO last_listening_time
+        FROM listenings
+        WHERE users_id = NEW.users_id AND songs_id = NEW.songs_id;
+        
+        SELECT songs.duration INTO v_duration
+        FROM songs
+        WHERE id = NEW.songs_id;
+    ELSEIF NEW.beats_id IS NOT NULL THEN
+        SELECT MAX(created_at) INTO last_listening_time
+        FROM listenings
+        WHERE users_id = NEW.users_id AND beats_id = NEW.beats_id;
+        
+        SELECT beats.duration INTO v_duration
+        FROM beats
+        WHERE id = NEW.beats_id;
+    END IF;
+
+    IF last_listening_time + (INTERVAL '1 second' * v_duration) > NEW.created_at THEN
+        RAISE EXCEPTION 'Cannot insert a new listening for the same user and song/beat if the time elapsed since the last listening is less than the duration of the song/beat.';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER check_last_listening_duration_trigger
+BEFORE INSERT ON listenings
+FOR EACH ROW
+EXECUTE FUNCTION check_last_listening_duration();
+
+CREATE OR REPLACE FUNCTION check_conversations_id()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.conversations_id IS NULL THEN
+        RETURN NEW;
+    END IF;
+
+    IF EXISTS (
+        SELECT 1 FROM messages WHERE id = NEW.messages_id AND conversations_id = NEW.conversations_id
+    ) THEN
+        RETURN NEW;
+    ELSE
+        RAISE EXCEPTION 'Invalid conversations_id';
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER check_conversations_id_trigger
+BEFORE INSERT OR UPDATE ON messages
+FOR EACH ROW EXECUTE FUNCTION check_conversations_id();
+
 CREATE OR REPLACE FUNCTION validate_avatar_users_id()
     RETURNS TRIGGER AS $$
     BEGIN
@@ -656,25 +679,4 @@ CREATE TRIGGER enforce_cover_credits_cover_design_limit
     BEFORE INSERT OR UPDATE ON objects
     FOR EACH ROW
     EXECUTE FUNCTION check_cover_credits_cover_design_limit();
-
--- Give a ban to a user, every time his strikes amount %3 = 0
--- If there are more than 1 ban, next bans should be delegated to the superuser
-CREATE TABLE strikes (
-    id SERIAL PRIMARY KEY,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    users_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    administrators_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
-    comment VARCHAR(1000) NOT NULL
-);
-
--- I should create unban function in backend. And run it every 5 days for example.
-CREATE TABLE bans (
-    id SERIAL PRIMARY KEY,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    duration INTERVAL NOT NULL,
-    users_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    administrators_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
-    comment VARCHAR(1000) NOT NULL
-);
 
