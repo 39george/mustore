@@ -53,7 +53,7 @@
 } }}#[allow(clippy :: all, clippy :: pedantic)] #[allow(unused_variables)]
 #[allow(unused_imports)] #[allow(dead_code)] pub mod queries
 { pub mod creator_access
-{ use futures::{{StreamExt, TryStreamExt}};use futures; use cornucopia_async::GenericClient;#[derive(serde::Serialize, Debug, Clone, PartialEq, Copy)] pub struct GetCreatorMarksAvg
+{ use futures::{{StreamExt, TryStreamExt}};use futures; use cornucopia_async::GenericClient;#[derive( Debug)] pub struct InsertProductAndGetProductIdParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,> { pub owher_id : i32,pub name : T1,pub description : T2,pub price : rust_decimal::Decimal,}#[derive( Debug)] pub struct InsertProductCoverKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub product_id : i32,}#[derive( Debug)] pub struct InsertProductTagByNameParams < T1 : cornucopia_async::StringSql,> { pub product_id : i32,pub tag_name : T1,}#[derive( Debug)] pub struct InsertSongAndGetSongIdParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,> { pub product_id : i32,pub primary_genre : i32,pub secondary_genre : Option<i32>,pub sex : T1,pub tempo : i16,pub key : super::super::types::public::Musickey,pub duration : f32,pub lyric : T2,}#[derive( Debug)] pub struct InsertSongMasterKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub song_id : i32,}#[derive( Debug)] pub struct InsertSongMultitrackKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub song_id : i32,}#[derive(serde::Serialize, Debug, Clone, PartialEq, Copy)] pub struct GetCreatorMarksAvg
 { pub avg : rust_decimal::Decimal,pub count : i64,}pub struct GetCreatorMarksAvgQuery < 'a, C : GenericClient, T, const N : usize >
 {
     client : & 'a  C, params :
@@ -67,6 +67,45 @@ where C : GenericClient
     < 'a, C, R, N >
     {
         GetCreatorMarksAvgQuery
+        {
+            client : self.client, params : self.params, stmt : self.stmt,
+            extractor : self.extractor, mapper,
+        }
+    } pub async fn one(self) -> Result < T, tokio_postgres :: Error >
+    {
+        let stmt = self.stmt.prepare(self.client) .await ? ; let row =
+        self.client.query_one(stmt, & self.params) .await ? ;
+        Ok((self.mapper) ((self.extractor) (& row)))
+    } pub async fn all(self) -> Result < Vec < T >, tokio_postgres :: Error >
+    { self.iter() .await ?.try_collect().await } pub async fn opt(self) -> Result
+    < Option < T >, tokio_postgres :: Error >
+    {
+        let stmt = self.stmt.prepare(self.client) .await ? ;
+        Ok(self.client.query_opt(stmt, & self.params) .await
+        ?.map(| row | (self.mapper) ((self.extractor) (& row))))
+    } pub async fn iter(self,) -> Result < impl futures::Stream < Item = Result
+    < T, tokio_postgres :: Error >> + 'a, tokio_postgres :: Error >
+    {
+        let stmt = self.stmt.prepare(self.client) .await ? ; let it =
+        self.client.query_raw(stmt, cornucopia_async :: private ::
+        slice_iter(& self.params)) .await ?
+        .map(move | res |
+        res.map(| row | (self.mapper) ((self.extractor) (& row)))) .into_stream() ;
+        Ok(it)
+    }
+}pub struct I32Query < 'a, C : GenericClient, T, const N : usize >
+{
+    client : & 'a  C, params :
+    [& 'a (dyn postgres_types :: ToSql + Sync) ; N], stmt : & 'a mut cornucopia_async
+    :: private :: Stmt, extractor : fn(& tokio_postgres :: Row) -> i32,
+    mapper : fn(i32) -> T,
+} impl < 'a, C, T : 'a, const N : usize > I32Query < 'a, C, T, N >
+where C : GenericClient
+{
+    pub fn map < R > (self, mapper : fn(i32) -> R) -> I32Query
+    < 'a, C, R, N >
+    {
+        I32Query
         {
             client : self.client, params : self.params, stmt : self.stmt,
             extractor : self.extractor, mapper,
@@ -112,7 +151,127 @@ GetCreatorMarksAvg, 1 >
         client, params : [creator_id,], stmt : & mut self.0, extractor :
         | row | { GetCreatorMarksAvg { avg : row.get(0),count : row.get(1),} }, mapper : | it | { <GetCreatorMarksAvg>::from(it) },
     }
-} }}pub mod open_access
+} }pub fn insert_product_and_get_product_id() -> InsertProductAndGetProductIdStmt
+{ InsertProductAndGetProductIdStmt(cornucopia_async :: private :: Stmt :: new("INSERT INTO products(owner_id, name, description, price)
+VALUES ($1, $2, $3, $4) returning id")) } pub
+struct InsertProductAndGetProductIdStmt(cornucopia_async :: private :: Stmt) ; impl
+InsertProductAndGetProductIdStmt { pub fn bind < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,>
+(& 'a mut self, client : & 'a  C,
+owher_id : & 'a i32,name : & 'a T1,description : & 'a T2,price : & 'a rust_decimal::Decimal,) -> I32Query < 'a, C,
+i32, 4 >
+{
+    I32Query
+    {
+        client, params : [owher_id,name,description,price,], stmt : & mut self.0, extractor :
+        | row | { row.get(0) }, mapper : | it | { it },
+    }
+} }impl < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,> cornucopia_async ::
+Params < 'a, InsertProductAndGetProductIdParams < T1,T2,>, I32Query < 'a,
+C, i32, 4 >, C > for InsertProductAndGetProductIdStmt
+{
+    fn
+    params(& 'a mut self, client : & 'a  C, params : & 'a
+    InsertProductAndGetProductIdParams < T1,T2,>) -> I32Query < 'a, C,
+    i32, 4 >
+    { self.bind(client, & params.owher_id,& params.name,& params.description,& params.price,) }
+}pub fn insert_product_cover_key() -> InsertProductCoverKeyStmt
+{ InsertProductCoverKeyStmt(cornucopia_async :: private :: Stmt :: new("INSERT INTO objects(key, object_type, cover_products_id)
+VALUES ($1, 'image', $2)")) } pub
+struct InsertProductCoverKeyStmt(cornucopia_async :: private :: Stmt) ; impl
+InsertProductCoverKeyStmt { pub async fn bind < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,>
+(& 'a mut self, client : & 'a  C,
+key : & 'a T1,product_id : & 'a i32,) -> Result < u64, tokio_postgres :: Error >
+{
+    let stmt = self.0.prepare(client) .await ? ;
+    client.execute(stmt, & [key,product_id,]) .await
+} }impl < 'a, C : GenericClient + Send + Sync, T1 : cornucopia_async::StringSql,>
+cornucopia_async :: Params < 'a, InsertProductCoverKeyParams < T1,>, std::pin::Pin<Box<dyn futures::Future<Output = Result <
+u64, tokio_postgres :: Error > > + Send + 'a>>, C > for InsertProductCoverKeyStmt
+{
+    fn
+    params(& 'a mut self, client : & 'a  C, params : & 'a
+    InsertProductCoverKeyParams < T1,>) -> std::pin::Pin<Box<dyn futures::Future<Output = Result < u64, tokio_postgres ::
+    Error > > + Send + 'a>> { Box::pin(self.bind(client, & params.key,& params.product_id,) ) }
+}pub fn insert_product_tag_by_name() -> InsertProductTagByNameStmt
+{ InsertProductTagByNameStmt(cornucopia_async :: private :: Stmt :: new("INSERT INTO products_tags (products_id, tags_id)
+VALUES ($1, (
+    SELECT id FROM tags WHERE name = $2
+))")) } pub
+struct InsertProductTagByNameStmt(cornucopia_async :: private :: Stmt) ; impl
+InsertProductTagByNameStmt { pub async fn bind < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,>
+(& 'a mut self, client : & 'a  C,
+product_id : & 'a i32,tag_name : & 'a T1,) -> Result < u64, tokio_postgres :: Error >
+{
+    let stmt = self.0.prepare(client) .await ? ;
+    client.execute(stmt, & [product_id,tag_name,]) .await
+} }impl < 'a, C : GenericClient + Send + Sync, T1 : cornucopia_async::StringSql,>
+cornucopia_async :: Params < 'a, InsertProductTagByNameParams < T1,>, std::pin::Pin<Box<dyn futures::Future<Output = Result <
+u64, tokio_postgres :: Error > > + Send + 'a>>, C > for InsertProductTagByNameStmt
+{
+    fn
+    params(& 'a mut self, client : & 'a  C, params : & 'a
+    InsertProductTagByNameParams < T1,>) -> std::pin::Pin<Box<dyn futures::Future<Output = Result < u64, tokio_postgres ::
+    Error > > + Send + 'a>> { Box::pin(self.bind(client, & params.product_id,& params.tag_name,) ) }
+}pub fn insert_song_and_get_song_id() -> InsertSongAndGetSongIdStmt
+{ InsertSongAndGetSongIdStmt(cornucopia_async :: private :: Stmt :: new("INSERT INTO songs(products_id, primary_genre, secondary_genre, sex, tempo, key, duration, lyric)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8) returning id")) } pub
+struct InsertSongAndGetSongIdStmt(cornucopia_async :: private :: Stmt) ; impl
+InsertSongAndGetSongIdStmt { pub fn bind < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,>
+(& 'a mut self, client : & 'a  C,
+product_id : & 'a i32,primary_genre : & 'a i32,secondary_genre : & 'a Option<i32>,sex : & 'a T1,tempo : & 'a i16,key : & 'a super::super::types::public::Musickey,duration : & 'a f32,lyric : & 'a T2,) -> I32Query < 'a, C,
+i32, 8 >
+{
+    I32Query
+    {
+        client, params : [product_id,primary_genre,secondary_genre,sex,tempo,key,duration,lyric,], stmt : & mut self.0, extractor :
+        | row | { row.get(0) }, mapper : | it | { it },
+    }
+} }impl < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,> cornucopia_async ::
+Params < 'a, InsertSongAndGetSongIdParams < T1,T2,>, I32Query < 'a,
+C, i32, 8 >, C > for InsertSongAndGetSongIdStmt
+{
+    fn
+    params(& 'a mut self, client : & 'a  C, params : & 'a
+    InsertSongAndGetSongIdParams < T1,T2,>) -> I32Query < 'a, C,
+    i32, 8 >
+    { self.bind(client, & params.product_id,& params.primary_genre,& params.secondary_genre,& params.sex,& params.tempo,& params.key,& params.duration,& params.lyric,) }
+}pub fn insert_song_master_key() -> InsertSongMasterKeyStmt
+{ InsertSongMasterKeyStmt(cornucopia_async :: private :: Stmt :: new("INSERT INTO objects(key, object_type, master_songs_id)
+VALUES ($1, 'audio', $2)")) } pub
+struct InsertSongMasterKeyStmt(cornucopia_async :: private :: Stmt) ; impl
+InsertSongMasterKeyStmt { pub async fn bind < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,>
+(& 'a mut self, client : & 'a  C,
+key : & 'a T1,song_id : & 'a i32,) -> Result < u64, tokio_postgres :: Error >
+{
+    let stmt = self.0.prepare(client) .await ? ;
+    client.execute(stmt, & [key,song_id,]) .await
+} }impl < 'a, C : GenericClient + Send + Sync, T1 : cornucopia_async::StringSql,>
+cornucopia_async :: Params < 'a, InsertSongMasterKeyParams < T1,>, std::pin::Pin<Box<dyn futures::Future<Output = Result <
+u64, tokio_postgres :: Error > > + Send + 'a>>, C > for InsertSongMasterKeyStmt
+{
+    fn
+    params(& 'a mut self, client : & 'a  C, params : & 'a
+    InsertSongMasterKeyParams < T1,>) -> std::pin::Pin<Box<dyn futures::Future<Output = Result < u64, tokio_postgres ::
+    Error > > + Send + 'a>> { Box::pin(self.bind(client, & params.key,& params.song_id,) ) }
+}pub fn insert_song_multitrack_key() -> InsertSongMultitrackKeyStmt
+{ InsertSongMultitrackKeyStmt(cornucopia_async :: private :: Stmt :: new("INSERT INTO objects(key, object_type, multitrack_songs_id)
+VALUES ($1, 'multitrack', $2)")) } pub
+struct InsertSongMultitrackKeyStmt(cornucopia_async :: private :: Stmt) ; impl
+InsertSongMultitrackKeyStmt { pub async fn bind < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,>
+(& 'a mut self, client : & 'a  C,
+key : & 'a T1,song_id : & 'a i32,) -> Result < u64, tokio_postgres :: Error >
+{
+    let stmt = self.0.prepare(client) .await ? ;
+    client.execute(stmt, & [key,song_id,]) .await
+} }impl < 'a, C : GenericClient + Send + Sync, T1 : cornucopia_async::StringSql,>
+cornucopia_async :: Params < 'a, InsertSongMultitrackKeyParams < T1,>, std::pin::Pin<Box<dyn futures::Future<Output = Result <
+u64, tokio_postgres :: Error > > + Send + 'a>>, C > for InsertSongMultitrackKeyStmt
+{
+    fn
+    params(& 'a mut self, client : & 'a  C, params : & 'a
+    InsertSongMultitrackKeyParams < T1,>) -> std::pin::Pin<Box<dyn futures::Future<Output = Result < u64, tokio_postgres ::
+    Error > > + Send + 'a>> { Box::pin(self.bind(client, & params.key,& params.song_id,) ) }
+}}pub mod open_access
 { use futures::{{StreamExt, TryStreamExt}};use futures; use cornucopia_async::GenericClient;#[derive( Debug)] pub struct GetSongsParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::ArraySql<Item = i16>,T3 : cornucopia_async::ArraySql<Item = super::super::types::public::Musickey>,T4 : cornucopia_async::StringSql,T5 : cornucopia_async::ArraySql<Item = T4>,T6 : cornucopia_async::StringSql,T7 : cornucopia_async::ArraySql<Item = T6>,T8 : cornucopia_async::StringSql,> { pub sex : Option<T1>,pub tempo : Option<T2>,pub key : Option<T3>,pub genre : Option<T5>,pub tag : Option<T7>,pub sort_by : T8,pub amount : i64,}#[derive(serde::Serialize, Debug, Clone, PartialEq, )] pub struct GetStats
 { pub table_name : String,pub count : i64,}pub struct GetStatsBorrowed < 'a >
 { pub table_name : &'a str,pub count : i64,} impl < 'a > From < GetStatsBorrowed <
@@ -568,7 +727,7 @@ SelectUserDataWithAvatarKey, 1 >
         | row | { SelectUserDataWithAvatarKeyBorrowed { id : row.get(0),key : row.get(1),username : row.get(2),email : row.get(3),} }, mapper : | it | { <SelectUserDataWithAvatarKey>::from(it) },
     }
 } }}pub mod user_access
-{ use futures::{{StreamExt, TryStreamExt}};use futures; use cornucopia_async::GenericClient;#[derive(Clone,Copy, Debug)] pub struct SetUserSettingsParams < > { pub inbox_messages : bool,pub order_messages : bool,pub order_updates : bool,pub id : i32,}#[derive(serde::Serialize, Debug, Clone, PartialEq, Copy)] pub struct GetUserSettings
+{ use futures::{{StreamExt, TryStreamExt}};use futures; use cornucopia_async::GenericClient;#[derive(Clone,Copy, Debug)] pub struct SetUserSettingsParams < > { pub inbox_messages : bool,pub order_messages : bool,pub order_updates : bool,pub id : i32,}#[derive(Clone,Copy, Debug)] pub struct SetSystemNotificationHaveBeenSeenParams < > { pub user_id : i32,pub system_notification_id : i32,}#[derive(serde::Serialize, Debug, Clone, PartialEq, Copy)] pub struct GetUserSettings
 { pub inbox_messages : bool,pub order_messages : bool,pub order_updates : bool,}pub struct GetUserSettingsQuery < 'a, C : GenericClient, T, const N : usize >
 {
     client : & 'a  C, params :
@@ -582,6 +741,53 @@ where C : GenericClient
     < 'a, C, R, N >
     {
         GetUserSettingsQuery
+        {
+            client : self.client, params : self.params, stmt : self.stmt,
+            extractor : self.extractor, mapper,
+        }
+    } pub async fn one(self) -> Result < T, tokio_postgres :: Error >
+    {
+        let stmt = self.stmt.prepare(self.client) .await ? ; let row =
+        self.client.query_one(stmt, & self.params) .await ? ;
+        Ok((self.mapper) ((self.extractor) (& row)))
+    } pub async fn all(self) -> Result < Vec < T >, tokio_postgres :: Error >
+    { self.iter() .await ?.try_collect().await } pub async fn opt(self) -> Result
+    < Option < T >, tokio_postgres :: Error >
+    {
+        let stmt = self.stmt.prepare(self.client) .await ? ;
+        Ok(self.client.query_opt(stmt, & self.params) .await
+        ?.map(| row | (self.mapper) ((self.extractor) (& row))))
+    } pub async fn iter(self,) -> Result < impl futures::Stream < Item = Result
+    < T, tokio_postgres :: Error >> + 'a, tokio_postgres :: Error >
+    {
+        let stmt = self.stmt.prepare(self.client) .await ? ; let it =
+        self.client.query_raw(stmt, cornucopia_async :: private ::
+        slice_iter(& self.params)) .await ?
+        .map(move | res |
+        res.map(| row | (self.mapper) ((self.extractor) (& row)))) .into_stream() ;
+        Ok(it)
+    }
+}#[derive(serde::Serialize, Debug, Clone, PartialEq, )] pub struct GetUserSystemNotifications
+{ pub id : i32,pub text : String,pub users_id : i32,pub created_at : time::OffsetDateTime,pub system_notifications_id : Option<i32>,}pub struct GetUserSystemNotificationsBorrowed < 'a >
+{ pub id : i32,pub text : &'a str,pub users_id : i32,pub created_at : time::OffsetDateTime,pub system_notifications_id : Option<i32>,} impl < 'a > From < GetUserSystemNotificationsBorrowed <
+'a >> for GetUserSystemNotifications
+{
+    fn
+    from(GetUserSystemNotificationsBorrowed { id,text,users_id,created_at,system_notifications_id,} : GetUserSystemNotificationsBorrowed < 'a >)
+    -> Self { Self { id,text: text.into(),users_id,created_at,system_notifications_id,} }
+}pub struct GetUserSystemNotificationsQuery < 'a, C : GenericClient, T, const N : usize >
+{
+    client : & 'a  C, params :
+    [& 'a (dyn postgres_types :: ToSql + Sync) ; N], stmt : & 'a mut cornucopia_async
+    :: private :: Stmt, extractor : fn(& tokio_postgres :: Row) -> GetUserSystemNotificationsBorrowed,
+    mapper : fn(GetUserSystemNotificationsBorrowed) -> T,
+} impl < 'a, C, T : 'a, const N : usize > GetUserSystemNotificationsQuery < 'a, C, T, N >
+where C : GenericClient
+{
+    pub fn map < R > (self, mapper : fn(GetUserSystemNotificationsBorrowed) -> R) -> GetUserSystemNotificationsQuery
+    < 'a, C, R, N >
+    {
+        GetUserSystemNotificationsQuery
         {
             client : self.client, params : self.params, stmt : self.stmt,
             extractor : self.extractor, mapper,
@@ -648,6 +854,43 @@ u64, tokio_postgres :: Error > > + Send + 'a>>, C > for SetUserSettingsStmt
     params(& 'a mut self, client : & 'a  C, params : & 'a
     SetUserSettingsParams < >) -> std::pin::Pin<Box<dyn futures::Future<Output = Result < u64, tokio_postgres ::
     Error > > + Send + 'a>> { Box::pin(self.bind(client, & params.inbox_messages,& params.order_messages,& params.order_updates,& params.id,) ) }
+}pub fn get_user_system_notifications() -> GetUserSystemNotificationsStmt
+{ GetUserSystemNotificationsStmt(cornucopia_async :: private :: Stmt :: new("SELECT s.id, s.text, s.users_id, s.created_at, views.system_notifications_id
+FROM system_notifications s
+LEFT JOIN views
+ON views.system_notifications_id = s.id
+RIGHT JOIN users
+ON users.id = s.users_id
+ORDER BY s.created_at DESC")) } pub
+struct GetUserSystemNotificationsStmt(cornucopia_async :: private :: Stmt) ; impl
+GetUserSystemNotificationsStmt { pub fn bind < 'a, C : GenericClient, >
+(& 'a mut self, client : & 'a  C,
+) -> GetUserSystemNotificationsQuery < 'a, C,
+GetUserSystemNotifications, 0 >
+{
+    GetUserSystemNotificationsQuery
+    {
+        client, params : [], stmt : & mut self.0, extractor :
+        | row | { GetUserSystemNotificationsBorrowed { id : row.get(0),text : row.get(1),users_id : row.get(2),created_at : row.get(3),system_notifications_id : row.get(4),} }, mapper : | it | { <GetUserSystemNotifications>::from(it) },
+    }
+} }pub fn set_system_notification_have_been_seen() -> SetSystemNotificationHaveBeenSeenStmt
+{ SetSystemNotificationHaveBeenSeenStmt(cornucopia_async :: private :: Stmt :: new("INSERT INTO views (users_id, system_notifications_id)
+VALUES ($1, $2)")) } pub
+struct SetSystemNotificationHaveBeenSeenStmt(cornucopia_async :: private :: Stmt) ; impl
+SetSystemNotificationHaveBeenSeenStmt { pub async fn bind < 'a, C : GenericClient, >
+(& 'a mut self, client : & 'a  C,
+user_id : & 'a i32,system_notification_id : & 'a i32,) -> Result < u64, tokio_postgres :: Error >
+{
+    let stmt = self.0.prepare(client) .await ? ;
+    client.execute(stmt, & [user_id,system_notification_id,]) .await
+} }impl < 'a, C : GenericClient + Send + Sync, >
+cornucopia_async :: Params < 'a, SetSystemNotificationHaveBeenSeenParams < >, std::pin::Pin<Box<dyn futures::Future<Output = Result <
+u64, tokio_postgres :: Error > > + Send + 'a>>, C > for SetSystemNotificationHaveBeenSeenStmt
+{
+    fn
+    params(& 'a mut self, client : & 'a  C, params : & 'a
+    SetSystemNotificationHaveBeenSeenParams < >) -> std::pin::Pin<Box<dyn futures::Future<Output = Result < u64, tokio_postgres ::
+    Error > > + Send + 'a>> { Box::pin(self.bind(client, & params.user_id,& params.system_notification_id,) ) }
 }}pub mod user_auth_queries
 { use futures::{{StreamExt, TryStreamExt}};use futures; use cornucopia_async::GenericClient;#[derive( Debug)] pub struct CheckIfUserExistsAlreadyParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,> { pub email : T1,pub username : T2,}#[derive( Debug)] pub struct InsertNewUserParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,T3 : cornucopia_async::StringSql,> { pub user_settings_id : i32,pub username : T1,pub email : T2,pub password_hash : T3,}#[derive( Debug)] pub struct StoreUserPermissionParams < T1 : cornucopia_async::StringSql,> { pub user_id : i32,pub permission : T1,}#[derive( Debug)] pub struct InsertUserImageParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub users_id : i32,}#[derive(serde::Serialize, Debug, Clone, PartialEq, )] pub struct GetAuthUserDataByUsername
 { pub id : i32,pub username : String,pub password_hash : String,}pub struct GetAuthUserDataByUsernameBorrowed < 'a >
