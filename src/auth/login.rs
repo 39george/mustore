@@ -83,7 +83,7 @@ mod get {
     use super::*;
 
     pub async fn logout(mut auth_session: AuthSession) -> impl IntoResponse {
-        match auth_session.logout() {
+        match auth_session.logout().await {
             // FIX: write where to redirect to
             Ok(_) => Redirect::to("/login").into_response(),
             Err(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
