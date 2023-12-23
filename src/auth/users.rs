@@ -22,7 +22,33 @@ use crate::telemetry::spawn_blocking_with_tracing;
 pub struct User {
     id: i32,
     username: String,
-    password_hash: String,
+    #[serde(
+        serialize_with = "serialize_secret",
+        deserialize_with = "deserialize_secret"
+    )]
+    password_hash: Secret<String>,
+}
+
+// Serialize the secret revealing its content
+fn serialize_secret<S>(
+    secret: &Secret<String>,
+    serializer: S,
+) -> Result<S::Ok, S::Error>
+where
+    S: serde::Serializer,
+{
+    serializer.serialize_str(secret.expose_secret())
+}
+
+// Deserialize the secret, consuming the revealed content immediately
+fn deserialize_secret<'de, D>(
+    deserializer: D,
+) -> Result<Secret<String>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let s = String::deserialize(deserializer)?;
+    Ok(Secret::new(s))
 }
 
 // Here we've implemented `Debug` manually to avoid accidentally logging the
@@ -49,7 +75,7 @@ impl AuthUser for User {
         // hash--what this means
         // is when the user changes their password the
         // auth session becomes invalid.
-        self.password_hash.as_bytes()
+        self.password_hash.expose_secret().as_bytes()
     }
 }
 
@@ -82,7 +108,7 @@ impl AuthnBackend for Backend {
         let provided_password = creds.password.clone();
         let argon2_obj = self.app_state.argon2_obj.clone();
         let expected_password_hash = if let Ok(ref user) = user {
-            Secret::new(user.password_hash.clone())
+            user.password_hash.clone()
         } else {
             // We do it to prevent hacking by hash time
             Secret::new(
@@ -139,7 +165,7 @@ async fn get_user_data(
                 .await
                 .context("Failed to query user from db by username")
                 .map_err(AuthError::InvalidCredentialsError)?
-                .map(|r| (r.id, r.username, r.password_hash))
+                .map(|r| (r.id, r.username, Secret::new(r.password_hash)))
         }
         (None, Some(id)) => user_auth_queries::get_auth_user_data_by_id()
             .bind(&connection, id)
@@ -147,7 +173,7 @@ async fn get_user_data(
             .await
             .context("Failed to query user from db by id")
             .map_err(AuthError::InvalidCredentialsError)?
-            .map(|r| (r.id, r.username, r.password_hash)),
+            .map(|r| (r.id, r.username, Secret::new(r.password_hash))),
         _ => unreachable!(),
     };
 
@@ -158,7 +184,7 @@ async fn get_user_data(
     Ok(User {
         id,
         username,
-        password_hash: password_hash.to_string(),
+        password_hash,
     })
 }
 
