@@ -676,7 +676,41 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER enforce_cover_credits_cover_design_limit
-    BEFORE INSERT OR UPDATE ON objects
-    FOR EACH ROW
-    EXECUTE FUNCTION check_cover_credits_cover_design_limit();
+BEFORE INSERT OR UPDATE ON objects
+FOR EACH ROW
+EXECUTE FUNCTION check_cover_credits_cover_design_limit();
 
+CREATE OR REPLACE FUNCTION check_tags_limit()
+RETURNS TRIGGER AS $$
+DECLARE
+    tag_count INTEGER;
+BEGIN
+    -- Check tag count when inserting a new tag
+    IF TG_OP = 'INSERT' THEN
+        SELECT COUNT(*) INTO tag_count
+        FROM products_tags
+        WHERE products_id = NEW.products_id;
+
+        IF tag_count >= 3 THEN
+            RAISE EXCEPTION 'A product can have at most 3 tags.';
+        END IF;
+    END IF;
+
+    -- Check tag count when deleting a tag
+    IF TG_OP = 'DELETE' THEN
+        SELECT COUNT(*) INTO tag_count
+        FROM products_tags
+        WHERE products_id = OLD.products_id;
+
+        IF tag_count <= 1 THEN
+            RAISE EXCEPTION 'A product must have at least 1 tag.';
+        END IF;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_check_tag_limit
+BEFORE INSERT OR DELETE ON products_tags
+FOR EACH ROW EXECUTE FUNCTION check_tags_limit();
