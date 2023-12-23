@@ -315,7 +315,7 @@ CREATE TABLE music_services_genres (
 
 CREATE TABLE favorites (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    users_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    users_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     services_id INTEGER REFERENCES services(id) ON DELETE CASCADE,
     CONSTRAINT pk_favorites PRIMARY KEY (users_id, services_id)
 );

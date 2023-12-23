@@ -370,7 +370,7 @@ Table music_services_genres {
 
 Table favorites {
   created_at TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
-  users_id INTEGER [not null]
+  users_id INTEGER
   services_id INTEGER
   Indexes {
     (users_id, services_id) [pk, name: "pk_favorites"]
