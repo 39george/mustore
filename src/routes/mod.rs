@@ -16,6 +16,8 @@ pub enum ResponseError {
     InternalError(#[source] anyhow::Error),
     #[error("Bad request")]
     BadRequest(#[source] anyhow::Error),
+    #[error("No such user")]
+    UnauthorizedError(#[source] anyhow::Error),
 }
 
 impl std::fmt::Debug for ResponseError {
@@ -36,6 +38,9 @@ impl IntoResponse for ResponseError {
             }
             ResponseError::BadRequest(_) => {
                 StatusCode::BAD_REQUEST.into_response()
+            }
+            ResponseError::UnauthorizedError(_) => {
+                StatusCode::UNAUTHORIZED.into_response()
             }
         }
     }
