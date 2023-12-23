@@ -20,7 +20,7 @@ fred = "7.1.0"
 axum = { version = "0.7.2", features = ["macros"] }
 http = "1.0.0"
 hyper = "1.0.1"
-tokio = { version = "1.35.0", features = [
+tokio = { version = "1.35.1", features = [
   "macros",
   "rt-multi-thread",
   "signal",
@@ -61,8 +61,8 @@ rust_decimal = { version = "1.33.1", features = ["db-postgres"] }
 tokio-cron-scheduler = "0.9.4"
 
 # Security
-axum-login = "0.10.2"
-tower-sessions = { version = "0.7.0", features = ["redis-store"] }
+axum-login = "0.11.0"
+tower-sessions = { version = "0.8.0", features = ["redis-store"] }
 base64 = "0.21.5"
 argon2 = { version = "0.5.2", features = ["std"] }
 secrecy = { version = "0.8.0", features = ["serde"] }
