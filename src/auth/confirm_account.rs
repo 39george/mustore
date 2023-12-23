@@ -45,6 +45,12 @@ pub async fn confirm(
         .context("Failed to get connection from postgres pool")
         .map_err(AuthError::AccountConfirmationFailed)?;
 
+    let transaction = db_client
+        .transaction()
+        .await
+        .context("Failed to get a transaction from pg")
+        .map_err(AuthError::AccountConfirmationFailed)?;
+
     let user_candidate_data =
         get_user_candidate_data(&app_state.redis_pool, &email)
             .await
@@ -65,12 +71,6 @@ pub async fn confirm(
     })
     .await
     .context("Failed to join tokio thread handle")??;
-
-    let transaction = db_client
-        .transaction()
-        .await
-        .context("Failed to get a transaction from pg")
-        .map_err(AuthError::AccountConfirmationFailed)?;
 
     let user_settings_id = user_auth_queries::insert_new_user_settings()
         .bind(&transaction)
