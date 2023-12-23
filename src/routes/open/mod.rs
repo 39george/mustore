@@ -4,12 +4,9 @@ use anyhow::Context;
 use axum::extract::Path;
 use axum::extract::Query;
 use axum::extract::State;
-use axum::response::IntoResponse;
-use axum::response::Response;
 use axum::routing;
 use axum::Json;
 use axum::Router;
-use http::StatusCode;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -20,43 +17,11 @@ use crate::cornucopia::queries::open_access::GetNewSongs;
 use crate::cornucopia::queries::open_access::GetRecommendedSongs;
 use crate::cornucopia::queries::open_access::GetSongs;
 use crate::domain::music_parameters::*;
-use crate::error_chain_fmt;
 use crate::startup::AppState;
 
+use super::ResponseError;
+
 // ───── Types ────────────────────────────────────────────────────────────── //
-
-#[derive(thiserror::Error)]
-pub enum ResponseError {
-    #[error(transparent)]
-    UnexpectedError(#[from] anyhow::Error),
-    #[error("Internal error")]
-    InternalError(#[source] anyhow::Error),
-    #[error("Bad request")]
-    BadRequest(#[source] anyhow::Error),
-}
-
-impl std::fmt::Debug for ResponseError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        error_chain_fmt(self, f)
-    }
-}
-
-impl IntoResponse for ResponseError {
-    fn into_response(self) -> Response {
-        tracing::error!("{:?}", self);
-        match self {
-            ResponseError::UnexpectedError(_) => {
-                StatusCode::INTERNAL_SERVER_ERROR.into_response()
-            }
-            ResponseError::InternalError(_) => {
-                StatusCode::INTERNAL_SERVER_ERROR.into_response()
-            }
-            ResponseError::BadRequest(_) => {
-                StatusCode::BAD_REQUEST.into_response()
-            }
-        }
-    }
-}
 
 #[derive(Debug, Deserialize, Serialize)]
 struct Stats {
