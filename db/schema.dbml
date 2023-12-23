@@ -210,7 +210,7 @@ Table products {
   name VARCHAR(30) [not null]
   description VARCHAR(400)
   price NUMERIC(10,2) [not null]
-  status ProductStatus [not null]
+  status ProductStatus [not null, default: `moderation`]
 }
 
 Ref:products.id < products_tags.products_id [delete: cascade]

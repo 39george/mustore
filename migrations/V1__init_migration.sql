@@ -139,7 +139,7 @@ CREATE TABLE products (
     name VARCHAR(30) NOT NULL,
     description VARCHAR(400),
     price NUMERIC(10, 2) NOT NULL,
-    status ProductStatus NOT NULL
+    status ProductStatus NOT NULL DEFAULT 'moderation'
 );
 
 -- If product is not sold and creator wants to delete it,
