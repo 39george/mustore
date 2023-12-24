@@ -50,7 +50,7 @@ const Menu: FC = () => {
         </li>
         <li className={styles.link_container}>
           <div className={styles.nav_link}>
-            <NavLink to="products">Товары</NavLink>
+            Товары
             <GoChevronDown className={styles.chevron} />
           </div>
           <ul className={styles.submenu}>
@@ -73,7 +73,7 @@ const Menu: FC = () => {
         </li>
         <li className={styles.link_container}>
           <div className={styles.nav_link}>
-            <NavLink to="services">Услуги</NavLink>
+            Услуги
             <GoChevronDown className={styles.chevron} />
           </div>
           <ul className={styles.submenu}>
@@ -99,7 +99,7 @@ const Menu: FC = () => {
         </li>
         <li className={styles.link_container}>
           <div className={styles.nav_link}>
-            <NavLink to="help">Помощь</NavLink>
+            Помощь
             <GoChevronDown className={styles.chevron} />
           </div>
           <ul className={styles.submenu}>
@@ -128,7 +128,7 @@ const Menu: FC = () => {
         </li>
         <li className={styles.link_container}>
           <div className={styles.nav_link}>
-            <NavLink to="about">О нас</NavLink>
+            О нас
             <GoChevronDown className={styles.chevron} />
           </div>
           <ul className={styles.submenu}>
