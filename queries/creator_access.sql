@@ -33,8 +33,32 @@ VALUES (:product_id, (
 -- Songs
 
 --! insert_song_and_get_song_id (secondary_genre?)
-INSERT INTO songs(products_id, primary_genre, secondary_genre, sex, tempo, key, duration, lyric)
-VALUES (:product_id, :primary_genre, :secondary_genre, :sex, :tempo, :key, :duration, :lyric) returning id;
+INSERT INTO songs (
+    products_id,
+    primary_genre,
+    secondary_genre,
+    sex,
+    tempo,
+    key,
+    duration,
+    lyric
+)
+VALUES (
+    :product_id,
+    (SELECT id FROM genres WHERE name = :primary_genre),
+    (
+        CASE
+            WHEN :secondary_genre::VARCHAR(50) IS NOT NULL THEN
+                (SELECT id FROM genres WHERE name = :secondary_genre)
+        END
+    ),
+    :sex,
+    :tempo,
+    :key,
+    :duration,
+    :lyric
+)
+RETURNING id;
 
 --! insert_song_master_key
 INSERT INTO objects(key, object_type, master_songs_id)

@@ -53,7 +53,7 @@
 } }}#[allow(clippy :: all, clippy :: pedantic)] #[allow(unused_variables)]
 #[allow(unused_imports)] #[allow(dead_code)] pub mod queries
 { pub mod creator_access
-{ use futures::{{StreamExt, TryStreamExt}};use futures; use cornucopia_async::GenericClient;#[derive( Debug)] pub struct InsertProductAndGetProductIdParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,> { pub owher_id : i32,pub name : T1,pub description : T2,pub price : rust_decimal::Decimal,}#[derive( Debug)] pub struct InsertProductCoverKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub product_id : i32,}#[derive( Debug)] pub struct InsertProductTagByNameParams < T1 : cornucopia_async::StringSql,> { pub product_id : i32,pub tag_name : T1,}#[derive( Debug)] pub struct InsertSongAndGetSongIdParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,> { pub product_id : i32,pub primary_genre : i32,pub secondary_genre : Option<i32>,pub sex : T1,pub tempo : i16,pub key : super::super::types::public::Musickey,pub duration : f32,pub lyric : T2,}#[derive( Debug)] pub struct InsertSongMasterKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub song_id : i32,}#[derive( Debug)] pub struct InsertSongMultitrackKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub song_id : i32,}#[derive(serde::Serialize, Debug, Clone, PartialEq, Copy)] pub struct GetCreatorMarksAvg
+{ use futures::{{StreamExt, TryStreamExt}};use futures; use cornucopia_async::GenericClient;#[derive( Debug)] pub struct InsertProductAndGetProductIdParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,> { pub owher_id : i32,pub name : T1,pub description : T2,pub price : rust_decimal::Decimal,}#[derive( Debug)] pub struct InsertProductCoverKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub product_id : i32,}#[derive( Debug)] pub struct InsertProductTagByNameParams < T1 : cornucopia_async::StringSql,> { pub product_id : i32,pub tag_name : T1,}#[derive( Debug)] pub struct InsertSongAndGetSongIdParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,T3 : cornucopia_async::StringSql,T4 : cornucopia_async::StringSql,> { pub product_id : i32,pub primary_genre : T1,pub secondary_genre : Option<T2>,pub sex : T3,pub tempo : i16,pub key : super::super::types::public::Musickey,pub duration : i16,pub lyric : T4,}#[derive( Debug)] pub struct InsertSongMasterKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub song_id : i32,}#[derive( Debug)] pub struct InsertSongMultitrackKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub song_id : i32,}#[derive(serde::Serialize, Debug, Clone, PartialEq, Copy)] pub struct GetCreatorMarksAvg
 { pub avg : rust_decimal::Decimal,pub count : i64,}pub struct GetCreatorMarksAvgQuery < 'a, C : GenericClient, T, const N : usize >
 {
     client : & 'a  C, params :
@@ -213,12 +213,36 @@ u64, tokio_postgres :: Error > > + Send + 'a>>, C > for InsertProductTagByNameSt
     InsertProductTagByNameParams < T1,>) -> std::pin::Pin<Box<dyn futures::Future<Output = Result < u64, tokio_postgres ::
     Error > > + Send + 'a>> { Box::pin(self.bind(client, & params.product_id,& params.tag_name,) ) }
 }pub fn insert_song_and_get_song_id() -> InsertSongAndGetSongIdStmt
-{ InsertSongAndGetSongIdStmt(cornucopia_async :: private :: Stmt :: new("INSERT INTO songs(products_id, primary_genre, secondary_genre, sex, tempo, key, duration, lyric)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8) returning id")) } pub
+{ InsertSongAndGetSongIdStmt(cornucopia_async :: private :: Stmt :: new("INSERT INTO songs (
+    products_id,
+    primary_genre,
+    secondary_genre,
+    sex,
+    tempo,
+    key,
+    duration,
+    lyric
+)
+VALUES (
+    $1,
+    (SELECT id FROM genres WHERE name = $2),
+    (
+        CASE
+            WHEN $3::VARCHAR(50) IS NOT NULL THEN
+                (SELECT id FROM genres WHERE name = $3)
+        END
+    ),
+    $4,
+    $5,
+    $6,
+    $7,
+    $8
+)
+RETURNING id")) } pub
 struct InsertSongAndGetSongIdStmt(cornucopia_async :: private :: Stmt) ; impl
-InsertSongAndGetSongIdStmt { pub fn bind < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,>
+InsertSongAndGetSongIdStmt { pub fn bind < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,T3 : cornucopia_async::StringSql,T4 : cornucopia_async::StringSql,>
 (& 'a mut self, client : & 'a  C,
-product_id : & 'a i32,primary_genre : & 'a i32,secondary_genre : & 'a Option<i32>,sex : & 'a T1,tempo : & 'a i16,key : & 'a super::super::types::public::Musickey,duration : & 'a f32,lyric : & 'a T2,) -> I32Query < 'a, C,
+product_id : & 'a i32,primary_genre : & 'a T1,secondary_genre : & 'a Option<T2>,sex : & 'a T3,tempo : & 'a i16,key : & 'a super::super::types::public::Musickey,duration : & 'a i16,lyric : & 'a T4,) -> I32Query < 'a, C,
 i32, 8 >
 {
     I32Query
@@ -226,13 +250,13 @@ i32, 8 >
         client, params : [product_id,primary_genre,secondary_genre,sex,tempo,key,duration,lyric,], stmt : & mut self.0, extractor :
         | row | { row.get(0) }, mapper : | it | { it },
     }
-} }impl < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,> cornucopia_async ::
-Params < 'a, InsertSongAndGetSongIdParams < T1,T2,>, I32Query < 'a,
+} }impl < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,T3 : cornucopia_async::StringSql,T4 : cornucopia_async::StringSql,> cornucopia_async ::
+Params < 'a, InsertSongAndGetSongIdParams < T1,T2,T3,T4,>, I32Query < 'a,
 C, i32, 8 >, C > for InsertSongAndGetSongIdStmt
 {
     fn
     params(& 'a mut self, client : & 'a  C, params : & 'a
-    InsertSongAndGetSongIdParams < T1,T2,>) -> I32Query < 'a, C,
+    InsertSongAndGetSongIdParams < T1,T2,T3,T4,>) -> I32Query < 'a, C,
     i32, 8 >
     { self.bind(client, & params.product_id,& params.primary_genre,& params.secondary_genre,& params.sex,& params.tempo,& params.key,& params.duration,& params.lyric,) }
 }pub fn insert_song_master_key() -> InsertSongMasterKeyStmt
