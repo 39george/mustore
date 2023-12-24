@@ -178,8 +178,10 @@ Table objects {
   avatar_users_id INTEGER [unique, default: `NULL`]
   cover_products_id INTEGER [unique, default: `NULL`]
   master_songs_id INTEGER [unique, default: `NULL`]
+  tagged_master_songs_id INTEGER [unique, default: `NULL`]
   multitrack_songs_id INTEGER [unique, default: `NULL`]
   master_beats_id INTEGER [unique, default: `NULL`]
+  tagged_master_beats_id INTEGER [unique, default: `NULL`]
   multitrack_beats_id INTEGER [unique, default: `NULL`]
   cover_services_id INTEGER [unique, default: `NULL`]
   video_description_services_id INTEGER [unique, default: `NULL`]
@@ -238,7 +240,7 @@ Table songs {
   sex VARCHAR (6) [not null]
   tempo SMALLINT [not null]
   key MusicKey [not null]
-  duration REAL [not null]
+  duration SMALLINT [not null]
   lyric VARCHAR(1000) [not null]
 }
 

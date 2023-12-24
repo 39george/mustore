@@ -158,7 +158,7 @@ CREATE TABLE songs (
     sex VARCHAR(6) NOT NULL CHECK (sex IN ('male', 'female')),
     tempo SMALLINT NOT NULL,
     key MusicKey NOT NULL,
-    duration REAL NOT NULL,
+    duration SMALLINT NOT NULL,
     lyric VARCHAR(1000) NOT NULL
 );
 
@@ -492,8 +492,10 @@ CREATE TABLE objects (
 
     -- Audio
     master_songs_id INTEGER DEFAULT NULL REFERENCES songs(id) ON DELETE RESTRICT UNIQUE,
+    tagged_master_songs_id INTEGER DEFAULT NULL REFERENCES songs(id) ON DELETE RESTRICT UNIQUE,
     multitrack_songs_id INTEGER DEFAULT NULL REFERENCES songs(id) ON DELETE RESTRICT UNIQUE,
     master_beats_id INTEGER DEFAULT NULL REFERENCES beats(id) ON DELETE RESTRICT UNIQUE,
+    tagged_master_beats_id INTEGER DEFAULT NULL REFERENCES beats(id) ON DELETE RESTRICT UNIQUE,
     multitrack_beats_id INTEGER DEFAULT NULL REFERENCES beats(id) ON DELETE RESTRICT UNIQUE,
     mixing_credits_mixing_id INTEGER DEFAULT NULL REFERENCES mixing(id) ON DELETE RESTRICT,
     song_credits_songs_id INTEGER DEFAULT NULL REFERENCES song_writing(id) ON DELETE RESTRICT,
