@@ -4,3 +4,4 @@ rest_client/
 /**/.DS_Store
 .DS_Store
 frontend/
+/deps
