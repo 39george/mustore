@@ -13,7 +13,7 @@ tokio-postgres = { version = "0.7.10", features = [
 deadpool = "0.10.0"
 deadpool-postgres = "0.11.0"
 refinery = { version = "0.8.11", features = ["tokio-postgres"] }
-cornucopia_async = { path = "deps/cornucopia/crates/client_async" }
+cornucopia_async = { git = "https://github.com/ghashy/cornucopia" }
 fred = "7.1.0"
 
 # Web-related dependencies
