@@ -1,0 +1,58 @@
+@import "../../../colors.scss";
+
+.services_section {
+  position: relative;
+
+  width: 100%;
+
+  background-color: #e5a2a7;
+
+  --mask: radial-gradient(26.83px at 50% 36px, #000 99%, #0000 101%)
+      calc(50% - 24px) 0/48px 51% repeat-x,
+    radial-gradient(26.83px at 50% -24px, #0000 99%, #000 101%) 50% 12px/48px
+      calc(51% - 12px) repeat-x,
+    radial-gradient(26.83px at 50% calc(100% - 36px), #000 99%, #0000 101%)
+      calc(50% - 24px) 100%/48px 51% repeat-x,
+    radial-gradient(26.83px at 50% calc(100% + 24px), #0000 99%, #000 101%) 50%
+      calc(100% - 12px) / 48px calc(51% - 12px) repeat-x;
+  -webkit-mask: var(--mask);
+  mask: var(--mask);
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.64), rgba(0, 0, 0, 0.64)),
+      url("../../../assets/HomePage/bg_texture_services.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    mix-blend-mode: screen;
+    z-index: -1;
+  }
+}
+
+.main_content {
+  margin: 0 auto;
+  padding: 10.25rem 1.375rem;
+
+  width: fit-content;
+  max-width: 45rem;
+
+  color: $main_dark;
+}
+
+.h2 {
+  font-weight: 600;
+  font-size: 1.75rem;
+
+  color: #fff;
+  text-align: center;
+}
+
+.service {
+  background-color: $main_bright;
+}

@@ -1,5 +1,6 @@
 import Hero from "./Components/Hero";
 import Products from "./Components/Products";
+import Services from "./Components/Services";
 import WhyUs from "./Components/WhyUs";
 
 const HomePage = () => {
@@ -8,6 +9,7 @@ const HomePage = () => {
       <Hero />
       <WhyUs />
       <Products />
+      <Services />
     </>
   );
 };

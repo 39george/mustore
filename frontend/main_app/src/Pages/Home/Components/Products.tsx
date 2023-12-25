@@ -62,7 +62,7 @@ const Products: FC = () => {
           <hr className={styles.divider} />
           <AnimatedCounter
             amount={29}
-            duration={500}
+            duration={200}
             name="песен"
           />
         </div>
@@ -112,7 +112,7 @@ const Products: FC = () => {
           <hr className={styles.divider} />
           <AnimatedCounter
             amount={43}
-            duration={500}
+            duration={200}
             name="бита"
           />
         </div>
@@ -162,7 +162,7 @@ const Products: FC = () => {
           <hr className={styles.divider} />
           <AnimatedCounter
             amount={36}
-            duration={500}
+            duration={200}
             name="обложек"
           />
         </div>
@@ -212,7 +212,7 @@ const Products: FC = () => {
           <hr className={styles.divider} />
           <AnimatedCounter
             amount={19}
-            duration={500}
+            duration={200}
             name="текстов"
           />
         </div>
