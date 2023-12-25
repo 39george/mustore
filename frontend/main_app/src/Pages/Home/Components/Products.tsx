@@ -9,6 +9,7 @@ import cover_9 from "../../../assets/HomePage/album_covers/ablum_cover_9.png";
 import cover_10 from "../../../assets/HomePage/album_covers/ablum_cover_10.png";
 import cover_11 from "../../../assets/HomePage/album_covers/ablum_cover_11.png";
 import { NavLink } from "react-router-dom";
+import AnimatedCounter from "./UI/AnimatedCounter";
 
 const Products: FC = () => {
   return (
@@ -59,9 +60,11 @@ const Products: FC = () => {
             />
           </div>
           <hr className={styles.divider} />
-          <p className={styles.product_name}>
-            <span>29</span> песен
-          </p>
+          <AnimatedCounter
+            amount={29}
+            duration={500}
+            name="песен"
+          />
         </div>
         <div className={styles.product}>
           <div className={styles.covers_container}>
@@ -107,9 +110,11 @@ const Products: FC = () => {
             />
           </div>
           <hr className={styles.divider} />
-          <p className={styles.product_name}>
-            <span>43</span> бита
-          </p>
+          <AnimatedCounter
+            amount={43}
+            duration={500}
+            name="бита"
+          />
         </div>
         <div className={styles.product}>
           <div className={styles.covers_container}>
@@ -155,9 +160,11 @@ const Products: FC = () => {
             />
           </div>
           <hr className={styles.divider} />
-          <p className={styles.product_name}>
-            <span>37</span> обложек
-          </p>
+          <AnimatedCounter
+            amount={36}
+            duration={500}
+            name="обложек"
+          />
         </div>
         <div className={styles.product}>
           <div className={styles.covers_container}>
@@ -203,9 +210,11 @@ const Products: FC = () => {
             />
           </div>
           <hr className={styles.divider} />
-          <p className={styles.product_name}>
-            <span>19</span> текстов
-          </p>
+          <AnimatedCounter
+            amount={19}
+            duration={500}
+            name="текстов"
+          />
         </div>
       </div>
     </section>

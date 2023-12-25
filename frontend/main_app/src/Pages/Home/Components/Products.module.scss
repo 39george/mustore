@@ -200,13 +200,6 @@
   transition: 0.2s ease-out;
 }
 
-.product_name {
-  span {
-    font-family: "Roboto Flex", sans-serif;
-    color: $accent_pink;
-  }
-}
-
 @media (max-width: 620px) {
   .h2 {
     font-size: 1.625rem;
