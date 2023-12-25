@@ -5,3 +5,4 @@ Cargo.lock
 scripts/
 secrets/
 refinery.toml
+local.env
