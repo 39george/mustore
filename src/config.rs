@@ -10,32 +10,6 @@ use serde::Deserialize;
 use crate::domain::user_email::UserEmail;
 use crate::email_client::EmailDeliveryService;
 
-pub enum Environment {
-    Local,
-    Production,
-}
-
-impl Environment {
-    pub fn as_str(&self) -> &'static str {
-        match self {
-            Environment::Local => "local",
-            Environment::Production => "production",
-        }
-    }
-}
-
-impl TryFrom<String> for Environment {
-    type Error = String;
-    fn try_from(s: String) -> Result<Self, Self::Error> {
-        match s.to_lowercase().as_str() {
-            "local" => Ok(Self::Local),
-            "production" => Ok(Self::Production),
-            other => Err(format!(
-                "{} is not a supported environment. Use either `local` or `production`.", other)),
-        }
-    }
-}
-
 #[derive(Deserialize, Debug)]
 pub struct Settings {
     pub database: DatabaseSettings,
@@ -50,22 +24,11 @@ pub struct Settings {
 
 impl Settings {
     pub fn load_configuration() -> Result<Settings, anyhow::Error> {
-        let base_path = std::env::current_dir()
-            .expect("Failed to determine the current directory");
-        let configuration_directory = base_path.join("config");
-        let environment: Environment = std::env::var("APP_ENVIRONMENT")
-            .unwrap_or_else(|_| "local".into())
-            .try_into()
-            .expect("Failed to parse APP_ENVIRONMENT.");
+        let config_file = std::env::var("APP_CONFIG_FILE")
+            .expect("APP_CONFIG_FILE var is unset!");
 
         config::Config::builder()
-            .add_source(config::File::new(
-                configuration_directory
-                    .join(environment.as_str())
-                    .to_str()
-                    .unwrap(),
-                FileFormat::Yaml,
-            ))
+            .add_source(config::File::new(&config_file, FileFormat::Yaml))
             .build()?
             .try_deserialize()
             .context("Failed to build config from local config file.")
