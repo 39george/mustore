@@ -46,9 +46,42 @@ impl YandexObjectStorage {
         // Construct a client for Yandex Object Storage using the custom endpoint.
         let client = Client::new(&config);
 
+        let bucket_name = settings.bucket_name;
+
+        let head_bucket_response =
+            client.head_bucket().bucket(&bucket_name).send().await;
+
+        match head_bucket_response {
+            Ok(_) => {
+                println!("Bucket {} already exists!", bucket_name);
+            }
+            Err(e) => {
+                println!(
+                    "Bucket does not exist: {:?}, attempting to create it...",
+                    e.into_source()
+                );
+
+                // Now attempt to create the bucket
+                let create_bucket_response =
+                    client.create_bucket().bucket(&bucket_name).send().await;
+
+                match create_bucket_response {
+                    Ok(_) => {
+                        println!("Bucket {} created successfully.", bucket_name)
+                    }
+                    Err(err) => {
+                        panic!(
+                            "Failed to create bucket: {:?}",
+                            err.into_source()
+                        )
+                    }
+                }
+            }
+        }
+
         YandexObjectStorage {
             client,
-            bucket_name: settings.bucket_name,
+            bucket_name,
         }
     }
 
