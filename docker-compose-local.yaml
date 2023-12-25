@@ -1,0 +1,148 @@
+services:
+  mustore:
+    image: ghashy/mustore:0.1
+    ports:
+      - "8000:8000"
+    secrets:
+      - object-storage-key-id
+      - object-storage-access-key
+      - email-authorization-token
+      - redis-password
+      - postgres-password
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: mustore
+      APP_CONFIG: /run/secrets/local-compose-config
+      APP_ENVIRONMENT: local
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres-password
+      REDIS_PASSWORD_FILE: /run/secrets/redis-password
+      EMAIL_AUTHORIZATION_TOKEN_FILE: /run/secrets/email-authorization-token
+      OBJECT_STORAGE_KEY_ID_FILE: /run/secrets/object-storage-key-id
+      OBJECT_STORAGE_ACCESS_KEY_FILE: /run/secrets/object-storage-access-key
+    networks:
+      default:
+      customnetwork:
+        ipv4_address: 172.20.0.11
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      email-mock:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health_check"]
+      interval: 5s
+      timeout: 5s
+      retries: 2
+      start_period: 5s
+
+  email-mock:
+    image: ghashy/email-mock:0.1
+    ports:
+      - "8001:8001"
+    networks:
+      - default
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health_check"]
+      interval: 5s
+      timeout: 5s
+      retries: 2
+      start_period: 2s
+
+  postgres:
+    image: postgres:16.1-alpine3.18
+    restart: always
+    user: postgres
+    secrets:
+      - postgres-password
+    volumes:
+      - postgres_volume:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=mustore
+      - POSTGRES_PASSWORD_FILE=/run/secrets/postgres-password
+    expose:
+      - "5432"
+    networks:
+      - default
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 5s
+      timeout: 5s
+      retries: 2
+
+  redis:
+    image: redis:alpine
+    secrets:
+      - redis-password
+    environment:
+      REDIS_PASSWORD_FILE: /run/secrets/redis-password
+    command: sh -c "redis-server --requirepass $(cat $$REDIS_PASSWORD_FILE)"
+    volumes:
+      - redis_volume:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - default
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "$(cat $$REDIS_PASSWORD_FILE)", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 2
+      start_period: 2s
+
+  minio:
+    image: minio/minio
+    secrets:
+      - object-storage-key-id
+      - object-storage-access-key
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_volume:/data
+    ports:
+      - 9000:9000
+      - 9001:9001
+    networks:
+      customnetwork:
+        ipv4_address: 172.20.0.10
+    environment:
+      MINIO_DOMAIN: minio
+      MINIO_SITE_REGION: us-west-1
+      MINIO_ROOT_USER_FILE: /run/secrets/object-storage-key-id
+      MINIO_ROOT_PASSWORD_FILE: /run/secrets/object-storage-access-key
+    healthcheck:
+      test: timeout 5s bash -c ':> /dev/tcp/127.0.0.1/9000' || exit 1
+      interval: 5s
+      timeout: 5s
+      retries: 2
+      start_period: 2s
+
+volumes:
+  redis_volume:
+  minio_volume:
+  postgres_volume:
+
+secrets:
+  local-compose-config:
+    file: secrets/local-compose.yaml
+  postgres-password:
+    file: secrets/postgres_password.txt
+  redis-password:
+    file: secrets/redis_password.txt
+  email-authorization-token:
+    file: secrets/email_client_authorization_token.txt
+  object-storage-key-id:
+    file: secrets/object_storage_key_id.txt
+  object-storage-access-key:
+    file: secrets/object_storage_access_key.txt
+
+networks:
+  customnetwork:
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+  default: {}
+
