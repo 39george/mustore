@@ -20,7 +20,7 @@ use crate::telemetry::spawn_blocking_with_tracing;
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct User {
-    id: i32,
+    pub id: i32,
     username: String,
     #[serde(
         serialize_with = "serialize_secret",
