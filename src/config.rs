@@ -58,33 +58,28 @@ impl Settings {
             .try_into()
             .expect("Failed to parse APP_ENVIRONMENT.");
 
-        match environment {
-            Environment::Local => config::Config::builder()
-                .add_source(config::File::new(
-                    configuration_directory
-                        .join(environment.as_str())
-                        .to_str()
-                        .unwrap(),
-                    FileFormat::Yaml,
-                ))
-                .build()?
-                .try_deserialize()
-                .context("Failed to build config from local config file."),
-            Environment::Production => {
-                let path = std::env::var("APP_CONFIG")?;
-                let config = load_config_from_file(path)?;
-                serde_yaml::from_str(&config)
-                    .context("Failed to build config from env variable")
-            }
-        }
+        config::Config::builder()
+            .add_source(config::File::new(
+                configuration_directory
+                    .join(environment.as_str())
+                    .to_str()
+                    .unwrap(),
+                FileFormat::Yaml,
+            ))
+            .build()?
+            .try_deserialize()
+            .context("Failed to build config from local config file.")
     }
 }
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct DatabaseSettings {
-    pub username: String,
-    pub password: Secret<String>,
     pub host: String,
+    #[serde(default = "pg_username")]
+    pub username: String,
+    #[serde(default = "pg_password")]
+    pub password: Secret<String>,
+    #[serde(default = "pg_db_name")]
     pub database_name: String,
 }
 
@@ -103,10 +98,11 @@ impl DatabaseSettings {
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct RedisSettings {
-    pub password: Secret<String>,
     pub host: String,
     pub port: u16,
     pub db_number: u16,
+    #[serde(default = "redis_password")]
+    pub password: Secret<String>,
 }
 
 impl RedisSettings {
@@ -130,6 +126,7 @@ pub struct EmailClientSettings {
     /// This host email address
     pub sender_email: String,
     /// Token to authorize in API
+    #[serde(default = "email_token")]
     pub authorization_token: Secret<String>,
     /// `request` crate will wait until this timeout when sends emails
     timeout: u64,
@@ -151,12 +148,72 @@ pub struct ObjectStorageSettings {
     pub endpoint_url: String,
     pub region: String,
     pub bucket_name: String,
+    #[serde(default = "object_storage_key_id")]
     pub access_key_id: Secret<String>,
+    #[serde(default = "object_storage_acces_key")]
     pub secret_access_key: Secret<String>,
 }
 
-fn load_config_from_file<T: AsRef<Path>>(
+fn load_value_from_file<T: AsRef<Path>>(
     path: T,
 ) -> Result<String, std::io::Error> {
     Ok(std::fs::read_to_string(path)?.trim().to_string())
+}
+
+fn pg_username() -> String {
+    std::env::var("POSTGRES_USER").expect("POSTGRES_USER var is unset!")
+}
+
+fn pg_db_name() -> String {
+    std::env::var("POSTGRES_DB").expect("POSTGRES_DB var is unset!")
+}
+
+fn pg_password() -> Secret<String> {
+    Secret::new(
+        load_value_from_file(
+            std::env::var("POSTGRES_PASSWORD_FILE")
+                .expect("POSTGRES_PASSWORD_FILE var is unset!"),
+        )
+        .expect("Can't read postgres password file!"),
+    )
+}
+
+fn redis_password() -> Secret<String> {
+    Secret::new(
+        load_value_from_file(
+            std::env::var("REDIS_PASSWORD_FILE")
+                .expect("REDIS_PASSWORD_FILE var is unset!"),
+        )
+        .expect("Can't read redis password file!"),
+    )
+}
+
+fn email_token() -> Secret<String> {
+    Secret::new(
+        load_value_from_file(
+            std::env::var("EMAIL_AUTHORIZATION_TOKEN_FILE")
+                .expect("EMAIL_AUTHORIZATION_TOKEN_FILE var is unset!"),
+        )
+        .expect("Can't read email token file!"),
+    )
+}
+
+fn object_storage_key_id() -> Secret<String> {
+    Secret::new(
+        load_value_from_file(
+            std::env::var("OBJECT_STORAGE_KEY_ID_FILE")
+                .expect("OBJECT_STORAGE_KEY_ID_FILE var is unset!"),
+        )
+        .expect("Can't read object-storage-key-id file!"),
+    )
+}
+
+fn object_storage_acces_key() -> Secret<String> {
+    Secret::new(
+        load_value_from_file(
+            std::env::var("OBJECT_STORAGE_ACCESS_KEY_FILE")
+                .expect("OBJECT_STORAGE_ACCESS_KEY_FILE var is unset!"),
+        )
+        .expect("Can't read object-storage-access-key file!"),
+    )
 }
