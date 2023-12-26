@@ -10,6 +10,7 @@ async fn main() {
         .with_env_filter(
             tracing_subscriber::EnvFilter::from_default_env()
                 .add_directive(Level::INFO.into())
+                .add_directive("tower_sessions_core=warn".parse().unwrap())
                 .add_directive("aws_config=warn".parse().unwrap()),
         )
         .compact()
