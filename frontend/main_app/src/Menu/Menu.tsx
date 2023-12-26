@@ -6,7 +6,7 @@ import { IoMenu } from "react-icons/io5";
 import { HiMiniXMark } from "react-icons/hi2";
 import styles from "./Menu.module.scss";
 import { FC, useState } from "react";
-import Logo from "../assets/svg/Logo";
+import logo from "../assets/svg/logo.svg";
 
 interface ToggledLinks {
   products: boolean;
@@ -45,7 +45,10 @@ const Menu: FC = () => {
             to="."
             end
           >
-            <Logo />
+            <img
+              src={logo}
+              alt="logo"
+            />
           </NavLink>
         </li>
         <li className={styles.link_container}>

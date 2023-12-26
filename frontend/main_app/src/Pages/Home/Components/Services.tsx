@@ -2,11 +2,11 @@ import styles from "./Services.module.scss";
 import { FC } from "react";
 import { FaLongArrowAltRight } from "react-icons/fa";
 import { NavLink } from "react-router-dom";
-import Mixing from "../../../assets/svg/Mixing";
-import Songwriting from "../../../assets/svg/Songwriting";
-import BeatMaking from "../../../assets/svg/BeatMaking";
-import Ghostwriting from "../../../assets/svg/Ghostwriting";
-import CoverDesign from "../../../assets/svg/CoverDesign";
+import songwriting from "../../../assets/svg/songwriting.svg";
+import mixing from "../../../assets/svg/mixing.svg";
+import beatmaking from "../../../assets/svg/beatmaking.svg";
+import ghostwriting from "../../../assets/svg/ghostwriting.svg";
+import cover_design from "../../../assets/svg/cover_design.svg";
 
 const Services: FC = () => {
   return (
@@ -15,7 +15,11 @@ const Services: FC = () => {
         <h2 className={styles.h2}>Или закажите необходимую услугу</h2>
         <div className={styles.services_container}>
           <div className={styles.service}>
-            <Songwriting />
+            <img
+              src={songwriting}
+              alt="service songwriting"
+              className={styles.service_icon}
+            />
             <div className={styles.service_text}>
               <h3 className={styles.h3}>Создание песни</h3>
               <p className={styles.description}>
@@ -34,7 +38,11 @@ const Services: FC = () => {
             </div>
           </div>
           <div className={styles.service}>
-            <Mixing />
+            <img
+              src={mixing}
+              alt="service songwriting"
+              className={styles.service_icon}
+            />
             <div className={styles.service_text}>
               <h3 className={styles.h3}>Сведение / Мастеринг</h3>
               <p className={styles.description}>
@@ -53,7 +61,11 @@ const Services: FC = () => {
             </div>
           </div>
           <div className={styles.service}>
-            <BeatMaking />
+            <img
+              src={beatmaking}
+              alt="service beatmaking"
+              className={styles.service_icon}
+            />
             <div className={styles.service_text}>
               <h3 className={styles.h3}>Написание бита</h3>
               <p className={styles.description}>
@@ -72,7 +84,11 @@ const Services: FC = () => {
             </div>
           </div>
           <div className={styles.service}>
-            <Ghostwriting />
+            <img
+              src={ghostwriting}
+              alt="service ghostriting"
+              className={styles.service_icon}
+            />
             <div className={styles.service_text}>
               <h3 className={styles.h3}>Гострайтинг</h3>
               <p className={styles.description}>
@@ -91,7 +107,11 @@ const Services: FC = () => {
             </div>
           </div>
           <div className={styles.service}>
-            <CoverDesign />
+            <img
+              src={cover_design}
+              alt="service cover designk"
+              className={styles.service_icon}
+            />
             <div className={styles.service_text}>
               <h3 className={styles.h3}>Дизайн обложки</h3>
               <p className={styles.description}>
