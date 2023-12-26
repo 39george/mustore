@@ -295,7 +295,17 @@ u64, tokio_postgres :: Error > > + Send + 'a>>, C > for InsertSongMultitrackKeyS
     params(& 'a mut self, client : & 'a  C, params : & 'a
     InsertSongMultitrackKeyParams < T1,>) -> std::pin::Pin<Box<dyn futures::Future<Output = Result < u64, tokio_postgres ::
     Error > > + Send + 'a>> { Box::pin(self.bind(client, & params.key,& params.song_id,) ) }
-}}pub mod open_access
+}}pub mod internal
+{ use futures::{{StreamExt, TryStreamExt}};use futures; use cornucopia_async::GenericClient;pub fn refresh_available_songs() -> RefreshAvailableSongsStmt
+{ RefreshAvailableSongsStmt(cornucopia_async :: private :: Stmt :: new("REFRESH MATERIALIZED VIEW available_songs")) } pub
+struct RefreshAvailableSongsStmt(cornucopia_async :: private :: Stmt) ; impl
+RefreshAvailableSongsStmt { pub async fn bind < 'a, C : GenericClient, >
+(& 'a mut self, client : & 'a  C,
+) -> Result < u64, tokio_postgres :: Error >
+{
+    let stmt = self.0.prepare(client) .await ? ;
+    client.execute(stmt, & []) .await
+} }}pub mod open_access
 { use futures::{{StreamExt, TryStreamExt}};use futures; use cornucopia_async::GenericClient;#[derive( Debug)] pub struct GetSongsParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::ArraySql<Item = i16>,T3 : cornucopia_async::ArraySql<Item = super::super::types::public::Musickey>,T4 : cornucopia_async::StringSql,T5 : cornucopia_async::ArraySql<Item = T4>,T6 : cornucopia_async::StringSql,T7 : cornucopia_async::ArraySql<Item = T6>,T8 : cornucopia_async::StringSql,> { pub sex : Option<T1>,pub tempo : Option<T2>,pub key : Option<T3>,pub genre : Option<T5>,pub tag : Option<T7>,pub sort_by : T8,pub amount : i64,}#[derive(serde::Serialize, Debug, Clone, PartialEq, )] pub struct GetStats
 { pub table_name : String,pub count : i64,}pub struct GetStatsBorrowed < 'a >
 { pub table_name : &'a str,pub count : i64,} impl < 'a > From < GetStatsBorrowed <
