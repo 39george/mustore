@@ -1,65 +1,69 @@
 import styles from "./WhyUs.module.scss";
 import { FC } from "react";
-import check_mark from "../../../assets/svg/check_mark.svg";
+import underline from "../../../assets/svg/underline.svg";
+import { PiHandshakeFill } from "react-icons/pi";
+import { FaUserShield } from "react-icons/fa";
+import { BsLightningChargeFill } from "react-icons/bs";
+import { FaMusic } from "react-icons/fa6";
 
 const WhyUs: FC = () => {
   return (
     <section className={styles.why_us_section}>
       <div className={styles.main_content}>
-        <h2 className={styles.h2}>Почему стоит выбрать MUSTORE</h2>
-        <div className={styles.reason}>
-          <div className={styles.reason_title}>
+        <h2 className={styles.h2}>
+          Почему стоит выбрать{" "}
+          <span>
+            MUSTORE
             <img
-              src={check_mark}
-              alt="check mark icon"
+              src={underline}
+              alt="underline"
+              className={styles.underline}
             />
-            <h3 className={styles.h3}>Сервис удобный для всех</h3>
+          </span>
+        </h2>
+        <div className={styles.reasons_container}>
+          <div className={styles.reason}>
+            <div className={styles.reason_title}>
+              <h3 className={styles.h3}>Сервис удобный для всех</h3>
+              <PiHandshakeFill className={styles.reason_icon} />
+            </div>
+            <p className={styles.reason_description}>
+              Мы создали платформу, на которой комфортно всем: и желающим найти
+              для себя лучшее творческое решение от одельных элементов до
+              полностью готовой песни, и тем, кто мечтал начать зарабатывать на
+              своих творческих идеях
+            </p>
           </div>
-          <p className={styles.reason_description}>
-            Мы создали платформу, на которой комфортно всем: и желающим найти
-            для себя лучшее творческое решение от одельных элементов до
-            полностью готовой песни, и тем, кто мечтал начать зарабатывать на
-            своих творческих идеях
-          </p>
-        </div>
-        <div className={styles.reason}>
-          <div className={styles.reason_title}>
-            <img
-              src={check_mark}
-              alt="check mark icon"
-            />
-            <h3 className={styles.h3}>Причина 2</h3>
+          <div className={styles.reason}>
+            <div className={styles.reason_title}>
+              <h3 className={styles.h3}>Надежность</h3>
+              <FaUserShield className={styles.reason_icon} />
+            </div>
+            <p className={styles.reason_description}>
+              Здесь должно быть описание причины, по которой людям понравится
+              наш сервис
+            </p>
           </div>
-          <p className={styles.reason_description}>
-            Здесь должно быть описание причины, по которой людям понравится наш
-            сервис
-          </p>
-        </div>
-        <div className={styles.reason}>
-          <div className={styles.reason_title}>
-            <img
-              src={check_mark}
-              alt="check mark icon"
-            />
-            <h3 className={styles.h3}>Причина 3</h3>
+          <div className={styles.reason}>
+            <div className={styles.reason_title}>
+              <h3 className={styles.h3}>Потрясающая скорость</h3>
+              <BsLightningChargeFill className={styles.reason_icon} />
+            </div>
+            <p className={styles.reason_description}>
+              Здесь должно быть описание причины, по которой людям понравится
+              наш сервис
+            </p>
           </div>
-          <p className={styles.reason_description}>
-            Здесь должно быть описание причины, по которой людям понравится наш
-            сервис
-          </p>
-        </div>
-        <div className={styles.reason}>
-          <div className={styles.reason_title}>
-            <img
-              src={check_mark}
-              alt="check mark icon"
-            />
-            <h3 className={styles.h3}>Причина 4</h3>
+          <div className={styles.reason}>
+            <div className={styles.reason_title}>
+              <h3 className={styles.h3}>Большие возможности</h3>
+              <FaMusic className={styles.reason_icon} />
+            </div>
+            <p className={styles.reason_description}>
+              Здесь должно быть описание причины, по которой людям понравится
+              наш сервис
+            </p>
           </div>
-          <p className={styles.reason_description}>
-            Здесь должно быть описание причины, по которой людям понравится наш
-            сервис
-          </p>
         </div>
       </div>
     </section>
