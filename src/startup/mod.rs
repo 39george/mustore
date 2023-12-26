@@ -4,6 +4,7 @@ use axum::serve::Serve;
 use axum::BoxError;
 use axum::Router;
 use axum_login::AuthManagerLayerBuilder;
+use deadpool_postgres::Client;
 use deadpool_postgres::Manager;
 use deadpool_postgres::ManagerConfig;
 
@@ -15,6 +16,7 @@ use http::StatusCode;
 use secrecy::ExposeSecret;
 
 use time::Duration;
+use time::UtcOffset;
 use tokio::net::TcpListener;
 use tokio_postgres::NoTls;
 use tower::ServiceBuilder;
@@ -39,6 +41,10 @@ use crate::service_providers::object_storage::YandexObjectStorage;
 pub mod db_migration;
 
 // ───── Body ─────────────────────────────────────────────────────────────── //
+
+lazy_static::lazy_static! {
+    static ref MOSKOW_TIME_OFFSET: UtcOffset = UtcOffset::from_hms(3, 0, 0).unwrap();
+}
 
 /// This is a central type of our codebase. `Application` type builds server
 /// for both production and testing purposes.
@@ -68,6 +74,10 @@ impl Application {
         configuration: Settings,
     ) -> Result<Application, anyhow::Error> {
         let pg_pool = get_postgres_connection_pool(&configuration.database);
+        let pg_client = pg_pool
+            .get()
+            .await
+            .expect("Failed to get pg client for scheduler");
         let redis_pool =
             get_redis_connection_pool(&configuration.redis).await?;
 
@@ -81,7 +91,6 @@ impl Application {
             &configuration.email_client,
             configuration.email_delivery_service,
         )?;
-
         db_migration::run_migration(&pg_pool).await;
 
         let address =
@@ -101,7 +110,7 @@ impl Application {
         );
 
         tokio::spawn(async {
-            if let Err(e) = run_scheduler().await {
+            if let Err(e) = run_scheduler(pg_client).await {
                 tracing::error!("Scheduler failed with: {e}");
             }
         });
@@ -257,22 +266,43 @@ fn get_pg_conf(configuration: &DatabaseSettings) -> tokio_postgres::Config {
     config
 }
 
-async fn run_scheduler() -> Result<(), tokio_cron_scheduler::JobSchedulerError>
-{
+async fn run_scheduler(
+    pg_client: Client,
+) -> Result<(), tokio_cron_scheduler::JobSchedulerError> {
     let sched = tokio_cron_scheduler::JobScheduler::new().await?;
 
+    let pg_client = std::sync::Arc::new(pg_client);
     sched
         .add(tokio_cron_scheduler::Job::new_async(
-            "0 * * * * *",
-            |uuid, mut l| {
+            "0 0 * * * *",
+            move |uuid, mut l| {
+                let pg_client = pg_client.clone();
                 Box::pin(async move {
-                    println!("I run async every 1 hour!");
+                    match crate::cornucopia::queries::internal::refresh_available_songs().bind(&*pg_client).await {
+                        Ok(rows) => {
+                            tracing::info!("Successfully refreshed available songs materialized view, updated rows: {rows}");
+                        },
+                        Err(e) => {
+                            tracing::error!("Failed to refresh available songs materialized view: {e}");
+                        },
+                    }
                     match l.next_tick_for_job(uuid).await {
                         Ok(Some(ts)) => {
-                            tracing::info!("Next time for 7s is {:?}", ts)
+                            if let Ok(utc_target) =
+                                time::OffsetDateTime::from_unix_timestamp(
+                                    ts.timestamp(),
+                                )
+                            {
+                                let time = utc_target
+                                    .to_offset(MOSKOW_TIME_OFFSET.clone());
+                                tracing::info!(
+                                    "Next time for available songs materialized view update: {:?}",
+                                    time
+                                );
+                            }
                         }
                         _ => {
-                            tracing::warn!("Could not get next tick for 7s job")
+                            tracing::warn!("Could not get next tick for 1h job")
                         }
                     }
                 })
@@ -281,7 +311,7 @@ async fn run_scheduler() -> Result<(), tokio_cron_scheduler::JobSchedulerError>
         .await?;
 
     if let Err(e) = sched.start().await {
-        tracing::error!("Cheduler failed with {e}");
+        tracing::error!("Scheduler failed with {e}");
     }
 
     Ok(())

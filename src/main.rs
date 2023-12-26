@@ -1,10 +1,17 @@
 use mustore::{config::Settings, startup::Application};
+use tracing::Level;
+use tracing_subscriber::fmt::format::FmtSpan;
 
 #[tokio::main]
 async fn main() {
     let subscriber = tracing_subscriber::fmt()
         .with_timer(tracing_subscriber::fmt::time::ChronoLocal::default())
-        .with_max_level(tracing::Level::INFO)
+        .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
+        .with_env_filter(
+            tracing_subscriber::EnvFilter::from_default_env()
+                .add_directive(Level::INFO.into())
+                .add_directive("aws_config=warn".parse().unwrap()),
+        )
         .compact()
         .with_level(true)
         .finish();

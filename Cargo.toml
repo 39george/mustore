@@ -54,7 +54,8 @@ askama = "0.12.1"
 rand = { version = "0.8.5", features = ["std_rng"] }
 thiserror = "1.0.50"
 anyhow = "1.0.75"
-time = "0.3.30"
+time = { version = "0.3.30", features = ["local-offset"] }
+lazy_static = "1.4.0"
 identicon-rs = "4.0.1"
 image = "0.24.7"
 rust_decimal = { version = "1.33.1", features = ["db-postgres"] }
