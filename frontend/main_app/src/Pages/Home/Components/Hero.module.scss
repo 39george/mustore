@@ -6,7 +6,7 @@
   align-items: center;
   position: relative;
 
-  overflow-x: hidden;
+  overflow: hidden;
 
   height: calc(100vh - 5.25rem);
 }
@@ -211,6 +211,11 @@ hr {
 }
 
 @media (max-width: 1010px) {
+  .hero_section,
+  .content_block_left,
+  .content_block_right {
+    height: calc(100vh - 4.5rem);
+  }
   .title {
     font-size: 4rem;
   }
