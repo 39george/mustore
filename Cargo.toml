@@ -54,7 +54,7 @@ askama = "0.12.1"
 rand = { version = "0.8.5", features = ["std_rng"] }
 thiserror = "1.0.50"
 anyhow = "1.0.75"
-time = { version = "0.3.30", features = ["local-offset"] }
+time = { version = "0.3.30", features = ["local-offset", "macros", "parsing"] }
 lazy_static = "1.4.0"
 identicon-rs = "4.0.1"
 image = "0.24.7"
@@ -65,6 +65,9 @@ tokio-cron-scheduler = "0.9.4"
 axum-login = "0.11.0"
 tower-sessions = { version = "0.8.0", features = ["redis-store"] }
 base64 = "0.21.5"
+sha2 = "0.10.8"
+hex = "0.4.3"
+hmac = "0.12.1"
 argon2 = { version = "0.5.2", features = ["std"] }
 secrecy = { version = "0.8.0", features = ["serde"] }
 zxcvbn = "2.2.2"
