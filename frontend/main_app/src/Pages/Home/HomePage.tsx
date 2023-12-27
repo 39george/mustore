@@ -1,3 +1,4 @@
+import AuthorsReviews from "./Components/AuthorsReviews";
 import Hero from "./Components/Hero";
 import JoinUs from "./Components/JoinUs";
 import Products from "./Components/Products";
@@ -12,6 +13,7 @@ const HomePage = () => {
       <Products />
       <Services />
       <JoinUs />
+      <AuthorsReviews />
     </>
   );
 };
