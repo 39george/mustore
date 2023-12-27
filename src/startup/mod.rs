@@ -34,7 +34,7 @@ use crate::email_client::EmailDeliveryService;
 use crate::routes::health_check::health_check;
 use crate::routes::open::open_router;
 use crate::routes::protected::protected_router;
-use crate::service_providers::object_storage::YandexObjectStorage;
+use crate::service_providers::object_storage::ObjectStorage;
 
 // ───── Submodules ───────────────────────────────────────────────────────── //
 
@@ -60,7 +60,7 @@ pub struct AppState {
     pub base_url: String,
     pub pg_pool: Pool,
     pub redis_pool: RedisPool,
-    pub object_storage: YandexObjectStorage,
+    pub object_storage: ObjectStorage,
     pub email_client: EmailClient,
     pub argon2_obj: argon2::Argon2<'static>,
 }
@@ -86,7 +86,7 @@ impl Application {
         fred::interfaces::ClientLike::wait_for_connect(&redis_client).await?;
 
         let object_storage =
-            YandexObjectStorage::new(configuration.object_storage).await;
+            ObjectStorage::new(configuration.object_storage).await;
         let email_client = get_email_client(
             &configuration.email_client,
             configuration.email_delivery_service,
@@ -135,7 +135,7 @@ impl Application {
         pg_pool: Pool,
         redis_pool: RedisPool,
         redis_client: RedisClient,
-        object_storage: YandexObjectStorage,
+        object_storage: ObjectStorage,
         email_client: EmailClient,
     ) -> Serve<Router, Router> {
         let argon2_obj = argon2::Argon2::new(
