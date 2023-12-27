@@ -59,12 +59,14 @@ const Products: FC = () => {
               className={`${styles.covers} ${styles.cover_4}`}
             />
           </div>
-          <hr className={styles.divider} />
-          <AnimatedCounter
-            amount={29}
-            duration={200}
-            name="песен"
-          />
+          <div className={styles.info_container}>
+            <hr className={styles.divider} />
+            <AnimatedCounter
+              amount={29}
+              duration={200}
+              name="песен"
+            />
+          </div>
         </div>
         <div className={styles.product}>
           <div className={styles.covers_container}>
@@ -109,12 +111,14 @@ const Products: FC = () => {
               className={`${styles.covers} ${styles.cover_4}`}
             />
           </div>
-          <hr className={styles.divider} />
-          <AnimatedCounter
-            amount={43}
-            duration={200}
-            name="бита"
-          />
+          <div className={styles.info_container}>
+            <hr className={styles.divider} />
+            <AnimatedCounter
+              amount={43}
+              duration={200}
+              name="бита"
+            />
+          </div>
         </div>
         <div className={styles.product}>
           <div className={styles.covers_container}>
@@ -159,12 +163,14 @@ const Products: FC = () => {
               className={`${styles.covers} ${styles.cover_4}`}
             />
           </div>
-          <hr className={styles.divider} />
-          <AnimatedCounter
-            amount={36}
-            duration={200}
-            name="обложек"
-          />
+          <div className={styles.info_container}>
+            <hr className={styles.divider} />
+            <AnimatedCounter
+              amount={36}
+              duration={200}
+              name="обложек"
+            />
+          </div>
         </div>
         <div className={styles.product}>
           <div className={styles.covers_container}>
@@ -209,12 +215,14 @@ const Products: FC = () => {
               className={`${styles.covers} ${styles.cover_4}`}
             />
           </div>
-          <hr className={styles.divider} />
-          <AnimatedCounter
-            amount={19}
-            duration={200}
-            name="текстов"
-          />
+          <div className={styles.info_container}>
+            <hr className={styles.divider} />
+            <AnimatedCounter
+              amount={19}
+              duration={200}
+              name="текстов"
+            />
+          </div>
         </div>
       </div>
     </section>
