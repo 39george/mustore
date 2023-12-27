@@ -87,6 +87,12 @@
 }
 
 // Media queries
+@media (max-width: 863px) {
+  .mock_service {
+    display: none;
+  }
+}
+
 @media (max-width: 620px) {
   .services_section {
     padding: 0 1.375rem 6rem;
@@ -94,10 +100,6 @@
 
   .h2 {
     font-size: 1.625rem;
-  }
-
-  .mock_service {
-    display: none;
   }
 }
 

@@ -1,20 +1,21 @@
 @import "../../../colors.scss";
-// 95 120
 
 .join_us_section {
   padding: 0 1.375rem 10.25rem;
 }
+
 .widget {
   position: relative;
 
   display: flex;
   flex-direction: column;
+  flex-wrap: wrap;
 
   width: 100%;
   max-width: 70rem;
 
   margin: 0 auto;
-  padding: 6em 7.5em;
+  padding: 6em 3em;
 
   color: $main_bright;
   background-color: #a9636a;
@@ -23,14 +24,20 @@
   background-image: url("../../../assets/HomePage/join_us_photo.png");
   background-size: cover;
   background-repeat: no-repeat;
+  background-position: center;
 }
 
 .h2 {
-  width: 70%;
+  width: 100%;
   max-width: 700px;
-  margin-bottom: 4rem;
+
+  margin-bottom: 2.5em;
+
   font-size: 1.75rem;
+
   font-weight: 600;
+
+  z-index: 1;
 }
 
 .button {
@@ -44,10 +51,53 @@
   border-radius: 0.375rem;
   cursor: pointer;
 
+  z-index: 1;
+
   &:hover {
     filter: brightness(110%);
   }
 }
 
-@media (max-width: 1010px) {
+@media (max-width: 912px) {
+  .widget {
+    background-image: none;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      background-image: url("../../../assets/HomePage/bg_texture_join_us.png");
+      mix-blend-mode: screen;
+      opacity: 0.27;
+    }
+  }
+}
+
+@media (max-width: 750px) {
+  .widget {
+    padding: 3em;
+  }
+
+  .h2 {
+    margin-bottom: 2em;
+  }
+}
+
+@media (max-width: 430px) {
+  .widget {
+    padding: 2em;
+  }
+
+  .h2 {
+    font-size: 1.625rem;
+  }
+
+  .button {
+    width: 35vw;
+    min-width: 9.125rem;
+    font-size: 0.875rem;
+  }
 }
