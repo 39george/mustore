@@ -1,0 +1,53 @@
+@import "../../../colors.scss";
+// 95 120
+
+.join_us_section {
+  padding: 0 1.375rem 10.25rem;
+}
+.widget {
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+  max-width: 70rem;
+
+  margin: 0 auto;
+  padding: 6em 7.5em;
+
+  color: $main_bright;
+  background-color: #a9636a;
+  border-radius: 0.25rem;
+
+  background-image: url("../../../assets/HomePage/join_us_photo.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.h2 {
+  width: 70%;
+  max-width: 700px;
+  margin-bottom: 4rem;
+  font-size: 1.75rem;
+  font-weight: 600;
+}
+
+.button {
+  width: fit-content;
+
+  padding: 0.75rem 0.875rem;
+
+  font-weight: 500;
+
+  background-color: #574143;
+  border-radius: 0.375rem;
+  cursor: pointer;
+
+  &:hover {
+    filter: brightness(110%);
+  }
+}
+
+@media (max-width: 1010px) {
+}
