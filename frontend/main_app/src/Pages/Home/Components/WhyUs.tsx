@@ -5,11 +5,16 @@ import { PiHandshakeFill } from "react-icons/pi";
 import { FaUserShield } from "react-icons/fa";
 import { BsLightningChargeFill } from "react-icons/bs";
 import { FaMusic } from "react-icons/fa6";
+import bend_shape from "../../../assets/svg/bend_shape.svg";
 
 const WhyUs: FC = () => {
   return (
     <section className={styles.why_us_section}>
       <div className={styles.main_content}>
+        {/* <img
+          src={bend_shape}
+          alt="bend shape"
+        /> */}
         <h2 className={styles.h2}>
           Почему стоит выбрать{" "}
           <span>
