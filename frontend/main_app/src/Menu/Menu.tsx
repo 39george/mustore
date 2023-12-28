@@ -1,21 +1,13 @@
-import { NavLink } from "react-router-dom";
+import styles from "./Menu.module.scss";
+import { Link, NavLink } from "react-router-dom";
 import { GoChevronDown } from "react-icons/go";
 import { FaYoutube, FaVk, FaTelegram } from "react-icons/fa6";
 import { BsInstagram } from "react-icons/bs";
 import { IoMenu } from "react-icons/io5";
 import { HiMiniXMark } from "react-icons/hi2";
-import styles from "./Menu.module.scss";
 import { FC, useState } from "react";
 import logo from "../assets/svg/logo.svg";
-
-interface ToggledLinks {
-  products: boolean;
-  services: boolean;
-  help: boolean;
-  about: boolean;
-}
-
-type LinkName = keyof ToggledLinks;
+import { LinkName, ToggledLinks } from "../types/types";
 
 const Menu: FC = () => {
   const [link_toggled, set_link_toggled] = useState<ToggledLinks>({
@@ -303,10 +295,30 @@ const Menu: FC = () => {
             ©2024 Mustore, all rights reserved
           </div>
           <div className={styles.social_media_container}>
-            <FaYoutube className={styles.social_media} />
-            <FaVk className={styles.social_media} />
-            <FaTelegram className={styles.social_media} />
-            <BsInstagram className={styles.social_media} />
+            <Link
+              to="https://www.youtube.com/"
+              target="_blank"
+            >
+              <FaYoutube className={styles.social_media} />
+            </Link>
+            <Link
+              to="https://vk.com/"
+              target="_blank"
+            >
+              <FaVk className={styles.social_media} />
+            </Link>
+            <Link
+              to="https://web.telegram.org/"
+              target="_blank"
+            >
+              <FaTelegram className={styles.social_media} />
+            </Link>
+            <Link
+              to="https://www.instagram.com/"
+              target="_blank"
+            >
+              <BsInstagram className={styles.social_media} />
+            </Link>
           </div>
         </div>
       </div>
