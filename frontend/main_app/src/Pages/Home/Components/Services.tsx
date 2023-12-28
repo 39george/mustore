@@ -6,8 +6,11 @@ import mixing from "../../../assets/svg/mixing.svg";
 import beatmaking from "../../../assets/svg/beatmaking.svg";
 import ghostwriting from "../../../assets/svg/ghostwriting.svg";
 import cover_design from "../../../assets/svg/cover_design.svg";
+import usePageNavigation from "../../../hooks/usePageNavigation";
 
 const Services: FC = () => {
+  const handle_page_navigation = usePageNavigation();
+
   return (
     <section className={styles.services_section}>
       <h2 className={styles.h2}>Или закажите необходимую услугу</h2>
@@ -29,6 +32,7 @@ const Services: FC = () => {
             <NavLink
               to="services"
               className={styles.link}
+              onClick={() => handle_page_navigation("services")}
             >
               найти профессионала
             </NavLink>
@@ -51,6 +55,7 @@ const Services: FC = () => {
             <NavLink
               to="services"
               className={styles.link}
+              onClick={() => handle_page_navigation("services")}
             >
               найти профессионала
             </NavLink>
@@ -73,6 +78,7 @@ const Services: FC = () => {
             <NavLink
               to="services"
               className={styles.link}
+              onClick={() => handle_page_navigation("services")}
             >
               найти профессионала
             </NavLink>
@@ -95,6 +101,7 @@ const Services: FC = () => {
             <NavLink
               to="services"
               className={styles.link}
+              onClick={() => handle_page_navigation("services")}
             >
               найти профессионала
             </NavLink>
@@ -117,6 +124,7 @@ const Services: FC = () => {
             <NavLink
               to="services"
               className={styles.link}
+              onClick={() => handle_page_navigation("services")}
             >
               найти профессионала
             </NavLink>

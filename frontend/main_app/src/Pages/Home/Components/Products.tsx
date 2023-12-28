@@ -10,8 +10,11 @@ import cover_10 from "../../../assets/HomePage/album_covers/ablum_cover_10.png";
 import cover_11 from "../../../assets/HomePage/album_covers/ablum_cover_11.png";
 import { NavLink } from "react-router-dom";
 import AnimatedCounter from "./UI/AnimatedCounter";
+import usePageNavigation from "../../../hooks/usePageNavigation";
 
 const Products: FC = () => {
+  const handle_page_navigation = usePageNavigation();
+
   return (
     <section className={styles.products_section}>
       <h2 className={styles.h2}>Начните с готовых решений</h2>
@@ -21,6 +24,7 @@ const Products: FC = () => {
             <NavLink
               to="products"
               className={styles.cover_hover}
+              onClick={() => handle_page_navigation("products")}
             >
               <div className={styles.text_content}>
                 к контенту
@@ -73,6 +77,7 @@ const Products: FC = () => {
             <NavLink
               to="products"
               className={styles.cover_hover}
+              onClick={() => handle_page_navigation("products")}
             >
               <div className={styles.text_content}>
                 к контенту
@@ -125,6 +130,7 @@ const Products: FC = () => {
             <NavLink
               to="products"
               className={styles.cover_hover}
+              onClick={() => handle_page_navigation("products")}
             >
               <div className={styles.text_content}>
                 к контенту
@@ -177,6 +183,7 @@ const Products: FC = () => {
             <NavLink
               to="products"
               className={styles.cover_hover}
+              onClick={() => handle_page_navigation("products")}
             >
               <div className={styles.text_content}>
                 к контенту

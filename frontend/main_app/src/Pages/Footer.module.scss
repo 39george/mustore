@@ -10,7 +10,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url(../assets/HomePage/bg_texture_footer.png);
+    // background-image: url(../assets/HomePage/bg_texture_footer.png);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -115,6 +115,10 @@
 @media (max-width: 635px) {
   .main_content {
     padding: 2rem 1.375rem 3rem;
+
+    .divider {
+      margin: 2rem 0;
+    }
   }
 
   .nav_links {

@@ -23,6 +23,15 @@ const Footer: FC = () => {
     }));
   };
 
+  const close_all = () => {
+    set_link_toggled({
+      products: false,
+      services: false,
+      help: false,
+      about: false,
+    });
+  };
+
   const handle_page_navigation = usePageNavigation();
 
   return (
@@ -48,7 +57,10 @@ const Footer: FC = () => {
               <li>
                 <NavLink
                   to="products"
-                  onClick={() => handle_page_navigation("products")}
+                  onClick={() => {
+                    handle_page_navigation("products");
+                    close_all();
+                  }}
                 >
                   Песни
                 </NavLink>
@@ -56,7 +68,10 @@ const Footer: FC = () => {
               <li>
                 <NavLink
                   to="products"
-                  onClick={() => handle_page_navigation("products")}
+                  onClick={() => {
+                    handle_page_navigation("products");
+                    close_all();
+                  }}
                 >
                   Биты
                 </NavLink>
@@ -64,7 +79,10 @@ const Footer: FC = () => {
               <li>
                 <NavLink
                   to="products"
-                  onClick={() => handle_page_navigation("products")}
+                  onClick={() => {
+                    handle_page_navigation("products");
+                    close_all();
+                  }}
                 >
                   Обложки
                 </NavLink>
@@ -72,7 +90,10 @@ const Footer: FC = () => {
               <li>
                 <NavLink
                   to="products"
-                  onClick={() => handle_page_navigation("products")}
+                  onClick={() => {
+                    handle_page_navigation("products");
+                    close_all();
+                  }}
                 >
                   Тексты
                 </NavLink>
@@ -97,7 +118,10 @@ const Footer: FC = () => {
               <li>
                 <NavLink
                   to="services"
-                  onClick={() => handle_page_navigation("services")}
+                  onClick={() => {
+                    handle_page_navigation("services");
+                    close_all();
+                  }}
                 >
                   Создание песни
                 </NavLink>
@@ -105,7 +129,10 @@ const Footer: FC = () => {
               <li>
                 <NavLink
                   to="services"
-                  onClick={() => handle_page_navigation("services")}
+                  onClick={() => {
+                    handle_page_navigation("services");
+                    close_all();
+                  }}
                 >
                   Сведение / Мастеринг
                 </NavLink>
@@ -113,7 +140,10 @@ const Footer: FC = () => {
               <li>
                 <NavLink
                   to="services"
-                  onClick={() => handle_page_navigation("services")}
+                  onClick={() => {
+                    handle_page_navigation("services");
+                    close_all();
+                  }}
                 >
                   Написание бита
                 </NavLink>
@@ -121,7 +151,10 @@ const Footer: FC = () => {
               <li>
                 <NavLink
                   to="services"
-                  onClick={() => handle_page_navigation("services")}
+                  onClick={() => {
+                    handle_page_navigation("services");
+                    close_all();
+                  }}
                 >
                   Гострайтинг
                 </NavLink>
@@ -129,7 +162,10 @@ const Footer: FC = () => {
               <li>
                 <NavLink
                   to="services"
-                  onClick={() => handle_page_navigation("services")}
+                  onClick={() => {
+                    handle_page_navigation("services");
+                    close_all();
+                  }}
                 >
                   Дизайн обложки
                 </NavLink>
@@ -154,7 +190,10 @@ const Footer: FC = () => {
               <li>
                 <NavLink
                   to="help"
-                  onClick={() => handle_page_navigation("help")}
+                  onClick={() => {
+                    handle_page_navigation("help");
+                    close_all();
+                  }}
                 >
                   FAQ
                 </NavLink>
@@ -162,7 +201,10 @@ const Footer: FC = () => {
               <li>
                 <NavLink
                   to="help"
-                  onClick={() => handle_page_navigation("help")}
+                  onClick={() => {
+                    handle_page_navigation("help");
+                    close_all();
+                  }}
                 >
                   Обратиться в поддержку
                 </NavLink>
@@ -170,7 +212,10 @@ const Footer: FC = () => {
               <li>
                 <NavLink
                   to="help"
-                  onClick={() => handle_page_navigation("help")}
+                  onClick={() => {
+                    handle_page_navigation("help");
+                    close_all();
+                  }}
                 >
                   Покупателям
                 </NavLink>
@@ -178,7 +223,10 @@ const Footer: FC = () => {
               <li>
                 <NavLink
                   to="help"
-                  onClick={() => handle_page_navigation("help")}
+                  onClick={() => {
+                    handle_page_navigation("help");
+                    close_all();
+                  }}
                 >
                   Продавцам
                 </NavLink>
@@ -186,7 +234,10 @@ const Footer: FC = () => {
               <li>
                 <NavLink
                   to="help"
-                  onClick={() => handle_page_navigation("help")}
+                  onClick={() => {
+                    handle_page_navigation("help");
+                    close_all();
+                  }}
                 >
                   Политика конфиденциальности
                 </NavLink>
@@ -194,7 +245,10 @@ const Footer: FC = () => {
               <li>
                 <NavLink
                   to="help"
-                  onClick={() => handle_page_navigation("help")}
+                  onClick={() => {
+                    handle_page_navigation("help");
+                    close_all();
+                  }}
                 >
                   Правила сообщества
                 </NavLink>
@@ -219,7 +273,10 @@ const Footer: FC = () => {
               <li>
                 <NavLink
                   to="about"
-                  onClick={() => handle_page_navigation("about")}
+                  onClick={() => {
+                    handle_page_navigation("about");
+                    close_all();
+                  }}
                 >
                   Блог
                 </NavLink>
@@ -227,7 +284,10 @@ const Footer: FC = () => {
               <li>
                 <NavLink
                   to="about"
-                  onClick={() => handle_page_navigation("about")}
+                  onClick={() => {
+                    handle_page_navigation("about");
+                    close_all();
+                  }}
                 >
                   Наша команда
                 </NavLink>
