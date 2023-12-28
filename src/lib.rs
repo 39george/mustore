@@ -13,9 +13,17 @@ pub mod routes;
 pub mod service_providers;
 pub mod startup;
 pub mod telemetry;
+pub mod types;
 pub mod validation;
 
 // ───── Helpers ──────────────────────────────────────────────────────────── //
+
+pub const MAX_MP3_SIZE_MB: u64 = 15;
+pub const MAX_MULTITRACK_SIZE_GB: u64 = 5;
+pub const MAX_WAV_SIZE_MB: u64 = 50;
+pub const MAX_VIDEO_SIZE_MB: u64 = 50;
+pub const MAX_IMAGE_SIZE_MB: u64 = 5;
+pub const MAX_DEFAULT_SIZE_MB: u64 = 2;
 
 pub fn error_chain_fmt(
     e: &impl std::error::Error,
