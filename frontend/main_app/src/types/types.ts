@@ -6,3 +6,7 @@ export interface ToggledLinks {
 }
 
 export type LinkName = keyof ToggledLinks;
+
+export interface HeroProps {
+  scroll_to_why_us: () => void;
+}

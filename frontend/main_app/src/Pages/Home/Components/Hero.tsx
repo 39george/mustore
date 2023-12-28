@@ -12,8 +12,10 @@ import cover_5 from "../../../assets/HomePage/album_covers/ablum_cover_5.png";
 import cover_6 from "../../../assets/HomePage/album_covers/ablum_cover_6.png";
 import cover_7 from "../../../assets/HomePage/album_covers/ablum_cover_7.png";
 import cover_8 from "../../../assets/HomePage/album_covers/ablum_cover_8.png";
+import { FC } from "react";
+import { HeroProps } from "../../../types/types";
 
-const Hero = () => {
+const Hero: FC<HeroProps> = ({ scroll_to_why_us }) => {
   return (
     <div className={styles.hero_section}>
       <div className={styles.content_block_left}>
@@ -98,7 +100,10 @@ const Hero = () => {
           alt="background decor 4"
         />
       </div>
-      <GoChevronDown className={styles.chevron} />
+      <GoChevronDown
+        className={styles.chevron}
+        onClick={scroll_to_why_us}
+      />
     </div>
   );
 };
