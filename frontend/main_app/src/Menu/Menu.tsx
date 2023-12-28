@@ -5,7 +5,7 @@ import { FaYoutube, FaVk, FaTelegram } from "react-icons/fa6";
 import { BsInstagram } from "react-icons/bs";
 import { IoMenu } from "react-icons/io5";
 import { HiMiniXMark } from "react-icons/hi2";
-import { FC, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import logo from "../assets/svg/logo.svg";
 import { LinkName, ToggledLinks } from "../types/types";
 
@@ -17,6 +17,7 @@ const Menu: FC = () => {
     about: false,
   });
   const [sidebar_open, set_sidebar_open] = useState(false);
+  const sidebar_ref = useRef<HTMLDivElement>(null);
 
   const toggle_link = (link_name: LinkName) => {
     set_link_toggled((prev_state) => ({
@@ -28,6 +29,34 @@ const Menu: FC = () => {
   const toggle_sidebar = () => {
     set_sidebar_open(!sidebar_open);
   };
+
+  useEffect(() => {
+    function handle_click_outside(event: MouseEvent) {
+      if (
+        sidebar_ref.current &&
+        !sidebar_ref.current.contains(event.target as Node)
+      ) {
+        set_sidebar_open(false);
+      }
+    }
+
+    function handle_scroll_outside(event: Event) {
+      if (
+        sidebar_ref.current &&
+        !sidebar_ref.current.contains(event.target as Node)
+      ) {
+        set_sidebar_open(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handle_click_outside);
+    document.addEventListener("scroll", handle_scroll_outside);
+
+    return () => {
+      document.removeEventListener("mousedown", handle_click_outside);
+      document.removeEventListener("scroll", handle_scroll_outside);
+    };
+  }, []);
 
   return (
     <nav className={styles.nav_bar}>
@@ -161,6 +190,7 @@ const Menu: FC = () => {
         className={`${styles.mobile_sidebar} ${
           sidebar_open ? styles.sidebar_visible : ""
         }`}
+        ref={sidebar_ref}
       >
         <div className={styles.sidebar_content}>
           <div className={styles.sidebar_nav_links}>
