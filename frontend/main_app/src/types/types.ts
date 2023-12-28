@@ -10,3 +10,5 @@ export type LinkName = keyof ToggledLinks;
 export interface HeroProps {
   scroll_to_why_us: () => void;
 }
+
+export type page_names = "" | "products" | "services" | "help" | "about";

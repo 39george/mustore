@@ -6,6 +6,7 @@ import { FaYoutube, FaVk, FaTelegram } from "react-icons/fa6";
 import { BsInstagram } from "react-icons/bs";
 import { GoChevronDown } from "react-icons/go";
 import { LinkName, ToggledLinks } from "../types/types";
+import usePageNavigation from "../hooks/usePageNavigation";
 
 const Footer: FC = () => {
   const [link_toggled, set_link_toggled] = useState<ToggledLinks>({
@@ -21,6 +22,8 @@ const Footer: FC = () => {
       [link_name]: !prev_state[link_name],
     }));
   };
+
+  const handle_page_navigation = usePageNavigation();
 
   return (
     <footer className={styles.footer}>
@@ -43,16 +46,36 @@ const Footer: FC = () => {
             </div>
             <ul className={styles.links}>
               <li>
-                <NavLink to="products">Песни</NavLink>
+                <NavLink
+                  to="products"
+                  onClick={() => handle_page_navigation("products")}
+                >
+                  Песни
+                </NavLink>
               </li>
               <li>
-                <NavLink to="products">Биты</NavLink>
+                <NavLink
+                  to="products"
+                  onClick={() => handle_page_navigation("products")}
+                >
+                  Биты
+                </NavLink>
               </li>
               <li>
-                <NavLink to="products">Обложки</NavLink>
+                <NavLink
+                  to="products"
+                  onClick={() => handle_page_navigation("products")}
+                >
+                  Обложки
+                </NavLink>
               </li>
               <li>
-                <NavLink to="products">Тексты</NavLink>
+                <NavLink
+                  to="products"
+                  onClick={() => handle_page_navigation("products")}
+                >
+                  Тексты
+                </NavLink>
               </li>
             </ul>
           </li>
@@ -72,19 +95,44 @@ const Footer: FC = () => {
             </div>
             <ul className={styles.links}>
               <li>
-                <NavLink to="services">Создание песни</NavLink>
+                <NavLink
+                  to="services"
+                  onClick={() => handle_page_navigation("services")}
+                >
+                  Создание песни
+                </NavLink>
               </li>
               <li>
-                <NavLink to="services">Сведение / Мастеринг</NavLink>
+                <NavLink
+                  to="services"
+                  onClick={() => handle_page_navigation("services")}
+                >
+                  Сведение / Мастеринг
+                </NavLink>
               </li>
               <li>
-                <NavLink to="services">Написание бита</NavLink>
+                <NavLink
+                  to="services"
+                  onClick={() => handle_page_navigation("services")}
+                >
+                  Написание бита
+                </NavLink>
               </li>
               <li>
-                <NavLink to="services">Гострайтинг</NavLink>
+                <NavLink
+                  to="services"
+                  onClick={() => handle_page_navigation("services")}
+                >
+                  Гострайтинг
+                </NavLink>
               </li>
               <li>
-                <NavLink to="services">Дизайн обложки</NavLink>
+                <NavLink
+                  to="services"
+                  onClick={() => handle_page_navigation("services")}
+                >
+                  Дизайн обложки
+                </NavLink>
               </li>
             </ul>
           </li>
@@ -104,22 +152,52 @@ const Footer: FC = () => {
             </div>
             <ul className={styles.links}>
               <li>
-                <NavLink to="help">FAQ</NavLink>
+                <NavLink
+                  to="help"
+                  onClick={() => handle_page_navigation("help")}
+                >
+                  FAQ
+                </NavLink>
               </li>
               <li>
-                <NavLink to="help">Обратиться в поддержку</NavLink>
+                <NavLink
+                  to="help"
+                  onClick={() => handle_page_navigation("help")}
+                >
+                  Обратиться в поддержку
+                </NavLink>
               </li>
               <li>
-                <NavLink to="help">Покупателям</NavLink>
+                <NavLink
+                  to="help"
+                  onClick={() => handle_page_navigation("help")}
+                >
+                  Покупателям
+                </NavLink>
               </li>
               <li>
-                <NavLink to="help">Продавцам</NavLink>
+                <NavLink
+                  to="help"
+                  onClick={() => handle_page_navigation("help")}
+                >
+                  Продавцам
+                </NavLink>
               </li>
               <li>
-                <NavLink to="help">Политика конфиденциальности</NavLink>
+                <NavLink
+                  to="help"
+                  onClick={() => handle_page_navigation("help")}
+                >
+                  Политика конфиденциальности
+                </NavLink>
               </li>
               <li>
-                <NavLink to="help">Правила сообщества</NavLink>
+                <NavLink
+                  to="help"
+                  onClick={() => handle_page_navigation("help")}
+                >
+                  Правила сообщества
+                </NavLink>
               </li>
             </ul>
           </li>
@@ -139,10 +217,20 @@ const Footer: FC = () => {
             </div>
             <ul className={styles.links}>
               <li>
-                <NavLink to="about">Блог</NavLink>
+                <NavLink
+                  to="about"
+                  onClick={() => handle_page_navigation("about")}
+                >
+                  Блог
+                </NavLink>
               </li>
               <li>
-                <NavLink to="about">Наша команда</NavLink>
+                <NavLink
+                  to="about"
+                  onClick={() => handle_page_navigation("about")}
+                >
+                  Наша команда
+                </NavLink>
               </li>
             </ul>
           </li>
@@ -150,7 +238,10 @@ const Footer: FC = () => {
         <hr className={styles.divider} />
         <ul className={styles.bottom_bar}>
           <li>
-            <NavLink to=".">
+            <NavLink
+              to="."
+              onClick={() => handle_page_navigation("")}
+            >
               <img
                 src={logo}
                 alt="logo"
