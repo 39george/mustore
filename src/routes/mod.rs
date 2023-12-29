@@ -20,6 +20,8 @@ pub enum ResponseError {
     NotAcceptableError,
     #[error("No such user")]
     UnauthorizedError(#[source] anyhow::Error),
+    #[error("Too many uploads for that user")]
+    TooManyUploadsError,
 }
 
 impl std::fmt::Debug for ResponseError {
@@ -46,6 +48,9 @@ impl IntoResponse for ResponseError {
             }
             ResponseError::NotAcceptableError => {
                 StatusCode::NOT_ACCEPTABLE.into_response()
+            }
+            ResponseError::TooManyUploadsError => {
+                StatusCode::TOO_MANY_REQUESTS.into_response()
             }
         }
     }

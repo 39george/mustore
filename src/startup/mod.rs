@@ -7,7 +7,6 @@ use axum_login::AuthManagerLayerBuilder;
 use deadpool_postgres::Client;
 use deadpool_postgres::Manager;
 use deadpool_postgres::ManagerConfig;
-
 use deadpool_postgres::Pool;
 use fred::clients::RedisClient;
 use fred::clients::RedisPool;
@@ -39,6 +38,7 @@ use crate::service_providers::object_storage::ObjectStorage;
 // ───── Submodules ───────────────────────────────────────────────────────── //
 
 pub mod db_migration;
+mod tasks;
 
 // ───── Body ─────────────────────────────────────────────────────────────── //
 
@@ -82,11 +82,15 @@ impl Application {
             get_redis_connection_pool(&configuration.redis).await?;
 
         let redis_client = redis_pool.next().clone_new();
+        let redis_client2 = redis_pool.next().clone_new();
         fred::interfaces::ClientLike::connect(&redis_client);
+        fred::interfaces::ClientLike::connect(&redis_client2);
         fred::interfaces::ClientLike::wait_for_connect(&redis_client).await?;
+        fred::interfaces::ClientLike::wait_for_connect(&redis_client2).await?;
 
         let object_storage =
             ObjectStorage::new(configuration.object_storage).await;
+        let object_storage2 = object_storage.clone();
         let email_client = get_email_client(
             &configuration.email_client,
             configuration.email_delivery_service,
@@ -110,7 +114,9 @@ impl Application {
         );
 
         tokio::spawn(async {
-            if let Err(e) = run_scheduler(pg_client).await {
+            if let Err(e) =
+                run_scheduler(pg_client, redis_client2, object_storage2).await
+            {
                 tracing::error!("Scheduler failed with: {e}");
             }
         });
@@ -268,45 +274,23 @@ fn get_pg_conf(configuration: &DatabaseSettings) -> tokio_postgres::Config {
 
 async fn run_scheduler(
     pg_client: Client,
+    redis_client: RedisClient,
+    object_storage: ObjectStorage,
 ) -> Result<(), tokio_cron_scheduler::JobSchedulerError> {
     let sched = tokio_cron_scheduler::JobScheduler::new().await?;
 
     let pg_client = std::sync::Arc::new(pg_client);
+    let redis_client = std::sync::Arc::new(redis_client);
+    let object_storage = std::sync::Arc::new(object_storage);
     sched
-        .add(tokio_cron_scheduler::Job::new_async(
-            "0 0 * * * *",
-            move |uuid, mut l| {
-                let pg_client = pg_client.clone();
-                Box::pin(async move {
-                    match crate::cornucopia::queries::internal::refresh_available_songs().bind(&*pg_client).await {
-                        Ok(rows) => {
-                            tracing::info!("Successfully refreshed available songs materialized view, updated rows: {rows}");
-                        },
-                        Err(e) => {
-                            tracing::error!("Failed to refresh available songs materialized view: {e}");
-                        },
-                    }
-                    match l.next_tick_for_job(uuid).await {
-                        Ok(Some(ts)) => {
-                            if let Ok(utc_target) =
-                                time::OffsetDateTime::from_unix_timestamp(
-                                    ts.timestamp(),
-                                )
-                            {
-                                let time = utc_target
-                                    .to_offset(MOSKOW_TIME_OFFSET.clone());
-                                tracing::info!(
-                                    "Next time for available songs materialized view update: {:?}",
-                                    time
-                                );
-                            }
-                        }
-                        _ => {
-                            tracing::warn!("Could not get next tick for 1h job")
-                        }
-                    }
-                })
-            },
+        .add(tasks::update_available_songs_materialized_view_task(
+            pg_client,
+        )?)
+        .await?;
+    sched
+        .add(tasks::check_current_user_uploads(
+            object_storage,
+            redis_client,
         )?)
         .await?;
 

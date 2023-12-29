@@ -9,26 +9,19 @@ use axum::Router;
 use axum_login::permission_required;
 use fred::clients::RedisPool;
 use fred::interfaces::HashesInterface;
-use fred::interfaces::SetsInterface;
 use fred::interfaces::TransactionInterface;
-use fred::interfaces::*;
 use fred::prelude::RedisResult;
+use fred::types::Scanner;
+use futures::TryStreamExt;
 use http::StatusCode;
 use mediatype::media_type;
-use mediatype::MediaType;
 use mediatype::MediaTypeBuf;
-use rust_decimal::Decimal;
 use serde::Deserialize;
 use time::OffsetDateTime;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
 use crate::auth::users::AuthSession;
-use crate::cornucopia::queries::creator_access;
-use crate::cornucopia::queries::user_auth_queries;
-use crate::cornucopia::queries::user_auth_queries::get_user_permissions;
-use crate::domain::music_parameters::MusicKey;
-use crate::domain::music_parameters::Sex;
 use crate::routes::ResponseError;
 use crate::service_providers::object_storage::presigned_post_form::PresignedPostData;
 use crate::startup::AppState;
@@ -93,6 +86,10 @@ async fn request_obj_storage_upload_link(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
 
+    check_current_user_uploads(&app_state.redis_pool, user.id)
+        .await
+        .context("Failed to check user uploads")?;
+
     let max_size = match MAX_SIZES.get(&params.media_type) {
         Some(&max_size) => max_size,
         None => {
@@ -132,8 +129,10 @@ async fn store_upload_request_data(
     user_id: i32,
 ) -> RedisResult<()> {
     let user_id = user_id.to_string();
-    let created_at = OffsetDateTime::now_utc().to_string();
-    let key = format!("upload_request:{}", object_key);
+    let created_at = OffsetDateTime::now_utc()
+        .format(&crate::DEFAULT_TIME_FORMAT)
+        .unwrap();
+    let key = format!("upload_request:{}:{}", user_id, object_key);
 
     let mut hash_map: HashMap<&str, &str> = HashMap::new();
     hash_map.insert("object_key", object_key);
@@ -143,7 +142,33 @@ async fn store_upload_request_data(
     transaction
         .hset(&key, &hash_map.try_into().unwrap())
         .await?;
-    transaction.sadd("upload_requests", key).await?;
     transaction.exec(true).await?;
+    Ok(())
+}
+
+#[tracing::instrument(name = "Check current user uploads redis", skip_all)]
+async fn check_current_user_uploads(
+    con: &RedisPool,
+    user_id: i32,
+) -> Result<(), ResponseError> {
+    let pattern = format!("upload_request:{}*", user_id);
+    let mut scan = con.next().scan(pattern, None, None);
+    while let Ok(Some(mut page)) = scan.try_next().await {
+        if let Some(keys) = page.take_results() {
+            if keys.len() > 10 {
+                tracing::error!(
+                    "User {} already have 10 current uploads",
+                    user_id
+                );
+                return Err(ResponseError::TooManyUploadsError);
+            } else if keys.len() > 5 {
+                tracing::warn!(
+                    "User {} already have 5 current uploads",
+                    user_id
+                );
+            }
+        }
+        page.next().context("Failed to move on to the next page of results from the SCAN operation")?;
+    }
     Ok(())
 }

@@ -1,5 +1,7 @@
 //! src/lib.rs
 
+use time::macros::format_description;
+
 mod examples;
 
 pub mod auth;
@@ -17,6 +19,10 @@ pub mod types;
 pub mod validation;
 
 // ───── Helpers ──────────────────────────────────────────────────────────── //
+
+lazy_static::lazy_static! {
+    pub static ref DEFAULT_TIME_FORMAT: &'static [time::format_description::FormatItem<'static>] = format_description!("[year]-[month]-[day] [hour]:[minute]:[second].[subsecond] [offset_hour sign:mandatory]:[offset_minute]:[offset_second]");
+}
 
 pub const MAX_MP3_SIZE_MB: u64 = 15;
 pub const MAX_MULTITRACK_SIZE_GB: u64 = 5;
