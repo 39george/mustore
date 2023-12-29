@@ -130,7 +130,7 @@ impl Application {
 
     /// This function only returns when the application is stopped.
     pub async fn run_until_stopped(self) -> Result<(), std::io::Error> {
-        self.serve.await?;
+        self.serve.with_graceful_shutdown(shutdown_signal()).await?;
         Ok(())
     }
 
@@ -218,6 +218,30 @@ impl Application {
 
         axum::serve(listener, app)
     }
+}
+
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        tokio::signal::ctrl_c()
+            .await
+            .expect("failed to install Ctrl+C handler");
+    };
+    #[cfg(unix)]
+    let terminate = async {
+        tokio::signal::unix::signal(
+            tokio::signal::unix::SignalKind::terminate(),
+        )
+        .expect("failed to install signal handler")
+        .recv()
+        .await;
+    };
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+    tokio::select! {
+        () = ctrl_c => {},
+        () = terminate => {},
+    }
+    tracing::info!("Terminate signal received");
 }
 
 fn get_email_client(
