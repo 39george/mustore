@@ -1,6 +1,10 @@
 @import "../../../colors.scss";
 
-.hero_section {
+.filler {
+  height: 5.25rem;
+}
+
+.main_content {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -39,7 +43,7 @@
   letter-spacing: 0.4rem;
 
   span {
-    font-family: "Geologica", sans-serif;
+    font-family: "Inter", sans-serif;
     color: $accent_pink;
     letter-spacing: 0.2em;
   }
@@ -260,10 +264,14 @@ hr {
 }
 
 @media (max-width: 1010px) {
-  .hero_section,
+  .filler {
+    height: 5rem;
+  }
+
+  .main_content,
   .content_block_left,
   .content_block_right {
-    height: calc(100vh - 4.5rem);
+    height: calc(100vh - 5rem);
   }
   .title {
     font-size: 4rem;

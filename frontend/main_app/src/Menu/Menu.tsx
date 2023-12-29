@@ -553,7 +553,7 @@ const Menu: FC = () => {
         </div>
         <div className={styles.sidebar_footer}>
           <div className={styles.copyright}>
-            ©2024 Mustore, all rights reserved
+            ©2024 HARMONY.SPHERE, all rights reserved
           </div>
           <div className={styles.social_media_container}>
             <Link

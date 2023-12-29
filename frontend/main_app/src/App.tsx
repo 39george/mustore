@@ -19,50 +19,55 @@ function App() {
           <Route
             path="products"
             element={
-              <div style={{ height: "100vh" }}>
-                <h1 style={{ width: "fit-content", margin: "0 auto" }}>
+              <div>
+                <h1 style={{ width: "fit-content", margin: "6rem auto 0" }}>
                   Products page
                 </h1>
+                <div style={{ height: "100vh" }}></div>
               </div>
             }
           />
           <Route
             path="services"
             element={
-              <div style={{ height: "100vh" }}>
-                <h1 style={{ width: "fit-content", margin: "0 auto" }}>
+              <div>
+                <h1 style={{ width: "fit-content", margin: "6rem auto 0" }}>
                   Services page
                 </h1>
+                <div style={{ height: "100vh" }}></div>
               </div>
             }
           />
           <Route
             path="help"
             element={
-              <div style={{ height: "100vh" }}>
-                <h1 style={{ width: "fit-content", margin: "0 auto" }}>
+              <div>
+                <h1 style={{ width: "fit-content", margin: "6rem auto 0" }}>
                   Help page
                 </h1>
+                <div style={{ height: "100vh" }}></div>
               </div>
             }
           />
           <Route
             path="about"
             element={
-              <div style={{ height: "100vh" }}>
-                <h1 style={{ width: "fit-content", margin: "0 auto" }}>
+              <div>
+                <h1 style={{ width: "fit-content", margin: "6rem auto 0" }}>
                   About page
                 </h1>
+                <div style={{ height: "100vh" }}></div>
               </div>
             }
           />
           <Route
             path="*"
             element={
-              <div style={{ height: "100vh" }}>
-                <h1 style={{ width: "fit-content", margin: "0 auto" }}>
+              <div>
+                <h1 style={{ width: "fit-content", margin: "6rem auto 0" }}>
                   Page not found
                 </h1>
+                <div style={{ height: "100vh" }}></div>
               </div>
             }
           />

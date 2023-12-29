@@ -8,14 +8,22 @@ li {
   display: flex;
   align-items: center;
 
-  position: sticky;
+  position: fixed;
+  // position: sticky;
   top: 0;
+
+  width: 100vw;
 
   padding: 0 3em;
 
   font-family: "Geologica", sans-serif;
   font-weight: 300;
   font-size: 1rem;
+
+  background-color: rgba($color: $main_bright, $alpha: 0.7);
+  // background-color: rgba(#010816, 0.7);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
 
   z-index: 999;
 }
@@ -167,6 +175,7 @@ a {
 .burger_icon {
   display: none;
   color: $main_dark;
+  // color: $main_bright;
   cursor: pointer;
 }
 
@@ -200,7 +209,7 @@ a {
   font-weight: 300;
 
   color: $main_bright;
-  background-color: rgba($color: $main_dark, $alpha: 0.9);
+  background-color: rgba($color: $main_dark, $alpha: 1);
   backdrop-filter: blur(9px);
   -webkit-backdrop-filter: blur(9px);
 
@@ -333,7 +342,7 @@ a {
 // Media queries
 @media (max-width: 1010px) {
   .nav_bar {
-    padding: 1.375em 1em;
+    padding: 0.75em 1em;
   }
 
   .link_container {

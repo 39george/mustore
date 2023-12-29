@@ -309,7 +309,7 @@ const Footer: FC = () => {
             </NavLink>
           </li>
           <li className={styles.copyright}>
-            ©2024 Mustore, all rights reserved.
+            ©2024 HARMONY.SPHERE, all rights reserved.
           </li>
           <li className={styles.social_media_container}>
             <Link
