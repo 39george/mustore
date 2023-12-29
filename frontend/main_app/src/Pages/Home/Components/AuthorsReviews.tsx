@@ -18,7 +18,7 @@ const AuthorsReviews: FC = () => {
           </div>
           <div className={styles.text_content}>
             <p className={styles.description}>
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+              Благодаря HARMONY.SHPERE моё искусство нашло своих ценителей
             </p>
             <p className={styles.author_name}>ALENA NAI</p>
           </div>
@@ -32,7 +32,8 @@ const AuthorsReviews: FC = () => {
           </div>
           <div className={styles.text_content}>
             <p className={styles.description}>
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+              Интуитивно понятный интерфейс и быстрые выплаты сделали мой опыт
+              невероятно удобным
             </p>
             <p className={styles.author_name}>MISHA LETNIY</p>
           </div>
@@ -46,7 +47,9 @@ const AuthorsReviews: FC = () => {
           </div>
           <div className={styles.text_content}>
             <p className={styles.description}>
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+              Удобный процесс загрузки и продажи моих музыкальных услуг помогает
+              мне сосредоточиться на создании качественного контента, не
+              отвлекаясь на технические аспекты.
             </p>
             <p className={styles.author_name}>OLEGUS PRO</p>
           </div>
