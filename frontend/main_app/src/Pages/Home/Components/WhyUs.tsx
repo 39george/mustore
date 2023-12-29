@@ -13,7 +13,7 @@ const WhyUs: FC = () => {
         <h2 className={styles.h2}>
           Почему стоит выбрать{" "}
           <span>
-            MUSTORE
+            HARMONY.SPHERE
             <img
               src={underline}
               alt="underline"
