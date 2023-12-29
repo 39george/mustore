@@ -1,7 +1,7 @@
 ################################################################################
 # Create a stage for building the application.
 
-ARG RUST_VERSION=1.74.1
+ARG RUST_VERSION=1.75
 ARG APP_NAME=mustore
 FROM rust:${RUST_VERSION}-slim-bookworm AS build
 ARG APP_NAME
