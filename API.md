@@ -127,8 +127,7 @@ if Err, 1. If internal error > StatusCode::InternalError (500)
 → TO
 GET /api/protected/user/upload?media_type=<media_type>&file_name=<file_name>
 
-WHERE media_type is:
-mime type, like 'image/png',
+WHERE media_type is mime type, like 'image/png',
 file_name is string.
 
 ← FROM
