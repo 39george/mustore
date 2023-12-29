@@ -1,5 +1,7 @@
 # MUSTORE API
 
+### Authorization
+
 - User signup:
 ```
 → TO
@@ -53,6 +55,8 @@ GET /api/protected/health_check
 If OK > StatusCode::OK (200)
 if Err > StatusCode::Forbidden (403)
 ```
+
+### Open routes
 
 - Get beats, songs, covers, lyrics COUNTS:
 ```
@@ -116,3 +120,21 @@ if Err, 1. If internal error > StatusCode::InternalError (500)
         2. If bad input > StatusCode::BadRequest (400) 
 ```
 
+### User routes
+
+- Get presigned post form to upload file on object storage:
+```
+→ TO
+GET /api/protected/user/upload?media_type=<media_type>&file_name=<file_name>
+
+WHERE media_type is:
+mime type, like 'image/png',
+file_name is string.
+
+← FROM
+If OK, Json (complex structure, look at the source code), StatusCode::OK (200)
+if Err, 1. If internal error > StatusCode::InternalError (500)
+        2. If bad input > StatusCode::NotAcceptable (406) 
+        3. If don't have permission > StatusCode::Forbidden (403)
+        4. If not authorized > StatusCode::Unautorized (401)
+```
