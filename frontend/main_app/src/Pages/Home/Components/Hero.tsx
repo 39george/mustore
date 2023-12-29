@@ -57,7 +57,11 @@ const Hero: FC<HeroProps> = ({ scroll_to_why_us }) => {
       </div>
       <div className={styles.text_block}>
         <div className={styles.empty_space}></div>
-        <h1 className={styles.title}>HARMONY.SPHERE</h1>
+        <h1 className={styles.title}>
+          HARMONY<span>.</span>
+          <br />
+          SPHERE
+        </h1>
         <h2 className={styles.tagline}>
           Сервис для тех, кто хочет найти или предложить свои{" "}
           <span>музыкальные решения.</span>

@@ -40,21 +40,21 @@ const Menu: FC = () => {
       }
     }
 
-    function handle_scroll_outside(event: Event) {
-      if (
-        sidebar_ref.current &&
-        !sidebar_ref.current.contains(event.target as Node)
-      ) {
-        set_sidebar_open(false);
-      }
-    }
+    // function handle_scroll_outside(event: Event) {
+    //   if (
+    //     sidebar_ref.current &&
+    //     !sidebar_ref.current.contains(event.target as Node)
+    //   ) {
+    //     set_sidebar_open(false);
+    //   }
+    // }
 
     document.addEventListener("mousedown", handle_click_outside);
-    document.addEventListener("scroll", handle_scroll_outside);
+    // document.addEventListener("scroll", handle_scroll_outside);
 
     return () => {
       document.removeEventListener("mousedown", handle_click_outside);
-      document.removeEventListener("scroll", handle_scroll_outside);
+      // document.removeEventListener("scroll", handle_scroll_outside);
     };
   }, []);
 
