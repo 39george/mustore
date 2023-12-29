@@ -3,7 +3,6 @@ use std::collections::HashMap;
 use base64::Engine;
 use hmac::digest::InvalidLength;
 use hmac::{Hmac, Mac};
-use mime::Mime;
 use serde::Serialize;
 use sha2::Sha256;
 use time::macros::format_description;
@@ -73,7 +72,7 @@ pub struct PresignedPostDataBuilder<'a> {
     date: Option<OffsetDateTime>,
     content_disposition: Option<&'a str>,
     expiration: Option<Duration>,
-    mime: Option<Mime>,
+    mime: Option<mediatype::MediaType<'a>>,
     service_name: Option<&'a str>,
     min_obj_length: Option<u64>,
     max_obj_length: Option<u64>,
@@ -104,7 +103,7 @@ impl<'a> PresignedPostDataBuilder<'a> {
         }
     }
 
-    pub fn with_mime(self, mime: Mime) -> Self {
+    pub fn with_mime(self, mime: mediatype::MediaType<'a>) -> Self {
         Self {
             mime: Some(mime),
             ..self
@@ -130,7 +129,9 @@ impl<'a> PresignedPostDataBuilder<'a> {
         let date = self.date.unwrap_or(OffsetDateTime::now_utc());
         let expiration = date + self.expiration.unwrap_or(Duration::HOUR);
         let service_name = self.service_name.unwrap_or("s3");
-        let mime = self.mime.unwrap_or(mime::APPLICATION_OCTET_STREAM);
+        let mime = self
+            .mime
+            .unwrap_or(mediatype::media_type!(APPLICATION / OCTET_STREAM));
         let default_disposition =
             format!("attachment; filename=\"{}\"", self.object_key);
         let content_disposition =
@@ -187,7 +188,7 @@ impl<'a> PresignedPostDataBuilder<'a> {
     fn create_policy_document(
         bucket: &str,
         object_key: &str,
-        mime: &Mime,
+        mime: &mediatype::MediaType<'_>,
         expiration: OffsetDateTime,
         content_disposition: &str,
         x_amz_credential: &str,
@@ -206,7 +207,7 @@ impl<'a> PresignedPostDataBuilder<'a> {
                 {"acl": "private"},
                 {"success_action_status": "200"},
                 {"Content-Disposition": content_disposition},
-                ["starts-with", "$Content-Type", mime.type_().as_ref()],
+                ["starts-with", "$Content-Type", mime.ty.as_ref()],
                 ["content-length-range", min, max]
             ]
         });
@@ -282,7 +283,7 @@ mod tests {
             "test-data",
             "image.png",
         )
-        .with_mime(mime::IMAGE_PNG)
+        .with_mime(mediatype::media_type!(IMAGE / PNG))
         .with_date(OffsetDateTime::UNIX_EPOCH)
         .with_expiration(time::Duration::minutes(10))
         .with_content_length_range(0, 5.mb())

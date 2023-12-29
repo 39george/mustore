@@ -10,13 +10,12 @@ use aws_sdk_s3::presigning::PresigningConfig;
 use aws_sdk_s3::primitives::ByteStream;
 use aws_sdk_s3::primitives::SdkBody;
 use aws_sdk_s3::Client;
-use mime::Mime;
 use secrecy::ExposeSecret;
 
 use self::presigned_post_form::PresignedPostData;
 use crate::config::ObjectStorageSettings;
 
-mod presigned_post_form;
+pub mod presigned_post_form;
 
 /// Handle to work with object storage.
 /// Client internally uses Arc, so clone is ok.
@@ -136,7 +135,8 @@ impl ObjectStorage {
     pub fn generate_presigned_post_form(
         &self,
         object_key: &str,
-        mime: Mime,
+        mime: mediatype::MediaTypeBuf,
+        max: u64,
     ) -> Result<PresignedPostData, anyhow::Error> {
         let form = PresignedPostData::builder(
             &self.settings.secret_access_key.expose_secret(),
@@ -146,7 +146,8 @@ impl ObjectStorage {
             &self.settings.bucket_name,
             object_key,
         )
-        .with_mime(mime);
+        .with_content_length_range(0, max)
+        .with_mime(mime.to_ref());
 
         form.build()
             .context("Failed to generate presigned post form")
