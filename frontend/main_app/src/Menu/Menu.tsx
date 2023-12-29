@@ -8,6 +8,7 @@ import { HiMiniXMark } from "react-icons/hi2";
 import { FC, useEffect, useRef, useState } from "react";
 import logo from "../assets/svg/logo.svg";
 import { LinkName, ToggledLinks } from "../types/types";
+import usePageNavigation from "../hooks/usePageNavigation";
 
 const Menu: FC = () => {
   const [link_toggled, set_link_toggled] = useState<ToggledLinks>({
@@ -30,6 +31,18 @@ const Menu: FC = () => {
     set_sidebar_open(!sidebar_open);
   };
 
+  const handle_page_navigation = usePageNavigation();
+
+  const close_all = () => {
+    set_link_toggled({
+      products: false,
+      services: false,
+      help: false,
+      about: false,
+    });
+    set_sidebar_open(false);
+  };
+
   useEffect(() => {
     function handle_click_outside(event: MouseEvent) {
       if (
@@ -40,21 +53,10 @@ const Menu: FC = () => {
       }
     }
 
-    // function handle_scroll_outside(event: Event) {
-    //   if (
-    //     sidebar_ref.current &&
-    //     !sidebar_ref.current.contains(event.target as Node)
-    //   ) {
-    //     set_sidebar_open(false);
-    //   }
-    // }
-
     document.addEventListener("mousedown", handle_click_outside);
-    // document.addEventListener("scroll", handle_scroll_outside);
 
     return () => {
       document.removeEventListener("mousedown", handle_click_outside);
-      // document.removeEventListener("scroll", handle_scroll_outside);
     };
   }, []);
 
@@ -64,7 +66,7 @@ const Menu: FC = () => {
         <li className={styles.logo}>
           <NavLink
             to="."
-            end
+            onClick={() => handle_page_navigation("")}
           >
             <img
               src={logo}
@@ -81,16 +83,44 @@ const Menu: FC = () => {
             <li className={styles.submenu_header}>Товары</li>
             <div className={styles.submenu_body}>
               <li>
-                <NavLink to="products">Песни</NavLink>
+                <NavLink
+                  to="products"
+                  onClick={() => {
+                    handle_page_navigation("products");
+                  }}
+                >
+                  Песни
+                </NavLink>
               </li>
               <li>
-                <NavLink to="products">Биты</NavLink>
+                <NavLink
+                  to="products"
+                  onClick={() => {
+                    handle_page_navigation("products");
+                  }}
+                >
+                  Биты
+                </NavLink>
               </li>
               <li>
-                <NavLink to="products">Обложки</NavLink>
+                <NavLink
+                  to="products"
+                  onClick={() => {
+                    handle_page_navigation("products");
+                  }}
+                >
+                  Обложки
+                </NavLink>
               </li>
               <li>
-                <NavLink to="products">Тексты</NavLink>
+                <NavLink
+                  to="products"
+                  onClick={() => {
+                    handle_page_navigation("products");
+                  }}
+                >
+                  Тексты
+                </NavLink>
               </li>
             </div>
           </ul>
@@ -104,19 +134,44 @@ const Menu: FC = () => {
             <li className={styles.submenu_header}>Услуги</li>
             <div className={styles.submenu_body}>
               <li>
-                <NavLink to="services">Создание песни</NavLink>
+                <NavLink
+                  to="services"
+                  onClick={() => handle_page_navigation("services")}
+                >
+                  Создание песни
+                </NavLink>
               </li>
               <li>
-                <NavLink to="services">Сведение / Мастеринг</NavLink>
+                <NavLink
+                  to="services"
+                  onClick={() => handle_page_navigation("services")}
+                >
+                  Сведение / Мастеринг
+                </NavLink>
               </li>
               <li>
-                <NavLink to="services">Написание бита</NavLink>
+                <NavLink
+                  to="services"
+                  onClick={() => handle_page_navigation("services")}
+                >
+                  Написание бита
+                </NavLink>
               </li>
               <li>
-                <NavLink to="services">Гострайтинг</NavLink>
+                <NavLink
+                  to="services"
+                  onClick={() => handle_page_navigation("services")}
+                >
+                  Гострайтинг
+                </NavLink>
               </li>
               <li>
-                <NavLink to="services">Дизайн обложки</NavLink>
+                <NavLink
+                  to="services"
+                  onClick={() => handle_page_navigation("services")}
+                >
+                  Дизайн обложки
+                </NavLink>
               </li>
             </div>
           </ul>
@@ -130,22 +185,52 @@ const Menu: FC = () => {
             <li className={styles.submenu_header}>Помощь</li>
             <div className={styles.submenu_body}>
               <li>
-                <NavLink to="help">FAQ</NavLink>
+                <NavLink
+                  to="help"
+                  onClick={() => handle_page_navigation("help")}
+                >
+                  FAQ
+                </NavLink>
               </li>
               <li>
-                <NavLink to="help">Обратиться в поддержку</NavLink>
+                <NavLink
+                  to="help"
+                  onClick={() => handle_page_navigation("help")}
+                >
+                  Обратиться в поддержку
+                </NavLink>
               </li>
               <li>
-                <NavLink to="help">Покупателям</NavLink>
+                <NavLink
+                  to="help"
+                  onClick={() => handle_page_navigation("help")}
+                >
+                  Покупателям
+                </NavLink>
               </li>
               <li>
-                <NavLink to="help">Продавцам</NavLink>
+                <NavLink
+                  to="help"
+                  onClick={() => handle_page_navigation("help")}
+                >
+                  Продавцам
+                </NavLink>
               </li>
               <li>
-                <NavLink to="help">Политика конфиденциальности</NavLink>
+                <NavLink
+                  to="help"
+                  onClick={() => handle_page_navigation("help")}
+                >
+                  Политика конфиденциальности
+                </NavLink>
               </li>
               <li>
-                <NavLink to="help">Правила сообщества</NavLink>
+                <NavLink
+                  to="help"
+                  onClick={() => handle_page_navigation("help")}
+                >
+                  Правила сообщества
+                </NavLink>
               </li>
             </div>
           </ul>
@@ -159,10 +244,20 @@ const Menu: FC = () => {
             <li className={styles.submenu_header}>О нас</li>
             <div className={styles.submenu_body}>
               <li>
-                <NavLink to="about">Блог</NavLink>
+                <NavLink
+                  to="about"
+                  onClick={() => handle_page_navigation("about")}
+                >
+                  Блог
+                </NavLink>
               </li>
               <li>
-                <NavLink to="about">Наша команда</NavLink>
+                <NavLink
+                  to="about"
+                  onClick={() => handle_page_navigation("about")}
+                >
+                  Наша команда
+                </NavLink>
               </li>
             </div>
           </ul>
@@ -210,16 +305,48 @@ const Menu: FC = () => {
               </div>
               <ul className={styles.sidebar_submenu}>
                 <li>
-                  <NavLink to="products">Песни</NavLink>
+                  <NavLink
+                    to="products"
+                    onClick={() => {
+                      handle_page_navigation("products");
+                      close_all();
+                    }}
+                  >
+                    Песни
+                  </NavLink>
                 </li>
                 <li>
-                  <NavLink to="products">Биты</NavLink>
+                  <NavLink
+                    to="products"
+                    onClick={() => {
+                      handle_page_navigation("products");
+                      close_all();
+                    }}
+                  >
+                    Биты
+                  </NavLink>
                 </li>
                 <li>
-                  <NavLink to="products">Обложки</NavLink>
+                  <NavLink
+                    to="products"
+                    onClick={() => {
+                      handle_page_navigation("products");
+                      close_all();
+                    }}
+                  >
+                    Обложки
+                  </NavLink>
                 </li>
                 <li>
-                  <NavLink to="products">Тексты</NavLink>
+                  <NavLink
+                    to="products"
+                    onClick={() => {
+                      handle_page_navigation("products");
+                      close_all();
+                    }}
+                  >
+                    Тексты
+                  </NavLink>
                 </li>
               </ul>
             </li>
@@ -239,19 +366,59 @@ const Menu: FC = () => {
               </div>
               <ul className={styles.sidebar_submenu}>
                 <li>
-                  <NavLink to="services">Создание песни</NavLink>
+                  <NavLink
+                    to="services"
+                    onClick={() => {
+                      handle_page_navigation("services");
+                      close_all();
+                    }}
+                  >
+                    Создание песни
+                  </NavLink>
                 </li>
                 <li>
-                  <NavLink to="services">Сведение / Мастеринг</NavLink>
+                  <NavLink
+                    to="services"
+                    onClick={() => {
+                      handle_page_navigation("services");
+                      close_all();
+                    }}
+                  >
+                    Сведение / Мастеринг
+                  </NavLink>
                 </li>
                 <li>
-                  <NavLink to="services">Написание бита</NavLink>
+                  <NavLink
+                    to="services"
+                    onClick={() => {
+                      handle_page_navigation("services");
+                      close_all();
+                    }}
+                  >
+                    Написание бита
+                  </NavLink>
                 </li>
                 <li>
-                  <NavLink to="services">Гострайтинг</NavLink>
+                  <NavLink
+                    to="services"
+                    onClick={() => {
+                      handle_page_navigation("services");
+                      close_all();
+                    }}
+                  >
+                    Гострайтинг
+                  </NavLink>
                 </li>
                 <li>
-                  <NavLink to="services">Дизайн обложки</NavLink>
+                  <NavLink
+                    to="services"
+                    onClick={() => {
+                      handle_page_navigation("services");
+                      close_all();
+                    }}
+                  >
+                    Дизайн обложки
+                  </NavLink>
                 </li>
               </ul>
             </li>
@@ -271,22 +438,70 @@ const Menu: FC = () => {
               </div>
               <ul className={styles.sidebar_submenu}>
                 <li>
-                  <NavLink to="help">FAQ</NavLink>
+                  <NavLink
+                    to="help"
+                    onClick={() => {
+                      handle_page_navigation("help");
+                      close_all();
+                    }}
+                  >
+                    FAQ
+                  </NavLink>
                 </li>
                 <li>
-                  <NavLink to="help">Обратиться в поддержку</NavLink>
+                  <NavLink
+                    to="help"
+                    onClick={() => {
+                      handle_page_navigation("help");
+                      close_all();
+                    }}
+                  >
+                    Обратиться в поддержку
+                  </NavLink>
                 </li>
                 <li>
-                  <NavLink to="help">Покупателям</NavLink>
+                  <NavLink
+                    to="help"
+                    onClick={() => {
+                      handle_page_navigation("help");
+                      close_all();
+                    }}
+                  >
+                    Покупателям
+                  </NavLink>
                 </li>
                 <li>
-                  <NavLink to="help">Продавцам</NavLink>
+                  <NavLink
+                    to="help"
+                    onClick={() => {
+                      handle_page_navigation("help");
+                      close_all();
+                    }}
+                  >
+                    Продавцам
+                  </NavLink>
                 </li>
                 <li>
-                  <NavLink to="help">Политика конфиденциальности</NavLink>
+                  <NavLink
+                    to="help"
+                    onClick={() => {
+                      handle_page_navigation("help");
+                      close_all();
+                    }}
+                  >
+                    Политика конфиденциальности
+                  </NavLink>
                 </li>
                 <li>
-                  <NavLink to="help">Правила сообщества</NavLink>
+                  <NavLink
+                    to="help"
+                    onClick={() => {
+                      handle_page_navigation("help");
+                      close_all();
+                    }}
+                  >
+                    Правила сообщества
+                  </NavLink>
                 </li>
               </ul>
             </li>
@@ -306,10 +521,26 @@ const Menu: FC = () => {
               </div>
               <ul className={styles.sidebar_submenu}>
                 <li>
-                  <NavLink to="about">Блог</NavLink>
+                  <NavLink
+                    to="about"
+                    onClick={() => {
+                      handle_page_navigation("about");
+                      close_all();
+                    }}
+                  >
+                    Блог
+                  </NavLink>
                 </li>
                 <li>
-                  <NavLink to="about">Наша команда</NavLink>
+                  <NavLink
+                    to="about"
+                    onClick={() => {
+                      handle_page_navigation("about");
+                      close_all();
+                    }}
+                  >
+                    Наша команда
+                  </NavLink>
                 </li>
               </ul>
             </li>

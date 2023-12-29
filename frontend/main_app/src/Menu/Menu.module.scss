@@ -8,13 +8,16 @@ li {
   display: flex;
   align-items: center;
 
-  position: relative;
+  position: sticky;
+  top: 0;
 
   padding: 0 3em;
 
   font-family: "Geologica", sans-serif;
   font-weight: 300;
   font-size: 1rem;
+
+  z-index: 999;
 }
 
 .nav_links {
@@ -191,8 +194,7 @@ a {
 
   width: 15rem;
   height: 100vh;
-  min-height: calc(4.5rem + 30rem);
-  // min-height: 300px;
+  // min-height: calc(4.5rem + 30rem);
 
   font-size: 1rem;
   font-weight: 300;
