@@ -1,5 +1,4 @@
 use anyhow::Context;
-use axum::extract::DefaultBodyLimit;
 use axum::extract::State;
 use axum::routing;
 use axum::Json;
@@ -26,30 +25,6 @@ use crate::startup::AppState;
 //     // User-specific errors here
 // }
 
-enum UploadLinkType {
-    // Images
-    NewAvatarImage,
-    CoverCreditsDesign,
-    ServiceCover,
-    ProductCover,
-    // Audio
-    SongMasterFile,
-    //SongMasterFileTagged?,
-    SongMultitrackArchive,
-    BeatMasterFile,
-    //BeatMasterFileTagged?,
-    BeatMultitrackArchive,
-    MixingCreditsTrack,
-    SongCreditsTrack,
-    BeatCreditsTrack,
-    // Other
-    ServiceVideoDescription,
-    MessageAttachment,
-}
-
-#[derive(Deserialize, Debug)]
-struct RequestUploadLinkQuery {}
-
 // FIXME validate this query, maybe implement domain validation?
 #[derive(Deserialize, Debug)]
 struct UploadSongQuery {
@@ -71,26 +46,12 @@ struct UploadSongQuery {
 pub fn creator_router() -> Router<AppState> {
     Router::new()
         .route("/health_check", routing::get(health_check))
-        .route("/upload_song", routing::post(upload_song))
         .layer(permission_required!(crate::auth::users::Backend, "creator",))
 }
 
 #[tracing::instrument(name = "Creator's health check", skip_all)]
 async fn health_check() -> StatusCode {
     StatusCode::OK
-}
-
-#[tracing::instrument(name = "Upload a new song", skip_all)]
-async fn request_obj_storage_upload_link(
-    auth_session: AuthSession,
-    State(app_state): State<AppState>,
-    Json(params): Json<UploadSongQuery>,
-) -> Result<StatusCode, ResponseError> {
-    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
-        anyhow::anyhow!("No such user in AuthSession!"),
-    ))?;
-
-    Ok(StatusCode::OK)
 }
 
 #[tracing::instrument(name = "Upload a new song", skip_all)]
