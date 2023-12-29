@@ -24,6 +24,7 @@ pub const MAX_WAV_SIZE_MB: u64 = 50;
 pub const MAX_VIDEO_SIZE_MB: u64 = 50;
 pub const MAX_IMAGE_SIZE_MB: u64 = 5;
 pub const MAX_DEFAULT_SIZE_MB: u64 = 2;
+pub const MAX_DOCUMENT_SIZE_MB: u64 = 5;
 
 pub fn error_chain_fmt(
     e: &impl std::error::Error,
