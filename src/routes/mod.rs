@@ -16,6 +16,8 @@ pub enum ResponseError {
     InternalError(#[source] anyhow::Error),
     #[error("Bad request")]
     BadRequest(#[source] anyhow::Error),
+    #[error("Can't process that input")]
+    NotAcceptableError,
     #[error("No such user")]
     UnauthorizedError(#[source] anyhow::Error),
 }
@@ -41,6 +43,9 @@ impl IntoResponse for ResponseError {
             }
             ResponseError::UnauthorizedError(_) => {
                 StatusCode::UNAUTHORIZED.into_response()
+            }
+            ResponseError::NotAcceptableError => {
+                StatusCode::NOT_ACCEPTABLE.into_response()
             }
         }
     }
