@@ -80,7 +80,7 @@ pub async fn confirm(
         .map_err(AuthError::AccountConfirmationFailed)?;
 
     // Upload identicon to the object storage
-    let avatar_key = format!("avatar_{}.png", &email);
+    let avatar_key = format!("{}-avatar.png", &user_candidate_data.username);
     app_state.object_storage.put(&avatar_key, identicon).await?;
 
     let user_id = match user_auth_queries::insert_new_user()
