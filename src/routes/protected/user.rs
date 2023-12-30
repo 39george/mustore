@@ -9,6 +9,7 @@ use axum::Router;
 use axum_login::permission_required;
 use fred::clients::RedisPool;
 use fred::interfaces::HashesInterface;
+use fred::interfaces::KeysInterface;
 use fred::interfaces::TransactionInterface;
 use fred::prelude::RedisResult;
 use fred::types::Scanner;
@@ -132,16 +133,7 @@ async fn store_upload_request_data(
         .format(&crate::DEFAULT_TIME_FORMAT)
         .unwrap();
     let key = format!("upload_request:{}:{}", user_id, object_key);
-
-    let mut hash_map: HashMap<&str, &str> = HashMap::new();
-    hash_map.insert("object_key", object_key);
-    hash_map.insert("user_id", &user_id);
-    hash_map.insert("created_at", &created_at);
-    let transaction = con.next().multi();
-    transaction
-        .hset(&key, &hash_map.try_into().unwrap())
-        .await?;
-    transaction.exec(true).await?;
+    con.set(&key, &created_at, None, None, false).await?;
     Ok(())
 }
 

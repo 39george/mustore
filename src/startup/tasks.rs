@@ -53,7 +53,7 @@ pub fn check_current_user_uploads(
                 while let Ok(Some(mut page)) = scan.try_next().await {
                     if let Some(keys) = page.take_results() {
                         for key in keys.into_iter() {
-                            let date: String = match client.hget(&key, "created_at").await {
+                            let date: String = match client.get(&key).await {
                                 Ok(d) => d,
                                 Err(e) => {
                                     tracing::error!("Failed to get timestamp from upload request: {e}");
