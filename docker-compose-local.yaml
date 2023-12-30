@@ -13,7 +13,6 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_DB: mustore
       APP_CONFIG_FILE: /app/config/local-compose.yaml
-      APP_CONFIG: /run/secrets/local-compose-config
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres-password
       REDIS_PASSWORD_FILE: /run/secrets/redis-password
       EMAIL_AUTHORIZATION_TOKEN_FILE: /run/secrets/email-authorization-token
@@ -110,7 +109,7 @@ services:
         ipv4_address: 172.20.0.10
     environment:
       MINIO_DOMAIN: minio
-      MINIO_SITE_REGION: us-west-1
+      MINIO_SITE_REGION: ru-central1
       MINIO_ROOT_USER_FILE: /run/secrets/object-storage-key-id
       MINIO_ROOT_PASSWORD_FILE: /run/secrets/object-storage-access-key
     healthcheck:
