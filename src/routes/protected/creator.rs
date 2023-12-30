@@ -1,9 +1,14 @@
 use anyhow::Context;
 use axum::extract::State;
+use axum::response::IntoResponse;
 use axum::routing;
 use axum::Json;
 use axum::Router;
 use axum_login::permission_required;
+use fred::clients::RedisPool;
+use fred::error::RedisError;
+use fred::interfaces::KeysInterface;
+use fred::prelude::RedisResult;
 use http::StatusCode;
 use validator::ValidateArgs;
 
@@ -12,16 +17,37 @@ use validator::ValidateArgs;
 use crate::auth::users::AuthSession;
 use crate::cornucopia::queries::creator_access;
 use crate::domain::requests::SubmitSongRequest;
+use crate::error_chain_fmt;
 use crate::routes::ResponseError;
 use crate::startup::AppState;
 
 // ───── Types ────────────────────────────────────────────────────────────── //
 
-// pub enum UserResponseError {
-//     #[error(transparent)]
-//     Common(#[from] ResponseError),
-//     // User-specific errors here
-// }
+#[derive(thiserror::Error)]
+pub enum CreatorResponseError {
+    #[error(transparent)]
+    ResponseError(#[from] ResponseError),
+    #[error("No upload info in cache")]
+    NoUploadInfoInCacheError(#[from] RedisError),
+}
+
+impl std::fmt::Debug for CreatorResponseError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        error_chain_fmt(self, f)
+    }
+}
+
+impl IntoResponse for CreatorResponseError {
+    fn into_response(self) -> axum::response::Response {
+        match self {
+            CreatorResponseError::ResponseError(e) => e.into_response(),
+            CreatorResponseError::NoUploadInfoInCacheError(_) => {
+                tracing::error!("{:?}", self);
+                StatusCode::EXPECTATION_FAILED.into_response()
+            }
+        }
+    }
+}
 
 // ───── Handlers ─────────────────────────────────────────────────────────── //
 
@@ -43,23 +69,34 @@ async fn submit_song(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
     Json(params): Json<SubmitSongRequest>,
-) -> Result<StatusCode, ResponseError> {
+) -> Result<StatusCode, CreatorResponseError> {
     let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
 
-    params.validate_args((1, 50))?;
+    params
+        .validate_args((1, 50))
+        .map_err(ResponseError::ValidationError)?;
+
+    verify_upload_request_data_in_redis(
+        &app_state.redis_pool,
+        &params,
+        user.id,
+    )
+    .await?;
 
     let mut db_client = app_state
         .pg_pool
         .get()
         .await
-        .context("Failed to get connection from postgres pool")?;
+        .context("Failed to get connection from postgres pool")
+        .map_err(ResponseError::UnexpectedError)?;
 
     let transaction = db_client
         .transaction()
         .await
-        .context("Failed to get a transaction from pg")?;
+        .context("Failed to get a transaction from pg")
+        .map_err(ResponseError::UnexpectedError)?;
 
     let product_id = creator_access::insert_product_and_get_product_id()
         .bind(
@@ -71,23 +108,27 @@ async fn submit_song(
         )
         .one()
         .await
-        .context("Failed to insert song (product part) into the pg")?;
+        .context("Failed to insert song (product part) into the pg")
+        .map_err(ResponseError::UnexpectedError)?;
 
     creator_access::insert_product_cover_object_key()
         .bind(&transaction, &params.song_cover_object_key, &product_id)
         .await
-        .context("Failed to insert cover_object_key into pg")?;
+        .context("Failed to insert cover_object_key into pg")
+        .map_err(ResponseError::UnexpectedError)?;
 
     creator_access::insert_song_master_object_key()
         .bind(&transaction, &params.song_master_object_key, &product_id)
         .await
-        .context("Failed to insert song_master_object_key into pg")?;
+        .context("Failed to insert song_master_object_key into pg")
+        .map_err(ResponseError::UnexpectedError)?;
 
     if let Some(tagged_key) = params.song_master_tagged_object_key {
         creator_access::insert_song_master_tagged_object_key()
             .bind(&transaction, &tagged_key, &product_id)
             .await
-            .context("Failed to insert song_master_object_key into pg")?;
+            .context("Failed to insert song_master_object_key into pg")
+            .map_err(ResponseError::UnexpectedError)?;
     }
 
     creator_access::insert_song_multitrack_object_key()
@@ -97,7 +138,8 @@ async fn submit_song(
             &product_id,
         )
         .await
-        .context("Failed to insert song_master_object_key into pg")?;
+        .context("Failed to insert song_master_object_key into pg")
+        .map_err(ResponseError::UnexpectedError)?;
 
     let _song_id = creator_access::insert_song_and_get_song_id().bind(
         &transaction,
@@ -111,18 +153,45 @@ async fn submit_song(
         &params.lyric,
     );
 
+    // We will not clear object storage here. In the case of error,
+    // we should research the reason of that error.
     if let Err(e) = transaction
         .commit()
         .await
         .context("Failed to commit a pg transaction")
     {
-        // app_state
-        //     .object_storage
-        //     .delete_object_by_key(&avatar_key)
-        //     .await?;
-
-        return Err(e.into());
+        return Err(ResponseError::UnexpectedError(e).into());
     }
 
     Ok(StatusCode::CREATED)
+}
+
+// ───── Functions ────────────────────────────────────────────────────────── //
+
+/// Verify upload requests of given song, and if all is ok, delete requests.
+#[tracing::instrument(name = "Verify upload requests of given song.", skip_all)]
+async fn verify_upload_request_data_in_redis(
+    con: &RedisPool,
+    req: &SubmitSongRequest,
+    user_id: i32,
+) -> RedisResult<()> {
+    let tagged = req.song_master_tagged_object_key.as_ref();
+    let object_keys = [
+        &req.song_master_object_key,
+        &req.song_multitrack_object_key,
+        &req.song_cover_object_key,
+    ];
+
+    for obj_key in object_keys.into_iter() {
+        let key = format!("upload_request:{}:{}", user_id, obj_key);
+        let _created_at: String = con.get(&key).await?;
+        con.del(&key).await?;
+    }
+
+    if let Some(obj_key) = tagged {
+        let key = format!("upload_request:{}:{}", user_id, obj_key);
+        let _created_at: String = con.get(&key).await?;
+        con.del(&key).await?;
+    }
+    Ok(())
 }
