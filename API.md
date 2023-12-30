@@ -47,10 +47,10 @@ if Err > StatusCode::InternalError (500)
 ```
 → TO
 GET /api/protected/health_check
-        OR /api/protected/user/health_check
-        OR /api/protected/admin/health_check
-        OR /api/protected/creator/health_check
-        OR /api/protected/consumer/health_check
+    OR /api/protected/user/health_check
+    OR /api/protected/admin/health_check
+    OR /api/protected/creator/health_check
+    OR /api/protected/consumer/health_check
 ← FROM
 If OK > StatusCode::OK (200)
 if Err > StatusCode::Forbidden (403)
@@ -64,10 +64,10 @@ if Err > StatusCode::Forbidden (403)
 GET /api/open/stats
 ← FROM
 If OK, Json {
-  songs: number,
-  beats: number,
-  covers: number,
-  lyrics: number,
+    songs: number,
+    beats: number,
+    covers: number,
+    lyrics: number,
 }, StatusCode::OK (200)
 if Err > StatusCode::InternalError (500)
 ```
@@ -78,8 +78,9 @@ if Err > StatusCode::InternalError (500)
 GET /api/open/genres OR GET /api/open/tags
 ← FROM
 If OK, Json [..list], StatusCode::OK (200)
-if Err, 1. If internal error > StatusCode::InternalError (500)
-        2. If bad input > StatusCode::BadRequest (400) 
+if Err:
+    1. If internal error > StatusCode::InternalError (500)
+    2. If bad input > StatusCode::BadRequest (400) 
 ```
 
 - Get songs objects:
@@ -97,8 +98,9 @@ Json: {
 }
 ← FROM
 If OK, Json [..list], StatusCode::OK (200)
-if Err, 1. If internal error > StatusCode::InternalError (500)
-        2. If bad input > StatusCode::BadRequest (400) 
+if Err:
+    1. If internal error > StatusCode::InternalError (500)
+    2. If bad input > StatusCode::BadRequest (400) 
 ```
 
 - Get new songs:
@@ -107,8 +109,9 @@ if Err, 1. If internal error > StatusCode::InternalError (500)
 GET /api/open/new_songs?amount=<arg>
 ← FROM
 If OK, Json [..list], StatusCode::OK (200)
-if Err, 1. If internal error > StatusCode::InternalError (500)
-        2. If bad input > StatusCode::BadRequest (400) 
+if Err,
+    1. If internal error > StatusCode::InternalError (500)
+    2. If bad input > StatusCode::BadRequest (400) 
 ```
 - Get recommended songs:
 ```
@@ -116,8 +119,9 @@ if Err, 1. If internal error > StatusCode::InternalError (500)
 GET /api/open/recommended_songs?amount=<arg>
 ← FROM
 If OK, Json [..list], StatusCode::OK (200)
-if Err, 1. If internal error > StatusCode::InternalError (500)
-        2. If bad input > StatusCode::BadRequest (400) 
+if Err:
+    1. If internal error > StatusCode::InternalError (500)
+    2. If bad input > StatusCode::BadRequest (400) 
 ```
 
 ### User routes
@@ -132,10 +136,46 @@ file_name is string.
 
 ← FROM
 If OK, Json (complex structure, look at the source code), StatusCode::OK (200)
-if Err, 1. If internal error > StatusCode::InternalError (500)
-        2. If bad input > StatusCode::NotAcceptable (406) 
-        3. If don't have permission > StatusCode::Forbidden (403)
-        4. If not authorized > StatusCode::Unautorized (401)
-        5. If too many uploads for that user > StatusCode::TooManyRequests (429)
-        6. If filename containes forbidden characters > StatusCode::BadRequest (400) + error description in the body.
+if Err:
+    1. If internal error > StatusCode::InternalError (500)
+    2. If bad input > StatusCode::NotAcceptable (406) 
+    3. If don't have permission > StatusCode::Forbidden (403)
+    4. If not authorized > StatusCode::Unautorized (401)
+    5. If too many uploads for that user > StatusCode::TooManyRequests (429)
+    6. If filename containes forbidden characters > StatusCode::BadRequest (400) + error description in the body.
+```
+
+### Creator routes
+
+- Submit a new song:
+```
+→ TO
+POST /api/protected/creator/submit_song
+Json: {
+    song_master_object_key: String,
+    song_master_tagged_object_key: Option<String>,
+    song_multitrack_object_key: String,
+    song_cover_object_key: String,
+    name: String,
+    description: Option<String>,
+    tags: Vec<String>,
+    primary_genre: String,
+    secondary_genre: Option<String>,
+    tempo: integer,
+    duration: integer,
+    lyric: String,
+    price: decimal,
+    sex: sex,
+    key: MusicKey,
+}
+
+← FROM
+If OK, StatusCode::CREATED (201)
+if Err:
+    1. If internal error > StatusCode::InternalError (500)
+    2. If bad input > StatusCode::NotAcceptable (406) 
+    3. If don't have permission > StatusCode::Forbidden (403)
+    4. If not authorized > StatusCode::Unautorized (401)
+    6. If filename containes forbidden characters > StatusCode::BadRequest (400) + error description in the body.
+    7. If no upload registered in the redis cache, > StatusCode::ExpectationFailed (417)
 ```
