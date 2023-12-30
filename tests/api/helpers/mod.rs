@@ -5,7 +5,10 @@ use std::collections::HashMap;
 use deadpool_postgres::Client;
 use fake::Fake;
 use fred::clients::RedisClient;
+use mustore::service_providers::object_storage::presigned_post_form::PresignedPostData;
 use mustore::startup::get_redis_connection_pool;
+use reqwest::multipart::Form;
+use reqwest::multipart::Part;
 use secrecy::{ExposeSecret, Secret};
 use tokio_postgres::NoTls;
 use tracing::Level;
@@ -225,6 +228,40 @@ impl TestApp {
 
         ConfirmationLink(link)
     }
+
+    pub async fn upload_file(
+        &self,
+        client_with_cookies: &reqwest::Client,
+        media_type: &str,
+        name: &str,
+        file: Vec<u8>,
+    ) -> (reqwest::Response, String) {
+        let response = client_with_cookies
+            .get(format!(
+                "{}/api/protected/user/upload?media_type={}&file_name={}",
+                self.address, media_type, name
+            ))
+            .send()
+            .await
+            .unwrap();
+        let post_form: PresignedPostData = response.json().await.unwrap();
+        let object_key = post_form.fields.get("key").unwrap().clone();
+        let url = post_form.url;
+        let mut multipart = Form::new();
+        for (key, value) in post_form.fields.into_iter() {
+            multipart = multipart.text(key, value);
+        }
+        multipart = multipart.part("file", Part::bytes(file));
+        (
+            client_with_cookies
+                .post(url)
+                .multipart(multipart)
+                .send()
+                .await
+                .unwrap(),
+            object_key,
+        )
+    }
 }
 
 impl Drop for TestApp {
@@ -279,6 +316,7 @@ fn init_tracing() {
             .with_env_filter(
                 tracing_subscriber::EnvFilter::from_default_env()
                     .add_directive(Level::INFO.into())
+                    .add_directive("axum::rejection=trace".parse().unwrap())
                     .add_directive("aws_config=warn".parse().unwrap()),
             )
             .compact()
