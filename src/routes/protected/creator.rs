@@ -10,6 +10,7 @@ use fred::error::RedisError;
 use fred::interfaces::KeysInterface;
 use fred::prelude::RedisResult;
 use http::StatusCode;
+use tower_http::trace::TraceLayer;
 use validator::ValidateArgs;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
@@ -55,7 +56,7 @@ pub fn creator_router() -> Router<AppState> {
     Router::new()
         .route("/health_check", routing::get(health_check))
         .route("/submit_song", routing::post(submit_song))
-        .layer(permission_required!(crate::auth::users::Backend, "creator",))
+        .layer(permission_required!(crate::auth::users::Backend, "creator"))
 }
 
 #[tracing::instrument(name = "Creator's health check", skip_all)]
@@ -109,7 +110,24 @@ async fn submit_song(
         )
         .one()
         .await
-        .context("Failed to insert song (product part) into the pg")
+        .context("Failed to insert song (product tab) into the pg")
+        .map_err(ResponseError::UnexpectedError)?;
+
+    let song_id = creator_access::insert_song_and_get_song_id()
+        .bind(
+            &transaction,
+            &product_id,
+            &params.primary_genre,
+            &params.secondary_genre,
+            &params.sex.to_string(),
+            &params.tempo,
+            &params.key.clone().into(),
+            &params.duration,
+            &params.lyric,
+        )
+        .one()
+        .await
+        .context("Failed to insert song (song tab) into the pg")
         .map_err(ResponseError::UnexpectedError)?;
 
     creator_access::insert_product_cover_object_key()
@@ -119,40 +137,24 @@ async fn submit_song(
         .map_err(ResponseError::UnexpectedError)?;
 
     creator_access::insert_song_master_object_key()
-        .bind(&transaction, &params.song_master_object_key, &product_id)
+        .bind(&transaction, &params.song_master_object_key, &song_id)
         .await
         .context("Failed to insert song_master_object_key into pg")
         .map_err(ResponseError::UnexpectedError)?;
 
     if let Some(ref tagged_key) = params.song_master_tagged_object_key {
         creator_access::insert_song_master_tagged_object_key()
-            .bind(&transaction, &tagged_key, &product_id)
+            .bind(&transaction, &tagged_key, &song_id)
             .await
             .context("Failed to insert song_master_object_key into pg")
             .map_err(ResponseError::UnexpectedError)?;
     }
 
     creator_access::insert_song_multitrack_object_key()
-        .bind(
-            &transaction,
-            &params.song_multitrack_object_key,
-            &product_id,
-        )
+        .bind(&transaction, &params.song_multitrack_object_key, &song_id)
         .await
         .context("Failed to insert song_master_object_key into pg")
         .map_err(ResponseError::UnexpectedError)?;
-
-    let _song_id = creator_access::insert_song_and_get_song_id().bind(
-        &transaction,
-        &product_id,
-        &params.primary_genre,
-        &params.secondary_genre,
-        &params.sex.to_string(),
-        &params.tempo,
-        &params.key.clone().into(),
-        &params.duration,
-        &params.lyric,
-    );
 
     if let Err(e) = transaction
         .commit()
