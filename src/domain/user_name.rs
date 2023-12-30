@@ -1,5 +1,7 @@
 //! src/domain/user_name.rs
 
+use crate::domain::forbidden_characters;
+
 /// This type guarantees us that `UserName` is properly formed.
 pub struct UserName(String);
 
@@ -10,10 +12,7 @@ impl UserName {
         let is_empty_or_whitespace = name.trim().is_empty();
         let is_too_long = name.chars().count() > 256;
         let is_too_short = name.chars().count() < 3;
-        let forbidden_characters =
-            ['/', '(', ')', '"', '<', '>', '\\', '{', '}', ';', ':'];
-        let contains_forbidden_chars =
-            name.chars().any(|g| forbidden_characters.contains(&g));
+        let contains_forbidden_chars = forbidden_characters(name).is_err();
 
         if is_empty_or_whitespace {
             Err(anyhow::anyhow!("String is emtpy"))
