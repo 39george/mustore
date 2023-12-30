@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 
 use anyhow::Context;
+use axum::extract::Query;
 use axum::extract::State;
 use axum::routing;
-use axum::Form;
 use axum::Json;
 use axum::Router;
 use axum_login::permission_required;
@@ -18,6 +18,7 @@ use http::StatusCode;
 use mediatype::media_type;
 use mediatype::MediaTypeBuf;
 use time::OffsetDateTime;
+use tower_http::trace::TraceLayer;
 use validator::Validate;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
@@ -61,7 +62,7 @@ pub fn user_router() -> Router<AppState> {
     Router::new()
         .route("/health_check", routing::get(health_check))
         .route("/upload", routing::get(request_obj_storage_upload))
-        .layer(permission_required!(crate::auth::users::Backend, "user",))
+        .layer(permission_required!(crate::auth::users::Backend, "user"))
 }
 
 #[tracing::instrument(name = "User's health check", skip_all)]
@@ -76,7 +77,7 @@ async fn health_check() -> StatusCode {
 async fn request_obj_storage_upload(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
-    Form(params): Form<UploadFileRequest>,
+    Query(params): Query<UploadFileRequest>,
 ) -> Result<Json<PresignedPostData>, ResponseError> {
     let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
