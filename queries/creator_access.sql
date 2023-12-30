@@ -16,7 +16,7 @@ WHERE services.creator_id = :creator_id;
 
 -- Products
 
---! insert_product_and_get_product_id
+--! insert_product_and_get_product_id (description?)
 INSERT INTO products(owner_id, name, description, price)
 VALUES (:owher_id, :name, :description, :price) returning id;
 
