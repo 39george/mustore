@@ -82,6 +82,7 @@ async fn submit_song(
         &app_state.redis_pool,
         &params,
         user.id,
+        false,
     )
     .await?;
 
@@ -123,7 +124,7 @@ async fn submit_song(
         .context("Failed to insert song_master_object_key into pg")
         .map_err(ResponseError::UnexpectedError)?;
 
-    if let Some(tagged_key) = params.song_master_tagged_object_key {
+    if let Some(ref tagged_key) = params.song_master_tagged_object_key {
         creator_access::insert_song_master_tagged_object_key()
             .bind(&transaction, &tagged_key, &product_id)
             .await
@@ -148,13 +149,11 @@ async fn submit_song(
         &params.secondary_genre,
         &params.sex.to_string(),
         &params.tempo,
-        &params.key.into(),
+        &params.key.clone().into(),
         &params.duration,
         &params.lyric,
     );
 
-    // We will not clear object storage here. In the case of error,
-    // we should research the reason of that error.
     if let Err(e) = transaction
         .commit()
         .await
@@ -162,6 +161,15 @@ async fn submit_song(
     {
         return Err(ResponseError::UnexpectedError(e).into());
     }
+
+    // Now we can safely delete upload data from redis
+    verify_upload_request_data_in_redis(
+        &app_state.redis_pool,
+        &params,
+        user.id,
+        true,
+    )
+    .await?;
 
     Ok(StatusCode::CREATED)
 }
@@ -174,6 +182,7 @@ async fn verify_upload_request_data_in_redis(
     con: &RedisPool,
     req: &SubmitSongRequest,
     user_id: i32,
+    should_delete: bool,
 ) -> RedisResult<()> {
     let tagged = req.song_master_tagged_object_key.as_ref();
     let object_keys = [
@@ -185,13 +194,17 @@ async fn verify_upload_request_data_in_redis(
     for obj_key in object_keys.into_iter() {
         let key = format!("upload_request:{}:{}", user_id, obj_key);
         let _created_at: String = con.get(&key).await?;
-        con.del(&key).await?;
+        if should_delete {
+            con.del(&key).await?;
+        }
     }
 
     if let Some(obj_key) = tagged {
         let key = format!("upload_request:{}:{}", user_id, obj_key);
         let _created_at: String = con.get(&key).await?;
-        con.del(&key).await?;
+        if should_delete {
+            con.del(&key).await?;
+        }
     }
     Ok(())
 }

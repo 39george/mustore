@@ -19,7 +19,7 @@ impl std::fmt::Display for Sex {
     }
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 #[allow(non_camel_case_types)]
 pub enum MusicKey {
     a_minor,
