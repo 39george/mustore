@@ -1,5 +1,6 @@
 use rust_decimal::Decimal;
 use serde::Deserialize;
+use serde::Serialize;
 use validator::Validate;
 use validator::ValidationError;
 
@@ -53,7 +54,7 @@ pub struct UploadFileRequest {
     pub file_name: String,
 }
 
-#[derive(Deserialize, Debug, Validate)]
+#[derive(Serialize, Deserialize, Debug, Validate)]
 pub struct SubmitSongRequest {
     #[validate(
         length(min = 10, max = 500),

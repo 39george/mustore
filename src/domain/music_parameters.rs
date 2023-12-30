@@ -1,10 +1,10 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::cornucopia::types::public::Musickey;
 
 // ───── Body ─────────────────────────────────────────────────────────────── //
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub enum Sex {
     Male,
     Female,
@@ -19,7 +19,7 @@ impl std::fmt::Display for Sex {
     }
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[allow(non_camel_case_types)]
 pub enum MusicKey {
     a_minor,
