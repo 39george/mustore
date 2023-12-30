@@ -9,6 +9,7 @@ use axum::Json;
 use axum::Router;
 use serde::Deserialize;
 use serde::Serialize;
+use validator::ValidateArgs;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
@@ -16,7 +17,7 @@ use crate::cornucopia::queries::open_access;
 use crate::cornucopia::queries::open_access::GetNewSongs;
 use crate::cornucopia::queries::open_access::GetRecommendedSongs;
 use crate::cornucopia::queries::open_access::GetSongs;
-use crate::domain::music_parameters::*;
+use crate::domain::queries::GetSongsListQuery;
 use crate::startup::AppState;
 
 use super::ResponseError;
@@ -57,23 +58,7 @@ impl TryFrom<Vec<open_access::GetStats>> for Stats {
     }
 }
 
-#[derive(Deserialize, Debug)]
-struct GetSongsListQuery {
-    sex: Option<Sex>,
-    tempo: Option<Vec<i16>>,
-    key: Option<Vec<MusicKey>>,
-    genres: Option<Vec<String>>,
-    vibes: Option<Vec<String>>,
-    sort_by: SortBy,
-    amount: i64,
-}
-
-#[derive(Deserialize, Debug)]
-struct GetSongsAmountQuery {
-    amount: i64,
-}
-
-// ───── Body ─────────────────────────────────────────────────────────────── //
+// ───── Handlers ─────────────────────────────────────────────────────────── //
 
 pub fn open_router() -> Router<AppState> {
     Router::new()
@@ -141,21 +126,7 @@ async fn get_songs(
     State(app_state): State<AppState>,
     Json(params): Json<GetSongsListQuery>,
 ) -> Result<Json<Vec<GetSongs>>, ResponseError> {
-    if params.amount > 50 || params.amount < 1 {
-        return Err(ResponseError::BadRequest(anyhow::anyhow!(
-            "Amount of tracks should be between 1 and 50, requested: {}",
-            params.amount
-        )));
-    }
-    if params
-        .tempo
-        .as_ref()
-        .is_some_and(|v| v.len() != 2 || v[0] < 40 || v[1] > 320)
-    {
-        return Err(ResponseError::BadRequest(anyhow::anyhow!(
-            "Tempo should be array with 2 values, min is 40 and max is 320!"
-        )));
-    }
+    params.validate_args((40, 320))?;
 
     let pg_pool = app_state
         .pg_pool
@@ -174,6 +145,7 @@ async fn get_songs(
             &params.vibes,
             &params.sort_by.to_string(),
             &params.amount,
+            &params.offset,
         )
         .all()
         .await
@@ -184,7 +156,7 @@ async fn get_songs(
 #[tracing::instrument(name = "Get new songs query", skip(app_state))]
 async fn get_new_songs(
     State(app_state): State<AppState>,
-    Query(GetSongsAmountQuery { amount }): Query<GetSongsAmountQuery>,
+    Query(amount): Query<i64>,
 ) -> Result<Json<Vec<GetNewSongs>>, ResponseError> {
     if amount > 50 || amount < 1 {
         return Err(ResponseError::BadRequest(anyhow::anyhow!(
@@ -211,7 +183,7 @@ async fn get_new_songs(
 #[tracing::instrument(name = "Get recommended songs query", skip(app_state))]
 async fn get_recommended_songs(
     State(app_state): State<AppState>,
-    Query(GetSongsAmountQuery { amount }): Query<GetSongsAmountQuery>,
+    Query(amount): Query<i64>,
 ) -> Result<Json<Vec<GetRecommendedSongs>>, ResponseError> {
     if amount > 50 || amount < 1 {
         return Err(ResponseError::BadRequest(anyhow::anyhow!(
