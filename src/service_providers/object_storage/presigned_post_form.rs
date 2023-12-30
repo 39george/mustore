@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use base64::Engine;
 use hmac::digest::InvalidLength;
 use hmac::{Hmac, Mac};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sha2::Sha256;
 use time::macros::format_description;
 use time::{Duration, OffsetDateTime};
@@ -29,7 +29,7 @@ impl std::fmt::Debug for Error {
     }
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct PresignedPostData {
     pub url: String,
     pub fields: HashMap<String, String>,
