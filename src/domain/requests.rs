@@ -9,7 +9,7 @@ use super::music_parameters::SortBy;
 use super::validate_slice_bounds_characters;
 
 #[derive(Deserialize, Debug, Validate)]
-pub struct GetSongsListQuery {
+pub struct GetSongsListRequest {
     pub sex: Option<Sex>,
     #[validate(custom(
         function = "validate_tempo_bounds",
@@ -43,7 +43,7 @@ fn validate_tempo_bounds(
 }
 
 #[derive(Deserialize, Debug, Validate)]
-pub struct UploadFileQuery {
+pub struct UploadFileRequest {
     pub media_type: mediatype::MediaTypeBuf,
     #[validate(
         length(min = 2, max = 50),
@@ -54,7 +54,7 @@ pub struct UploadFileQuery {
 }
 
 #[derive(Deserialize, Debug, Validate)]
-pub struct UploadSongQuery {
+pub struct UploadSongRequest {
     pub object_key: String,
     #[validate(
         length(min = 2, max = 30),

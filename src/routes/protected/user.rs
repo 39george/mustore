@@ -22,7 +22,7 @@ use validator::Validate;
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
 use crate::auth::users::AuthSession;
-use crate::domain::queries::UploadFileQuery;
+use crate::domain::requests::UploadFileRequest;
 use crate::routes::ResponseError;
 use crate::service_providers::object_storage::presigned_post_form::PresignedPostData;
 use crate::startup::AppState;
@@ -75,7 +75,7 @@ async fn health_check() -> StatusCode {
 async fn request_obj_storage_upload(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
-    Form(params): Form<UploadFileQuery>,
+    Form(params): Form<UploadFileRequest>,
 ) -> Result<Json<PresignedPostData>, ResponseError> {
     let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),

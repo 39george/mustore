@@ -11,7 +11,7 @@ use validator::ValidateArgs;
 
 use crate::auth::users::AuthSession;
 use crate::cornucopia::queries::creator_access;
-use crate::domain::queries::UploadSongQuery;
+use crate::domain::requests::UploadSongRequest;
 use crate::routes::ResponseError;
 use crate::startup::AppState;
 
@@ -42,7 +42,7 @@ async fn health_check() -> StatusCode {
 async fn submit_song(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
-    Json(params): Json<UploadSongQuery>,
+    Json(params): Json<UploadSongRequest>,
 ) -> Result<StatusCode, ResponseError> {
     let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
@@ -73,7 +73,7 @@ async fn submit_song(
         .await
         .context("Failed to insert song (product part) into the pg")?;
 
-    let song_id = creator_access::insert_song_and_get_song_id().bind(
+    let _song_id = creator_access::insert_song_and_get_song_id().bind(
         &transaction,
         &product_id,
         &params.primary_genre,

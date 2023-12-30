@@ -17,7 +17,7 @@ use crate::cornucopia::queries::open_access;
 use crate::cornucopia::queries::open_access::GetNewSongs;
 use crate::cornucopia::queries::open_access::GetRecommendedSongs;
 use crate::cornucopia::queries::open_access::GetSongs;
-use crate::domain::queries::GetSongsListQuery;
+use crate::domain::requests::GetSongsListRequest;
 use crate::startup::AppState;
 
 use super::ResponseError;
@@ -124,7 +124,7 @@ async fn get_values_list(
 #[tracing::instrument(name = "Get songs query", skip(app_state))]
 async fn get_songs(
     State(app_state): State<AppState>,
-    Json(params): Json<GetSongsListQuery>,
+    Json(params): Json<GetSongsListRequest>,
 ) -> Result<Json<Vec<GetSongs>>, ResponseError> {
     params.validate_args((40, 320))?;
 

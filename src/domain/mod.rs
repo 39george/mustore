@@ -3,7 +3,7 @@
 use validator::ValidationError;
 
 pub mod music_parameters;
-pub mod queries;
+pub mod requests;
 pub mod signup_token;
 pub mod user_candidate;
 pub mod user_email;
