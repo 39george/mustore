@@ -34,7 +34,7 @@ CREATE TABLE genres (
     name VARCHAR(50) NOT NULL UNIQUE
 );
 
-CREATE TABLE tags (
+CREATE TABLE moods (
     id SERIAL PRIMARY KEY,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     name VARCHAR(50) NOT NULL UNIQUE
@@ -130,7 +130,7 @@ CREATE TABLE admin_signup_tokens(
     users_id INTEGER REFERENCES users(id) ON DELETE SET NULL
 );
 
--- Products & tags
+-- Products
 CREATE TABLE products (
     id SERIAL PRIMARY KEY,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -144,10 +144,10 @@ CREATE TABLE products (
 
 -- If product is not sold and creator wants to delete it,
 -- we can delete it safely.
-CREATE TABLE products_tags (
+CREATE TABLE products_moods (
     products_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
-    tags_id INTEGER REFERENCES tags(id) ON DELETE RESTRICT,
-    CONSTRAINT pk_products_tags PRIMARY KEY (products_id, tags_id)
+    moods_id INTEGER REFERENCES moods(id) ON DELETE RESTRICT,
+    CONSTRAINT pk_products_moods PRIMARY KEY (products_id, moods_id)
 );
 
 CREATE TABLE songs (
@@ -682,30 +682,30 @@ BEFORE INSERT OR UPDATE ON objects
 FOR EACH ROW
 EXECUTE FUNCTION check_cover_credits_cover_design_limit();
 
-CREATE OR REPLACE FUNCTION check_tags_limit()
+CREATE OR REPLACE FUNCTION check_moods_limit()
 RETURNS TRIGGER AS $$
 DECLARE
-    tag_count INTEGER;
+    mood_count INTEGER;
 BEGIN
-    -- Check tag count when inserting a new tag
+    -- Check mood count when inserting a new mood
     IF TG_OP = 'INSERT' THEN
-        SELECT COUNT(*) INTO tag_count
-        FROM products_tags
+        SELECT COUNT(*) INTO mood_count
+        FROM products_moods
         WHERE products_id = NEW.products_id;
 
-        IF tag_count >= 3 THEN
-            RAISE EXCEPTION 'A product can have at most 3 tags.';
+        IF mood_count >= 3 THEN
+            RAISE EXCEPTION 'A product can have at most 3 moods.';
         END IF;
     END IF;
 
-    -- Check tag count when deleting a tag
+    -- Check mood count when deleting a mood
     IF TG_OP = 'DELETE' THEN
-        SELECT COUNT(*) INTO tag_count
-        FROM products_tags
+        SELECT COUNT(*) INTO mood_count
+        FROM products_moods
         WHERE products_id = OLD.products_id;
 
-        IF tag_count <= 1 THEN
-            RAISE EXCEPTION 'A product must have at least 1 tag.';
+        IF mood_count <= 1 THEN
+            RAISE EXCEPTION 'A product must have at least 1 mood.';
         END IF;
     END IF;
 
@@ -713,6 +713,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trg_check_tag_limit
-BEFORE INSERT OR DELETE ON products_tags
-FOR EACH ROW EXECUTE FUNCTION check_tags_limit();
+CREATE TRIGGER trg_check_mood_limit
+BEFORE INSERT OR DELETE ON products_moods
+FOR EACH ROW EXECUTE FUNCTION check_moods_limit();

@@ -79,13 +79,13 @@ Ref:genres.id < beats.primary_genre [delete: restrict]
 Ref:genres.id < beats.secondary_genre [delete: restrict]
 Ref:genres.id < music_services_genres.genres_id [delete: restrict]
 
-Table tags {
+Table moods {
   id SERIAL [pk, increment]
   created_at TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
   name VARCHAR(50) [not null, unique]
 }
 
-Ref:tags.id < products_tags.tags_id [delete: restrict]
+Ref:moods.id < products_moods.moods_id [delete: restrict]
 
 
 Table user_settings {
@@ -215,7 +215,7 @@ Table products {
   status ProductStatus [not null, default: `moderation`]
 }
 
-Ref:products.id < products_tags.products_id [delete: cascade]
+Ref:products.id < products_moods.products_id [delete: cascade]
 Ref:products.id < songs.products_id [delete: cascade]
 Ref:products.id < beats.products_id [delete: cascade]
 Ref:products.id < lyrics.products_id [delete: cascade]
@@ -224,11 +224,11 @@ Ref:products.id < product_orders.products_id [delete: set null]
 Ref:products.id < reports.products_id [delete: cascade]
 Ref:products.id < objects.cover_products_id [delete: restrict]
 
-Table products_tags {
+Table products_moods {
   products_id INTEGER [not null]
-  tags_id INTEGER [not null]
+  moods_id INTEGER [not null]
   Indexes {
-    (products_id, tags_id) [pk, name: "pk_products_id"]
+    (products_id, moods_id) [pk, name: "pk_products_id"]
   }
 }
 
