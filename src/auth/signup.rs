@@ -21,6 +21,7 @@ use serde::Serialize;
 
 use super::AuthError;
 use crate::cornucopia::queries::user_auth_queries;
+use crate::domain::signup_token::SignupToken;
 use crate::domain::user_candidate::UserCandidate;
 use crate::domain::user_email::UserEmail;
 use crate::domain::user_name::UserName;
@@ -29,7 +30,6 @@ use crate::domain::user_role::UserRole;
 use crate::email_client::EmailClient;
 use crate::startup::AppState;
 use crate::telemetry::spawn_blocking_with_tracing;
-use crate::validation::signup_token::SignupToken;
 
 // ───── Types ────────────────────────────────────────────────────────────── //
 
