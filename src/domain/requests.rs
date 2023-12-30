@@ -54,8 +54,31 @@ pub struct UploadFileRequest {
 }
 
 #[derive(Deserialize, Debug, Validate)]
-pub struct UploadSongRequest {
-    pub object_key: String,
+pub struct SubmitSongRequest {
+    #[validate(
+        length(min = 10, max = 500),
+        non_control_character,
+        custom = "crate::domain::forbidden_characters"
+    )]
+    pub song_master_object_key: String,
+    #[validate(
+        length(min = 10, max = 500),
+        non_control_character,
+        custom = "crate::domain::forbidden_characters"
+    )]
+    pub song_master_tagged_object_key: Option<String>,
+    #[validate(
+        length(min = 10, max = 500),
+        non_control_character,
+        custom = "crate::domain::forbidden_characters"
+    )]
+    pub song_multitrack_object_key: String,
+    #[validate(
+        length(min = 10, max = 500),
+        non_control_character,
+        custom = "crate::domain::forbidden_characters"
+    )]
+    pub song_cover_object_key: String,
     #[validate(
         length(min = 2, max = 30),
         non_control_character,

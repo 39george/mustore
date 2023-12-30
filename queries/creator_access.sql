@@ -20,7 +20,7 @@ WHERE services.creator_id = :creator_id;
 INSERT INTO products(owner_id, name, description, price)
 VALUES (:owher_id, :name, :description, :price) returning id;
 
---! insert_product_cover_key
+--! insert_product_cover_object_key
 INSERT INTO objects(key, object_type, cover_products_id)
 VALUES (:key, 'image', :product_id);
 
@@ -60,11 +60,15 @@ VALUES (
 )
 RETURNING id;
 
---! insert_song_master_key
+--! insert_song_master_object_key
 INSERT INTO objects(key, object_type, master_songs_id)
 VALUES (:key, 'audio', :song_id);
 
---! insert_song_multitrack_key
+--! insert_song_master_tagged_object_key
+INSERT INTO objects(key, object_type, tagged_master_songs_id)
+VALUES (:key, 'audio', :song_id);
+
+--! insert_song_multitrack_object_key
 INSERT INTO objects(key, object_type, multitrack_songs_id)
 VALUES (:key, 'multitrack', :song_id);
 

@@ -11,7 +11,7 @@ use validator::ValidateArgs;
 
 use crate::auth::users::AuthSession;
 use crate::cornucopia::queries::creator_access;
-use crate::domain::requests::UploadSongRequest;
+use crate::domain::requests::SubmitSongRequest;
 use crate::routes::ResponseError;
 use crate::startup::AppState;
 
@@ -42,7 +42,7 @@ async fn health_check() -> StatusCode {
 async fn submit_song(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
-    Json(params): Json<UploadSongRequest>,
+    Json(params): Json<SubmitSongRequest>,
 ) -> Result<StatusCode, ResponseError> {
     let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
@@ -72,6 +72,32 @@ async fn submit_song(
         .one()
         .await
         .context("Failed to insert song (product part) into the pg")?;
+
+    creator_access::insert_product_cover_object_key()
+        .bind(&transaction, &params.song_cover_object_key, &product_id)
+        .await
+        .context("Failed to insert cover_object_key into pg")?;
+
+    creator_access::insert_song_master_object_key()
+        .bind(&transaction, &params.song_master_object_key, &product_id)
+        .await
+        .context("Failed to insert song_master_object_key into pg")?;
+
+    if let Some(tagged_key) = params.song_master_tagged_object_key {
+        creator_access::insert_song_master_tagged_object_key()
+            .bind(&transaction, &tagged_key, &product_id)
+            .await
+            .context("Failed to insert song_master_object_key into pg")?;
+    }
+
+    creator_access::insert_song_multitrack_object_key()
+        .bind(
+            &transaction,
+            &params.song_multitrack_object_key,
+            &product_id,
+        )
+        .await
+        .context("Failed to insert song_master_object_key into pg")?;
 
     let _song_id = creator_access::insert_song_and_get_song_id().bind(
         &transaction,
