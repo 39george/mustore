@@ -52,6 +52,7 @@ ORDER BY
     CASE WHEN :sort_by = 'new_first' THEN created_at END DESC NULLS LAST,
     CASE WHEN :sort_by = 'old_first' THEN created_at END ASC NULLS LAST,
     CASE WHEN :sort_by = 'relevance' THEN relevance_score END DESC
+OFFSET :offset
 LIMIT :amount;
 
 --! get_new_songs : (cover_url?)
