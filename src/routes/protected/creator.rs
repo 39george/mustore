@@ -5,15 +5,13 @@ use axum::Json;
 use axum::Router;
 use axum_login::permission_required;
 use http::StatusCode;
-use rust_decimal::Decimal;
-use serde::Deserialize;
+use validator::ValidateArgs;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
 use crate::auth::users::AuthSession;
 use crate::cornucopia::queries::creator_access;
-use crate::domain::music_parameters::MusicKey;
-use crate::domain::music_parameters::Sex;
+use crate::domain::queries::UploadSongQuery;
 use crate::routes::ResponseError;
 use crate::startup::AppState;
 
@@ -25,27 +23,12 @@ use crate::startup::AppState;
 //     // User-specific errors here
 // }
 
-// FIXME validate this query, maybe implement domain validation?
-#[derive(Deserialize, Debug)]
-struct UploadSongQuery {
-    name: String,
-    description: String,
-    price: Decimal,
-    tags: Vec<String>,
-    primary_genre: String,
-    secondary_genre: Option<String>,
-    sex: Sex,
-    tempo: i16,
-    duration: i16,
-    key: MusicKey,
-    lyric: String,
-}
-
-// ───── Body ─────────────────────────────────────────────────────────────── //
+// ───── Handlers ─────────────────────────────────────────────────────────── //
 
 pub fn creator_router() -> Router<AppState> {
     Router::new()
         .route("/health_check", routing::get(health_check))
+        .route("/submit_song", routing::post(submit_song))
         .layer(permission_required!(crate::auth::users::Backend, "creator",))
 }
 
@@ -54,9 +37,9 @@ async fn health_check() -> StatusCode {
     StatusCode::OK
 }
 
-#[tracing::instrument(name = "Upload a new song", skip_all)]
+#[tracing::instrument(name = "Submit a new song", skip_all)]
 #[axum::debug_handler]
-async fn upload_song(
+async fn submit_song(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
     Json(params): Json<UploadSongQuery>,
@@ -64,6 +47,8 @@ async fn upload_song(
     let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
+
+    params.validate_args((1, 50))?;
 
     let mut db_client = app_state
         .pg_pool

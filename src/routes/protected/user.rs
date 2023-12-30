@@ -16,12 +16,13 @@ use futures::TryStreamExt;
 use http::StatusCode;
 use mediatype::media_type;
 use mediatype::MediaTypeBuf;
-use serde::Deserialize;
 use time::OffsetDateTime;
+use validator::Validate;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
 use crate::auth::users::AuthSession;
+use crate::domain::queries::UploadFileQuery;
 use crate::routes::ResponseError;
 use crate::service_providers::object_storage::presigned_post_form::PresignedPostData;
 use crate::startup::AppState;
@@ -53,18 +54,12 @@ lazy_static::lazy_static! {
     };
 }
 
-#[derive(Deserialize, Debug)]
-struct UploadFileQuery {
-    media_type: mediatype::MediaTypeBuf,
-    file_name: String,
-}
-
-// ───── Body ─────────────────────────────────────────────────────────────── //
+// ───── Handlers ─────────────────────────────────────────────────────────── //
 
 pub fn user_router() -> Router<AppState> {
     Router::new()
         .route("/health_check", routing::get(health_check))
-        .route("/upload", routing::get(request_obj_storage_upload_link))
+        .route("/upload", routing::get(request_obj_storage_upload))
         .layer(permission_required!(crate::auth::users::Backend, "user",))
 }
 
@@ -77,7 +72,7 @@ async fn health_check() -> StatusCode {
     name = "Request post form data for obj store upload.",
     skip_all
 )]
-async fn request_obj_storage_upload_link(
+async fn request_obj_storage_upload(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
     Form(params): Form<UploadFileQuery>,
@@ -85,6 +80,8 @@ async fn request_obj_storage_upload_link(
     let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
+
+    params.validate()?;
 
     check_current_user_uploads(&app_state.redis_pool, user.id)
         .await
@@ -118,6 +115,8 @@ async fn request_obj_storage_upload_link(
 
     Ok(Json(presigned_post_data))
 }
+
+// ───── Functions ────────────────────────────────────────────────────────── //
 
 #[tracing::instrument(
     name = "Store upload request data in the redis",

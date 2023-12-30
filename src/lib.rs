@@ -16,7 +16,6 @@ pub mod service_providers;
 pub mod startup;
 pub mod telemetry;
 pub mod types;
-pub mod validation;
 
 // ───── Helpers ──────────────────────────────────────────────────────────── //
 
