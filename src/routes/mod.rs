@@ -1,6 +1,8 @@
+use axum::body::Body;
 use axum::response::IntoResponse;
 use axum::response::Response;
 use http::StatusCode;
+use validator::ValidationErrors;
 
 use crate::error_chain_fmt;
 
@@ -16,6 +18,8 @@ pub enum ResponseError {
     InternalError(#[source] anyhow::Error),
     #[error("Bad request")]
     BadRequest(#[source] anyhow::Error),
+    #[error("Validation failed")]
+    ValidationError(#[from] ValidationErrors),
     #[error("Can't process that input")]
     NotAcceptableError,
     #[error("No such user")]
@@ -52,6 +56,10 @@ impl IntoResponse for ResponseError {
             ResponseError::TooManyUploadsError => {
                 StatusCode::TOO_MANY_REQUESTS.into_response()
             }
+            ResponseError::ValidationError(e) => Response::builder()
+                .status(StatusCode::BAD_REQUEST)
+                .body(Body::from(e.to_string()))
+                .unwrap_or(StatusCode::BAD_REQUEST.into_response()),
         }
     }
 }
