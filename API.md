@@ -137,4 +137,5 @@ if Err, 1. If internal error > StatusCode::InternalError (500)
         3. If don't have permission > StatusCode::Forbidden (403)
         4. If not authorized > StatusCode::Unautorized (401)
         5. If too many uploads for that user > StatusCode::TooManyRequests (429)
+        6. If filename containes forbidden characters > StatusCode::BadRequest (400) + error description in the body.
 ```
