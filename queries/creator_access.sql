@@ -9,8 +9,30 @@ JOIN services
 ON service_orders.services_id = services.id
 WHERE services.creator_id = :creator_id;
 
--- get_creator_inbox_response_rate
-
+--! get_creator_inbox_response_rate
+WITH ConversationResponses AS (
+    SELECT
+        conversations.id,
+        BOOL_OR(participants.users_id = 1 AND messages.created_at > conversations.created_at) AS is_responded
+    FROM conversations
+    JOIN participants ON conversations.id = participants.conversations_id
+    LEFT JOIN messages ON conversations.id = messages.conversations_id
+    WHERE participants.users_id = 1
+        AND (
+            SELECT users_id FROM messages AS m2
+            WHERE m2.conversations_id = conversations.id
+            ORDER BY m2.created_at
+            LIMIT 1
+        ) <> 1
+        AND conversations.created_at > NOW() - INTERVAL '1 month'
+    GROUP BY conversations.id
+)
+SELECT
+    CASE
+        WHEN COUNT(*) = 0 THEN NULL
+        ELSE (COUNT(CASE WHEN is_responded THEN 1 END)::float / COUNT(*)::float) * 100
+    END AS response_rate_percentage
+FROM ConversationResponses;
 
 -- UPDATING CONTENT --
 
@@ -24,10 +46,10 @@ VALUES (:owher_id, :name, :description, :price) returning id;
 INSERT INTO objects(key, object_type, cover_products_id)
 VALUES (:key, 'image', :product_id);
 
---! insert_product_tag_by_name
-INSERT INTO products_tags (products_id, tags_id)
+--! insert_product_mood_by_name
+INSERT INTO products_moods (products_id, moods_id)
 VALUES (:product_id, (
-    SELECT id FROM tags WHERE name = :tag_name
+    SELECT id FROM moods WHERE name = :mood_name
 ));
 
 -- Songs
