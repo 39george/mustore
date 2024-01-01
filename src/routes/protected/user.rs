@@ -39,15 +39,9 @@ lazy_static::lazy_static! {
         m.insert(media_type!(IMAGE/JPEG).into(), crate::MAX_IMAGE_SIZE_MB);
         m.insert(media_type!(AUDIO/WAV).into(), crate::MAX_WAV_SIZE_MB);
         m.insert(media_type!(AUDIO/MPEG).into(), crate::MAX_MP3_SIZE_MB);
-        m.insert(
-            media_type!(APPLICATION/ZIP).into(),
-            crate::MAX_MULTITRACK_SIZE_GB,
-        );
+        m.insert(media_type!(APPLICATION/ZIP).into(), crate::MAX_MULTITRACK_SIZE_GB);
         m.insert(media_type!(VIDEO/MP4).into(), crate::MAX_VIDEO_SIZE_MB);
-        m.insert(
-            media_type!(APPLICATION/PDF).into(),
-            crate::MAX_DOCUMENT_SIZE_MB,
-        );
+        m.insert(media_type!(APPLICATION/PDF).into(), crate::MAX_DOCUMENT_SIZE_MB);
         m.insert(
             media_type!(APPLICATION/vnd::OPENXMLFORMATS_OFFICEDOCUMENT_WORDPROCESSINGML_DOCUMENT).into(),
             crate::MAX_DOCUMENT_SIZE_MB,
