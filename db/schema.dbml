@@ -453,7 +453,6 @@ Table consumer_reviews {
 Table conversations {
   id SERIAL [pk, increment]
   created_at TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
-  updated_at TIMESTAMP [default: `CURRENT_TIMESTAMP`]
 }
 
 Ref:conversations.id < messages.conversations_id [delete: cascade]
