@@ -10,7 +10,6 @@ use fred::error::RedisError;
 use fred::interfaces::KeysInterface;
 use fred::prelude::RedisResult;
 use http::StatusCode;
-use tower_http::trace::TraceLayer;
 use validator::ValidateArgs;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
