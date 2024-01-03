@@ -93,19 +93,27 @@ where C : GenericClient
         res.map(| row | (self.mapper) ((self.extractor) (& row)))) .into_stream() ;
         Ok(it)
     }
-}pub struct F64Query < 'a, C : GenericClient, T, const N : usize >
+}#[derive(serde::Serialize, Debug, Clone, PartialEq, )] pub struct GetCreatorInboxResponseRateAndTime
+{ pub response_rate_percentage : f64,pub average_response_time : String,}pub struct GetCreatorInboxResponseRateAndTimeBorrowed < 'a >
+{ pub response_rate_percentage : f64,pub average_response_time : &'a str,} impl < 'a > From < GetCreatorInboxResponseRateAndTimeBorrowed <
+'a >> for GetCreatorInboxResponseRateAndTime
+{
+    fn
+    from(GetCreatorInboxResponseRateAndTimeBorrowed { response_rate_percentage,average_response_time,} : GetCreatorInboxResponseRateAndTimeBorrowed < 'a >)
+    -> Self { Self { response_rate_percentage,average_response_time: average_response_time.into(),} }
+}pub struct GetCreatorInboxResponseRateAndTimeQuery < 'a, C : GenericClient, T, const N : usize >
 {
     client : & 'a  C, params :
     [& 'a (dyn postgres_types :: ToSql + Sync) ; N], stmt : & 'a mut cornucopia_async
-    :: private :: Stmt, extractor : fn(& tokio_postgres :: Row) -> f64,
-    mapper : fn(f64) -> T,
-} impl < 'a, C, T : 'a, const N : usize > F64Query < 'a, C, T, N >
+    :: private :: Stmt, extractor : fn(& tokio_postgres :: Row) -> GetCreatorInboxResponseRateAndTimeBorrowed,
+    mapper : fn(GetCreatorInboxResponseRateAndTimeBorrowed) -> T,
+} impl < 'a, C, T : 'a, const N : usize > GetCreatorInboxResponseRateAndTimeQuery < 'a, C, T, N >
 where C : GenericClient
 {
-    pub fn map < R > (self, mapper : fn(f64) -> R) -> F64Query
+    pub fn map < R > (self, mapper : fn(GetCreatorInboxResponseRateAndTimeBorrowed) -> R) -> GetCreatorInboxResponseRateAndTimeQuery
     < 'a, C, R, N >
     {
-        F64Query
+        GetCreatorInboxResponseRateAndTimeQuery
         {
             client : self.client, params : self.params, stmt : self.stmt,
             extractor : self.extractor, mapper,
@@ -190,44 +198,74 @@ GetCreatorMarksAvg, 1 >
         client, params : [creator_id,], stmt : & mut self.0, extractor :
         | row | { GetCreatorMarksAvg { avg : row.get(0),count : row.get(1),} }, mapper : | it | { <GetCreatorMarksAvg>::from(it) },
     }
-} }pub fn get_creator_inbox_response_rate() -> GetCreatorInboxResponseRateStmt
-{ GetCreatorInboxResponseRateStmt(cornucopia_async :: private :: Stmt :: new("WITH ConversationResponses AS (
+} }pub fn get_creator_inbox_response_rate_and_time() -> GetCreatorInboxResponseRateAndTimeStmt
+{ GetCreatorInboxResponseRateAndTimeStmt(cornucopia_async :: private :: Stmt :: new("WITH FirstResponseTime AS (
     SELECT
-        conversations.id,
-        -- BOOL_OR(participants.users_id = $1 AND messages.created_at > conversations.created_at) AS is_responded
-        BOOL_OR(participants.users_id = $1 AND
-            messages.created_at - conversations.created_at < '1 day'::INTERVAL)
-        AS is_responded
+        conversations.id AS conversation_id,
+        MIN(messages.created_at) AS first_response_time
     FROM conversations
     JOIN participants ON conversations.id = participants.conversations_id
-    LEFT JOIN messages ON conversations.id = messages.conversations_id
+    JOIN messages ON conversations.id = messages.conversations_id
     WHERE participants.users_id = $1
-        AND (
-            SELECT users_id FROM messages AS m2
-            WHERE m2.conversations_id = conversations.id
-            ORDER BY m2.created_at
-            LIMIT 1
-        ) <> $1
-        AND conversations.created_at > NOW() - INTERVAL '1 month'
-        -- AND NOT EXISTS (
-        --     SELECT 1 FROM service_orders
-        --     WHERE service_orders.conversations_id = conversations.id
-        -- )
+        AND messages.users_id = $1
+        AND messages.created_at > conversations.created_at
     GROUP BY conversations.id
+),
+ConversationResponses AS (
+    SELECT
+        conversations.id,
+        (CASE
+            WHEN frt.first_response_time IS NOT NULL AND 
+                 frt.first_response_time - conversations.created_at < INTERVAL '1 day' 
+            THEN 1
+            ELSE 0 
+         END) AS is_responded,
+        frt.first_response_time - conversations.created_at AS response_time
+    FROM conversations
+    LEFT JOIN FirstResponseTime frt ON conversations.id = frt.conversation_id
+    WHERE EXISTS (
+        SELECT 1
+        FROM messages
+        WHERE messages.conversations_id = conversations.id
+          AND messages.users_id <> $1
+        LIMIT 1
+    )
+    AND conversations.created_at > NOW() - INTERVAL '1 month'
 )
 SELECT
-    CASE
-        WHEN COUNT(*) = 0 THEN NULL
-        ELSE (COUNT(CASE WHEN is_responded THEN 1 END)::float / COUNT(*)::float) * 100
-    END AS response_rate_percentage
+    COALESCE(
+        -- COUNT() will NOT count NULLS
+       (COUNT(CASE WHEN is_responded = 1 THEN 1 END)::float / COUNT(*)::float) * 100,
+       0
+    ) AS response_rate_percentage,
+    AVG(response_time)::TEXT AS average_response_time
 FROM ConversationResponses")) } pub
-struct GetCreatorInboxResponseRateStmt(cornucopia_async :: private :: Stmt) ; impl
-GetCreatorInboxResponseRateStmt { pub fn bind < 'a, C : GenericClient, >
+struct GetCreatorInboxResponseRateAndTimeStmt(cornucopia_async :: private :: Stmt) ; impl
+GetCreatorInboxResponseRateAndTimeStmt { pub fn bind < 'a, C : GenericClient, >
 (& 'a mut self, client : & 'a  C,
-user_id : & 'a i32,) -> F64Query < 'a, C,
-f64, 1 >
+user_id : & 'a i32,) -> GetCreatorInboxResponseRateAndTimeQuery < 'a, C,
+GetCreatorInboxResponseRateAndTime, 1 >
 {
-    F64Query
+    GetCreatorInboxResponseRateAndTimeQuery
+    {
+        client, params : [user_id,], stmt : & mut self.0, extractor :
+        | row | { GetCreatorInboxResponseRateAndTimeBorrowed { response_rate_percentage : row.get(0),average_response_time : row.get(1),} }, mapper : | it | { <GetCreatorInboxResponseRateAndTime>::from(it) },
+    }
+} }pub fn get_profile_completion_value() -> GetProfileCompletionValueStmt
+{ GetProfileCompletionValueStmt(cornucopia_async :: private :: Stmt :: new("SELECT 
+    CASE
+        WHEN bio IS NULL THEN 80
+        ELSE 100
+    END AS profile_completion_value
+FROM users
+WHERE users.id = $1")) } pub
+struct GetProfileCompletionValueStmt(cornucopia_async :: private :: Stmt) ; impl
+GetProfileCompletionValueStmt { pub fn bind < 'a, C : GenericClient, >
+(& 'a mut self, client : & 'a  C,
+user_id : & 'a i32,) -> I32Query < 'a, C,
+i32, 1 >
+{
+    I32Query
     {
         client, params : [user_id,], stmt : & mut self.0, extractor :
         | row | { row.get(0) }, mapper : | it | { it },

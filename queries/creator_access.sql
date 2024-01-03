@@ -9,37 +9,57 @@ JOIN services
 ON service_orders.services_id = services.id
 WHERE services.creator_id = :creator_id;
 
---! get_creator_inbox_response_rate
-WITH ConversationResponses AS (
+--! get_creator_inbox_response_rate_and_time
+WITH FirstResponseTime AS (
     SELECT
-        conversations.id,
-        -- BOOL_OR(participants.users_id = :user_id AND messages.created_at > conversations.created_at) AS is_responded
-        BOOL_OR(participants.users_id = :user_id AND
-            messages.created_at - conversations.created_at < '1 day'::INTERVAL)
-        AS is_responded
+        conversations.id AS conversation_id,
+        MIN(messages.created_at) AS first_response_time
     FROM conversations
     JOIN participants ON conversations.id = participants.conversations_id
-    LEFT JOIN messages ON conversations.id = messages.conversations_id
+    JOIN messages ON conversations.id = messages.conversations_id
     WHERE participants.users_id = :user_id
-        AND (
-            SELECT users_id FROM messages AS m2
-            WHERE m2.conversations_id = conversations.id
-            ORDER BY m2.created_at
-            LIMIT 1
-        ) <> :user_id
-        AND conversations.created_at > NOW() - INTERVAL '1 month'
-        -- AND NOT EXISTS (
-        --     SELECT 1 FROM service_orders
-        --     WHERE service_orders.conversations_id = conversations.id
-        -- )
+        AND messages.users_id = :user_id
+        AND messages.created_at > conversations.created_at
     GROUP BY conversations.id
+),
+ConversationResponses AS (
+    SELECT
+        conversations.id,
+        (CASE
+            WHEN frt.first_response_time IS NOT NULL AND 
+                 frt.first_response_time - conversations.created_at < INTERVAL '1 day' 
+            THEN 1
+            ELSE 0 
+         END) AS is_responded,
+        frt.first_response_time - conversations.created_at AS response_time
+    FROM conversations
+    LEFT JOIN FirstResponseTime frt ON conversations.id = frt.conversation_id
+    WHERE EXISTS (
+        SELECT 1
+        FROM messages
+        WHERE messages.conversations_id = conversations.id
+          AND messages.users_id <> :user_id
+        LIMIT 1
+    )
+    AND conversations.created_at > NOW() - INTERVAL '1 month'
 )
 SELECT
-    CASE
-        WHEN COUNT(*) = 0 THEN NULL
-        ELSE (COUNT(CASE WHEN is_responded THEN 1 END)::float / COUNT(*)::float) * 100
-    END AS response_rate_percentage
+    COALESCE(
+        -- COUNT() will NOT count NULLS
+       (COUNT(CASE WHEN is_responded = 1 THEN 1 END)::float / COUNT(*)::float) * 100,
+       0
+    ) AS response_rate_percentage,
+    AVG(response_time)::TEXT AS average_response_time
 FROM ConversationResponses;
+
+--! get_profile_completion_value
+SELECT 
+    CASE
+        WHEN bio IS NULL THEN 80
+        ELSE 100
+    END AS profile_completion_value
+FROM users
+WHERE users.id = :user_id;
 
 -- UPDATING CONTENT --
 
