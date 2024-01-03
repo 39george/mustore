@@ -9,6 +9,8 @@ import { FC, useEffect, useRef, useState } from "react";
 import logo from "../assets/svg/logo.svg";
 import { LinkName, ToggledLinks } from "../types/types";
 import usePageNavigation from "../hooks/usePageNavigation";
+import { useSelector } from "react-redux";
+import { select_active_section } from "../state/active_section_slice";
 
 const Menu: FC = () => {
   const [link_toggled, set_link_toggled] = useState<ToggledLinks>({
@@ -19,6 +21,7 @@ const Menu: FC = () => {
   });
   const [sidebar_open, set_sidebar_open] = useState(false);
   const sidebar_ref = useRef<HTMLDivElement>(null);
+  const active_section = useSelector(select_active_section);
 
   const toggle_link = (link_name: LinkName) => {
     set_link_toggled((prev_state) => ({

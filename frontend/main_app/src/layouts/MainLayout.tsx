@@ -1,7 +1,8 @@
 import { Outlet } from "react-router-dom";
 import Menu from "../Menu/Menu";
+import { FC } from "react";
 
-const MainLayout = () => {
+const MainLayout: FC = () => {
   return (
     <>
       <Menu />
