@@ -1,7 +1,9 @@
 //! tests/api/upload_song.rs
 
 use crate::helpers::{TestApp, TestUser};
-use mustore::{config::Settings, domain::requests::SubmitSongRequest};
+use mustore::{
+    config::Settings, domain::requests::creator_access::SubmitSongRequest,
+};
 
 #[tokio::test]
 async fn song_uploading_success() {
