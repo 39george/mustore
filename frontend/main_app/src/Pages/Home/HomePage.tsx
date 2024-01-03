@@ -86,9 +86,11 @@ const HomePage: FC = () => {
         let currently_intersecting = current_entries.current.filter((obj) => {
           return obj.is_intersecting === true;
         });
-        if (currently_intersecting[0].id !== prioritized_section.current.id) {
-          prioritized_section.current.id = currently_intersecting[0].id;
-          change_section(prioritized_section.current.id);
+        if (currently_intersecting.length !== 0) {
+          if (currently_intersecting[0].id !== prioritized_section.current.id) {
+            prioritized_section.current.id = currently_intersecting[0].id;
+            change_section(prioritized_section.current.id);
+          }
         }
       },
       {
@@ -101,6 +103,10 @@ const HomePage: FC = () => {
         observer.observe(ref);
       }
     });
+
+    return () => {
+      observer.disconnect();
+    };
   }, []);
 
   const scroll_to_why_us = () => {
