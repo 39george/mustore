@@ -129,7 +129,7 @@ if Err:
 - Get presigned post form to upload file on object storage:
 ```
 → TO
-GET /api/protected/user/upload?media_type=<media_type>&file_name=<file_name>
+GET /api/protected/user/req_upload_form?media_type=<media_type>&file_name=<file_name>
 
 WHERE media_type is mime type, like 'image/png',
 file_name is string.
