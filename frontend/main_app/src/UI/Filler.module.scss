@@ -1,0 +1,9 @@
+.filler {
+  height: 5.25rem;
+}
+
+@media (max-width: 1010px) {
+  .filler {
+    height: 5rem;
+  }
+}

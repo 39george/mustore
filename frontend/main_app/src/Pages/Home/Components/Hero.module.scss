@@ -1,9 +1,5 @@
 @import "../../../colors.scss";
 
-.filler {
-  height: 5.25rem;
-}
-
 .main_content {
   display: flex;
   justify-content: center;
@@ -264,10 +260,6 @@ hr {
 }
 
 @media (max-width: 1010px) {
-  .filler {
-    height: 5rem;
-  }
-
   .main_content,
   .content_block_left,
   .content_block_right {

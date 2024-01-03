@@ -56,9 +56,9 @@ const Footer: FC = () => {
             <ul className={styles.links}>
               <li>
                 <NavLink
-                  to="products"
+                  to="products/songs"
                   onClick={() => {
-                    handle_page_navigation("products");
+                    handle_page_navigation("products/songs");
                     close_all();
                   }}
                 >
@@ -67,9 +67,9 @@ const Footer: FC = () => {
               </li>
               <li>
                 <NavLink
-                  to="products"
+                  to="products/beats"
                   onClick={() => {
-                    handle_page_navigation("products");
+                    handle_page_navigation("products/beats");
                     close_all();
                   }}
                 >
@@ -78,9 +78,9 @@ const Footer: FC = () => {
               </li>
               <li>
                 <NavLink
-                  to="products"
+                  to="products/covers"
                   onClick={() => {
-                    handle_page_navigation("products");
+                    handle_page_navigation("products/covers");
                     close_all();
                   }}
                 >
@@ -89,9 +89,9 @@ const Footer: FC = () => {
               </li>
               <li>
                 <NavLink
-                  to="products"
+                  to="products/texts"
                   onClick={() => {
-                    handle_page_navigation("products");
+                    handle_page_navigation("products/texts");
                     close_all();
                   }}
                 >

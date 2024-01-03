@@ -1,0 +1,41 @@
+@import "../../../colors.scss";
+.content_section {
+  width: 100%;
+  max-width: 72.75rem;
+
+  margin: 0 auto;
+  padding: 0 1.375rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+
+  margin-top: 3.75rem;
+}
+
+.h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: 0.2rem;
+
+  span {
+    position: relative;
+    .underline {
+      position: absolute;
+      left: -0.5rem;
+      bottom: -0.5rem;
+    }
+  }
+}
+
+.chevron {
+  font-size: 1.5rem;
+  margin-left: 1rem;
+}
+
+.main_content {
+  min-height: 100vh;
+
+  margin-top: 5rem;
+}

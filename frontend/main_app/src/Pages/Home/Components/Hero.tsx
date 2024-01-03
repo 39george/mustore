@@ -14,11 +14,12 @@ import cover_7 from "../../../assets/HomePage/album_covers/ablum_cover_7.png";
 import cover_8 from "../../../assets/HomePage/album_covers/ablum_cover_8.png";
 import { FC } from "react";
 import { HeroProps } from "../../../types/types";
+import Filler from "../../../UI/Filler";
 
 const Hero: FC<HeroProps> = ({ scroll_to_why_us }) => {
   return (
     <section className={styles.hero_section}>
-      <div className={styles.filler}></div>
+      <Filler />
       <div className={styles.main_content}>
         <div className={styles.content_block_left}>
           <img

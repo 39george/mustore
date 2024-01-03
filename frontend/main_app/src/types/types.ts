@@ -11,4 +11,12 @@ export interface HeroProps {
   scroll_to_why_us: () => void;
 }
 
-export type page_names = "" | "products" | "services" | "help" | "about";
+export type page_names =
+  | ""
+  | "products/beats"
+  | "products/covers"
+  | "products/songs"
+  | "products/texts"
+  | "services"
+  | "help"
+  | "about";

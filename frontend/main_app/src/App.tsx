@@ -3,6 +3,8 @@ import "./App.scss";
 import MainLayout from "./layouts/MainLayout";
 import HomePage from "./Pages/Home/HomePage";
 import Footer from "./Pages/Footer";
+import ProductsPage from "./Pages/Products/ProductsPage";
+import ContentSection from "./Pages/Products/Components/ContentSection";
 
 function App() {
   return (
@@ -18,15 +20,29 @@ function App() {
           />
           <Route
             path="products"
-            element={
-              <div>
-                <h1 style={{ width: "fit-content", margin: "6rem auto 0" }}>
-                  Products page
-                </h1>
-                <div style={{ height: "100vh" }}></div>
-              </div>
-            }
-          />
+            element={<ProductsPage />}
+          >
+            <Route
+              path="beats"
+              element={<ContentSection section_type="beats" />}
+            />
+            <Route
+              path="covers"
+              element={<ContentSection section_type="covers" />}
+            />
+            <Route
+              path="songs"
+              element={<ContentSection section_type="songs" />}
+            />
+            <Route
+              path="texts"
+              element={<ContentSection section_type="texts" />}
+            />
+            <Route
+              index
+              element={<ContentSection section_type="songs" />}
+            />
+          </Route>
           <Route
             path="services"
             element={

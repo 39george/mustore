@@ -56,7 +56,11 @@ const Menu: FC = () => {
   }, [intersecting_section]);
 
   useEffect(() => {
-    if (intersecting_section === "hero" || intersecting_section === "group") {
+    if (
+      intersecting_section === "hero" ||
+      intersecting_section === "group" ||
+      intersecting_section === null
+    ) {
       set_is_nav_dark(false);
     } else {
       set_is_nav_dark(true);
@@ -127,9 +131,9 @@ const Menu: FC = () => {
             <div className={styles.submenu_body}>
               <li>
                 <NavLink
-                  to="products"
+                  to="products/songs"
                   onClick={() => {
-                    handle_page_navigation("products");
+                    handle_page_navigation("products/songs");
                   }}
                 >
                   Песни
@@ -137,9 +141,9 @@ const Menu: FC = () => {
               </li>
               <li>
                 <NavLink
-                  to="products"
+                  to="products/beats"
                   onClick={() => {
-                    handle_page_navigation("products");
+                    handle_page_navigation("products/beats");
                   }}
                 >
                   Биты
@@ -147,9 +151,9 @@ const Menu: FC = () => {
               </li>
               <li>
                 <NavLink
-                  to="products"
+                  to="products/covers"
                   onClick={() => {
-                    handle_page_navigation("products");
+                    handle_page_navigation("products/covers");
                   }}
                 >
                   Обложки
@@ -157,9 +161,9 @@ const Menu: FC = () => {
               </li>
               <li>
                 <NavLink
-                  to="products"
+                  to="products/texts"
                   onClick={() => {
-                    handle_page_navigation("products");
+                    handle_page_navigation("products/texts");
                   }}
                 >
                   Тексты
@@ -349,9 +353,9 @@ const Menu: FC = () => {
               <ul className={styles.sidebar_submenu}>
                 <li>
                   <NavLink
-                    to="products"
+                    to="products/songs"
                     onClick={() => {
-                      handle_page_navigation("products");
+                      handle_page_navigation("products/songs");
                       close_all();
                     }}
                   >
@@ -360,9 +364,9 @@ const Menu: FC = () => {
                 </li>
                 <li>
                   <NavLink
-                    to="products"
+                    to="products/beats"
                     onClick={() => {
-                      handle_page_navigation("products");
+                      handle_page_navigation("products/beats");
                       close_all();
                     }}
                   >
@@ -371,9 +375,9 @@ const Menu: FC = () => {
                 </li>
                 <li>
                   <NavLink
-                    to="products"
+                    to="products/covers"
                     onClick={() => {
-                      handle_page_navigation("products");
+                      handle_page_navigation("products/covers");
                       close_all();
                     }}
                   >
@@ -382,9 +386,9 @@ const Menu: FC = () => {
                 </li>
                 <li>
                   <NavLink
-                    to="products"
+                    to="products/texts"
                     onClick={() => {
-                      handle_page_navigation("products");
+                      handle_page_navigation("products/texts");
                       close_all();
                     }}
                   >

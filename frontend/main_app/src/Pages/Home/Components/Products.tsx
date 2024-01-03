@@ -9,7 +9,7 @@ import cover_9 from "../../../assets/HomePage/album_covers/ablum_cover_9.png";
 import cover_10 from "../../../assets/HomePage/album_covers/ablum_cover_10.png";
 import cover_11 from "../../../assets/HomePage/album_covers/ablum_cover_11.png";
 import { NavLink } from "react-router-dom";
-import AnimatedCounter from "./UI/AnimatedCounter";
+import AnimatedCounter from "../../../UI/AnimatedCounter";
 import usePageNavigation from "../../../hooks/usePageNavigation";
 
 const Products: FC = () => {
@@ -22,9 +22,9 @@ const Products: FC = () => {
         <div className={styles.product}>
           <div className={styles.covers_container}>
             <NavLink
-              to="products"
+              to="products/songs"
               className={styles.cover_hover}
-              onClick={() => handle_page_navigation("products")}
+              onClick={() => handle_page_navigation("products/songs")}
             >
               <div className={styles.text_content}>
                 к контенту
@@ -75,9 +75,9 @@ const Products: FC = () => {
         <div className={styles.product}>
           <div className={styles.covers_container}>
             <NavLink
-              to="products"
+              to="products/beats"
               className={styles.cover_hover}
-              onClick={() => handle_page_navigation("products")}
+              onClick={() => handle_page_navigation("products/beats")}
             >
               <div className={styles.text_content}>
                 к контенту
@@ -128,9 +128,9 @@ const Products: FC = () => {
         <div className={styles.product}>
           <div className={styles.covers_container}>
             <NavLink
-              to="products"
+              to="products/covers"
               className={styles.cover_hover}
-              onClick={() => handle_page_navigation("products")}
+              onClick={() => handle_page_navigation("products/covers")}
             >
               <div className={styles.text_content}>
                 к контенту
@@ -181,9 +181,9 @@ const Products: FC = () => {
         <div className={styles.product}>
           <div className={styles.covers_container}>
             <NavLink
-              to="products"
+              to="products/texts"
               className={styles.cover_hover}
-              onClick={() => handle_page_navigation("products")}
+              onClick={() => handle_page_navigation("products/texts")}
             >
               <div className={styles.text_content}>
                 к контенту
