@@ -308,7 +308,9 @@ CREATE TABLE service_orders (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     consumers_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
     services_id INTEGER REFERENCES services(id) ON DELETE SET NULL,
-    conversations_id INTEGER NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+    -- Temporary disable, because can't figure out why it is here.
+    -- If all will OK, just delete that later.
+    -- conversations_id INTEGER NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
     delivery_date TIMESTAMP NOT NULL,
     revisions INTEGER NOT NULL,
     revision_price NUMERIC(10, 2) NOT NULL,
@@ -368,6 +370,7 @@ CREATE TABLE messages (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     conversations_id INTEGER DEFAULT NULL REFERENCES conversations(id) ON DELETE CASCADE,
     service_orders_id INTEGER DEFAULT NULL REFERENCES service_orders(id) ON DELETE CASCADE,
+    services_id INTEGER DEFAULT NULL REFERENCES services(id) ON DELETE SET NULL,
     users_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
     messages_id INTEGER REFERENCES messages(id) ON DELETE SET NULL,
 	text VARCHAR(2500) NOT NULL,

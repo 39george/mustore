@@ -398,7 +398,8 @@ Table service_orders {
   updated_at TIMESTAMP [default: `CURRENT_TIMESTAMP`]
   consumers_id INTEGER
   services_id INTEGER
-  conversations_id INTEGER [not null]
+// Temporarily disabled
+//  conversations_id INTEGER [not null]
   delivery_date TIMESTAMP [not null]
   revisions INTEGER [not null]
   revision_price NUMERIC(10, 2) [not null]
@@ -457,7 +458,8 @@ Table conversations {
 
 Ref:conversations.id < messages.conversations_id [delete: cascade]
 Ref:conversations.id < participants.conversations_id [delete: cascade]
-Ref:conversations.id < service_orders.conversations_id [delete: cascade]
+// Temporarily disabled
+// Ref:conversations.id < service_orders.conversations_id [delete: cascade]
 Ref:conversations.id < offers.conversations_id [delete: cascade]
 
 Table messages {
