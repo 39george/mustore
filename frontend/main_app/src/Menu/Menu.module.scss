@@ -20,11 +20,35 @@ li {
   font-size: 1rem;
 
   background-color: rgba($color: $main_bright, $alpha: 0.7);
-  // background-color: rgba(#010816, 0.7);
   backdrop-filter: blur(7px);
   -webkit-backdrop-filter: blur(7px);
 
+  transition: color, background-color 0.2s ease-out;
   z-index: 999;
+}
+
+.nav_bar_dark_default {
+  background-color: rgba(#010816, 0.7);
+
+  .nav_link {
+    color: $main_bright;
+
+    .chevron {
+      color: $main_bright;
+    }
+  }
+
+  .logging {
+    color: $main_bright;
+  }
+
+  .burger_icon {
+    color: $main_bright;
+  }
+}
+
+.nav_bar_dark_black {
+  background-color: rgba($main_dark, 0.7);
 }
 
 .nav_links {

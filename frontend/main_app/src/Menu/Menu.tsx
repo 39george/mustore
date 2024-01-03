@@ -10,7 +10,11 @@ import logo from "../assets/svg/logo.svg";
 import { LinkName, ToggledLinks } from "../types/types";
 import usePageNavigation from "../hooks/usePageNavigation";
 import { useSelector } from "react-redux";
-import { select_active_section } from "../state/active_section_slice";
+import {
+  ActiveSection,
+  select_active_section,
+} from "../state/active_section_slice";
+import { RootState } from "../state/store";
 
 const Menu: FC = () => {
   const [link_toggled, set_link_toggled] = useState<ToggledLinks>({
@@ -21,7 +25,33 @@ const Menu: FC = () => {
   });
   const [sidebar_open, set_sidebar_open] = useState(false);
   const sidebar_ref = useRef<HTMLDivElement>(null);
-  const active_section = useSelector(select_active_section);
+  const intersecting_section = useSelector<RootState, ActiveSection>((state) =>
+    select_active_section(state.active_section)
+  );
+  const [nav_bar_class_names, set_nav_bar_class_names] = useState(
+    `${styles.nav_bar}`
+  );
+
+  useEffect(() => {
+    switch (intersecting_section) {
+      case "hero":
+        set_nav_bar_class_names(`${styles.nav_bar}`);
+        break;
+      case "why_us":
+        set_nav_bar_class_names(
+          `${styles.nav_bar} ${styles.nav_bar_dark_default}`
+        );
+        break;
+      case "group":
+        set_nav_bar_class_names(`${styles.nav_bar}`);
+        break;
+      case "authors_reviews":
+        set_nav_bar_class_names(
+          `${styles.nav_bar} ${styles.nav_bar_dark_default} ${styles.nav_bar_dark_black}`
+        );
+        break;
+    }
+  }, [intersecting_section]);
 
   const toggle_link = (link_name: LinkName) => {
     set_link_toggled((prev_state) => ({
@@ -64,7 +94,7 @@ const Menu: FC = () => {
   }, []);
 
   return (
-    <nav className={styles.nav_bar}>
+    <nav className={nav_bar_class_names}>
       <ul className={styles.nav_links}>
         <li className={styles.logo}>
           <NavLink

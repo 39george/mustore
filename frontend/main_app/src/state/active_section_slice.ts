@@ -3,9 +3,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 export type ActiveSection =
   | "hero"
   | "why_us"
-  | "products"
-  | "services"
-  | "join_us"
+  | "group"
   | "authors_reviews"
   | null;
 

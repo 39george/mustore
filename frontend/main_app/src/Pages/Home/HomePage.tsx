@@ -5,11 +5,11 @@ import JoinUs from "./Components/JoinUs";
 import Products from "./Components/Products";
 import Services from "./Components/Services";
 import WhyUs from "./Components/WhyUs";
-
-interface CurrentEntries {
-  id: string;
-  is_intersecting: boolean;
-}
+import { useDispatch } from "react-redux";
+import {
+  ActiveSection,
+  set_active_section,
+} from "../../state/active_section_slice";
 
 interface HomePageRefs {
   hero_ref: React.RefObject<HTMLDivElement>;
@@ -19,6 +19,11 @@ interface HomePageRefs {
   services_ref: React.RefObject<HTMLDivElement>;
   join_us_ref: React.RefObject<HTMLDivElement>;
   authors_reviews_ref: React.RefObject<HTMLDivElement>;
+}
+
+interface CurrentEntries {
+  id: ActiveSection;
+  is_intersecting: boolean;
 }
 
 const HomePage: FC = () => {
@@ -51,12 +56,13 @@ const HomePage: FC = () => {
     },
   ]);
   let prioritized_section = useRef<CurrentEntries>({
-    id: "",
+    id: null,
     is_intersecting: true,
   });
+  const dispatch = useDispatch();
 
-  const scroll_to_why_us = () => {
-    refs.why_us_ref.current?.scrollIntoView({ behavior: "smooth" });
+  const change_section = (section: ActiveSection) => {
+    dispatch(set_active_section(section));
   };
 
   useEffect(() => {
@@ -82,11 +88,11 @@ const HomePage: FC = () => {
         });
         if (currently_intersecting[0].id !== prioritized_section.current.id) {
           prioritized_section.current.id = currently_intersecting[0].id;
-          console.log(`${prioritized_section.current.id} is intersecting`);
+          change_section(prioritized_section.current.id);
         }
       },
       {
-        threshold: 0.05,
+        threshold: 0.04,
       }
     );
 
@@ -96,6 +102,10 @@ const HomePage: FC = () => {
       }
     });
   }, []);
+
+  const scroll_to_why_us = () => {
+    refs.why_us_ref.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   // useEffect(() => {
   //   const hero_ref = refs.hero_ref.current;
