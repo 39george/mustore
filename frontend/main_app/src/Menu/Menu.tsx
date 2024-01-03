@@ -7,6 +7,7 @@ import { IoMenu } from "react-icons/io5";
 import { HiMiniXMark } from "react-icons/hi2";
 import { FC, useEffect, useRef, useState } from "react";
 import logo from "../assets/svg/logo.svg";
+import logo_bright from "../assets/svg/logo_bright.svg";
 import { LinkName, ToggledLinks } from "../types/types";
 import usePageNavigation from "../hooks/usePageNavigation";
 import { useSelector } from "react-redux";
@@ -31,6 +32,7 @@ const Menu: FC = () => {
   const [nav_bar_class_names, set_nav_bar_class_names] = useState(
     `${styles.nav_bar}`
   );
+  const [is_nav_dark, set_is_nav_dark] = useState(false);
 
   useEffect(() => {
     switch (intersecting_section) {
@@ -50,6 +52,14 @@ const Menu: FC = () => {
           `${styles.nav_bar} ${styles.nav_bar_dark_default} ${styles.nav_bar_dark_black}`
         );
         break;
+    }
+  }, [intersecting_section]);
+
+  useEffect(() => {
+    if (intersecting_section === "hero" || intersecting_section === "group") {
+      set_is_nav_dark(false);
+    } else {
+      set_is_nav_dark(true);
     }
   }, [intersecting_section]);
 
@@ -102,7 +112,7 @@ const Menu: FC = () => {
             onClick={() => handle_page_navigation("")}
           >
             <img
-              src={logo}
+              src={is_nav_dark ? logo_bright : logo}
               alt="logo"
             />
           </NavLink>
