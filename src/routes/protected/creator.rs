@@ -16,7 +16,7 @@ use validator::ValidateArgs;
 
 use crate::auth::users::AuthSession;
 use crate::cornucopia::queries::creator_access;
-use crate::domain::requests::SubmitSongRequest;
+use crate::domain::requests::creator_access::SubmitSongRequest;
 use crate::error_chain_fmt;
 use crate::routes::ResponseError;
 use crate::startup::AppState;

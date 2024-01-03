@@ -17,7 +17,7 @@ use crate::cornucopia::queries::open_access;
 use crate::cornucopia::queries::open_access::GetNewSongs;
 use crate::cornucopia::queries::open_access::GetRecommendedSongs;
 use crate::cornucopia::queries::open_access::GetSongs;
-use crate::domain::requests::GetSongsListRequest;
+use crate::domain::requests::open_access::GetSongsListRequest;
 use crate::startup::AppState;
 
 use super::ResponseError;
