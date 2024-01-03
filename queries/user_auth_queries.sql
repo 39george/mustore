@@ -52,7 +52,7 @@ VALUES (
     (SELECT id FROM groups WHERE name = :permission)
 );
 
---! insert_user_image
+--! insert_user_avatar_image
 INSERT INTO objects
 (key, object_type, avatar_users_id)
 VALUES (:key, 'image', :users_id);

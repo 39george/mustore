@@ -1,4 +1,4 @@
--- SELECTING CONTENT
+-- SELECTING CONTENT --
 
 --! get_creator_marks_avg
 SELECT AVG(mark), COUNT(mark)
@@ -13,18 +13,25 @@ WHERE services.creator_id = :creator_id;
 WITH ConversationResponses AS (
     SELECT
         conversations.id,
-        BOOL_OR(participants.users_id = 1 AND messages.created_at > conversations.created_at) AS is_responded
+        -- BOOL_OR(participants.users_id = :user_id AND messages.created_at > conversations.created_at) AS is_responded
+        BOOL_OR(participants.users_id = :user_id AND
+            messages.created_at - conversations.created_at < '1 day'::INTERVAL)
+        AS is_responded
     FROM conversations
     JOIN participants ON conversations.id = participants.conversations_id
     LEFT JOIN messages ON conversations.id = messages.conversations_id
-    WHERE participants.users_id = 1
+    WHERE participants.users_id = :user_id
         AND (
             SELECT users_id FROM messages AS m2
             WHERE m2.conversations_id = conversations.id
             ORDER BY m2.created_at
             LIMIT 1
-        ) <> 1
+        ) <> :user_id
         AND conversations.created_at > NOW() - INTERVAL '1 month'
+        -- AND NOT EXISTS (
+        --     SELECT 1 FROM service_orders
+        --     WHERE service_orders.conversations_id = conversations.id
+        -- )
     GROUP BY conversations.id
 )
 SELECT
