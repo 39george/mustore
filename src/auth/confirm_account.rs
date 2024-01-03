@@ -158,7 +158,7 @@ pub async fn confirm(
         return Err(e);
     }
 
-    if let Err(e) = user_auth_queries::insert_user_image()
+    if let Err(e) = user_auth_queries::insert_user_avatar_image()
         .bind(&transaction, &avatar_key, &user_id)
         .await
         .context("Failed to insert a new user to the pg")
@@ -192,6 +192,8 @@ pub async fn confirm(
 
     Ok(StatusCode::OK)
 }
+
+// ───── Functions ────────────────────────────────────────────────────────── //
 
 #[tracing::instrument(name = "Get user candidate data from redis", skip_all)]
 async fn get_user_candidate_data(
