@@ -407,7 +407,7 @@ CREATE TABLE offers (
     services_id INTEGER NOT NULL REFERENCES services(id) ON DELETE CASCADE,
 	text VARCHAR(2500) NOT NULL,
     price NUMERIC(10, 2) NOT NULL,
-    delivery_date TIMESTAMP NOT NULL,
+    delivery_date TIMESTAMP WITH TIME ZONE NOT NULL,
     free_revisions INTEGER NOT NULL,
     revision_price NUMERIC(10, 2) NOT NULL,
     status OfferStatus NOT NULL DEFAULT 'pending'
