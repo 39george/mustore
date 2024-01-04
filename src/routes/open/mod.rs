@@ -13,6 +13,7 @@ use validator::ValidateArgs;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
+use crate::auth::users::AuthSession;
 use crate::cornucopia::queries::open_access;
 use crate::cornucopia::queries::open_access::GetNewSongs;
 use crate::cornucopia::queries::open_access::GetRecommendedSongs;
@@ -123,19 +124,24 @@ async fn get_values_list(
 
 #[tracing::instrument(name = "Get songs query", skip(app_state))]
 async fn get_songs(
+    auth_session: AuthSession,
     State(app_state): State<AppState>,
     Json(params): Json<GetSongsListRequest>,
 ) -> Result<Json<Vec<GetSongs>>, ResponseError> {
     params.validate_args((40, 320))?;
+
+    let user_id = auth_session.user.map(|u| u.id);
 
     let pg_pool = app_state
         .pg_pool
         .get()
         .await
         .context("Failed to get pool from pg")?;
+
     let songs = open_access::get_songs()
         .bind(
             &pg_pool,
+            &user_id,
             &params.sex.map(|s| s.to_string()),
             &params.tempo,
             &params
@@ -155,6 +161,7 @@ async fn get_songs(
 
 #[tracing::instrument(name = "Get new songs query", skip(app_state))]
 async fn get_new_songs(
+    auth_session: AuthSession,
     State(app_state): State<AppState>,
     Query(amount): Query<i64>,
 ) -> Result<Json<Vec<GetNewSongs>>, ResponseError> {
@@ -165,6 +172,8 @@ async fn get_new_songs(
         )));
     }
 
+    let user_id = auth_session.user.map(|u| u.id);
+
     let pg_pool = app_state
         .pg_pool
         .get()
@@ -172,7 +181,7 @@ async fn get_new_songs(
         .context("Failed to get pool from pg")?;
 
     let songs = open_access::get_new_songs()
-        .bind(&pg_pool, &amount)
+        .bind(&pg_pool, &user_id, &amount)
         .all()
         .await
         .context("Failed to fetch songs data from pg")?;
@@ -182,6 +191,7 @@ async fn get_new_songs(
 
 #[tracing::instrument(name = "Get recommended songs query", skip(app_state))]
 async fn get_recommended_songs(
+    auth_session: AuthSession,
     State(app_state): State<AppState>,
     Query(amount): Query<i64>,
 ) -> Result<Json<Vec<GetRecommendedSongs>>, ResponseError> {
@@ -192,6 +202,8 @@ async fn get_recommended_songs(
         )));
     }
 
+    let user_id = auth_session.user.map(|u| u.id);
+
     let pg_pool = app_state
         .pg_pool
         .get()
@@ -199,7 +211,7 @@ async fn get_recommended_songs(
         .context("Failed to get pool from pg")?;
 
     let songs = open_access::get_recommended_songs()
-        .bind(&pg_pool, &amount)
+        .bind(&pg_pool, &user_id, &amount)
         .all()
         .await
         .context("Failed to fetch songs data from pg")?;
