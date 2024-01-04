@@ -49,7 +49,7 @@ pub struct SubmitSongRequest {
         function = "validate_slice_bounds_characters",
         arg = "(usize, usize)"
     ))]
-    pub tags: Vec<String>,
+    pub moods: Vec<String>,
     #[validate(
         length(min = 1, max = 50),
         non_control_character,

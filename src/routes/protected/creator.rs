@@ -155,6 +155,14 @@ async fn submit_song(
         .context("Failed to insert song_master_object_key into pg")
         .map_err(ResponseError::UnexpectedError)?;
 
+    for mood in params.moods.iter() {
+        creator_access::insert_product_mood_by_name()
+            .bind(&transaction, &product_id, mood)
+            .await
+            .context("Failed to insert mood for product into pg")
+            .map_err(ResponseError::UnexpectedError)?;
+    }
+
     if let Err(e) = transaction
         .commit()
         .await
