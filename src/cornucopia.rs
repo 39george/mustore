@@ -1026,13 +1026,13 @@ where C : GenericClient
         Ok(it)
     }
 }#[derive(serde::Serialize, Debug, Clone, PartialEq, )] pub struct GetConversationsEntries
-{ pub interlocutor : String,pub last_message_text : String,pub last_message_timestamp : time::OffsetDateTime,pub image_url : String,pub unread_messages_count : i64,}pub struct GetConversationsEntriesBorrowed < 'a >
-{ pub interlocutor : &'a str,pub last_message_text : &'a str,pub last_message_timestamp : time::OffsetDateTime,pub image_url : &'a str,pub unread_messages_count : i64,} impl < 'a > From < GetConversationsEntriesBorrowed <
+{ pub conversation_id : i32,pub interlocutor : String,pub last_message_text : String,pub last_message_timestamp : time::OffsetDateTime,pub image_url : String,pub unread_messages_count : i64,}pub struct GetConversationsEntriesBorrowed < 'a >
+{ pub conversation_id : i32,pub interlocutor : &'a str,pub last_message_text : &'a str,pub last_message_timestamp : time::OffsetDateTime,pub image_url : &'a str,pub unread_messages_count : i64,} impl < 'a > From < GetConversationsEntriesBorrowed <
 'a >> for GetConversationsEntries
 {
     fn
-    from(GetConversationsEntriesBorrowed { interlocutor,last_message_text,last_message_timestamp,image_url,unread_messages_count,} : GetConversationsEntriesBorrowed < 'a >)
-    -> Self { Self { interlocutor: interlocutor.into(),last_message_text: last_message_text.into(),last_message_timestamp,image_url: image_url.into(),unread_messages_count,} }
+    from(GetConversationsEntriesBorrowed { conversation_id,interlocutor,last_message_text,last_message_timestamp,image_url,unread_messages_count,} : GetConversationsEntriesBorrowed < 'a >)
+    -> Self { Self { conversation_id,interlocutor: interlocutor.into(),last_message_text: last_message_text.into(),last_message_timestamp,image_url: image_url.into(),unread_messages_count,} }
 }pub struct GetConversationsEntriesQuery < 'a, C : GenericClient, T, const N : usize >
 {
     client : & 'a  C, params :
@@ -1215,6 +1215,7 @@ C, Option<i32>, 2 >, C > for GetConversationByUserIdStmt
     { self.bind(client, & params.first_user_id,& params.second_user_id,) }
 }pub fn get_conversations_entries() -> GetConversationsEntriesStmt
 { GetConversationsEntriesStmt(cornucopia_async :: private :: Stmt :: new("SELECT 
+    conversations.id AS conversation_id,
     interlocutor.username AS interlocutor,
     last_message.text AS last_message_text,
     last_message.created_at AS last_message_timestamp,
@@ -1250,7 +1251,7 @@ GetConversationsEntries, 1 >
     GetConversationsEntriesQuery
     {
         client, params : [user_id,], stmt : & mut self.0, extractor :
-        | row | { GetConversationsEntriesBorrowed { interlocutor : row.get(0),last_message_text : row.get(1),last_message_timestamp : row.get(2),image_url : row.get(3),unread_messages_count : row.get(4),} }, mapper : | it | { <GetConversationsEntries>::from(it) },
+        | row | { GetConversationsEntriesBorrowed { conversation_id : row.get(0),interlocutor : row.get(1),last_message_text : row.get(2),last_message_timestamp : row.get(3),image_url : row.get(4),unread_messages_count : row.get(5),} }, mapper : | it | { <GetConversationsEntries>::from(it) },
     }
 } }pub fn create_new_conversation() -> CreateNewConversationStmt
 { CreateNewConversationStmt(cornucopia_async :: private :: Stmt :: new("INSERT INTO conversations VALUES (DEFAULT) returning id")) } pub

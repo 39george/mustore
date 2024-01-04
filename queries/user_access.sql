@@ -37,6 +37,7 @@ JOIN participants p2 ON c.id = p2.conversations_id AND p2.users_id = :second_use
 
 --! get_conversations_entries
 SELECT 
+    conversations.id AS conversation_id,
     interlocutor.username AS interlocutor,
     last_message.text AS last_message_text,
     last_message.created_at AS last_message_timestamp,
