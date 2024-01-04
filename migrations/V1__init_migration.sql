@@ -409,7 +409,7 @@ CREATE TABLE offers (
     delivery_date TIMESTAMP NOT NULL,
     free_revisions INTEGER NOT NULL,
     revision_price NUMERIC(10, 2) NOT NULL,
-    status OfferStatus NOT NULL
+    status OfferStatus NOT NULL DEFAULT 'pending'
 );
 
 CREATE TABLE system_notifications (
