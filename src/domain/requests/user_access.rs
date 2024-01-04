@@ -32,3 +32,9 @@ pub struct SendMessageRequest {
     pub attachments: Vec<String>,
     pub reply_message_id: Option<i32>,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ListConversationRequest {
+    pub conversation_id: i32,
+    pub offset: i64,
+}

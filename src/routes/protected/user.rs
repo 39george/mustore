@@ -25,8 +25,10 @@ use crate::cornucopia::queries::user_access;
 use crate::cornucopia::queries::user_access::GetConversationsEntries;
 use crate::domain::requests::user_access::CreateConversationRequest;
 use crate::domain::requests::user_access::GetConversationRequest;
+use crate::domain::requests::user_access::ListConversationRequest;
 use crate::domain::requests::user_access::SendMessageRequest;
 use crate::domain::requests::user_access::UploadFileRequest;
+use crate::domain::responses::user_access::ConversationDataResponse;
 use crate::routes::ResponseError;
 use crate::service_providers::object_storage::presigned_post_form::PresignedPostData;
 use crate::startup::AppState;
@@ -61,6 +63,7 @@ pub fn user_router() -> Router<AppState> {
         .route("/conversations", routing::get(get_conversations))
         .route("/conversation_id", routing::get(get_conversation_id))
         .route("/send_message", routing::post(send_message))
+        .route("/list_conversation", routing::get(list_conversation))
         .layer(permission_required!(crate::auth::users::Backend, "user"))
 }
 
@@ -248,6 +251,43 @@ async fn send_message(
 
     Ok(StatusCode::CREATED)
 }
+
+#[tracing::instrument(name = "List conversation", skip_all)]
+async fn list_conversation(
+    auth_session: AuthSession,
+    State(app_state): State<AppState>,
+    Query(ListConversationRequest {
+        conversation_id,
+        offset,
+    }): Query<ListConversationRequest>,
+) -> Result<Json<ConversationDataResponse>, ResponseError> {
+    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
+        anyhow::anyhow!("No such user in AuthSession!"),
+    ))?;
+
+    let db_client = app_state
+        .pg_pool
+        .get()
+        .await
+        .context("Failed to get connection from postgres pool")?;
+
+    let conversations = user_access::list_conversation_by_id()
+        .bind(&db_client, &conversation_id, &offset)
+        .all()
+        .await
+        .context("Failed to fetch conversations from db")?;
+
+    let response = ConversationDataResponse::new(
+        conversations,
+        &app_state.object_storage,
+        user.id,
+    )
+    .await
+    .context("Failed to build conversation response")?;
+
+    Ok(Json(response))
+}
+
 // ───── Functions ────────────────────────────────────────────────────────── //
 
 #[tracing::instrument(
