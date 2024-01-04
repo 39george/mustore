@@ -490,6 +490,7 @@ Table offers {
   created_at TIMESTAMP [not null, default: `CURRENT_TIMESTAMP`]
   conversations_id INTEGER [not null]
   services_id INTEGER [not null]
+  text VARCHAR(2500) [not null]
   price NUMERIC(10,2) [not null]
   delivery_date TIMESTAMP [not null]
   free_revisions INTEGER [not null]

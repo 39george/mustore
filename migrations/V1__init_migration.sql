@@ -405,6 +405,7 @@ CREATE TABLE offers (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     conversations_id INTEGER NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
     services_id INTEGER NOT NULL REFERENCES services(id) ON DELETE CASCADE,
+	text VARCHAR(2500) NOT NULL,
     price NUMERIC(10, 2) NOT NULL,
     delivery_date TIMESTAMP NOT NULL,
     free_revisions INTEGER NOT NULL,
