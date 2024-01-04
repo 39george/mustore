@@ -16,6 +16,7 @@ use validator::ValidateArgs;
 
 use crate::auth::users::AuthSession;
 use crate::cornucopia::queries::creator_access;
+use crate::domain::requests::creator_access::CreateOfferRequest;
 use crate::domain::requests::creator_access::SubmitSongRequest;
 use crate::error_chain_fmt;
 use crate::routes::ResponseError;
@@ -55,6 +56,7 @@ pub fn creator_router() -> Router<AppState> {
     Router::new()
         .route("/health_check", routing::get(health_check))
         .route("/submit_song", routing::post(submit_song))
+        .route("/create_offer", routing::post(create_offer))
         .layer(permission_required!(crate::auth::users::Backend, "creator"))
 }
 
@@ -64,7 +66,6 @@ async fn health_check() -> StatusCode {
 }
 
 #[tracing::instrument(name = "Submit a new song", skip_all)]
-#[axum::debug_handler]
 async fn submit_song(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
@@ -183,6 +184,18 @@ async fn submit_song(
     Ok(StatusCode::CREATED)
 }
 
+#[tracing::instrument(name = "Create a new offer", skip_all)]
+async fn create_offer(
+    auth_session: AuthSession,
+    State(app_state): State<AppState>,
+    Json(params): Json<CreateOfferRequest>,
+) -> Result<StatusCode, CreatorResponseError> {
+    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
+        anyhow::anyhow!("No such user in AuthSession!"),
+    ))?;
+
+    Ok(StatusCode::OK)
+}
 // ───── Functions ────────────────────────────────────────────────────────── //
 
 /// Verify upload requests of given song, and if all is ok, delete requests.
