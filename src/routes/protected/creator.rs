@@ -189,10 +189,30 @@ async fn create_offer(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
     Json(params): Json<CreateOfferRequest>,
-) -> Result<StatusCode, CreatorResponseError> {
-    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
+) -> Result<StatusCode, ResponseError> {
+    let _user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
+
+    let db_client = app_state
+        .pg_pool
+        .get()
+        .await
+        .context("Failed to get connection from postgres pool")?;
+
+    creator_access::create_offer()
+        .bind(
+            &db_client,
+            &params.conversation_id,
+            &params.service_id,
+            &params.text,
+            &params.price,
+            &params.delivery_date,
+            &params.free_revisions,
+            &params.revision_price,
+        )
+        .await
+        .context("Failed to insert new offer into pg")?;
 
     Ok(StatusCode::CREATED)
 }

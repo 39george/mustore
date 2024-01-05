@@ -81,9 +81,9 @@ pub struct SubmitSongRequest {
 #[derive(Serialize, Deserialize, Debug, Validate)]
 pub struct CreateOfferRequest {
     pub conversation_id: i32,
+    pub service_id: i32,
     #[validate(length(min = 1, max = 2500))]
     pub text: String,
-    pub service_id: i32,
     pub price: Decimal,
     pub delivery_date: OffsetDateTime,
     pub free_revisions: i32,

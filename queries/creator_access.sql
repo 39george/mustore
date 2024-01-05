@@ -121,3 +121,8 @@ VALUES (:key, 'audio', :song_id);
 INSERT INTO objects(key, object_type, multitrack_songs_id)
 VALUES (:key, 'multitrack', :song_id);
 
+-- Offers
+
+--! create_offer
+INSERT INTO offers(conversations_id, services_id, text, price, delivery_date, free_revisions, revision_price)
+VALUES (:conversations_id, :services_id, :text, :price, :delivery_date, :free_refisions, :revision_price);
