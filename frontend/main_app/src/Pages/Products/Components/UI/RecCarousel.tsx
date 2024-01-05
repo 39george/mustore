@@ -138,7 +138,7 @@ const carousel_items: CarouselItem[] = [
 const RecCarousel: FC = () => {
   const [current_index, set_current_index] = useState(0);
   const [container_width, set_container_widht] = useState(0);
-  const [items_per_slide, set_items_per_slide] = useState(2);
+  const [items_per_slide, set_items_per_slide] = useState(1);
   const MIN_ITEMS_PER_SLIDE = 1;
   const MAX_ITEMS_PER_SLIDE = 6;
   const MAX_INDEX =
@@ -189,11 +189,6 @@ const RecCarousel: FC = () => {
     set_current_index((prev_index) =>
       Math.min(prev_index + items_per_slide, MAX_INDEX)
     );
-
-    if (current_index === MAX_INDEX - current_index) {
-      console.log("here");
-      set_is_next_hovered(false);
-    }
   };
 
   const handle_prev = () => {
@@ -201,6 +196,10 @@ const RecCarousel: FC = () => {
       Math.max(prev_index - items_per_slide, 0)
     );
   };
+
+  useEffect(() => {
+    current_index === MAX_INDEX ? set_is_next_hovered(false) : "";
+  }, [current_index]);
 
   // Calculating translation amount
   const get_translation_amount = () => {
