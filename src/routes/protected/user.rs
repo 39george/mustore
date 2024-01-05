@@ -94,7 +94,7 @@ async fn request_obj_storage_upload(
     let max_size = match MAX_SIZES.get(&params.media_type) {
         Some(&max_size) => max_size,
         None => {
-            tracing::error!("Wrong media type: {}", params.media_type);
+            tracing::warn!("Wrong media type: {}", params.media_type);
             return Err(ResponseError::NotAcceptableError);
         }
     };
