@@ -62,6 +62,7 @@ pub fn user_router() -> Router<AppState> {
         .route("/req_upload_form", routing::get(request_obj_storage_upload))
         .route("/conversations", routing::get(get_conversations))
         .route("/conversation_id", routing::get(get_conversation_id))
+        .route("/new_conversation", routing::post(create_new_conversation))
         .route("/send_message", routing::post(send_message))
         .route("/list_conversation", routing::get(list_conversation))
         .layer(permission_required!(crate::auth::users::Backend, "user"))
