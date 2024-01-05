@@ -8,6 +8,32 @@ use crate::{
     service_providers::object_storage::ObjectStorage,
 };
 
+trait UnpackOption {
+    type Output;
+    type Error;
+    fn unpack(
+        self,
+        message: impl std::fmt::Display,
+    ) -> Result<Self::Output, Self::Error>;
+}
+
+impl<T> UnpackOption for Option<T> {
+    type Output = T;
+    type Error = ConversationDataError;
+    fn unpack(
+        self,
+        message: impl std::fmt::Display,
+    ) -> Result<Self::Output, Self::Error> {
+        match self {
+            Some(d) => Ok(d),
+            None => {
+                tracing::error!("Application design error: {message}");
+                return Err(ConversationDataError::NoRelatedDataError);
+            }
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 struct Interlocutor {
     username: String,
@@ -74,6 +100,7 @@ impl std::fmt::Debug for ConversationDataError {
 }
 
 impl ConversationDataResponse {
+    #[tracing::instrument(name = "Create conversation list", skip_all)]
     pub async fn new(
         conversation_data: Vec<ListConversationById>,
         object_storage: &ObjectStorage,
@@ -183,31 +210,5 @@ impl ConversationDataResponse {
             interlocutors,
             entries,
         })
-    }
-}
-
-trait UnpackOption {
-    type Output;
-    type Error;
-    fn unpack(
-        self,
-        message: impl std::fmt::Display,
-    ) -> Result<Self::Output, Self::Error>;
-}
-
-impl<T> UnpackOption for Option<T> {
-    type Output = T;
-    type Error = ConversationDataError;
-    fn unpack(
-        self,
-        message: impl std::fmt::Display,
-    ) -> Result<Self::Output, Self::Error> {
-        match self {
-            Some(d) => Ok(d),
-            None => {
-                tracing::error!("Application design error: {message}");
-                return Err(ConversationDataError::NoRelatedDataError);
-            }
-        }
     }
 }
