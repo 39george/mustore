@@ -194,7 +194,7 @@ async fn create_offer(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
 
-    Ok(StatusCode::OK)
+    Ok(StatusCode::CREATED)
 }
 // ───── Functions ────────────────────────────────────────────────────────── //
 

@@ -1,6 +1,7 @@
 use serde::Deserialize;
 use serde::Serialize;
 use validator::Validate;
+use validator::ValidationError;
 
 #[derive(Deserialize, Debug, Validate)]
 pub struct UploadFileRequest {
@@ -29,8 +30,17 @@ pub struct SendMessageRequest {
     #[validate(length(min = 1, max = 2500))]
     pub text: String,
     pub service_id: Option<i32>,
+    #[validate(custom = "check_length")]
     pub attachments: Vec<String>,
     pub reply_message_id: Option<i32>,
+}
+
+fn check_length(input: &Vec<String>) -> Result<(), ValidationError> {
+    if input.len() > 10 {
+        Err(ValidationError::new("Too many attachments"))
+    } else {
+        Ok(())
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]

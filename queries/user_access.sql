@@ -76,6 +76,7 @@ SELECT
     msg.created_at as message_created_at,
     msg.updated_at as message_updated_at,
     msg.messages_id as reply_message_id,
+    ARRAY_AGG(DISTINCT obj3.key) as message_attachments,
     serv.id as service_id,
     serv.name as service_name,
     obj2.key as service_cover_key,
@@ -94,8 +95,11 @@ LEFT JOIN offers off ON off.conversations_id = conv.id
 LEFT JOIN services serv ON serv.id = COALESCE(msg.services_id, off.services_id)
 LEFT JOIN objects obj ON obj.avatar_users_id = usr.id
 LEFT JOIN objects obj2 ON obj.cover_services_id = serv.id
+LEFT JOIN objects obj3 ON obj.message_attachment = msg.id
 WHERE 
     conv.id = :conversation_id
+GROUP BY 
+    msg.id, conv.id, part.users_id, usr.username, obj.key, serv.id, serv.name, obj2.key, off.id, off.text, off.price, off.delivery_date, off.free_revisions, off.revision_price
 ORDER BY 
     msg.created_at ASC, 
     off.created_at ASC
@@ -115,4 +119,8 @@ VALUES
 
 --! insert_new_message (service_id?, reply_message_id?)
 INSERT INTO messages (conversations_id, services_id, users_id, messages_id, text)
-VALUES (:conversation_id, :service_id, :user_id, :reply_message_id, :text);
+VALUES (:conversation_id, :service_id, :user_id, :reply_message_id, :text) returning id;
+
+--! insert_message_attachment
+INSERT INTO objects (key, object_type, message_attachment)
+VALUES (:key, 'attachment', :message_id);

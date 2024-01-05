@@ -231,23 +231,41 @@ async fn send_message(
 
     params.validate()?;
 
-    let db_client = app_state
+    let mut db_client = app_state
         .pg_pool
         .get()
         .await
         .context("Failed to get connection from postgres pool")?;
 
-    user_access::insert_new_message()
+    let transaction = db_client
+        .transaction()
+        .await
+        .context("Failed to get a transaction from pg")?;
+
+    let message_id = user_access::insert_new_message()
         .bind(
-            &db_client,
+            &transaction,
             &params.conversation_id,
             &params.service_id,
             &user.id,
             &params.reply_message_id,
             &params.text,
         )
+        .one()
         .await
         .context("Failed to add participants to the conversation")?;
+
+    for attachment in params.attachments {
+        user_access::insert_message_attachment()
+            .bind(&transaction, &attachment, &message_id)
+            .await
+            .context("Failed to add participants to the conversation")?;
+    }
+
+    transaction
+        .commit()
+        .await
+        .context("Failed to commit a pg transaction")?;
 
     Ok(StatusCode::CREATED)
 }

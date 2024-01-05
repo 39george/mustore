@@ -57,6 +57,7 @@ struct Message {
     updated_at: OffsetDateTime,
     service: Option<ServiceData>,
     reply_message_id: Option<i32>,
+    attachments: Vec<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -113,6 +114,7 @@ impl ConversationDataResponse {
 
         // Asynchronously collect presigned URLs
         let mut presigned_urls = HashMap::new();
+        let mut message_attachments = HashMap::new();
         for data in &conversation_data {
             let presigned_avatar_key = object_storage
                 .generate_presigned_url(
@@ -125,9 +127,20 @@ impl ConversationDataResponse {
                 presigned_avatar_key,
             );
             if let Some(ref cover_key) = data.service_cover_key {
-                object_storage
+                let url = object_storage
                     .generate_presigned_url(cover_key, expiration)
                     .await?;
+                presigned_urls.insert(cover_key.clone(), url);
+            }
+            if let Some(message_id) = data.message_id {
+                let mut attachments = Vec::new();
+                for key in &data.message_attachments {
+                    let url = object_storage
+                        .generate_presigned_url(&key, expiration)
+                        .await?;
+                    attachments.push(url);
+                }
+                message_attachments.insert(message_id, attachments);
             }
         }
 
@@ -178,6 +191,11 @@ impl ConversationDataResponse {
                     )?,
                     service,
                     reply_message_id: data.reply_message_id,
+                    attachments: message_attachments
+                        .remove(&message_id)
+                        .unpack(
+                            "message id is presented, but attachments are not",
+                        )?,
                 }));
             } else if let Some(offer_id) = data.offer_id {
                 entries.push(Entry::Offer(Offer {

@@ -926,7 +926,7 @@ SelectUserDataWithAvatarKey, 1 >
         | row | { SelectUserDataWithAvatarKeyBorrowed { id : row.get(0),key : row.get(1),username : row.get(2),email : row.get(3),} }, mapper : | it | { <SelectUserDataWithAvatarKey>::from(it) },
     }
 } }}pub mod user_access
-{ use futures::{{StreamExt, TryStreamExt}};use futures; use cornucopia_async::GenericClient;#[derive(Clone,Copy, Debug)] pub struct SetUserSettingsParams < > { pub inbox_messages : bool,pub order_messages : bool,pub order_updates : bool,pub id : i32,}#[derive(Clone,Copy, Debug)] pub struct SetSystemNotificationHaveBeenSeenParams < > { pub user_id : i32,pub system_notification_id : i32,}#[derive(Clone,Copy, Debug)] pub struct GetConversationByUserIdParams < > { pub first_user_id : i32,pub second_user_id : i32,}#[derive(Clone,Copy, Debug)] pub struct ListConversationByIdParams < > { pub conversation_id : i32,pub offset : i64,}#[derive(Clone,Copy, Debug)] pub struct AddParticipantsToConversationParams < > { pub conversation_id : i32,pub user1 : i32,pub user2 : i32,}#[derive( Debug)] pub struct InsertNewMessageParams < T1 : cornucopia_async::StringSql,> { pub conversation_id : i32,pub service_id : Option<i32>,pub user_id : i32,pub reply_message_id : Option<i32>,pub text : T1,}#[derive(serde::Serialize, Debug, Clone, PartialEq, Copy)] pub struct GetUserSettings
+{ use futures::{{StreamExt, TryStreamExt}};use futures; use cornucopia_async::GenericClient;#[derive(Clone,Copy, Debug)] pub struct SetUserSettingsParams < > { pub inbox_messages : bool,pub order_messages : bool,pub order_updates : bool,pub id : i32,}#[derive(Clone,Copy, Debug)] pub struct SetSystemNotificationHaveBeenSeenParams < > { pub user_id : i32,pub system_notification_id : i32,}#[derive(Clone,Copy, Debug)] pub struct GetConversationByUserIdParams < > { pub first_user_id : i32,pub second_user_id : i32,}#[derive(Clone,Copy, Debug)] pub struct ListConversationByIdParams < > { pub conversation_id : i32,pub offset : i64,}#[derive(Clone,Copy, Debug)] pub struct AddParticipantsToConversationParams < > { pub conversation_id : i32,pub user1 : i32,pub user2 : i32,}#[derive( Debug)] pub struct InsertNewMessageParams < T1 : cornucopia_async::StringSql,> { pub conversation_id : i32,pub service_id : Option<i32>,pub user_id : i32,pub reply_message_id : Option<i32>,pub text : T1,}#[derive( Debug)] pub struct InsertMessageAttachmentParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub message_id : i32,}#[derive(serde::Serialize, Debug, Clone, PartialEq, Copy)] pub struct GetUserSettings
 { pub inbox_messages : bool,pub order_messages : bool,pub order_updates : bool,}pub struct GetUserSettingsQuery < 'a, C : GenericClient, T, const N : usize >
 {
     client : & 'a  C, params :
@@ -1100,13 +1100,13 @@ where C : GenericClient
         Ok(it)
     }
 }#[derive(serde::Serialize, Debug, Clone, PartialEq, )] pub struct ListConversationById
-{ pub conversation_id : i32,pub participant_user_id : i32,pub participant_username : String,pub participant_avatar_key : String,pub message_id : Option<i32>,pub message_text : Option<String>,pub message_created_at : Option<time::OffsetDateTime>,pub message_updated_at : Option<time::OffsetDateTime>,pub reply_message_id : Option<i32>,pub service_id : Option<i32>,pub service_name : Option<String>,pub service_cover_key : Option<String>,pub offer_id : Option<i32>,pub offer_text : Option<String>,pub offer_price : Option<rust_decimal::Decimal>,pub offer_delivery_date : Option<time::OffsetDateTime>,pub offer_free_revisions : Option<i32>,pub offer_revision_price : Option<rust_decimal::Decimal>,}pub struct ListConversationByIdBorrowed < 'a >
-{ pub conversation_id : i32,pub participant_user_id : i32,pub participant_username : &'a str,pub participant_avatar_key : &'a str,pub message_id : Option<i32>,pub message_text : Option<&'a str>,pub message_created_at : Option<time::OffsetDateTime>,pub message_updated_at : Option<time::OffsetDateTime>,pub reply_message_id : Option<i32>,pub service_id : Option<i32>,pub service_name : Option<&'a str>,pub service_cover_key : Option<&'a str>,pub offer_id : Option<i32>,pub offer_text : Option<&'a str>,pub offer_price : Option<rust_decimal::Decimal>,pub offer_delivery_date : Option<time::OffsetDateTime>,pub offer_free_revisions : Option<i32>,pub offer_revision_price : Option<rust_decimal::Decimal>,} impl < 'a > From < ListConversationByIdBorrowed <
+{ pub conversation_id : i32,pub participant_user_id : i32,pub participant_username : String,pub participant_avatar_key : String,pub message_id : Option<i32>,pub message_text : Option<String>,pub message_created_at : Option<time::OffsetDateTime>,pub message_updated_at : Option<time::OffsetDateTime>,pub reply_message_id : Option<i32>,pub message_attachments : Vec<String>,pub service_id : Option<i32>,pub service_name : Option<String>,pub service_cover_key : Option<String>,pub offer_id : Option<i32>,pub offer_text : Option<String>,pub offer_price : Option<rust_decimal::Decimal>,pub offer_delivery_date : Option<time::OffsetDateTime>,pub offer_free_revisions : Option<i32>,pub offer_revision_price : Option<rust_decimal::Decimal>,}pub struct ListConversationByIdBorrowed < 'a >
+{ pub conversation_id : i32,pub participant_user_id : i32,pub participant_username : &'a str,pub participant_avatar_key : &'a str,pub message_id : Option<i32>,pub message_text : Option<&'a str>,pub message_created_at : Option<time::OffsetDateTime>,pub message_updated_at : Option<time::OffsetDateTime>,pub reply_message_id : Option<i32>,pub message_attachments : cornucopia_async::ArrayIterator<'a, &'a str>,pub service_id : Option<i32>,pub service_name : Option<&'a str>,pub service_cover_key : Option<&'a str>,pub offer_id : Option<i32>,pub offer_text : Option<&'a str>,pub offer_price : Option<rust_decimal::Decimal>,pub offer_delivery_date : Option<time::OffsetDateTime>,pub offer_free_revisions : Option<i32>,pub offer_revision_price : Option<rust_decimal::Decimal>,} impl < 'a > From < ListConversationByIdBorrowed <
 'a >> for ListConversationById
 {
     fn
-    from(ListConversationByIdBorrowed { conversation_id,participant_user_id,participant_username,participant_avatar_key,message_id,message_text,message_created_at,message_updated_at,reply_message_id,service_id,service_name,service_cover_key,offer_id,offer_text,offer_price,offer_delivery_date,offer_free_revisions,offer_revision_price,} : ListConversationByIdBorrowed < 'a >)
-    -> Self { Self { conversation_id,participant_user_id,participant_username: participant_username.into(),participant_avatar_key: participant_avatar_key.into(),message_id,message_text: message_text.map(|v| v.into()),message_created_at,message_updated_at,reply_message_id,service_id,service_name: service_name.map(|v| v.into()),service_cover_key: service_cover_key.map(|v| v.into()),offer_id,offer_text: offer_text.map(|v| v.into()),offer_price,offer_delivery_date,offer_free_revisions,offer_revision_price,} }
+    from(ListConversationByIdBorrowed { conversation_id,participant_user_id,participant_username,participant_avatar_key,message_id,message_text,message_created_at,message_updated_at,reply_message_id,message_attachments,service_id,service_name,service_cover_key,offer_id,offer_text,offer_price,offer_delivery_date,offer_free_revisions,offer_revision_price,} : ListConversationByIdBorrowed < 'a >)
+    -> Self { Self { conversation_id,participant_user_id,participant_username: participant_username.into(),participant_avatar_key: participant_avatar_key.into(),message_id,message_text: message_text.map(|v| v.into()),message_created_at,message_updated_at,reply_message_id,message_attachments: message_attachments.map(|v| v.into()).collect(),service_id,service_name: service_name.map(|v| v.into()),service_cover_key: service_cover_key.map(|v| v.into()),offer_id,offer_text: offer_text.map(|v| v.into()),offer_price,offer_delivery_date,offer_free_revisions,offer_revision_price,} }
 }pub struct ListConversationByIdQuery < 'a, C : GenericClient, T, const N : usize >
 {
     client : & 'a  C, params :
@@ -1338,6 +1338,7 @@ GetConversationsEntries, 1 >
     msg.created_at as message_created_at,
     msg.updated_at as message_updated_at,
     msg.messages_id as reply_message_id,
+    ARRAY_AGG(DISTINCT obj3.key) as message_attachments,
     serv.id as service_id,
     serv.name as service_name,
     obj2.key as service_cover_key,
@@ -1356,8 +1357,11 @@ LEFT JOIN offers off ON off.conversations_id = conv.id
 LEFT JOIN services serv ON serv.id = COALESCE(msg.services_id, off.services_id)
 LEFT JOIN objects obj ON obj.avatar_users_id = usr.id
 LEFT JOIN objects obj2 ON obj.cover_services_id = serv.id
+LEFT JOIN objects obj3 ON obj.message_attachment = msg.id
 WHERE 
     conv.id = $1
+GROUP BY 
+    msg.id, conv.id, part.users_id, usr.username, obj.key, serv.id, serv.name, obj2.key, off.id, off.text, off.price, off.delivery_date, off.free_revisions, off.revision_price
 ORDER BY 
     msg.created_at ASC, 
     off.created_at ASC
@@ -1372,7 +1376,7 @@ ListConversationById, 2 >
     ListConversationByIdQuery
     {
         client, params : [conversation_id,offset,], stmt : & mut self.0, extractor :
-        | row | { ListConversationByIdBorrowed { conversation_id : row.get(0),participant_user_id : row.get(1),participant_username : row.get(2),participant_avatar_key : row.get(3),message_id : row.get(4),message_text : row.get(5),message_created_at : row.get(6),message_updated_at : row.get(7),reply_message_id : row.get(8),service_id : row.get(9),service_name : row.get(10),service_cover_key : row.get(11),offer_id : row.get(12),offer_text : row.get(13),offer_price : row.get(14),offer_delivery_date : row.get(15),offer_free_revisions : row.get(16),offer_revision_price : row.get(17),} }, mapper : | it | { <ListConversationById>::from(it) },
+        | row | { ListConversationByIdBorrowed { conversation_id : row.get(0),participant_user_id : row.get(1),participant_username : row.get(2),participant_avatar_key : row.get(3),message_id : row.get(4),message_text : row.get(5),message_created_at : row.get(6),message_updated_at : row.get(7),reply_message_id : row.get(8),message_attachments : row.get(9),service_id : row.get(10),service_name : row.get(11),service_cover_key : row.get(12),offer_id : row.get(13),offer_text : row.get(14),offer_price : row.get(15),offer_delivery_date : row.get(16),offer_free_revisions : row.get(17),offer_revision_price : row.get(18),} }, mapper : | it | { <ListConversationById>::from(it) },
     }
 } }impl < 'a, C : GenericClient, > cornucopia_async ::
 Params < 'a, ListConversationByIdParams < >, ListConversationByIdQuery < 'a,
@@ -1418,22 +1422,45 @@ u64, tokio_postgres :: Error > > + Send + 'a>>, C > for AddParticipantsToConvers
     Error > > + Send + 'a>> { Box::pin(self.bind(client, & params.conversation_id,& params.user1,& params.user2,) ) }
 }pub fn insert_new_message() -> InsertNewMessageStmt
 { InsertNewMessageStmt(cornucopia_async :: private :: Stmt :: new("INSERT INTO messages (conversations_id, services_id, users_id, messages_id, text)
-VALUES ($1, $2, $3, $4, $5)")) } pub
+VALUES ($1, $2, $3, $4, $5) returning id")) } pub
 struct InsertNewMessageStmt(cornucopia_async :: private :: Stmt) ; impl
-InsertNewMessageStmt { pub async fn bind < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,>
+InsertNewMessageStmt { pub fn bind < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,>
 (& 'a mut self, client : & 'a  C,
-conversation_id : & 'a i32,service_id : & 'a Option<i32>,user_id : & 'a i32,reply_message_id : & 'a Option<i32>,text : & 'a T1,) -> Result < u64, tokio_postgres :: Error >
+conversation_id : & 'a i32,service_id : & 'a Option<i32>,user_id : & 'a i32,reply_message_id : & 'a Option<i32>,text : & 'a T1,) -> I32Query < 'a, C,
+i32, 5 >
 {
-    let stmt = self.0.prepare(client) .await ? ;
-    client.execute(stmt, & [conversation_id,service_id,user_id,reply_message_id,text,]) .await
-} }impl < 'a, C : GenericClient + Send + Sync, T1 : cornucopia_async::StringSql,>
-cornucopia_async :: Params < 'a, InsertNewMessageParams < T1,>, std::pin::Pin<Box<dyn futures::Future<Output = Result <
-u64, tokio_postgres :: Error > > + Send + 'a>>, C > for InsertNewMessageStmt
+    I32Query
+    {
+        client, params : [conversation_id,service_id,user_id,reply_message_id,text,], stmt : & mut self.0, extractor :
+        | row | { row.get(0) }, mapper : | it | { it },
+    }
+} }impl < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,> cornucopia_async ::
+Params < 'a, InsertNewMessageParams < T1,>, I32Query < 'a,
+C, i32, 5 >, C > for InsertNewMessageStmt
 {
     fn
     params(& 'a mut self, client : & 'a  C, params : & 'a
-    InsertNewMessageParams < T1,>) -> std::pin::Pin<Box<dyn futures::Future<Output = Result < u64, tokio_postgres ::
-    Error > > + Send + 'a>> { Box::pin(self.bind(client, & params.conversation_id,& params.service_id,& params.user_id,& params.reply_message_id,& params.text,) ) }
+    InsertNewMessageParams < T1,>) -> I32Query < 'a, C,
+    i32, 5 >
+    { self.bind(client, & params.conversation_id,& params.service_id,& params.user_id,& params.reply_message_id,& params.text,) }
+}pub fn insert_message_attachment() -> InsertMessageAttachmentStmt
+{ InsertMessageAttachmentStmt(cornucopia_async :: private :: Stmt :: new("INSERT INTO objects (key, object_type, message_attachment)
+VALUES ($1, 'attachment', $2)")) } pub
+struct InsertMessageAttachmentStmt(cornucopia_async :: private :: Stmt) ; impl
+InsertMessageAttachmentStmt { pub async fn bind < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,>
+(& 'a mut self, client : & 'a  C,
+key : & 'a T1,message_id : & 'a i32,) -> Result < u64, tokio_postgres :: Error >
+{
+    let stmt = self.0.prepare(client) .await ? ;
+    client.execute(stmt, & [key,message_id,]) .await
+} }impl < 'a, C : GenericClient + Send + Sync, T1 : cornucopia_async::StringSql,>
+cornucopia_async :: Params < 'a, InsertMessageAttachmentParams < T1,>, std::pin::Pin<Box<dyn futures::Future<Output = Result <
+u64, tokio_postgres :: Error > > + Send + 'a>>, C > for InsertMessageAttachmentStmt
+{
+    fn
+    params(& 'a mut self, client : & 'a  C, params : & 'a
+    InsertMessageAttachmentParams < T1,>) -> std::pin::Pin<Box<dyn futures::Future<Output = Result < u64, tokio_postgres ::
+    Error > > + Send + 'a>> { Box::pin(self.bind(client, & params.key,& params.message_id,) ) }
 }}pub mod user_auth_queries
 { use futures::{{StreamExt, TryStreamExt}};use futures; use cornucopia_async::GenericClient;#[derive( Debug)] pub struct CheckIfUserExistsAlreadyParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,> { pub email : T1,pub username : T2,}#[derive( Debug)] pub struct InsertNewUserParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,T3 : cornucopia_async::StringSql,> { pub user_settings_id : i32,pub username : T1,pub email : T2,pub password_hash : T3,}#[derive( Debug)] pub struct StoreUserPermissionParams < T1 : cornucopia_async::StringSql,> { pub user_id : i32,pub permission : T1,}#[derive( Debug)] pub struct InsertUserAvatarImageParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub users_id : i32,}#[derive(serde::Serialize, Debug, Clone, PartialEq, )] pub struct GetAuthUserDataByUsername
 { pub id : i32,pub username : String,pub password_hash : String,}pub struct GetAuthUserDataByUsernameBorrowed < 'a >
