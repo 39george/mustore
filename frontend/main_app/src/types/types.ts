@@ -21,7 +21,7 @@ export type page_names =
   | "help"
   | "about";
 
-export interface CarouselItem {
+export interface CarouselItemProps {
   id?: number;
   created_at?: Date;
   cover_url: string;

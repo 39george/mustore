@@ -1,11 +1,11 @@
-import styles from "./RecCarouselItem.module.scss";
+import styles from "./CarouselItem.module.scss";
 import { FC } from "react";
-import { CarouselItem } from "../../../../types/types";
+import { CarouselItemProps } from "../../../../types/types";
 import { GoHeartFill } from "react-icons/go";
 import { GoHeart } from "react-icons/go";
 import { PiShoppingCartFill } from "react-icons/pi";
 
-const RecCarouselItem: FC<CarouselItem> = (item) => {
+const CarouselItem: FC<CarouselItemProps> = (item) => {
   const formatted_price = item.price.toLocaleString("ru-RU");
 
   return (
@@ -32,4 +32,4 @@ const RecCarouselItem: FC<CarouselItem> = (item) => {
   );
 };
 
-export default RecCarouselItem;
+export default CarouselItem;

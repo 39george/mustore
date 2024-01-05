@@ -1,4 +1,4 @@
-import styles from "./RecCarousel.module.scss";
+import styles from "./Carousel.module.scss";
 import React, { FC, useEffect, useRef, useState } from "react";
 import cover_1 from "../../../../assets/HomePage/album_covers/ablum_cover_1.png";
 import cover_2 from "../../../../assets/HomePage/album_covers/ablum_cover_2.png";
@@ -9,10 +9,10 @@ import cover_6 from "../../../../assets/HomePage/album_covers/ablum_cover_6.png"
 import cover_7 from "../../../../assets/HomePage/album_covers/ablum_cover_7.png";
 import cover_8 from "../../../../assets/HomePage/album_covers/ablum_cover_8.png";
 import { GoChevronDown } from "react-icons/go";
-import { CarouselItem } from "../../../../types/types";
-import RecCarouselItem from "./RecCarouselItem";
+import { CarouselItemProps } from "../../../../types/types";
+import CarouselItem from "./CarouselItem";
 
-const carousel_items: CarouselItem[] = [
+const carousel_items: CarouselItemProps[] = [
   {
     id: 1,
     cover_url: cover_1,
@@ -135,7 +135,11 @@ const carousel_items: CarouselItem[] = [
   },
 ];
 
-const RecCarousel: FC = () => {
+interface CarouselProps {
+  carousel_type: "recommendations" | "new";
+}
+
+const Carousel: FC<CarouselProps> = ({ carousel_type }) => {
   const [current_index, set_current_index] = useState(0);
   const [container_width, set_container_widht] = useState(0);
   const [items_per_slide, set_items_per_slide] = useState(1);
@@ -239,7 +243,7 @@ const RecCarousel: FC = () => {
           {carousel_items.map((item) => {
             return (
               <React.Fragment key={item.id}>
-                <RecCarouselItem
+                <CarouselItem
                   cover_url={item.cover_url}
                   name={item.name}
                   author={item.author}
@@ -267,4 +271,4 @@ const RecCarousel: FC = () => {
   );
 };
 
-export default RecCarousel;
+export default Carousel;

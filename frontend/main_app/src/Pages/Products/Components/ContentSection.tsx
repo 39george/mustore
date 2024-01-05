@@ -7,7 +7,7 @@ import underline_green from "../../../assets/svg/underline_green.svg";
 import stars from "../../../assets/svg/recommendations.svg";
 import fire from "../../../assets/svg/fire.svg";
 import { FC } from "react";
-import RecCarousel from "./UI/RecCarousel";
+import Carousel from "./UI/Carousel";
 
 interface ContentSectionProps {
   section_type: "beats" | "covers" | "songs" | "texts";
@@ -76,7 +76,7 @@ const ContentSection: FC<ContentSectionProps> = ({ section_type }) => {
                 className={styles.title_icon}
               />
             </div>
-            <RecCarousel />
+            <Carousel carousel_type="recommendations" />
           </div>
         </div>
       )}
