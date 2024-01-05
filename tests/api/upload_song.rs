@@ -10,7 +10,7 @@ async fn song_uploading_success() {
     let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
 
     let test_user = TestUser::generate_user(String::from("creator"));
-    app.register_user(&test_user, 1).await;
+    app.register_user(&test_user).await;
     let client = reqwest::Client::builder()
         .cookie_store(true)
         .build()
@@ -68,7 +68,7 @@ async fn song_uploading_without_files_fails() {
     let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
 
     let test_user = TestUser::generate_user(String::from("creator"));
-    app.register_user(&test_user, 1).await;
+    app.register_user(&test_user).await;
     let client = reqwest::Client::builder()
         .cookie_store(true)
         .build()

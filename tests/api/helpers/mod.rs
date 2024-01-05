@@ -150,13 +150,11 @@ impl TestApp {
     pub async fn signup_user_get_confirmation_link(
         &self,
         user: &TestUser,
-        email_mock_expect_times_match: u64,
     ) -> ConfirmationLink {
         Mock::given(matchers::path("/v1/smtp/send"))
             .and(matchers::method("POST"))
             .and(matchers::header_exists("Authorization"))
             .respond_with(ResponseTemplate::new(200))
-            .expect(email_mock_expect_times_match)
             .mount(&self.email_server)
             .await;
 
@@ -172,14 +170,9 @@ impl TestApp {
     pub async fn register_user(
         &self,
         test_user: &TestUser,
-        email_mock_expect_times_match: u64,
     ) -> reqwest::StatusCode {
-        let confirmation_link = self
-            .signup_user_get_confirmation_link(
-                &test_user,
-                email_mock_expect_times_match,
-            )
-            .await;
+        let confirmation_link =
+            self.signup_user_get_confirmation_link(&test_user).await;
         let response = reqwest::get(confirmation_link.0).await.unwrap();
         response.status()
     }

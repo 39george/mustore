@@ -14,7 +14,7 @@ async fn signup_and_confirm_email_creates_user_with_correct_permissions() {
     let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
 
     let test_user = TestUser::generate_user(String::from("creator"));
-    app.register_user(&test_user, 1).await;
+    app.register_user(&test_user).await;
 
     let user_data = tests::select_user_data_with_avatar_key()
         .bind(&app.pg_client, &test_user.username)
@@ -44,7 +44,7 @@ async fn access_to_protected_with_login_is_allowed() {
     let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
 
     let test_user = TestUser::generate_user(String::from("consumer"));
-    let status_code = app.register_user(&test_user, 1).await;
+    let status_code = app.register_user(&test_user).await;
     assert_eq!(status_code.as_u16(), 200);
 
     let client = reqwest::Client::builder()
@@ -93,7 +93,7 @@ async fn access_to_admin_with_permission_is_given_and_token_is_used() {
             .unwrap()
     );
 
-    let status_code = app.register_user(&test_user, 1).await;
+    let status_code = app.register_user(&test_user).await;
     assert_eq!(status_code.as_u16(), 200);
 
     let client = reqwest::Client::builder()
@@ -135,7 +135,7 @@ async fn cant_register_admin_with_used_token() {
     );
 
     let test_user = TestUser::generate_admin(admin_token);
-    let status_code = app.register_user(&test_user, 2).await;
+    let status_code = app.register_user(&test_user).await;
     assert_eq!(status_code, 200);
 
     let new_test_user = TestUser::generate_admin(admin_token);
@@ -165,7 +165,7 @@ async fn access_to_admin_api_from_non_admin_account_is_restricted() {
     let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
 
     let test_user = TestUser::generate_user(String::from("consumer"));
-    let status_code = app.register_user(&test_user, 1).await;
+    let status_code = app.register_user(&test_user).await;
     assert_eq!(status_code.as_u16(), 200);
 
     let client = reqwest::Client::builder()
