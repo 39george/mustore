@@ -32,10 +32,33 @@
 .chevron {
   font-size: 1.5rem;
   margin-left: 1rem;
+  flex-shrink: 0;
+}
+
+.template {
+  height: 100vh;
+  margin-top: 5rem;
 }
 
 .main_content {
   min-height: 100vh;
 
   margin-top: 5rem;
+
+  font-family: "Montserrat", sans-serif;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  margin-left: 1.5rem;
+}
+
+.h2 {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.title_icon {
+  margin-left: 0.75rem;
 }

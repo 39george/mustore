@@ -1,0 +1,97 @@
+@import "../../../../colors.scss";
+
+.carousel_container {
+  display: flex;
+  align-items: center;
+
+  position: relative;
+
+  margin-top: 1rem;
+  padding: 1.875rem 1.75rem 2.125rem;
+
+  background-color: #fefefe;
+  box-shadow: 0 0 1.5rem rgba($color: #000000, $alpha: 0.06);
+  border-radius: 0.75rem;
+
+  overflow: hidden;
+
+  &:hover {
+    .prev_button,
+    .next_button {
+      opacity: 0.7;
+    }
+  }
+}
+
+.wrapper {
+  transition: transform 0.3s ease-out;
+}
+
+.carousel_inner {
+  display: flex;
+  gap: 1.75rem;
+  transform: translateX(0);
+  transition: transform 0.7s cubic-bezier(0.4, 0.93, 0.64, 0.99);
+}
+
+.prev_button,
+.next_button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  position: absolute;
+
+  width: 2rem;
+  height: 2rem;
+
+  background-color: #fefefe;
+  border-radius: 50%;
+  opacity: 0;
+
+  transition: opacity 0.1s ease-out, box-shadow 0.2s ease-out;
+
+  cursor: pointer;
+  z-index: 2;
+
+  &:hover {
+    opacity: 1 !important;
+    box-shadow: 0px 0px 10px rgba($color: #000000, $alpha: 0.1);
+  }
+}
+
+.prev_button {
+  transform: rotate(90deg);
+  left: 0.75rem;
+
+  &:hover + .wrapper {
+    transform: translateX(20px);
+  }
+}
+
+.next_button {
+  transform: rotate(-90deg);
+  right: 0.75rem;
+
+  &:hover ~ .wrapper {
+    transform: translateX(-20px);
+  }
+}
+
+.show_all {
+  position: absolute;
+
+  bottom: 10px;
+  right: 20px;
+
+  font-weight: 300;
+  font-size: 0.625rem;
+  opacity: 0.6;
+
+  cursor: pointer;
+  z-index: 3;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

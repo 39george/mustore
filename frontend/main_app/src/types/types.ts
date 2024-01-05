@@ -20,3 +20,13 @@ export type page_names =
   | "services"
   | "help"
   | "about";
+
+export interface CarouselItem {
+  id?: number;
+  created_at?: Date;
+  cover_url: string;
+  name: string;
+  author: string;
+  likes: number;
+  price: number;
+}

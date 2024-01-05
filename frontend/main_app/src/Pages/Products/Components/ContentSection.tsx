@@ -4,7 +4,10 @@ import underline_red from "../../../assets/svg/underline_red.svg";
 import underline_coral from "../../../assets/svg/underline_coral.svg";
 import underline_lilac from "../../../assets/svg/underline_lilac.svg";
 import underline_green from "../../../assets/svg/underline_green.svg";
+import stars from "../../../assets/svg/recommendations.svg";
+import fire from "../../../assets/svg/fire.svg";
 import { FC } from "react";
+import RecCarousel from "./UI/RecCarousel";
 
 interface ContentSectionProps {
   section_type: "beats" | "covers" | "songs" | "texts";
@@ -56,9 +59,27 @@ const ContentSection: FC<ContentSectionProps> = ({ section_type }) => {
         </h1>
         <GoChevronDown className={styles.chevron} />
       </div>
-      <div className={styles.main_content}>
-        Секция {section_props.section_name}
-      </div>
+      {section_type !== "songs" ? (
+        <div className={styles.template}>
+          Секция {section_props.section_name}
+        </div>
+      ) : (
+        <div className={styles.main_content}>
+          <div className={styles.recommendations_block}>
+            <div className={styles.title}>
+              <h2 className={styles.h2}>
+                Рекомендации harmony<span>.</span>sphere
+              </h2>
+              <img
+                src={stars}
+                alt="stars"
+                className={styles.title_icon}
+              />
+            </div>
+            <RecCarousel />
+          </div>
+        </div>
+      )}
     </section>
   );
 };
