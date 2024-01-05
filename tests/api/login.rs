@@ -11,9 +11,10 @@ use mustore::config::Settings;
 
 #[tokio::test]
 async fn signup_and_confirm_email_creates_user_with_correct_permissions() {
-    let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
+    let app =
+        TestApp::spawn_app(Settings::load_configuration().unwrap(), 1).await;
 
-    let test_user = TestUser::generate_user(String::from("creator"));
+    let test_user = TestUser::generate_user(String::from("creator"), 0);
     app.register_user(&test_user).await;
 
     let user_data = tests::select_user_data_with_avatar_key()
@@ -41,9 +42,10 @@ async fn signup_and_confirm_email_creates_user_with_correct_permissions() {
 
 #[tokio::test]
 async fn access_to_protected_with_login_is_allowed() {
-    let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
+    let app =
+        TestApp::spawn_app(Settings::load_configuration().unwrap(), 1).await;
 
-    let test_user = TestUser::generate_user(String::from("consumer"));
+    let test_user = TestUser::generate_user(String::from("consumer"), 0);
     let status_code = app.register_user(&test_user).await;
     assert_eq!(status_code.as_u16(), 200);
 
@@ -65,7 +67,8 @@ async fn access_to_protected_with_login_is_allowed() {
 
 #[tokio::test]
 async fn access_to_protected_without_login_is_restricted() {
-    let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
+    let app =
+        TestApp::spawn_app(Settings::load_configuration().unwrap(), 0).await;
     let client = reqwest::Client::builder()
         .cookie_store(true)
         .build()
@@ -82,9 +85,10 @@ async fn access_to_protected_without_login_is_restricted() {
 
 #[tokio::test]
 async fn access_to_admin_with_permission_is_given_and_token_is_used() {
-    let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
+    let app =
+        TestApp::spawn_app(Settings::load_configuration().unwrap(), 1).await;
     let admin_token = uuid::Uuid::new_v4();
-    let test_user = TestUser::generate_admin(admin_token);
+    let test_user = TestUser::generate_admin(admin_token, 0);
     assert_eq!(
         1,
         user_auth_queries::insert_a_new_admin_signup_token()
@@ -123,7 +127,8 @@ async fn access_to_admin_with_permission_is_given_and_token_is_used() {
 
 #[tokio::test]
 async fn cant_register_admin_with_used_token() {
-    let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
+    let app =
+        TestApp::spawn_app(Settings::load_configuration().unwrap(), 2).await;
     let admin_token = uuid::Uuid::new_v4();
 
     assert_eq!(
@@ -134,11 +139,11 @@ async fn cant_register_admin_with_used_token() {
             .unwrap()
     );
 
-    let test_user = TestUser::generate_admin(admin_token);
+    let test_user = TestUser::generate_admin(admin_token, 0);
     let status_code = app.register_user(&test_user).await;
     assert_eq!(status_code, 200);
 
-    let new_test_user = TestUser::generate_admin(admin_token);
+    let new_test_user = TestUser::generate_admin(admin_token, 0);
 
     let confirmation_link = {
         let response = new_test_user.post_signup(&app.address).await.unwrap();
@@ -162,9 +167,10 @@ async fn cant_register_admin_with_used_token() {
 
 #[tokio::test]
 async fn access_to_admin_api_from_non_admin_account_is_restricted() {
-    let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
+    let app =
+        TestApp::spawn_app(Settings::load_configuration().unwrap(), 1).await;
 
-    let test_user = TestUser::generate_user(String::from("consumer"));
+    let test_user = TestUser::generate_user(String::from("consumer"), 0);
     let status_code = app.register_user(&test_user).await;
     assert_eq!(status_code.as_u16(), 200);
 

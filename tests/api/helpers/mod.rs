@@ -22,32 +22,36 @@ use mustore::startup::Application;
 use wiremock::matchers;
 use wiremock::ResponseTemplate;
 
+#[derive(Debug)]
 pub struct TestUser {
     pub username: String,
     pub password: String,
     pub email: String,
     pub role: Option<String>,
     pub admin_token: Option<uuid::Uuid>,
+    pub idx: usize,
 }
 
 impl TestUser {
-    pub fn generate_user(role: String) -> Self {
+    pub fn generate_user(role: String, idx: usize) -> Self {
         Self {
             username: fake::faker::name::en::Name().fake(),
             password: String::from("A23c(fds)Helloworld232r"),
             email: fake::faker::internet::en::SafeEmail().fake(),
             role: Some(role),
             admin_token: None,
+            idx,
         }
     }
 
-    pub fn generate_admin(admin_token: uuid::Uuid) -> Self {
+    pub fn generate_admin(admin_token: uuid::Uuid, idx: usize) -> Self {
         Self {
             username: fake::faker::name::en::Name().fake(),
             password: String::from("A23c(fds)Helloworld232r"),
             email: fake::faker::internet::en::SafeEmail().fake(),
             role: None,
             admin_token: Some(admin_token),
+            idx,
         }
     }
 
@@ -98,7 +102,10 @@ pub struct TestApp {
 pub struct ConfirmationLink(pub reqwest::Url);
 
 impl TestApp {
-    pub async fn spawn_app(mut config: Settings) -> TestApp {
+    pub async fn spawn_app(
+        mut config: Settings,
+        email_mock_expect_times: u64,
+    ) -> TestApp {
         init_tracing();
 
         // Run tests on 1st redis database
@@ -135,6 +142,14 @@ impl TestApp {
         // Very important step
         let _ = tokio::spawn(application.run_until_stopped());
 
+        Mock::given(matchers::path("/v1/smtp/send"))
+            .and(matchers::method("POST"))
+            .and(matchers::header_exists("Authorization"))
+            .respond_with(ResponseTemplate::new(200))
+            .expect(email_mock_expect_times)
+            .mount(&email_server)
+            .await;
+
         TestApp {
             pg_username,
             pg_config_with_root_cred,
@@ -151,17 +166,11 @@ impl TestApp {
         &self,
         user: &TestUser,
     ) -> ConfirmationLink {
-        Mock::given(matchers::path("/v1/smtp/send"))
-            .and(matchers::method("POST"))
-            .and(matchers::header_exists("Authorization"))
-            .respond_with(ResponseTemplate::new(200))
-            .mount(&self.email_server)
-            .await;
-
         let response = user.post_signup(&self.address).await.unwrap();
         assert!(response.status().is_success());
 
-        let request = &self.email_server.received_requests().await.unwrap()[0];
+        let request =
+            &self.email_server.received_requests().await.unwrap()[user.idx];
 
         self.get_confirmation_link_urlencoded(request)
     }
@@ -309,6 +318,7 @@ fn init_tracing() {
             .with_env_filter(
                 tracing_subscriber::EnvFilter::from_default_env()
                     .add_directive(Level::INFO.into())
+                    .add_directive("tower_sessions_core=warn".parse().unwrap())
                     .add_directive("axum::rejection=trace".parse().unwrap())
                     .add_directive("aws_config=warn".parse().unwrap()),
             )

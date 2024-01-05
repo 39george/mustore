@@ -13,15 +13,10 @@ use wiremock::ResponseTemplate;
 
 #[tokio::test]
 async fn signup_with_correct_data_creates_a_new_candidate() {
-    let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
+    let app =
+        TestApp::spawn_app(Settings::load_configuration().unwrap(), 1).await;
 
-    let test_user = TestUser::generate_user(String::from("consumer"));
-
-    Mock::given(matchers::path("/v1/smtp/send"))
-        .respond_with(ResponseTemplate::new(200))
-        .expect(1)
-        .mount(&app.email_server)
-        .await;
+    let test_user = TestUser::generate_user(String::from("consumer"), 0);
 
     let response = test_user.post_signup(&app.address).await.unwrap();
     assert!(response.status().is_success());
@@ -38,13 +33,15 @@ async fn signup_with_correct_data_creates_a_new_candidate() {
 
 #[tokio::test]
 async fn signup_with_uncorrect_data_rejected() {
-    let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
+    let app =
+        TestApp::spawn_app(Settings::load_configuration().unwrap(), 0).await;
     let test_user = TestUser {
         username: String::from("a"),
         password: String::from("abc"),
         email: String::from("definitely_not_email"),
         role: Some("consumer".to_string()),
         admin_token: None,
+        idx: 0,
     };
     let response = test_user.post_signup(&app.address).await.unwrap();
     assert_eq!(response.status().as_u16(), 400);
@@ -52,16 +49,18 @@ async fn signup_with_uncorrect_data_rejected() {
 
 #[tokio::test]
 async fn signup_with_correct_data_sends_confirmation_email_with_link_smtpbz() {
-    let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
-    let test_user = TestUser::generate_user(String::from("creator"));
+    let app =
+        TestApp::spawn_app(Settings::load_configuration().unwrap(), 1).await;
+    let test_user = TestUser::generate_user(String::from("creator"), 0);
     let _confirmation_link =
         app.signup_user_get_confirmation_link(&test_user).await;
 }
 
 #[tokio::test]
 async fn going_by_confirmation_link_confirmes_candidate_account() {
-    let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
-    let test_user = TestUser::generate_user(String::from("consumer"));
+    let app =
+        TestApp::spawn_app(Settings::load_configuration().unwrap(), 1).await;
+    let test_user = TestUser::generate_user(String::from("consumer"), 0);
     let confirmation_link =
         app.signup_user_get_confirmation_link(&test_user).await;
     let response = reqwest::get(confirmation_link.0).await.unwrap();
@@ -70,7 +69,8 @@ async fn going_by_confirmation_link_confirmes_candidate_account() {
 
 #[tokio::test]
 async fn wrong_confirmation_link_should_redirect_to_specific_route() {
-    let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
+    let app =
+        TestApp::spawn_app(Settings::load_configuration().unwrap(), 0).await;
     let confirmation_link = format!(
         "{}/api/confirm_user_account?email=unexistent@shouldfail.net&token=26mxZMNiMnErAUd2hONzgymaw",
         app.address);

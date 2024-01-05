@@ -10,7 +10,7 @@ use crate::helpers::TestApp;
 async fn health_check_test() {
     let config = Settings::load_configuration().unwrap();
 
-    let app = TestApp::spawn_app(config).await;
+    let app = TestApp::spawn_app(config, 0).await;
 
     // We need to bring in `reqwest`
     // to perform HTTP requests against our application.

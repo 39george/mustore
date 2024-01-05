@@ -7,9 +7,10 @@ use mustore::{
 
 #[tokio::test]
 async fn song_uploading_success() {
-    let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
+    let app =
+        TestApp::spawn_app(Settings::load_configuration().unwrap(), 1).await;
 
-    let test_user = TestUser::generate_user(String::from("creator"));
+    let test_user = TestUser::generate_user(String::from("creator"), 0);
     app.register_user(&test_user).await;
     let client = reqwest::Client::builder()
         .cookie_store(true)
@@ -65,9 +66,10 @@ async fn song_uploading_success() {
 
 #[tokio::test]
 async fn song_uploading_without_files_fails() {
-    let app = TestApp::spawn_app(Settings::load_configuration().unwrap()).await;
+    let app =
+        TestApp::spawn_app(Settings::load_configuration().unwrap(), 1).await;
 
-    let test_user = TestUser::generate_user(String::from("creator"));
+    let test_user = TestUser::generate_user(String::from("creator"), 0);
     app.register_user(&test_user).await;
     let client = reqwest::Client::builder()
         .cookie_store(true)
