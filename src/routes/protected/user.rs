@@ -255,12 +255,22 @@ async fn send_message(
         .await
         .context("Failed to add participants to the conversation")?;
 
-    for attachment in params.attachments {
+    for attachment in &params.attachments {
         user_access::insert_message_attachment()
-            .bind(&transaction, &attachment, &message_id)
+            .bind(&transaction, attachment, &message_id)
             .await
             .context("Failed to add participants to the conversation")?;
     }
+
+    remove_attachments_data_from_redis(
+        &app_state.redis_pool,
+        &params.attachments,
+        user.id,
+    )
+    .await
+    .context(
+        "Failed to remove message attachments upload information from redis.",
+    )?;
 
     transaction
         .commit()
@@ -349,6 +359,23 @@ async fn check_current_user_uploads(
             }
         }
         page.next().context("Failed to move on to the next page of results from the SCAN operation")?;
+    }
+    Ok(())
+}
+
+#[tracing::instrument(name = "Remove upload data from redis.", skip_all)]
+async fn remove_attachments_data_from_redis(
+    con: &RedisPool,
+    keys: &Vec<String>,
+    user_id: i32,
+) -> RedisResult<()> {
+    for obj_key in keys.iter() {
+        let key = format!("upload_request:{}:{}", user_id, obj_key);
+
+        // Check that there are such upload is
+        let _created_at: String = con.get(&key).await?;
+
+        con.del(&key).await?;
     }
     Ok(())
 }
