@@ -7,9 +7,6 @@ use fred::interfaces::HashesInterface;
 use mustore::config::Settings;
 use mustore::domain::user_candidate::UserCandidate;
 use reqwest::redirect::Policy;
-use wiremock::matchers;
-use wiremock::Mock;
-use wiremock::ResponseTemplate;
 
 #[tokio::test]
 async fn signup_with_correct_data_creates_a_new_candidate() {

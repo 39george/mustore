@@ -37,7 +37,7 @@ impl TestUser {
         Self {
             username: fake::faker::name::en::Name().fake(),
             password: String::from("A23c(fds)Helloworld232r"),
-            email: fake::faker::internet::en::SafeEmail().fake(),
+            email: fake::faker::internet::en::FreeEmail().fake(),
             role: Some(role),
             admin_token: None,
             idx,
@@ -48,7 +48,7 @@ impl TestUser {
         Self {
             username: fake::faker::name::en::Name().fake(),
             password: String::from("A23c(fds)Helloworld232r"),
-            email: fake::faker::internet::en::SafeEmail().fake(),
+            email: fake::faker::internet::en::FreeEmail().fake(),
             role: None,
             admin_token: Some(admin_token),
             idx,
