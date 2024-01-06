@@ -263,7 +263,7 @@ async fn create_offer(
 }
 // ───── Functions ────────────────────────────────────────────────────────── //
 
-/// Verify upload requests of given music product, and if all is ok, delete requests.
+/// Verify upload requests of a given music product, and if all is ok, delete all requests.
 #[tracing::instrument(
     name = "Verify upload requests for a given music product.",
     skip_all
