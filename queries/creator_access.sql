@@ -109,17 +109,17 @@ VALUES (
 )
 RETURNING id;
 
---! insert_song_master_object_key
-INSERT INTO objects(key, object_type, master_songs_id)
-VALUES (:key, 'audio', :song_id);
+--! insert_music_product_master_object_key (song_id?, beat_id?)
+INSERT INTO objects(key, object_type, master_songs_id, master_beats_id)
+VALUES (:key, 'audio', :song_id, :beat_id);
 
---! insert_song_master_tagged_object_key
-INSERT INTO objects(key, object_type, tagged_master_songs_id)
-VALUES (:key, 'audio', :song_id);
+--! insert_music_product_master_tagged_object_key (song_id?, beat_id?)
+INSERT INTO objects(key, object_type, tagged_master_songs_id, tagged_master_beats_id)
+VALUES (:key, 'audio', :song_id, :beat_id);
 
---! insert_song_multitrack_object_key
-INSERT INTO objects(key, object_type, multitrack_songs_id)
-VALUES (:key, 'multitrack', :song_id);
+--! insert_music_product_multitrack_object_key (song_id?, beat_id?)
+INSERT INTO objects(key, object_type, multitrack_songs_id, multitrack_beats_id)
+VALUES (:key, 'multitrack', :song_id, :beat_id);
 
 -- Offers
 

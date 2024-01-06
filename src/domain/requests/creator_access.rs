@@ -3,37 +3,39 @@ use serde::Deserialize;
 use serde::Serialize;
 use time::OffsetDateTime;
 use validator::Validate;
+use validator::ValidateArgs;
+use validator::ValidationError;
+use validator::ValidationErrors;
 
 use crate::domain::music_parameters::MusicKey;
 use crate::domain::music_parameters::Sex;
-use crate::domain::validate_slice_bounds_characters;
 
 #[derive(Serialize, Deserialize, Debug, Validate)]
-pub struct SubmitSongRequest {
+pub struct MusicProduct {
     #[validate(
         length(min = 10, max = 500),
         non_control_character,
         custom = "crate::domain::forbidden_characters"
     )]
-    pub song_master_object_key: String,
+    pub master_object_key: String,
     #[validate(
         length(min = 10, max = 500),
         non_control_character,
         custom = "crate::domain::forbidden_characters"
     )]
-    pub song_master_tagged_object_key: Option<String>,
+    pub master_tagged_object_key: Option<String>,
     #[validate(
         length(min = 10, max = 500),
         non_control_character,
         custom = "crate::domain::forbidden_characters"
     )]
-    pub song_multitrack_object_key: String,
+    pub multitrack_object_key: String,
     #[validate(
         length(min = 10, max = 500),
         non_control_character,
         custom = "crate::domain::forbidden_characters"
     )]
-    pub song_cover_object_key: String,
+    pub cover_object_key: String,
     #[validate(
         length(min = 2, max = 30),
         non_control_character,
@@ -46,10 +48,7 @@ pub struct SubmitSongRequest {
         custom = "crate::domain::forbidden_characters"
     )]
     pub description: Option<String>,
-    #[validate(custom(
-        function = "validate_slice_bounds_characters",
-        arg = "(usize, usize)"
-    ))]
+    #[validate(custom(function = "validate_moods_slice_bounds_characters"))]
     pub moods: Vec<String>,
     #[validate(
         length(min = 1, max = 50),
@@ -67,15 +66,50 @@ pub struct SubmitSongRequest {
     pub tempo: i16,
     #[validate(range(min = 15, max = 600))]
     pub duration: i16,
+    pub price: Decimal,
+    pub key: MusicKey,
+}
+
+pub fn validate_moods_slice_bounds_characters(
+    moods: &[String],
+) -> Result<(), ValidationError> {
+    for mood in moods.iter() {
+        crate::domain::forbidden_characters(mood)?;
+        if mood.len() < 1 {
+            return Err(ValidationError::new("Mood is too short"));
+        } else if mood.len() > 50 {
+            return Err(ValidationError::new("Mood is too long"));
+        }
+    }
+    Ok(())
+}
+
+#[derive(Serialize, Deserialize, Debug, Validate)]
+pub struct SongMusicProduct {
     #[validate(
         length(min = 1, max = 1000),
         non_control_character,
         custom = "crate::domain::forbidden_characters"
     )]
     pub lyric: String,
-    pub price: Decimal,
     pub sex: Sex,
-    pub key: MusicKey,
+    #[validate]
+    pub music_product: MusicProduct,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub enum SubmitMusicProductRequest {
+    Beat(MusicProduct),
+    Song(SongMusicProduct),
+}
+
+impl Validate for SubmitMusicProductRequest {
+    fn validate(&self) -> Result<(), ValidationErrors> {
+        match self {
+            SubmitMusicProductRequest::Beat(m) => m.validate(),
+            SubmitMusicProductRequest::Song(s) => s.validate(),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Validate)]

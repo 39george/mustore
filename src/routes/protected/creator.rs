@@ -10,6 +10,7 @@ use fred::error::RedisError;
 use fred::interfaces::KeysInterface;
 use fred::prelude::RedisResult;
 use http::StatusCode;
+use validator::Validate;
 use validator::ValidateArgs;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
@@ -17,7 +18,7 @@ use validator::ValidateArgs;
 use crate::auth::users::AuthSession;
 use crate::cornucopia::queries::creator_access;
 use crate::domain::requests::creator_access::CreateOfferRequest;
-use crate::domain::requests::creator_access::SubmitSongRequest;
+use crate::domain::requests::creator_access::SubmitMusicProductRequest;
 use crate::error_chain_fmt;
 use crate::routes::ResponseError;
 use crate::startup::AppState;
@@ -66,24 +67,38 @@ async fn health_check() -> StatusCode {
 }
 
 #[tracing::instrument(name = "Submit a new song", skip_all)]
+#[axum::debug_handler]
 async fn submit_song(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
-    Json(params): Json<SubmitSongRequest>,
+    Json(req): Json<SubmitMusicProductRequest>,
 ) -> Result<StatusCode, CreatorResponseError> {
     let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
 
-    params
-        .validate_args((1, 50))
-        .map_err(ResponseError::ValidationError)?;
+    req.validate().map_err(ResponseError::ValidationError)?;
+
+    let (music_product, song) = match req {
+        SubmitMusicProductRequest::Beat(m) => (m, None),
+        SubmitMusicProductRequest::Song(s) => {
+            (s.music_product, Some((s.lyric, s.sex)))
+        }
+    };
+
+    let mut object_keys = vec![
+        music_product.master_object_key.as_str(),
+        music_product.multitrack_object_key.as_str(),
+        music_product.cover_object_key.as_str(),
+    ];
+    if let Some(ref tagged) = music_product.master_tagged_object_key {
+        object_keys.push(tagged.as_str());
+    }
 
     verify_upload_request_data_in_redis(
         &app_state.redis_pool,
-        &params,
+        &object_keys,
         user.id,
-        false,
     )
     .await?;
 
@@ -104,59 +119,79 @@ async fn submit_song(
         .bind(
             &transaction,
             &user.id,
-            &params.name,
-            &params.description,
-            &params.price,
+            &music_product.name,
+            &music_product.description,
+            &music_product.price,
         )
         .one()
         .await
         .context("Failed to insert song (product tab) into the pg")
         .map_err(ResponseError::UnexpectedError)?;
 
-    let song_id = creator_access::insert_song_and_get_song_id()
-        .bind(
-            &transaction,
-            &product_id,
-            &params.primary_genre,
-            &params.secondary_genre,
-            &params.sex.to_string(),
-            &params.tempo,
-            &params.key.clone().into(),
-            &params.duration,
-            &params.lyric,
-        )
-        .one()
-        .await
-        .context("Failed to insert song (song tab) into the pg")
-        .map_err(ResponseError::UnexpectedError)?;
+    // match
+    let (beat_id, song_id) = match song {
+        Some((lyric, sex)) => {
+            let song_id = creator_access::insert_song_and_get_song_id()
+                .bind(
+                    &transaction,
+                    &product_id,
+                    &music_product.primary_genre,
+                    &music_product.secondary_genre,
+                    &sex.to_string(),
+                    &music_product.tempo,
+                    &music_product.key.clone().into(),
+                    &music_product.duration,
+                    &lyric,
+                )
+                .one()
+                .await
+                .context("Failed to insert song (song tab) into the pg")
+                .map_err(ResponseError::UnexpectedError)?;
+            (None, Some(song_id))
+        }
+        None => {
+            let beat_id = 1;
+            (Some(beat_id), None)
+        }
+    };
 
     creator_access::insert_product_cover_object_key()
-        .bind(&transaction, &params.song_cover_object_key, &product_id)
+        .bind(&transaction, &music_product.cover_object_key, &product_id)
         .await
         .context("Failed to insert cover_object_key into pg")
         .map_err(ResponseError::UnexpectedError)?;
 
-    creator_access::insert_song_master_object_key()
-        .bind(&transaction, &params.song_master_object_key, &song_id)
+    creator_access::insert_music_product_master_object_key()
+        .bind(
+            &transaction,
+            &music_product.master_object_key,
+            &song_id,
+            &beat_id,
+        )
         .await
         .context("Failed to insert song_master_object_key into pg")
         .map_err(ResponseError::UnexpectedError)?;
 
-    if let Some(ref tagged_key) = params.song_master_tagged_object_key {
-        creator_access::insert_song_master_tagged_object_key()
-            .bind(&transaction, &tagged_key, &song_id)
+    if let Some(ref tagged_key) = music_product.master_tagged_object_key {
+        creator_access::insert_music_product_master_tagged_object_key()
+            .bind(&transaction, &tagged_key, &song_id, &beat_id)
             .await
             .context("Failed to insert song_master_object_key into pg")
             .map_err(ResponseError::UnexpectedError)?;
     }
 
-    creator_access::insert_song_multitrack_object_key()
-        .bind(&transaction, &params.song_multitrack_object_key, &song_id)
+    creator_access::insert_music_product_multitrack_object_key()
+        .bind(
+            &transaction,
+            &music_product.multitrack_object_key,
+            &song_id,
+            &beat_id,
+        )
         .await
         .context("Failed to insert song_master_object_key into pg")
         .map_err(ResponseError::UnexpectedError)?;
 
-    for mood in params.moods.iter() {
+    for mood in music_product.moods.iter() {
         creator_access::insert_product_mood_by_name()
             .bind(&transaction, &product_id, mood)
             .await
@@ -173,11 +208,10 @@ async fn submit_song(
     }
 
     // Now we can safely delete upload data from redis
-    verify_upload_request_data_in_redis(
+    delete_upload_request_data_from_redis(
         &app_state.redis_pool,
-        &params,
+        &object_keys,
         user.id,
-        true,
     )
     .await?;
 
@@ -218,35 +252,29 @@ async fn create_offer(
 }
 // ───── Functions ────────────────────────────────────────────────────────── //
 
-/// Verify upload requests of given song, and if all is ok, delete requests.
+/// Verify upload requests of given music product, and if all is ok, delete requests.
 #[tracing::instrument(name = "Verify upload requests of given song.", skip_all)]
 async fn verify_upload_request_data_in_redis(
     con: &RedisPool,
-    req: &SubmitSongRequest,
+    obj_keys: &[&str],
     user_id: i32,
-    should_delete: bool,
 ) -> RedisResult<()> {
-    let tagged = req.song_master_tagged_object_key.as_ref();
-    let object_keys = [
-        &req.song_master_object_key,
-        &req.song_multitrack_object_key,
-        &req.song_cover_object_key,
-    ];
-
-    for obj_key in object_keys.into_iter() {
+    for obj_key in obj_keys.into_iter() {
         let key = format!("upload_request:{}:{}", user_id, obj_key);
         let _created_at: String = con.get(&key).await?;
-        if should_delete {
-            con.del(&key).await?;
-        }
     }
+    Ok(())
+}
 
-    if let Some(obj_key) = tagged {
+#[tracing::instrument(name = "Verify upload requests of given song.", skip_all)]
+async fn delete_upload_request_data_from_redis(
+    con: &RedisPool,
+    obj_keys: &[&str],
+    user_id: i32,
+) -> RedisResult<()> {
+    for obj_key in obj_keys.into_iter() {
         let key = format!("upload_request:{}:{}", user_id, obj_key);
-        let _created_at: String = con.get(&key).await?;
-        if should_delete {
-            con.del(&key).await?;
-        }
+        con.del(&key).await?;
     }
     Ok(())
 }

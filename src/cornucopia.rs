@@ -53,7 +53,7 @@
 } }}#[allow(clippy :: all, clippy :: pedantic)] #[allow(unused_variables)]
 #[allow(unused_imports)] #[allow(dead_code)] pub mod queries
 { pub mod creator_access
-{ use futures::{{StreamExt, TryStreamExt}};use futures; use cornucopia_async::GenericClient;#[derive( Debug)] pub struct InsertProductAndGetProductIdParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,> { pub owher_id : i32,pub name : T1,pub description : Option<T2>,pub price : rust_decimal::Decimal,}#[derive( Debug)] pub struct InsertProductCoverObjectKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub product_id : i32,}#[derive( Debug)] pub struct InsertProductMoodByNameParams < T1 : cornucopia_async::StringSql,> { pub product_id : i32,pub mood_name : T1,}#[derive( Debug)] pub struct InsertSongAndGetSongIdParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,T3 : cornucopia_async::StringSql,T4 : cornucopia_async::StringSql,> { pub product_id : i32,pub primary_genre : T1,pub secondary_genre : Option<T2>,pub sex : T3,pub tempo : i16,pub key : super::super::types::public::Musickey,pub duration : i16,pub lyric : T4,}#[derive( Debug)] pub struct InsertSongMasterObjectKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub song_id : i32,}#[derive( Debug)] pub struct InsertSongMasterTaggedObjectKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub song_id : i32,}#[derive( Debug)] pub struct InsertSongMultitrackObjectKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub song_id : i32,}#[derive( Debug)] pub struct CreateOfferParams < T1 : cornucopia_async::StringSql,> { pub conversations_id : i32,pub services_id : i32,pub text : T1,pub price : rust_decimal::Decimal,pub delivery_date : time::OffsetDateTime,pub free_refisions : i32,pub revision_price : rust_decimal::Decimal,}#[derive(serde::Serialize, Debug, Clone, PartialEq, Copy)] pub struct GetCreatorMarksAvg
+{ use futures::{{StreamExt, TryStreamExt}};use futures; use cornucopia_async::GenericClient;#[derive( Debug)] pub struct InsertProductAndGetProductIdParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,> { pub owher_id : i32,pub name : T1,pub description : Option<T2>,pub price : rust_decimal::Decimal,}#[derive( Debug)] pub struct InsertProductCoverObjectKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub product_id : i32,}#[derive( Debug)] pub struct InsertProductMoodByNameParams < T1 : cornucopia_async::StringSql,> { pub product_id : i32,pub mood_name : T1,}#[derive( Debug)] pub struct InsertSongAndGetSongIdParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,T3 : cornucopia_async::StringSql,T4 : cornucopia_async::StringSql,> { pub product_id : i32,pub primary_genre : T1,pub secondary_genre : Option<T2>,pub sex : T3,pub tempo : i16,pub key : super::super::types::public::Musickey,pub duration : i16,pub lyric : T4,}#[derive( Debug)] pub struct InsertMusicProductMasterObjectKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub song_id : Option<i32>,pub beat_id : Option<i32>,}#[derive( Debug)] pub struct InsertMusicProductMasterTaggedObjectKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub song_id : Option<i32>,pub beat_id : Option<i32>,}#[derive( Debug)] pub struct InsertMusicProductMultitrackObjectKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub song_id : Option<i32>,pub beat_id : Option<i32>,}#[derive( Debug)] pub struct CreateOfferParams < T1 : cornucopia_async::StringSql,> { pub conversations_id : i32,pub services_id : i32,pub text : T1,pub price : rust_decimal::Decimal,pub delivery_date : time::OffsetDateTime,pub free_refisions : i32,pub revision_price : rust_decimal::Decimal,}#[derive(serde::Serialize, Debug, Clone, PartialEq, Copy)] pub struct GetCreatorMarksAvg
 { pub avg : rust_decimal::Decimal,pub count : i64,}pub struct GetCreatorMarksAvgQuery < 'a, C : GenericClient, T, const N : usize >
 {
     client : & 'a  C, params :
@@ -378,60 +378,60 @@ C, i32, 8 >, C > for InsertSongAndGetSongIdStmt
     InsertSongAndGetSongIdParams < T1,T2,T3,T4,>) -> I32Query < 'a, C,
     i32, 8 >
     { self.bind(client, & params.product_id,& params.primary_genre,& params.secondary_genre,& params.sex,& params.tempo,& params.key,& params.duration,& params.lyric,) }
-}pub fn insert_song_master_object_key() -> InsertSongMasterObjectKeyStmt
-{ InsertSongMasterObjectKeyStmt(cornucopia_async :: private :: Stmt :: new("INSERT INTO objects(key, object_type, master_songs_id)
-VALUES ($1, 'audio', $2)")) } pub
-struct InsertSongMasterObjectKeyStmt(cornucopia_async :: private :: Stmt) ; impl
-InsertSongMasterObjectKeyStmt { pub async fn bind < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,>
+}pub fn insert_music_product_master_object_key() -> InsertMusicProductMasterObjectKeyStmt
+{ InsertMusicProductMasterObjectKeyStmt(cornucopia_async :: private :: Stmt :: new("INSERT INTO objects(key, object_type, master_songs_id, master_beats_id)
+VALUES ($1, 'audio', $2, $3)")) } pub
+struct InsertMusicProductMasterObjectKeyStmt(cornucopia_async :: private :: Stmt) ; impl
+InsertMusicProductMasterObjectKeyStmt { pub async fn bind < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,>
 (& 'a mut self, client : & 'a  C,
-key : & 'a T1,song_id : & 'a i32,) -> Result < u64, tokio_postgres :: Error >
+key : & 'a T1,song_id : & 'a Option<i32>,beat_id : & 'a Option<i32>,) -> Result < u64, tokio_postgres :: Error >
 {
     let stmt = self.0.prepare(client) .await ? ;
-    client.execute(stmt, & [key,song_id,]) .await
+    client.execute(stmt, & [key,song_id,beat_id,]) .await
 } }impl < 'a, C : GenericClient + Send + Sync, T1 : cornucopia_async::StringSql,>
-cornucopia_async :: Params < 'a, InsertSongMasterObjectKeyParams < T1,>, std::pin::Pin<Box<dyn futures::Future<Output = Result <
-u64, tokio_postgres :: Error > > + Send + 'a>>, C > for InsertSongMasterObjectKeyStmt
+cornucopia_async :: Params < 'a, InsertMusicProductMasterObjectKeyParams < T1,>, std::pin::Pin<Box<dyn futures::Future<Output = Result <
+u64, tokio_postgres :: Error > > + Send + 'a>>, C > for InsertMusicProductMasterObjectKeyStmt
 {
     fn
     params(& 'a mut self, client : & 'a  C, params : & 'a
-    InsertSongMasterObjectKeyParams < T1,>) -> std::pin::Pin<Box<dyn futures::Future<Output = Result < u64, tokio_postgres ::
-    Error > > + Send + 'a>> { Box::pin(self.bind(client, & params.key,& params.song_id,) ) }
-}pub fn insert_song_master_tagged_object_key() -> InsertSongMasterTaggedObjectKeyStmt
-{ InsertSongMasterTaggedObjectKeyStmt(cornucopia_async :: private :: Stmt :: new("INSERT INTO objects(key, object_type, tagged_master_songs_id)
-VALUES ($1, 'audio', $2)")) } pub
-struct InsertSongMasterTaggedObjectKeyStmt(cornucopia_async :: private :: Stmt) ; impl
-InsertSongMasterTaggedObjectKeyStmt { pub async fn bind < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,>
+    InsertMusicProductMasterObjectKeyParams < T1,>) -> std::pin::Pin<Box<dyn futures::Future<Output = Result < u64, tokio_postgres ::
+    Error > > + Send + 'a>> { Box::pin(self.bind(client, & params.key,& params.song_id,& params.beat_id,) ) }
+}pub fn insert_music_product_master_tagged_object_key() -> InsertMusicProductMasterTaggedObjectKeyStmt
+{ InsertMusicProductMasterTaggedObjectKeyStmt(cornucopia_async :: private :: Stmt :: new("INSERT INTO objects(key, object_type, tagged_master_songs_id, tagged_master_beats_id)
+VALUES ($1, 'audio', $2, $3)")) } pub
+struct InsertMusicProductMasterTaggedObjectKeyStmt(cornucopia_async :: private :: Stmt) ; impl
+InsertMusicProductMasterTaggedObjectKeyStmt { pub async fn bind < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,>
 (& 'a mut self, client : & 'a  C,
-key : & 'a T1,song_id : & 'a i32,) -> Result < u64, tokio_postgres :: Error >
+key : & 'a T1,song_id : & 'a Option<i32>,beat_id : & 'a Option<i32>,) -> Result < u64, tokio_postgres :: Error >
 {
     let stmt = self.0.prepare(client) .await ? ;
-    client.execute(stmt, & [key,song_id,]) .await
+    client.execute(stmt, & [key,song_id,beat_id,]) .await
 } }impl < 'a, C : GenericClient + Send + Sync, T1 : cornucopia_async::StringSql,>
-cornucopia_async :: Params < 'a, InsertSongMasterTaggedObjectKeyParams < T1,>, std::pin::Pin<Box<dyn futures::Future<Output = Result <
-u64, tokio_postgres :: Error > > + Send + 'a>>, C > for InsertSongMasterTaggedObjectKeyStmt
+cornucopia_async :: Params < 'a, InsertMusicProductMasterTaggedObjectKeyParams < T1,>, std::pin::Pin<Box<dyn futures::Future<Output = Result <
+u64, tokio_postgres :: Error > > + Send + 'a>>, C > for InsertMusicProductMasterTaggedObjectKeyStmt
 {
     fn
     params(& 'a mut self, client : & 'a  C, params : & 'a
-    InsertSongMasterTaggedObjectKeyParams < T1,>) -> std::pin::Pin<Box<dyn futures::Future<Output = Result < u64, tokio_postgres ::
-    Error > > + Send + 'a>> { Box::pin(self.bind(client, & params.key,& params.song_id,) ) }
-}pub fn insert_song_multitrack_object_key() -> InsertSongMultitrackObjectKeyStmt
-{ InsertSongMultitrackObjectKeyStmt(cornucopia_async :: private :: Stmt :: new("INSERT INTO objects(key, object_type, multitrack_songs_id)
-VALUES ($1, 'multitrack', $2)")) } pub
-struct InsertSongMultitrackObjectKeyStmt(cornucopia_async :: private :: Stmt) ; impl
-InsertSongMultitrackObjectKeyStmt { pub async fn bind < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,>
+    InsertMusicProductMasterTaggedObjectKeyParams < T1,>) -> std::pin::Pin<Box<dyn futures::Future<Output = Result < u64, tokio_postgres ::
+    Error > > + Send + 'a>> { Box::pin(self.bind(client, & params.key,& params.song_id,& params.beat_id,) ) }
+}pub fn insert_music_product_multitrack_object_key() -> InsertMusicProductMultitrackObjectKeyStmt
+{ InsertMusicProductMultitrackObjectKeyStmt(cornucopia_async :: private :: Stmt :: new("INSERT INTO objects(key, object_type, multitrack_songs_id, multitrack_beats_id)
+VALUES ($1, 'multitrack', $2, $3)")) } pub
+struct InsertMusicProductMultitrackObjectKeyStmt(cornucopia_async :: private :: Stmt) ; impl
+InsertMusicProductMultitrackObjectKeyStmt { pub async fn bind < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,>
 (& 'a mut self, client : & 'a  C,
-key : & 'a T1,song_id : & 'a i32,) -> Result < u64, tokio_postgres :: Error >
+key : & 'a T1,song_id : & 'a Option<i32>,beat_id : & 'a Option<i32>,) -> Result < u64, tokio_postgres :: Error >
 {
     let stmt = self.0.prepare(client) .await ? ;
-    client.execute(stmt, & [key,song_id,]) .await
+    client.execute(stmt, & [key,song_id,beat_id,]) .await
 } }impl < 'a, C : GenericClient + Send + Sync, T1 : cornucopia_async::StringSql,>
-cornucopia_async :: Params < 'a, InsertSongMultitrackObjectKeyParams < T1,>, std::pin::Pin<Box<dyn futures::Future<Output = Result <
-u64, tokio_postgres :: Error > > + Send + 'a>>, C > for InsertSongMultitrackObjectKeyStmt
+cornucopia_async :: Params < 'a, InsertMusicProductMultitrackObjectKeyParams < T1,>, std::pin::Pin<Box<dyn futures::Future<Output = Result <
+u64, tokio_postgres :: Error > > + Send + 'a>>, C > for InsertMusicProductMultitrackObjectKeyStmt
 {
     fn
     params(& 'a mut self, client : & 'a  C, params : & 'a
-    InsertSongMultitrackObjectKeyParams < T1,>) -> std::pin::Pin<Box<dyn futures::Future<Output = Result < u64, tokio_postgres ::
-    Error > > + Send + 'a>> { Box::pin(self.bind(client, & params.key,& params.song_id,) ) }
+    InsertMusicProductMultitrackObjectKeyParams < T1,>) -> std::pin::Pin<Box<dyn futures::Future<Output = Result < u64, tokio_postgres ::
+    Error > > + Send + 'a>> { Box::pin(self.bind(client, & params.key,& params.song_id,& params.beat_id,) ) }
 }pub fn create_offer() -> CreateOfferStmt
 { CreateOfferStmt(cornucopia_async :: private :: Stmt :: new("INSERT INTO offers(conversations_id, services_id, text, price, delivery_date, free_revisions, revision_price)
 VALUES ($1, $2, $3, $4, $5, $6, $7)")) } pub
