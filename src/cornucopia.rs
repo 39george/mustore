@@ -1118,13 +1118,13 @@ where C : GenericClient
         Ok(it)
     }
 }#[derive(serde::Serialize, Debug, Clone, PartialEq, )] pub struct ListConversationById
-{ pub conversation_id : i32,pub participant_user_id : i32,pub participant_username : String,pub participant_avatar_key : String,pub message_id : Option<i32>,pub message_text : Option<String>,pub message_created_at : Option<time::OffsetDateTime>,pub message_updated_at : Option<time::OffsetDateTime>,pub reply_message_id : Option<i32>,pub message_attachments : Vec<String>,pub service_id : Option<i32>,pub service_name : Option<String>,pub service_cover_key : Option<String>,pub offer_id : Option<i32>,pub offer_text : Option<String>,pub offer_price : Option<rust_decimal::Decimal>,pub offer_delivery_date : Option<time::OffsetDateTime>,pub offer_free_revisions : Option<i32>,pub offer_revision_price : Option<rust_decimal::Decimal>,}pub struct ListConversationByIdBorrowed < 'a >
-{ pub conversation_id : i32,pub participant_user_id : i32,pub participant_username : &'a str,pub participant_avatar_key : &'a str,pub message_id : Option<i32>,pub message_text : Option<&'a str>,pub message_created_at : Option<time::OffsetDateTime>,pub message_updated_at : Option<time::OffsetDateTime>,pub reply_message_id : Option<i32>,pub message_attachments : cornucopia_async::ArrayIterator<'a, &'a str>,pub service_id : Option<i32>,pub service_name : Option<&'a str>,pub service_cover_key : Option<&'a str>,pub offer_id : Option<i32>,pub offer_text : Option<&'a str>,pub offer_price : Option<rust_decimal::Decimal>,pub offer_delivery_date : Option<time::OffsetDateTime>,pub offer_free_revisions : Option<i32>,pub offer_revision_price : Option<rust_decimal::Decimal>,} impl < 'a > From < ListConversationByIdBorrowed <
+{ pub conversation_id : i32,pub participant_user_id : i32,pub participant_username : String,pub participant_avatar_key : String,pub message_id : Option<i32>,pub message_text : Option<String>,pub message_created_at : Option<time::OffsetDateTime>,pub message_updated_at : Option<time::OffsetDateTime>,pub reply_message_id : Option<i32>,pub message_attachments : Option<Vec<String>>,pub service_id : Option<i32>,pub service_name : Option<String>,pub service_cover_key : Option<String>,pub offer_id : Option<i32>,pub offer_text : Option<String>,pub offer_price : Option<rust_decimal::Decimal>,pub offer_delivery_date : Option<time::OffsetDateTime>,pub offer_free_revisions : Option<i32>,pub offer_revision_price : Option<rust_decimal::Decimal>,}pub struct ListConversationByIdBorrowed < 'a >
+{ pub conversation_id : i32,pub participant_user_id : i32,pub participant_username : &'a str,pub participant_avatar_key : &'a str,pub message_id : Option<i32>,pub message_text : Option<&'a str>,pub message_created_at : Option<time::OffsetDateTime>,pub message_updated_at : Option<time::OffsetDateTime>,pub reply_message_id : Option<i32>,pub message_attachments : Option<cornucopia_async::ArrayIterator<'a, &'a str>>,pub service_id : Option<i32>,pub service_name : Option<&'a str>,pub service_cover_key : Option<&'a str>,pub offer_id : Option<i32>,pub offer_text : Option<&'a str>,pub offer_price : Option<rust_decimal::Decimal>,pub offer_delivery_date : Option<time::OffsetDateTime>,pub offer_free_revisions : Option<i32>,pub offer_revision_price : Option<rust_decimal::Decimal>,} impl < 'a > From < ListConversationByIdBorrowed <
 'a >> for ListConversationById
 {
     fn
     from(ListConversationByIdBorrowed { conversation_id,participant_user_id,participant_username,participant_avatar_key,message_id,message_text,message_created_at,message_updated_at,reply_message_id,message_attachments,service_id,service_name,service_cover_key,offer_id,offer_text,offer_price,offer_delivery_date,offer_free_revisions,offer_revision_price,} : ListConversationByIdBorrowed < 'a >)
-    -> Self { Self { conversation_id,participant_user_id,participant_username: participant_username.into(),participant_avatar_key: participant_avatar_key.into(),message_id,message_text: message_text.map(|v| v.into()),message_created_at,message_updated_at,reply_message_id,message_attachments: message_attachments.map(|v| v.into()).collect(),service_id,service_name: service_name.map(|v| v.into()),service_cover_key: service_cover_key.map(|v| v.into()),offer_id,offer_text: offer_text.map(|v| v.into()),offer_price,offer_delivery_date,offer_free_revisions,offer_revision_price,} }
+    -> Self { Self { conversation_id,participant_user_id,participant_username: participant_username.into(),participant_avatar_key: participant_avatar_key.into(),message_id,message_text: message_text.map(|v| v.into()),message_created_at,message_updated_at,reply_message_id,message_attachments: message_attachments.map(|v| v.map(|v| v.into()).collect()),service_id,service_name: service_name.map(|v| v.into()),service_cover_key: service_cover_key.map(|v| v.into()),offer_id,offer_text: offer_text.map(|v| v.into()),offer_price,offer_delivery_date,offer_free_revisions,offer_revision_price,} }
 }pub struct ListConversationByIdQuery < 'a, C : GenericClient, T, const N : usize >
 {
     client : & 'a  C, params :
@@ -1356,7 +1356,7 @@ GetConversationsEntries, 1 >
     msg.created_at as message_created_at,
     msg.updated_at as message_updated_at,
     msg.messages_id as reply_message_id,
-    ARRAY_AGG(DISTINCT obj3.key) as message_attachments,
+    ARRAY_AGG(DISTINCT obj3.key) FILTER (WHERE obj3.key IS NOT NULL) as message_attachments,
     serv.id as service_id,
     serv.name as service_name,
     obj2.key as service_cover_key,
@@ -1370,7 +1370,7 @@ FROM
     conversations conv
 LEFT JOIN participants part ON part.conversations_id = conv.id
 LEFT JOIN users usr ON part.users_id = usr.id
-LEFT JOIN messages msg ON msg.conversations_id = conv.id
+LEFT JOIN messages msg ON msg.conversations_id = conv.id AND msg.users_id = part.users_id
 LEFT JOIN offers off ON off.conversations_id = conv.id
 LEFT JOIN services serv ON serv.id = COALESCE(msg.services_id, off.services_id)
 LEFT JOIN objects obj ON obj.avatar_users_id = usr.id
