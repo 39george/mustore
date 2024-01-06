@@ -2,28 +2,42 @@ import styles from "./Carousel.module.scss";
 import React, { FC, useEffect, useMemo, useRef, useState } from "react";
 import { GoChevronDown } from "react-icons/go";
 import CarouselItem from "./CarouselItem";
-import { carousel_items_rec } from "./content_dummies";
-
-interface CarouselProps {
-  carousel_type: "recommendations" | "new";
-}
+import { CarouselProps } from "../../../../types/types";
 
 interface ClassNames {
   carousel_container: string;
   carousel_inner: string;
 }
 
-const Carousel: FC<CarouselProps> = ({ carousel_type }) => {
+const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
   const [current_index, set_current_index] = useState(0);
   const [container_width, set_container_widht] = useState(0);
   const [items_per_slide, set_items_per_slide] = useState(1);
-  const MIN_ITEMS_PER_SLIDE = 1;
-  const MAX_ITEMS_PER_SLIDE = 6;
+  const config = useMemo(() => {
+    let config = {
+      MIN_ITEMS_PER_SLIDE: 1,
+      MAX_ITEMS_PER_SLIDE: 6,
+      ITEM_WIDTH: 172,
+      TOTAL_CONTENT_WIDTH: 0,
+      RIGHT_MARGIN: 28,
+    };
+
+    switch (carousel_type) {
+      case "recommended":
+        config.TOTAL_CONTENT_WIDTH = carousel_items.length * config.ITEM_WIDTH;
+        break;
+      case "new":
+        config.MAX_ITEMS_PER_SLIDE = 3;
+        config.ITEM_WIDTH = 340;
+        config.TOTAL_CONTENT_WIDTH =
+          Math.ceil(carousel_items.length / 2) * config.ITEM_WIDTH - 36;
+    }
+
+    return config;
+  }, [carousel_type]);
   const MAX_INDEX =
-    carousel_items_rec.length -
-    (carousel_items_rec.length % items_per_slide || items_per_slide);
-  const ITEM_WIDTH = 172;
-  const RIGHT_MARGIN = 28;
+    carousel_items.length -
+    (carousel_items.length % items_per_slide || items_per_slide);
   const [is_next_hovered, set_is_next_hovered] = useState(false);
   const carousel_ref = useRef<HTMLDivElement>(null);
   const class_names = useMemo<ClassNames>(() => {
@@ -33,11 +47,11 @@ const Carousel: FC<CarouselProps> = ({ carousel_type }) => {
     };
 
     switch (carousel_type) {
-      case "recommendations":
+      case "recommended":
         break;
       case "new":
-        base_class_names.carousel_container += `${styles.carousel_container_new}`;
-        base_class_names.carousel_inner += `${styles.carousel_inner_new}`;
+        base_class_names.carousel_container += ` ${styles.carousel_container_new}`;
+        base_class_names.carousel_inner += ` ${styles.carousel_inner_new}`;
         break;
     }
 
@@ -65,11 +79,11 @@ const Carousel: FC<CarouselProps> = ({ carousel_type }) => {
 
   // Calculating new items per slide
   useEffect(() => {
-    const new_items_per_slide = Math.floor(container_width / ITEM_WIDTH);
+    const new_items_per_slide = Math.floor(container_width / config.ITEM_WIDTH);
 
     const clamped_items_per_slide = Math.max(
-      MIN_ITEMS_PER_SLIDE,
-      Math.min(new_items_per_slide, MAX_ITEMS_PER_SLIDE)
+      config.MIN_ITEMS_PER_SLIDE,
+      Math.min(new_items_per_slide, config.MAX_ITEMS_PER_SLIDE)
     );
 
     set_items_per_slide(clamped_items_per_slide);
@@ -94,10 +108,11 @@ const Carousel: FC<CarouselProps> = ({ carousel_type }) => {
 
   // Calculating translation amount
   const get_translation_amount = () => {
-    const total_content_width = carousel_items_rec.length * ITEM_WIDTH;
+    // const total_content_width = carousel_items.carousel_items.length * config.ITEM_WIDTH;
+    console.log(config.TOTAL_CONTENT_WIDTH);
     const max_translation =
-      total_content_width - container_width + RIGHT_MARGIN;
-    let translation_for_current_index = current_index * ITEM_WIDTH;
+      config.TOTAL_CONTENT_WIDTH - container_width + config.RIGHT_MARGIN;
+    let translation_for_current_index = current_index * config.ITEM_WIDTH;
     let translation = Math.min(translation_for_current_index, max_translation);
 
     return -translation;
@@ -123,20 +138,19 @@ const Carousel: FC<CarouselProps> = ({ carousel_type }) => {
       >
         <div
           className={class_names.carousel_inner}
-          style={{
-            transform: `translateX(${get_translation_amount()}px)`,
-          }}
+          style={
+            {
+              "--num-columns": `${Math.ceil(carousel_items.length / 2)}`,
+              transform: `translateX(${get_translation_amount()}px)`,
+            } as React.CSSProperties
+          }
         >
-          {carousel_items_rec.map((item) => {
+          {carousel_items.map((item) => {
             return (
               <React.Fragment key={item.id}>
                 <CarouselItem
-                  cover_url={item.cover_url}
-                  name={item.name}
-                  author={item.author}
-                  price={item.price}
-                  likes={item.likes}
-                  type={item.type}
+                  carousel_items={item}
+                  carousel_type={carousel_type}
                 />
               </React.Fragment>
             );

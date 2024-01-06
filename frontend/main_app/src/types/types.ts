@@ -21,7 +21,7 @@ export type page_names =
   | "help"
   | "about";
 
-export interface CarouselItemProps {
+export interface CarouselItem {
   id?: number;
   created_at?: Date;
   cover_url: string;
@@ -29,5 +29,9 @@ export interface CarouselItemProps {
   author: string;
   likes: number;
   price: number;
-  type: "recommended" | "new";
+}
+
+export interface CarouselProps {
+  carousel_type: "recommended" | "new";
+  carousel_items: CarouselItem[];
 }

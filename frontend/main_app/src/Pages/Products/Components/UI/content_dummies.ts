@@ -1,4 +1,4 @@
-import { CarouselItemProps } from "../../../../types/types";
+import { CarouselItem } from "../../../../types/types";
 import cover_1 from "../../../../assets/HomePage/album_covers/ablum_cover_1.png";
 import cover_2 from "../../../../assets/HomePage/album_covers/ablum_cover_2.png";
 import cover_3 from "../../../../assets/HomePage/album_covers/ablum_cover_3.png";
@@ -8,7 +8,7 @@ import cover_6 from "../../../../assets/HomePage/album_covers/ablum_cover_6.png"
 import cover_7 from "../../../../assets/HomePage/album_covers/ablum_cover_7.png";
 import cover_8 from "../../../../assets/HomePage/album_covers/ablum_cover_8.png";
 
-export const carousel_items_rec: CarouselItemProps[] = [
+export const carousel_items_rec: CarouselItem[] = [
   {
     id: 1,
     cover_url: cover_1,
@@ -16,7 +16,6 @@ export const carousel_items_rec: CarouselItemProps[] = [
     author: "ALENA NAI",
     price: 100_000,
     likes: 49,
-    type: "recommended",
   },
   {
     id: 2,
@@ -25,7 +24,6 @@ export const carousel_items_rec: CarouselItemProps[] = [
     author: "KartenMusic",
     price: 70_000,
     likes: 35,
-    type: "recommended",
   },
   {
     id: 3,
@@ -34,7 +32,6 @@ export const carousel_items_rec: CarouselItemProps[] = [
     author: "Camely",
     price: 90_000,
     likes: 32,
-    type: "recommended",
   },
   {
     id: 4,
@@ -43,7 +40,6 @@ export const carousel_items_rec: CarouselItemProps[] = [
     author: "Atires",
     price: 60_000,
     likes: 29,
-    type: "recommended",
   },
   {
     id: 5,
@@ -52,7 +48,6 @@ export const carousel_items_rec: CarouselItemProps[] = [
     author: "SIBERD",
     price: 30_000,
     likes: 13,
-    type: "recommended",
   },
   {
     id: 6,
@@ -61,7 +56,6 @@ export const carousel_items_rec: CarouselItemProps[] = [
     author: "Ababbul",
     price: 56_000,
     likes: 21,
-    type: "recommended",
   },
   {
     id: 7,
@@ -70,7 +64,6 @@ export const carousel_items_rec: CarouselItemProps[] = [
     author: "ALENA NAI",
     price: 100_000,
     likes: 49,
-    type: "recommended",
   },
   {
     id: 8,
@@ -79,7 +72,6 @@ export const carousel_items_rec: CarouselItemProps[] = [
     author: "KartenMusic",
     price: 70_000,
     likes: 35,
-    type: "recommended",
   },
   {
     id: 9,
@@ -88,7 +80,6 @@ export const carousel_items_rec: CarouselItemProps[] = [
     author: "Camely",
     price: 90_000,
     likes: 32,
-    type: "recommended",
   },
   {
     id: 10,
@@ -97,7 +88,6 @@ export const carousel_items_rec: CarouselItemProps[] = [
     author: "Atires",
     price: 60_000,
     likes: 29,
-    type: "recommended",
   },
   {
     id: 11,
@@ -106,7 +96,6 @@ export const carousel_items_rec: CarouselItemProps[] = [
     author: "SIBERD",
     price: 30_000,
     likes: 13,
-    type: "recommended",
   },
   {
     id: 12,
@@ -115,7 +104,6 @@ export const carousel_items_rec: CarouselItemProps[] = [
     author: "Ababbul",
     price: 56_000,
     likes: 21,
-    type: "recommended",
   },
   {
     id: 13,
@@ -124,7 +112,6 @@ export const carousel_items_rec: CarouselItemProps[] = [
     author: "Ababbul",
     price: 56_000,
     likes: 21,
-    type: "recommended",
   },
   {
     id: 14,
@@ -133,7 +120,6 @@ export const carousel_items_rec: CarouselItemProps[] = [
     author: "ALENA NAI",
     price: 100_000,
     likes: 49,
-    type: "recommended",
   },
   {
     id: 15,
@@ -142,6 +128,128 @@ export const carousel_items_rec: CarouselItemProps[] = [
     author: "KartenMusic",
     price: 70_000,
     likes: 35,
-    type: "recommended",
+  },
+];
+
+export const carousel_items_new: CarouselItem[] = [
+  {
+    id: 1,
+    cover_url: cover_1,
+    name: "Будь рядом",
+    author: "ALENA NAI",
+    price: 100_000,
+    likes: 49,
+  },
+  {
+    id: 2,
+    cover_url: cover_2,
+    name: "Закат",
+    author: "KartenMusic",
+    price: 70_000,
+    likes: 35,
+  },
+  {
+    id: 3,
+    cover_url: cover_3,
+    name: "Ночные часы",
+    author: "Camely",
+    price: 90_000,
+    likes: 32,
+  },
+  {
+    id: 4,
+    cover_url: cover_4,
+    name: "Забуду тебя",
+    author: "Atires",
+    price: 60_000,
+    likes: 29,
+  },
+  {
+    id: 5,
+    cover_url: cover_5,
+    name: "В окне",
+    author: "SIBERD",
+    price: 30_000,
+    likes: 13,
+  },
+  {
+    id: 6,
+    cover_url: cover_6,
+    name: "Вечером одна",
+    author: "Ababbul",
+    price: 56_000,
+    likes: 21,
+  },
+  {
+    id: 7,
+    cover_url: cover_7,
+    name: "Будь рядом",
+    author: "ALENA NAI",
+    price: 100_000,
+    likes: 49,
+  },
+  {
+    id: 8,
+    cover_url: cover_8,
+    name: "Закат",
+    author: "KartenMusic",
+    price: 70_000,
+    likes: 35,
+  },
+  {
+    id: 9,
+    cover_url: cover_3,
+    name: "Ночные часы",
+    author: "Camely",
+    price: 90_000,
+    likes: 32,
+  },
+  {
+    id: 10,
+    cover_url: cover_4,
+    name: "Забуду тебя",
+    author: "Atires",
+    price: 60_000,
+    likes: 29,
+  },
+  {
+    id: 11,
+    cover_url: cover_5,
+    name: "В окне",
+    author: "SIBERD",
+    price: 30_000,
+    likes: 13,
+  },
+  {
+    id: 12,
+    cover_url: cover_6,
+    name: "Вечером одна",
+    author: "Ababbul",
+    price: 56_000,
+    likes: 21,
+  },
+  {
+    id: 13,
+    cover_url: cover_1,
+    name: "Вечером одна",
+    author: "Ababbul",
+    price: 56_000,
+    likes: 21,
+  },
+  {
+    id: 14,
+    cover_url: cover_7,
+    name: "Будь рядом",
+    author: "ALENA NAI",
+    price: 100_000,
+    likes: 49,
+  },
+  {
+    id: 15,
+    cover_url: cover_8,
+    name: "Закат",
+    author: "KartenMusic",
+    price: 70_000,
+    likes: 35,
   },
 ];

@@ -8,6 +8,8 @@ import stars from "../../../assets/svg/recommendations.svg";
 import fire from "../../../assets/svg/fire.svg";
 import { FC } from "react";
 import Carousel from "./UI/Carousel";
+import { carousel_items_rec } from "./UI/content_dummies";
+import { carousel_items_new } from "./UI/content_dummies";
 
 interface ContentSectionProps {
   section_type: "beats" | "covers" | "songs" | "texts";
@@ -35,7 +37,6 @@ const ContentSection: FC<ContentSectionProps> = ({ section_type }) => {
       break;
     case "songs":
       section_props.section_name = "песен";
-      section_props.underline = underline_red;
       break;
     case "texts":
       section_props.section_name = "текстов";
@@ -76,7 +77,24 @@ const ContentSection: FC<ContentSectionProps> = ({ section_type }) => {
                 className={styles.title_icon}
               />
             </div>
-            <Carousel carousel_type="recommendations" />
+            <Carousel
+              carousel_type="recommended"
+              carousel_items={carousel_items_rec}
+            />
+          </div>
+          <div className={styles.new_block}>
+            <div className={styles.title}>
+              <h2 className={styles.h2}>Новинки</h2>
+              <img
+                src={fire}
+                alt="fire"
+                className={styles.title_icon}
+              />
+            </div>
+            <Carousel
+              carousel_type="new"
+              carousel_items={carousel_items_new}
+            />
           </div>
         </div>
       )}

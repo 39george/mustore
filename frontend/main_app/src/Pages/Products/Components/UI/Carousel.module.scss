@@ -1,5 +1,6 @@
 @import "../../../../colors.scss";
 
+// Default styles (ref - type "recommended")
 .carousel_container {
   display: flex;
   align-items: center;
@@ -94,4 +95,12 @@
   &:hover {
     text-decoration: underline;
   }
+}
+
+// Styles for type "new"
+.carousel_inner_new {
+  display: grid;
+  grid-template-columns: repeat(var(--num-columns), 276px);
+  grid-template-rows: 44px 44px;
+  gap: 2rem 4rem;
 }
