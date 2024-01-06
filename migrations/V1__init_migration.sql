@@ -158,6 +158,8 @@ CREATE TABLE songs (
     sex VARCHAR(6) NOT NULL CHECK (sex IN ('male', 'female')),
     tempo SMALLINT NOT NULL,
     key MusicKey NOT NULL,
+    -- Duration is for the check_last_listening_duration() fn
+    -- In seconds
     duration SMALLINT NOT NULL,
     lyric VARCHAR(1000) NOT NULL
 );
@@ -169,6 +171,8 @@ CREATE TABLE beats (
     secondary_genre INTEGER REFERENCES genres(id) ON DELETE RESTRICT,
     tempo SMALLINT NOT NULL,
     key MusicKey NOT NULL,
+    -- Duration is for the check_last_listening_duration() fn
+    -- In seconds
     duration REAL NOT NULL
 );
 
@@ -570,11 +574,14 @@ CREATE TABLE bans (
 
 -- Functions
 
-CREATE OR REPLACE FUNCTION check_last_listening_duration() RETURNS TRIGGER AS $$
+-- Function to prevent inserting listenings too frequently
+CREATE OR REPLACE FUNCTION check_last_listening_duration()
+RETURNS TRIGGER AS $$
 DECLARE
     last_listening_time TIMESTAMP;
     v_duration REAL;
 BEGIN
+    -- Collect duration
     IF NEW.songs_id IS NOT NULL THEN
         SELECT MAX(created_at) INTO last_listening_time
         FROM listenings
@@ -593,6 +600,7 @@ BEGIN
         WHERE id = NEW.beats_id;
     END IF;
 
+    -- Check
     IF last_listening_time + (INTERVAL '1 second' * v_duration) > NEW.created_at THEN
         RAISE EXCEPTION 'Cannot insert a new listening for the same user and song/beat if the time elapsed since the last listening is less than the duration of the song/beat.';
     END IF;
@@ -600,57 +608,37 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
-
 CREATE TRIGGER check_last_listening_duration_trigger
 BEFORE INSERT ON listenings
 FOR EACH ROW
 EXECUTE FUNCTION check_last_listening_duration();
 
-CREATE OR REPLACE FUNCTION check_conversations_id()
+-- Functions to check that for each image row, there are
+-- existing row in the objects table which IS avatar object key.
+CREATE OR REPLACE FUNCTION validate_avatar_users_id()
 RETURNS TRIGGER AS $$
 BEGIN
-    IF NEW.conversations_id IS NULL THEN
-        RETURN NEW;
+    IF NEW.objects_id IS NOT NULL THEN
+        IF NOT EXISTS (
+            SELECT 1
+            FROM objects
+            WHERE id = NEW.objects_id
+            AND avatar_users_id IS NOT NULL
+        ) THEN
+            RAISE EXCEPTION 'Invalid avatar_users_id';
+        END IF;
     END IF;
-
-    IF EXISTS (
-        SELECT 1 FROM messages WHERE id = NEW.messages_id AND conversations_id = NEW.conversations_id
-    ) THEN
-        RETURN NEW;
-    ELSE
-        RAISE EXCEPTION 'Invalid conversations_id';
-    END IF;
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
-
-CREATE TRIGGER check_conversations_id_trigger
-BEFORE INSERT OR UPDATE ON messages
-FOR EACH ROW EXECUTE FUNCTION check_conversations_id();
-
-CREATE OR REPLACE FUNCTION validate_avatar_users_id()
-    RETURNS TRIGGER AS $$
-    BEGIN
-        IF NEW.objects_id IS NOT NULL THEN
-            IF NOT EXISTS (
-                SELECT 1
-                FROM objects
-                WHERE id = NEW.objects_id
-                AND avatar_users_id IS NOT NULL
-            ) THEN
-                RAISE EXCEPTION 'Invalid avatar_users_id';
-            END IF;
-        END IF;
-        RETURN NEW;
-    END;
-$$ LANGUAGE plpgsql;
-
 CREATE TRIGGER check_avatar_users_id
-    BEFORE INSERT OR UPDATE ON images
-    FOR EACH ROW
-    EXECUTE FUNCTION validate_avatar_users_id();
+BEFORE INSERT OR UPDATE ON images
+FOR EACH ROW
+EXECUTE FUNCTION validate_avatar_users_id();
 
-CREATE OR REPLACE FUNCTION check_cover_credits_cover_design_limit()
-    RETURNS TRIGGER AS $$
+-- Function for checking limits for credits objects 
+CREATE OR REPLACE FUNCTION check_credits_limit()
+RETURNS TRIGGER AS $$
 BEGIN
     IF NEW.cover_credits_cover_design_id IS NOT NULL THEN
         IF (SELECT COUNT(*) FROM objects WHERE cover_credits_cover_design_id = NEW.cover_credits_cover_design_id) >= 3 THEN
@@ -679,12 +667,12 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
-
-CREATE TRIGGER enforce_cover_credits_cover_design_limit
+CREATE TRIGGER enforce_credits_limit
 BEFORE INSERT OR UPDATE ON objects
 FOR EACH ROW
-EXECUTE FUNCTION check_cover_credits_cover_design_limit();
+EXECUTE FUNCTION check_credits_limit();
 
+-- Check maximum moods count for product
 CREATE OR REPLACE FUNCTION check_moods_limit()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -701,21 +689,31 @@ BEGIN
         END IF;
     END IF;
 
-    -- Check mood count when deleting a mood
-    IF TG_OP = 'DELETE' THEN
-        SELECT COUNT(*) INTO mood_count
-        FROM products_moods
-        WHERE products_id = OLD.products_id;
-
-        IF mood_count <= 1 THEN
-            RAISE EXCEPTION 'A product must have at least 1 mood.';
-        END IF;
-    END IF;
-
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
-
 CREATE TRIGGER trg_check_mood_limit
 BEFORE INSERT OR DELETE ON products_moods
 FOR EACH ROW EXECUTE FUNCTION check_moods_limit();
+
+-- We only can reference messages in the same conversation (service order) 
+-- Check that.
+CREATE OR REPLACE FUNCTION check_conversations_id()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.messages_id IS NULL THEN
+        RETURN NEW;
+    END IF;
+
+    IF EXISTS (
+        SELECT 1 FROM messages WHERE id = NEW.messages_id AND conversations_id = NEW.conversations_id OR service_orders_id = NEW.service_orders_id
+    ) THEN
+        RETURN NEW;
+    ELSE
+        RAISE EXCEPTION 'Invalid conversations_id, or service_orders_id';
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+CREATE TRIGGER check_conversations_id_trigger
+BEFORE INSERT OR UPDATE ON messages
+FOR EACH ROW EXECUTE FUNCTION check_conversations_id();
