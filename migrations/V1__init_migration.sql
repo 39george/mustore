@@ -173,7 +173,7 @@ CREATE TABLE beats (
     key MusicKey NOT NULL,
     -- Duration is for the check_last_listening_duration() fn
     -- In seconds
-    duration REAL NOT NULL
+    duration SMALLINT NOT NULL
 );
 
 CREATE TABLE lyrics (

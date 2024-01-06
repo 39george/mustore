@@ -109,6 +109,30 @@ VALUES (
 )
 RETURNING id;
 
+--! insert_beat_and_get_beat_id (secondary_genre?)
+INSERT INTO beats (
+    products_id,
+    primary_genre,
+    secondary_genre,
+    tempo,
+    key,
+    duration
+)
+VALUES (
+    :product_id,
+    (SELECT id FROM genres WHERE name = :primary_genre),
+    (
+        CASE
+            WHEN :secondary_genre::VARCHAR(50) IS NOT NULL THEN
+                (SELECT id FROM genres WHERE name = :secondary_genre)
+        END
+    ),
+    :tempo,
+    :key,
+    :duration
+)
+RETURNING id;
+
 --! insert_music_product_master_object_key (song_id?, beat_id?)
 INSERT INTO objects(key, object_type, master_songs_id, master_beats_id)
 VALUES (:key, 'audio', :song_id, :beat_id);

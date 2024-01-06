@@ -6,4 +6,4 @@ mod health_check;
 mod helpers;
 mod login;
 mod signup;
-mod upload_song;
+mod upload;

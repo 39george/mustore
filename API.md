@@ -147,28 +147,54 @@ if Err:
 
 ### Creator routes
 
-- Submit a new song:
+- Submit a new music product (song / beat):
 ```
 → TO
-POST /api/protected/creator/submit_song
-Json: {
-    song_master_object_key: String,
-    song_master_tagged_object_key: Option<String>,
-    song_multitrack_object_key: String,
-    song_cover_object_key: String,
-    name: String,
-    description: Option<String>,
-    tags: Vec<String>,
-    primary_genre: String,
-    secondary_genre: Option<String>,
-    tempo: integer,
-    duration: integer,
-    lyric: String,
-    price: decimal,
-    sex: sex,
-    key: MusicKey,
+POST /api/protected/creator/submit_music_product
+Example json:
+{
+  "Song": {
+    "lyric": "this is song's lyric. Is it long enough or not?",
+    "sex": "Female",
+    "music_product": {
+      "master_object_key": "Alycia Daniel-27402d05-a1f7-4562-a082-e6268ffe9d43-song.mp3",
+      "master_tagged_object_key": null,
+      "multitrack_object_key": "Alycia Daniel-e61dfa06-abb7-4ebd-98ab-2c9002a5e850-arch.zip",
+      "cover_object_key": "Alycia Daniel-401ad043-994b-44f3-9458-2c0044625567-image.png",
+      "name": "some_song",
+      "description": null,
+      "moods": [
+        "веселый"
+      ],
+      "primary_genre": "Хор",
+      "secondary_genre": null,
+      "tempo": 100,
+      "duration": 30,
+      "price": "100",
+      "key": "a_major"
+    }
+  }
 }
-
+OR
+{
+  "Beat": {
+    "master_object_key": "Brandi Prosacco-cbc6fdc3-f11f-432f-85b5-0c5b50122e7e-song.mp3",
+    "master_tagged_object_key": null,
+    "multitrack_object_key": "Brandi Prosacco-421f1174-b2ce-494d-a7c0-b54d51a9a34d-arch.zip",
+    "cover_object_key": "Brandi Prosacco-b1c79d98-1257-4299-8b81-38bb4d2ddf26-image.png",
+    "name": "some_song",
+    "description": null,
+    "moods": [
+      "веселый"
+    ],
+    "primary_genre": "Хор",
+    "secondary_genre": null,
+    "tempo": 100,
+    "duration": 30,
+    "price": "100",
+    "key": "a_major"
+  }
+}
 ← FROM
 If OK, StatusCode::CREATED (201)
 if Err:

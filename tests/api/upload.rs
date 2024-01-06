@@ -61,7 +61,10 @@ async fn song_uploading_success() {
     });
 
     let response = client
-        .post(format!("{}/api/protected/creator/submit_song", app.address))
+        .post(format!(
+            "{}/api/protected/creator/submit_music_product",
+            app.address
+        ))
         .json(&body)
         .send()
         .await
@@ -103,10 +106,76 @@ async fn song_uploading_without_files_fails() {
     });
 
     let response = client
-        .post(format!("{}/api/protected/creator/submit_song", app.address))
+        .post(format!(
+            "{}/api/protected/creator/submit_music_product",
+            app.address
+        ))
         .json(&body)
         .send()
         .await
         .unwrap();
     assert_eq!(response.status().as_u16(), 417);
+}
+
+#[tokio::test]
+async fn beat_uploading_success() {
+    let app =
+        TestApp::spawn_app(Settings::load_configuration().unwrap(), 1).await;
+
+    let test_user = TestUser::generate_user(String::from("creator"), 0);
+    app.register_user(&test_user).await;
+    let client = reqwest::Client::builder()
+        .cookie_store(true)
+        .build()
+        .unwrap();
+    assert_eq!(app.login_user(&test_user, &client).await.as_u16(), 200);
+
+    let beat_file = std::fs::read("assets/song.mp3").unwrap();
+    let image_file = std::fs::read("assets/image.png").unwrap();
+    let arch_file = std::fs::read("assets/arch.zip").unwrap();
+
+    let (response, beat_key) = app
+        .upload_file(&client, "audio/mpeg", "song.mp3", beat_file)
+        .await;
+    assert_eq!(response.status().as_u16(), 200);
+
+    let (response, image_key) = app
+        .upload_file(&client, "image/png", "image.png", image_file)
+        .await;
+    assert_eq!(response.status().as_u16(), 200);
+
+    let (response, arch_key) = app
+        .upload_file(&client, "application/zip", "arch.zip", arch_file)
+        .await;
+    assert_eq!(response.status().as_u16(), 200);
+
+    let body = SubmitMusicProductRequest::Beat(MusicProduct {
+        master_object_key: beat_key,
+        master_tagged_object_key: None,
+        multitrack_object_key: arch_key,
+        cover_object_key: image_key,
+        name: "some_song".to_string(),
+        description: None,
+        moods: vec!["веселый".to_string()],
+        primary_genre: "Хор".to_string(),
+        secondary_genre: None,
+        tempo: 100,
+        duration: 30,
+        price: 100.into(),
+        key: mustore::domain::music_parameters::MusicKey::a_major,
+    });
+
+    let js = serde_json::to_string_pretty(&body).unwrap();
+    println!("{js}");
+
+    let response = client
+        .post(format!(
+            "{}/api/protected/creator/submit_music_product",
+            app.address
+        ))
+        .json(&body)
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(response.status().as_u16(), 201);
 }

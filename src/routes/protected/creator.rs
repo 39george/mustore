@@ -11,7 +11,6 @@ use fred::interfaces::KeysInterface;
 use fred::prelude::RedisResult;
 use http::StatusCode;
 use validator::Validate;
-use validator::ValidateArgs;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
@@ -56,7 +55,7 @@ impl IntoResponse for CreatorResponseError {
 pub fn creator_router() -> Router<AppState> {
     Router::new()
         .route("/health_check", routing::get(health_check))
-        .route("/submit_song", routing::post(submit_song))
+        .route("/submit_music_product", routing::post(submit_music_product))
         .route("/create_offer", routing::post(create_offer))
         .layer(permission_required!(crate::auth::users::Backend, "creator"))
 }
@@ -67,8 +66,7 @@ async fn health_check() -> StatusCode {
 }
 
 #[tracing::instrument(name = "Submit a new song", skip_all)]
-#[axum::debug_handler]
-async fn submit_song(
+async fn submit_music_product(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
     Json(req): Json<SubmitMusicProductRequest>,
@@ -125,7 +123,7 @@ async fn submit_song(
         )
         .one()
         .await
-        .context("Failed to insert song (product tab) into the pg")
+        .context("Failed to insert music product into the pg")
         .map_err(ResponseError::UnexpectedError)?;
 
     // match
@@ -145,12 +143,25 @@ async fn submit_song(
                 )
                 .one()
                 .await
-                .context("Failed to insert song (song tab) into the pg")
+                .context("Failed to insert song data into the pg")
                 .map_err(ResponseError::UnexpectedError)?;
             (None, Some(song_id))
         }
         None => {
-            let beat_id = 1;
+            let beat_id = creator_access::insert_beat_and_get_beat_id()
+                .bind(
+                    &transaction,
+                    &product_id,
+                    &music_product.primary_genre,
+                    &music_product.secondary_genre,
+                    &music_product.tempo,
+                    &music_product.key.clone().into(),
+                    &music_product.duration,
+                )
+                .one()
+                .await
+                .context("Failed to insert beat data into the pg")
+                .map_err(ResponseError::UnexpectedError)?;
             (Some(beat_id), None)
         }
     };
