@@ -29,4 +29,5 @@ export interface CarouselItemProps {
   author: string;
   likes: number;
   price: number;
+  type: "recommended" | "new";
 }

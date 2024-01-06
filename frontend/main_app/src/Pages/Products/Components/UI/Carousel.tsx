@@ -1,142 +1,16 @@
 import styles from "./Carousel.module.scss";
-import React, { FC, useEffect, useRef, useState } from "react";
-import cover_1 from "../../../../assets/HomePage/album_covers/ablum_cover_1.png";
-import cover_2 from "../../../../assets/HomePage/album_covers/ablum_cover_2.png";
-import cover_3 from "../../../../assets/HomePage/album_covers/ablum_cover_3.png";
-import cover_4 from "../../../../assets/HomePage/album_covers/ablum_cover_4.png";
-import cover_5 from "../../../../assets/HomePage/album_covers/ablum_cover_5.png";
-import cover_6 from "../../../../assets/HomePage/album_covers/ablum_cover_6.png";
-import cover_7 from "../../../../assets/HomePage/album_covers/ablum_cover_7.png";
-import cover_8 from "../../../../assets/HomePage/album_covers/ablum_cover_8.png";
+import React, { FC, useEffect, useMemo, useRef, useState } from "react";
 import { GoChevronDown } from "react-icons/go";
-import { CarouselItemProps } from "../../../../types/types";
 import CarouselItem from "./CarouselItem";
-
-const carousel_items: CarouselItemProps[] = [
-  {
-    id: 1,
-    cover_url: cover_1,
-    name: "Будь рядом",
-    author: "ALENA NAI",
-    price: 100_000,
-    likes: 49,
-  },
-  {
-    id: 2,
-    cover_url: cover_2,
-    name: "Закат",
-    author: "KartenMusic",
-    price: 70_000,
-    likes: 35,
-  },
-  {
-    id: 3,
-    cover_url: cover_3,
-    name: "Ночные часы",
-    author: "Camely",
-    price: 90_000,
-    likes: 32,
-  },
-  {
-    id: 4,
-    cover_url: cover_4,
-    name: "Забуду тебя",
-    author: "Atires",
-    price: 60_000,
-    likes: 29,
-  },
-  {
-    id: 5,
-    cover_url: cover_5,
-    name: "В окне",
-    author: "SIBERD",
-    price: 30_000,
-    likes: 13,
-  },
-  {
-    id: 6,
-    cover_url: cover_6,
-    name: "Вечером одна",
-    author: "Ababbul",
-    price: 56_000,
-    likes: 21,
-  },
-  {
-    id: 7,
-    cover_url: cover_7,
-    name: "Будь рядом",
-    author: "ALENA NAI",
-    price: 100_000,
-    likes: 49,
-  },
-  {
-    id: 8,
-    cover_url: cover_8,
-    name: "Закат",
-    author: "KartenMusic",
-    price: 70_000,
-    likes: 35,
-  },
-  {
-    id: 9,
-    cover_url: cover_3,
-    name: "Ночные часы",
-    author: "Camely",
-    price: 90_000,
-    likes: 32,
-  },
-  {
-    id: 10,
-    cover_url: cover_4,
-    name: "Забуду тебя",
-    author: "Atires",
-    price: 60_000,
-    likes: 29,
-  },
-  {
-    id: 11,
-    cover_url: cover_5,
-    name: "В окне",
-    author: "SIBERD",
-    price: 30_000,
-    likes: 13,
-  },
-  {
-    id: 12,
-    cover_url: cover_6,
-    name: "Вечером одна",
-    author: "Ababbul",
-    price: 56_000,
-    likes: 21,
-  },
-  {
-    id: 13,
-    cover_url: cover_1,
-    name: "Вечером одна",
-    author: "Ababbul",
-    price: 56_000,
-    likes: 21,
-  },
-  {
-    id: 14,
-    cover_url: cover_7,
-    name: "Будь рядом",
-    author: "ALENA NAI",
-    price: 100_000,
-    likes: 49,
-  },
-  {
-    id: 15,
-    cover_url: cover_8,
-    name: "Закат",
-    author: "KartenMusic",
-    price: 70_000,
-    likes: 35,
-  },
-];
+import { carousel_items_rec } from "./content_dummies";
 
 interface CarouselProps {
   carousel_type: "recommendations" | "new";
+}
+
+interface ClassNames {
+  carousel_container: string;
+  carousel_inner: string;
 }
 
 const Carousel: FC<CarouselProps> = ({ carousel_type }) => {
@@ -146,16 +20,29 @@ const Carousel: FC<CarouselProps> = ({ carousel_type }) => {
   const MIN_ITEMS_PER_SLIDE = 1;
   const MAX_ITEMS_PER_SLIDE = 6;
   const MAX_INDEX =
-    carousel_items.length -
-    (carousel_items.length % items_per_slide || items_per_slide);
+    carousel_items_rec.length -
+    (carousel_items_rec.length % items_per_slide || items_per_slide);
   const ITEM_WIDTH = 172;
   const RIGHT_MARGIN = 28;
   const [is_next_hovered, set_is_next_hovered] = useState(false);
   const carousel_ref = useRef<HTMLDivElement>(null);
+  const class_names = useMemo<ClassNames>(() => {
+    const base_class_names: ClassNames = {
+      carousel_container: `${styles.carousel_container}`,
+      carousel_inner: `${styles.carousel_inner}`,
+    };
 
-  const handle_next_button_hover = (hovered: boolean) => {
-    set_is_next_hovered(hovered);
-  };
+    switch (carousel_type) {
+      case "recommendations":
+        break;
+      case "new":
+        base_class_names.carousel_container += `${styles.carousel_container_new}`;
+        base_class_names.carousel_inner += `${styles.carousel_inner_new}`;
+        break;
+    }
+
+    return base_class_names;
+  }, [carousel_type]);
 
   // Updating container_width
   const update_container_width = () => {
@@ -207,7 +94,7 @@ const Carousel: FC<CarouselProps> = ({ carousel_type }) => {
 
   // Calculating translation amount
   const get_translation_amount = () => {
-    const total_content_width = carousel_items.length * ITEM_WIDTH;
+    const total_content_width = carousel_items_rec.length * ITEM_WIDTH;
     const max_translation =
       total_content_width - container_width + RIGHT_MARGIN;
     let translation_for_current_index = current_index * ITEM_WIDTH;
@@ -219,7 +106,7 @@ const Carousel: FC<CarouselProps> = ({ carousel_type }) => {
   // Rendering component
   return (
     <div
-      className={styles.carousel_container}
+      className={class_names.carousel_container}
       ref={carousel_ref}
     >
       {current_index !== 0 && (
@@ -235,12 +122,12 @@ const Carousel: FC<CarouselProps> = ({ carousel_type }) => {
         style={{ transform: `${is_next_hovered ? "translateX(-20px)" : ""}` }}
       >
         <div
-          className={styles.carousel_inner}
+          className={class_names.carousel_inner}
           style={{
             transform: `translateX(${get_translation_amount()}px)`,
           }}
         >
-          {carousel_items.map((item) => {
+          {carousel_items_rec.map((item) => {
             return (
               <React.Fragment key={item.id}>
                 <CarouselItem
@@ -249,6 +136,7 @@ const Carousel: FC<CarouselProps> = ({ carousel_type }) => {
                   author={item.author}
                   price={item.price}
                   likes={item.likes}
+                  type={item.type}
                 />
               </React.Fragment>
             );
@@ -259,8 +147,8 @@ const Carousel: FC<CarouselProps> = ({ carousel_type }) => {
         <div
           className={styles.next_button}
           onClick={handle_next}
-          onMouseEnter={() => handle_next_button_hover(true)}
-          onMouseLeave={() => handle_next_button_hover(false)}
+          onMouseEnter={() => set_is_next_hovered(true)}
+          onMouseLeave={() => set_is_next_hovered(false)}
         >
           <GoChevronDown className={styles.next_chevron} />
         </div>
