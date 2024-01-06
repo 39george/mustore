@@ -35,55 +35,70 @@ impl<T> UnpackOption for Option<T> {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct Interlocutor {
-    username: String,
-    id: i32,
-    avatar_url: String,
+pub struct Interlocutor {
+    pub username: String,
+    pub id: i32,
+    pub avatar_url: String,
+}
+
+#[derive(Eq, PartialEq, Serialize, Deserialize, Debug)]
+pub struct ServiceData {
+    pub service_name: String,
+    pub service_cover_url: String,
+    pub service_id: i32,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct ServiceData {
-    service_name: String,
-    service_cover_url: String,
-    service_id: i32,
+pub struct Message {
+    pub message_id: i32,
+    pub interlocutor_id: i32,
+    pub text: String,
+    pub created_at: OffsetDateTime,
+    pub updated_at: OffsetDateTime,
+    pub service: Option<ServiceData>,
+    pub reply_message_id: Option<i32>,
+    pub attachments: Option<Vec<String>>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct Message {
-    message_id: i32,
-    interlocutor_id: i32,
-    text: String,
-    created_at: OffsetDateTime,
-    updated_at: OffsetDateTime,
-    service: Option<ServiceData>,
-    reply_message_id: Option<i32>,
-    attachments: Vec<String>,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-struct Offer {
-    text: String,
-    offer_id: i32,
-    interlocutor_id: i32,
-    service: ServiceData,
-    price: Decimal,
-    delivery_date: OffsetDateTime,
-    free_revisions: i32,
-    revision_price: Decimal,
+pub struct Offer {
+    pub text: String,
+    pub offer_id: i32,
+    pub interlocutor_id: i32,
+    pub service: ServiceData,
+    pub price: Decimal,
+    pub delivery_date: OffsetDateTime,
+    pub free_revisions: i32,
+    pub revision_price: Decimal,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(tag = "entry_type", rename_all = "camelCase")]
-enum Entry {
+pub enum Entry {
     Message(Message),
     Offer(Offer),
 }
 
+impl Entry {
+    pub fn message(self) -> Message {
+        match self {
+            Entry::Message(m) => m,
+            Entry::Offer(o) => panic!("Trying unwrap offer from message"),
+        }
+    }
+    pub fn offer(self) -> Offer {
+        match self {
+            Entry::Message(m) => panic!("Trying unwrap message from offer"),
+            Entry::Offer(o) => o,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ConversationDataResponse {
-    self_user_id: i32,
-    interlocutors: HashMap<i32, Interlocutor>,
-    entries: Vec<Entry>,
+    pub self_user_id: i32,
+    pub interlocutors: HashMap<i32, Interlocutor>,
+    pub entries: Vec<Entry>,
 }
 
 #[derive(thiserror::Error)]
@@ -133,14 +148,17 @@ impl ConversationDataResponse {
                 presigned_urls.insert(cover_key.clone(), url);
             }
             if let Some(message_id) = data.message_id {
-                let mut attachments = Vec::new();
-                for key in &data.message_attachments {
-                    let url = object_storage
-                        .generate_presigned_url(&key, expiration)
-                        .await?;
-                    attachments.push(url);
+                if let Some(ref data_attachments) = data.message_attachments {
+                    let mut attachments_unpacked = Vec::new();
+                    for key in data_attachments {
+                        let url = object_storage
+                            .generate_presigned_url(&key, expiration)
+                            .await?;
+                        attachments_unpacked.push(url);
+                    }
+                    message_attachments
+                        .insert(message_id, attachments_unpacked);
                 }
-                message_attachments.insert(message_id, attachments);
             }
         }
 
@@ -191,11 +209,7 @@ impl ConversationDataResponse {
                     )?,
                     service,
                     reply_message_id: data.reply_message_id,
-                    attachments: message_attachments
-                        .remove(&message_id)
-                        .unpack(
-                            "message id is presented, but attachments are not",
-                        )?,
+                    attachments: message_attachments.remove(&message_id),
                 }));
             } else if let Some(offer_id) = data.offer_id {
                 entries.push(Entry::Offer(Offer {

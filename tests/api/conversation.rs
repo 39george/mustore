@@ -2,23 +2,135 @@
 
 use crate::helpers::{TestApp, TestUser};
 use mustore::{
-    config::Settings, domain::requests::creator_access::SubmitSongRequest,
+    config::Settings,
+    domain::{
+        requests::{
+            creator_access::SubmitSongRequest, user_access::SendMessageRequest,
+        },
+        responses::user_access::ConversationDataResponse,
+    },
 };
 
 #[tokio::test]
-async fn send_message_success() {
+async fn send_messages_in_two_directions_success() {
     let app =
         TestApp::spawn_app(Settings::load_configuration().unwrap(), 2).await;
 
-    let test_user1 = TestUser::generate_user(String::from("creator"), 0);
-    let test_user2 = TestUser::generate_user(String::from("consumer"), 1);
-    dbg!(&test_user1);
-    dbg!(&test_user2);
+    // Register users
+    let user1 = TestUser::generate_user(String::from("creator"), 0);
+    let user2 = TestUser::generate_user(String::from("consumer"), 1);
+    assert_eq!(app.register_user(&user1).await.as_u16(), 200);
+    assert_eq!(app.register_user(&user2).await.as_u16(), 200);
 
-    assert_eq!(app.register_user(&test_user1).await.as_u16(), 200);
-    assert_eq!(app.register_user(&test_user2).await.as_u16(), 200);
-    // let client = reqwest::Client::builder()
-    //     .cookie_store(true)
-    //     .build()
-    //     .unwrap();
+    // Get users id
+    let user1_id: i32 = app
+        .pg_client
+        .query_one(
+            "SELECT id FROM users WHERE username = $1",
+            &[&user1.username],
+        )
+        .await
+        .unwrap()
+        .get(0);
+    let user2_id: i32 = app
+        .pg_client
+        .query_one(
+            "SELECT id FROM users WHERE username = $1",
+            &[&user2.username],
+        )
+        .await
+        .unwrap()
+        .get(0);
+
+    // Login http clients on server
+    let client1 = reqwest::Client::builder()
+        .cookie_store(true)
+        .build()
+        .unwrap();
+    let client2 = reqwest::Client::builder()
+        .cookie_store(true)
+        .build()
+        .unwrap();
+    assert_eq!(app.login_user(&user1, &client1).await.as_u16(), 200);
+    assert_eq!(app.login_user(&user2, &client2).await.as_u16(), 200);
+
+    // Initiate dialog
+    let response = client2
+        .post(format!(
+            "{}/api/protected/user/new_conversation",
+            app.address
+        ))
+        .query(&[("with_user_id", user1_id)])
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(response.status().as_u16(), 201);
+    let conversation_id: i32 = response.json().await.unwrap();
+
+    // Send first message
+    let response = client2
+        .post(format!("{}/api/protected/user/send_message", app.address))
+        .json(&SendMessageRequest {
+            conversation_id,
+            text: "Hello! How are you!".to_string(),
+            service_id: None,
+            attachments: vec![],
+            reply_message_id: None,
+        })
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(response.status().as_u16(), 201);
+
+    // Send second message
+    let response = client1
+        .post(format!("{}/api/protected/user/send_message", app.address))
+        .json(&SendMessageRequest {
+            conversation_id,
+            text: "Thanks, I'm fine!".to_string(),
+            service_id: None,
+            attachments: vec![],
+            reply_message_id: None,
+        })
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(response.status().as_u16(), 201);
+
+    // Retrieve conversation
+    let response = client1
+        .get(format!(
+            "{}/api/protected/user/list_conversation",
+            app.address
+        ))
+        .query(&[("conversation_id", conversation_id), ("offset", 0)])
+        .send()
+        .await
+        .unwrap();
+
+    // Validate response
+    let mut response: ConversationDataResponse =
+        serde_json::from_str(&response.text().await.unwrap()).unwrap();
+    assert_eq!(
+        response.interlocutors.get(&user1_id).unwrap().username,
+        user1.username
+    );
+    assert_eq!(
+        response.interlocutors.get(&user2_id).unwrap().username,
+        user2.username
+    );
+    assert_eq!(response.entries.len(), 2);
+    // Start from end
+    let message2 = response.entries.pop().unwrap().message();
+    let message1 = response.entries.pop().unwrap().message();
+    assert_eq!(message2.text, "Thanks, I'm fine!");
+    assert_eq!(message1.text, "Hello! How are you!");
+    assert_eq!(message1.interlocutor_id, user2_id);
+    assert_eq!(message2.interlocutor_id, user1_id);
+    assert_eq!(message1.service, None);
+    assert_eq!(message1.reply_message_id, None);
+    assert_eq!(message1.attachments, None);
+    assert_eq!(message2.service, None);
+    assert_eq!(message2.reply_message_id, None);
+    assert_eq!(message2.attachments, None);
 }
