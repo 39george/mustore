@@ -264,7 +264,10 @@ async fn create_offer(
 // ───── Functions ────────────────────────────────────────────────────────── //
 
 /// Verify upload requests of given music product, and if all is ok, delete requests.
-#[tracing::instrument(name = "Verify upload requests of given song.", skip_all)]
+#[tracing::instrument(
+    name = "Verify upload requests for a given music product.",
+    skip_all
+)]
 async fn verify_upload_request_data_in_redis(
     con: &RedisPool,
     obj_keys: &[&str],
@@ -277,7 +280,10 @@ async fn verify_upload_request_data_in_redis(
     Ok(())
 }
 
-#[tracing::instrument(name = "Verify upload requests of given song.", skip_all)]
+#[tracing::instrument(
+    name = "Delete upload requests for a given music product.",
+    skip_all
+)]
 async fn delete_upload_request_data_from_redis(
     con: &RedisPool,
     obj_keys: &[&str],
