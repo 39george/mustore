@@ -179,7 +179,7 @@ async fn create_new_conversation(
     Query(CreateConversationRequest { with_user_id }): Query<
         CreateConversationRequest,
     >,
-) -> Result<Json<i32>, ResponseError> {
+) -> Result<(StatusCode, Json<i32>), ResponseError> {
     let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
@@ -216,7 +216,7 @@ async fn create_new_conversation(
             "Count was equal {count}, but should be 2"
         )))
     } else {
-        Ok(Json(conversation_id))
+        Ok((StatusCode::CREATED, Json(conversation_id)))
     }
 }
 
@@ -254,13 +254,13 @@ async fn send_message(
         )
         .one()
         .await
-        .context("Failed to add participants to the conversation")?;
+        .context("Failed to insert new message to pg.")?;
 
     for attachment in &params.attachments {
         user_access::insert_message_attachment()
             .bind(&transaction, attachment, &message_id)
             .await
-            .context("Failed to add participants to the conversation")?;
+            .context("Failed to insert message attachment to pg.")?;
     }
 
     remove_attachments_data_from_redis(
