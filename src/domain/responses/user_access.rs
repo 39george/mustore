@@ -83,12 +83,12 @@ impl Entry {
     pub fn message(self) -> Message {
         match self {
             Entry::Message(m) => m,
-            Entry::Offer(o) => panic!("Trying unwrap offer from message"),
+            Entry::Offer(_) => panic!("Trying unwrap offer from message"),
         }
     }
     pub fn offer(self) -> Offer {
         match self {
-            Entry::Message(m) => panic!("Trying unwrap message from offer"),
+            Entry::Message(_) => panic!("Trying unwrap message from offer"),
             Entry::Offer(o) => o,
         }
     }
