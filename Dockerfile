@@ -41,6 +41,7 @@ WORKDIR /app
 # Copy the executable from the "build" stage.
 COPY --from=build /app/$APP_NAME /app/$APP_NAME
 COPY config /app/config
+COPY migrations /app/migrations
 
 # Expose the port that the application listens on.
 EXPOSE 8000
