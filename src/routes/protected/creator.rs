@@ -329,8 +329,9 @@ async fn submit_other_product(
     )
     .await?;
 
-    Ok(StatusCode::OK)
+    Ok(StatusCode::CREATED)
 }
+
 #[tracing::instrument(name = "Create a new offer", skip_all)]
 async fn create_offer(
     auth_session: AuthSession,
