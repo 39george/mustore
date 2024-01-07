@@ -179,14 +179,8 @@ impl Application {
         // This combines the session layer with our backend to establish the auth
         // service which will provide the auth session as a request extension.
         let backend = crate::auth::users::Backend::new(app_state.clone());
-        let auth_service = ServiceBuilder::new()
-            .layer(HandleErrorLayer::new(|e: BoxError| async move {
-                tracing::error!("GOT HANDLE ERROR: {}", e);
-                StatusCode::BAD_REQUEST
-            }))
-            .layer(
-                AuthManagerLayerBuilder::new(backend, session_layer).build(),
-            );
+        let auth_service =
+            AuthManagerLayerBuilder::new(backend, session_layer).build();
 
         let mut app = Router::new()
             .nest("/api/protected", protected_router())
