@@ -221,11 +221,13 @@ impl Application {
 
         if let Ok(e) = std::env::var("ENVIRONMENT") {
             if e.eq("development") {
+                let origins = [
+                    "http://127.0.0.1:5173".parse().unwrap(),
+                    "http://localhost:5173".parse().unwrap(),
+                ];
                 let cors = CorsLayer::new()
                     // allow requests from any origin
-                    .allow_origin(
-                        "http://127.0.0.1:5173".parse::<HeaderValue>().unwrap(),
-                    );
+                    .allow_origin(origins);
                 app = app.layer(cors);
             }
         }
