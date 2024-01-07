@@ -18,6 +18,7 @@ use crate::auth::users::AuthSession;
 use crate::cornucopia::queries::creator_access;
 use crate::domain::requests::creator_access::CreateOfferRequest;
 use crate::domain::requests::creator_access::SubmitMusicProductRequest;
+use crate::domain::requests::creator_access::SubmitOtherProductRequest;
 use crate::error_chain_fmt;
 use crate::routes::ResponseError;
 use crate::startup::AppState;
@@ -56,6 +57,7 @@ pub fn creator_router() -> Router<AppState> {
     Router::new()
         .route("/health_check", routing::get(health_check))
         .route("/submit_music_product", routing::post(submit_music_product))
+        .route("/submit_other_product", routing::post(submit_other_product))
         .route("/create_offer", routing::post(create_offer))
         .layer(permission_required!(crate::auth::users::Backend, "creator"))
 }
@@ -229,6 +231,106 @@ async fn submit_music_product(
     Ok(StatusCode::CREATED)
 }
 
+#[tracing::instrument(name = "Submit other product", skip_all)]
+async fn submit_other_product(
+    auth_session: AuthSession,
+    State(app_state): State<AppState>,
+    Json(req): Json<SubmitOtherProductRequest>,
+) -> Result<StatusCode, CreatorResponseError> {
+    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
+        anyhow::anyhow!("No such user in AuthSession!"),
+    ))?;
+
+    req.validate().map_err(ResponseError::ValidationError)?;
+
+    let (product, lyric) = match req {
+        SubmitOtherProductRequest::Lyric(product, lyric) => {
+            (product, Some(lyric))
+        }
+        SubmitOtherProductRequest::Cover(product) => (product, None),
+    };
+
+    let object_keys = vec![product.cover_object_key.as_str()];
+
+    verify_upload_request_data_in_redis(
+        &app_state.redis_pool,
+        &object_keys,
+        user.id,
+    )
+    .await?;
+
+    let mut db_client = app_state
+        .pg_pool
+        .get()
+        .await
+        .context("Failed to get connection from postgres pool")
+        .map_err(ResponseError::UnexpectedError)?;
+
+    let transaction = db_client
+        .transaction()
+        .await
+        .context("Failed to get a transaction from pg")
+        .map_err(ResponseError::UnexpectedError)?;
+
+    let product_id = creator_access::insert_product_and_get_product_id()
+        .bind(
+            &transaction,
+            &user.id,
+            &product.name,
+            &product.description,
+            &product.price,
+        )
+        .one()
+        .await
+        .context("Failed to insert music product into the pg")
+        .map_err(ResponseError::UnexpectedError)?;
+
+    if let Some(text) = lyric {
+        creator_access::insert_lyric_and_get_lyric_id()
+            .bind(&transaction, &product_id, &text)
+            .await
+            .context("Failed to insert lyric into pg")
+            .map_err(ResponseError::UnexpectedError)?;
+    } else {
+        creator_access::insert_cover_and_get_cover_id()
+            .bind(&transaction, &product_id)
+            .await
+            .context("Failed to insert cover into pg")
+            .map_err(ResponseError::UnexpectedError)?;
+    }
+
+    creator_access::insert_product_cover_object_key()
+        .bind(&transaction, &product.cover_object_key, &product_id)
+        .await
+        .context("Failed to insert cover_object_key into pg")
+        .map_err(ResponseError::UnexpectedError)?;
+
+    for mood in product.moods.iter() {
+        creator_access::insert_product_mood_by_name()
+            .bind(&transaction, &product_id, mood)
+            .await
+            .context("Failed to insert mood for product into pg")
+            .map_err(ResponseError::UnexpectedError)?;
+    }
+
+    if let Err(e) = transaction
+        .commit()
+        .await
+        .context("Failed to commit a pg transaction")
+    {
+        return Err(ResponseError::UnexpectedError(e).into());
+    }
+
+    // Now we can safely delete upload data from redis
+    delete_upload_request_data_from_redis(
+        &app_state.redis_pool,
+        &object_keys,
+        user.id,
+    )
+    .await?;
+
+    Ok(StatusCode::OK)
+}
 #[tracing::instrument(name = "Create a new offer", skip_all)]
 async fn create_offer(
     auth_session: AuthSession,

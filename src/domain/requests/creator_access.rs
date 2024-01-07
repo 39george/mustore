@@ -113,6 +113,46 @@ impl Validate for SubmitMusicProductRequest {
 }
 
 #[derive(Serialize, Deserialize, Debug, Validate)]
+pub struct OtherProduct {
+    #[validate(
+        length(min = 2, max = 30),
+        non_control_character,
+        custom = "crate::domain::forbidden_characters"
+    )]
+    pub name: String,
+    #[validate(
+        length(min = 15, max = 400),
+        non_control_character,
+        custom = "crate::domain::forbidden_characters"
+    )]
+    pub description: Option<String>,
+    #[validate(
+        length(min = 10, max = 500),
+        non_control_character,
+        custom = "crate::domain::forbidden_characters"
+    )]
+    pub cover_object_key: String,
+    #[validate(custom(function = "validate_moods_slice_bounds_characters"))]
+    pub moods: Vec<String>,
+    pub price: Decimal,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub enum SubmitOtherProductRequest {
+    Lyric(OtherProduct, String),
+    Cover(OtherProduct),
+}
+
+impl Validate for SubmitOtherProductRequest {
+    fn validate(&self) -> Result<(), ValidationErrors> {
+        match self {
+            SubmitOtherProductRequest::Lyric(p, _) => p.validate(),
+            SubmitOtherProductRequest::Cover(p) => p.validate(),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Validate)]
 pub struct CreateOfferRequest {
     pub conversation_id: i32,
     pub service_id: i32,

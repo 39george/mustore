@@ -52,6 +52,7 @@ SELECT
     AVG(response_time)::TEXT AS average_response_time
 FROM ConversationResponses;
 
+-- FIXME: we should return list of uncompleted values, or frontend should understand that himself.
 --! get_profile_completion_value
 SELECT 
     CASE
@@ -78,8 +79,6 @@ INSERT INTO products_moods (products_id, moods_id)
 VALUES (:product_id, (
     SELECT id FROM moods WHERE name = :mood_name
 ));
-
--- Songs
 
 --! insert_song_and_get_song_id (secondary_genre?)
 INSERT INTO songs (
@@ -144,6 +143,14 @@ VALUES (:key, 'audio', :song_id, :beat_id);
 --! insert_music_product_multitrack_object_key (song_id?, beat_id?)
 INSERT INTO objects(key, object_type, multitrack_songs_id, multitrack_beats_id)
 VALUES (:key, 'multitrack', :song_id, :beat_id);
+
+--! insert_lyric_and_get_lyric_id
+INSERT INTO lyrics (products_id, text)
+VALUES (:product_id, :text);
+
+--! insert_cover_and_get_cover_id
+INSERT INTO covers (products_id)
+VALUES (:product_id);
 
 -- Offers
 
