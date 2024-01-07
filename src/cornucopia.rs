@@ -763,7 +763,7 @@ GetStats, 0 >
         | row | { GetStatsBorrowed { table_name : row.get(0),count : row.get(1),} }, mapper : | it | { <GetStats>::from(it) },
     }
 } }pub fn get_genres_list() -> GetGenresListStmt
-{ GetGenresListStmt(cornucopia_async :: private :: Stmt :: new("SELECT name from genres")) } pub
+{ GetGenresListStmt(cornucopia_async :: private :: Stmt :: new("SELECT name from genres ORDER BY name")) } pub
 struct GetGenresListStmt(cornucopia_async :: private :: Stmt) ; impl
 GetGenresListStmt { pub fn bind < 'a, C : GenericClient, >
 (& 'a mut self, client : & 'a  C,
@@ -776,7 +776,7 @@ String, 0 >
         | row | { row.get(0) }, mapper : | it | { it.into() },
     }
 } }pub fn get_moods_list() -> GetMoodsListStmt
-{ GetMoodsListStmt(cornucopia_async :: private :: Stmt :: new("SELECT name from moods")) } pub
+{ GetMoodsListStmt(cornucopia_async :: private :: Stmt :: new("SELECT name from moods ORDER BY name")) } pub
 struct GetMoodsListStmt(cornucopia_async :: private :: Stmt) ; impl
 GetMoodsListStmt { pub fn bind < 'a, C : GenericClient, >
 (& 'a mut self, client : & 'a  C,

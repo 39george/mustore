@@ -20,10 +20,10 @@ UNION ALL
 );
 
 --! get_genres_list
-SELECT name from genres;
+SELECT name from genres ORDER BY name;
 
 --! get_moods_list
-SELECT name from moods;
+SELECT name from moods ORDER BY name;
 
 --! get_songs (sex?, tempo?, key?, genre?, mood?, user_id?) : (is_user_liked?)
 SELECT 
