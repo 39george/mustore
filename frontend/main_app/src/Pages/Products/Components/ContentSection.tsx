@@ -4,12 +4,11 @@ import underline_red from "../../../assets/svg/underline_red.svg";
 import underline_coral from "../../../assets/svg/underline_coral.svg";
 import underline_lilac from "../../../assets/svg/underline_lilac.svg";
 import underline_green from "../../../assets/svg/underline_green.svg";
-import stars from "../../../assets/svg/recommendations.svg";
-import fire from "../../../assets/svg/fire.svg";
 import { FC } from "react";
 import Carousel from "./UI/Carousel";
 import { carousel_items_rec } from "./UI/content_dummies";
 import { carousel_items_new } from "./UI/content_dummies";
+import MainContentProducts from "./MainContentProducts";
 
 interface ContentSectionProps {
   section_type: "beats" | "covers" | "songs" | "texts";
@@ -45,7 +44,7 @@ const ContentSection: FC<ContentSectionProps> = ({ section_type }) => {
   }
 
   return (
-    <section className={styles.content_section}>
+    <section className={styles.products_section}>
       <div className={styles.header}>
         <h1 className={styles.h1}>
           Библиотека{" "}
@@ -58,44 +57,27 @@ const ContentSection: FC<ContentSectionProps> = ({ section_type }) => {
             />
           </span>
         </h1>
-        <GoChevronDown className={styles.chevron} />
+        <GoChevronDown className={styles.header_chevron} />
       </div>
       {section_type !== "songs" ? (
         <div className={styles.template}>
           Секция {section_props.section_name}
         </div>
       ) : (
-        <div className={styles.main_content}>
+        <div className={styles.content}>
           <div className={styles.recommendations_block}>
-            <div className={styles.title}>
-              <h2 className={styles.h2}>
-                Рекомендации harmony<span>.</span>sphere
-              </h2>
-              <img
-                src={stars}
-                alt="stars"
-                className={styles.title_icon}
-              />
-            </div>
             <Carousel
               carousel_type="recommended"
               carousel_items={carousel_items_rec}
             />
           </div>
           <div className={styles.new_block}>
-            <div className={styles.title}>
-              <h2 className={styles.h2}>Новинки</h2>
-              <img
-                src={fire}
-                alt="fire"
-                className={styles.title_icon}
-              />
-            </div>
             <Carousel
               carousel_type="new"
               carousel_items={carousel_items_new}
             />
           </div>
+          <MainContentProducts />
         </div>
       )}
     </section>

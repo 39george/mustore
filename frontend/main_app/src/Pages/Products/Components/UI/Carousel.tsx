@@ -19,6 +19,9 @@ const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
       MAX_ITEMS_PER_SLIDE: 6,
       ITEM_WIDTH: 172,
       TOTAL_CONTENT_WIDTH: 0,
+      MAX_INDEX:
+        carousel_items.length -
+        (carousel_items.length % items_per_slide || items_per_slide),
       RIGHT_MARGIN: 28,
     };
 
@@ -30,14 +33,17 @@ const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
         config.MAX_ITEMS_PER_SLIDE = 3;
         config.ITEM_WIDTH = 340;
         config.TOTAL_CONTENT_WIDTH =
-          Math.ceil(carousel_items.length / 2) * config.ITEM_WIDTH - 36;
+          Math.ceil(carousel_items.length / 3) * config.ITEM_WIDTH - 36;
+        config.MAX_INDEX =
+          Math.ceil(carousel_items.length / 3) -
+          (carousel_items.length % items_per_slide || items_per_slide);
     }
 
     return config;
-  }, [carousel_type]);
-  const MAX_INDEX =
-    carousel_items.length -
-    (carousel_items.length % items_per_slide || items_per_slide);
+  }, [carousel_type, items_per_slide, carousel_items.length]);
+  // const MAX_INDEX =
+  //   carousel_items.length -
+  //   (carousel_items.length % items_per_slide || items_per_slide);
   const [is_next_hovered, set_is_next_hovered] = useState(false);
   const carousel_ref = useRef<HTMLDivElement>(null);
   const class_names = useMemo<ClassNames>(() => {
@@ -56,6 +62,14 @@ const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
     }
 
     return base_class_names;
+  }, [carousel_type]);
+  const h2_name = useMemo(() => {
+    switch (carousel_type) {
+      case "recommended":
+        return "Рекомендации";
+      case "new":
+        return "Новинки";
+    }
   }, [carousel_type]);
 
   // Updating container_width
@@ -92,7 +106,7 @@ const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
   // Handling next/prev buttons
   const handle_next = () => {
     set_current_index((prev_index) =>
-      Math.min(prev_index + items_per_slide, MAX_INDEX)
+      Math.min(prev_index + items_per_slide, config.MAX_INDEX)
     );
   };
 
@@ -103,13 +117,11 @@ const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
   };
 
   useEffect(() => {
-    current_index === MAX_INDEX ? set_is_next_hovered(false) : "";
+    current_index === config.MAX_INDEX ? set_is_next_hovered(false) : "";
   }, [current_index]);
 
   // Calculating translation amount
   const get_translation_amount = () => {
-    // const total_content_width = carousel_items.carousel_items.length * config.ITEM_WIDTH;
-    console.log(config.TOTAL_CONTENT_WIDTH);
     const max_translation =
       config.TOTAL_CONTENT_WIDTH - container_width + config.RIGHT_MARGIN;
     let translation_for_current_index = current_index * config.ITEM_WIDTH;
@@ -124,6 +136,7 @@ const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
       className={class_names.carousel_container}
       ref={carousel_ref}
     >
+      <h2 className={styles.h2}>{h2_name}</h2>
       {current_index !== 0 && (
         <div
           className={styles.prev_button}
@@ -140,7 +153,7 @@ const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
           className={class_names.carousel_inner}
           style={
             {
-              "--num-columns": `${Math.ceil(carousel_items.length / 2)}`,
+              "--num-columns": `${Math.ceil(carousel_items.length / 3)}`,
               transform: `translateX(${get_translation_amount()}px)`,
             } as React.CSSProperties
           }
@@ -157,7 +170,7 @@ const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
           })}
         </div>
       </div>
-      {current_index !== MAX_INDEX && (
+      {current_index !== config.MAX_INDEX && (
         <div
           className={styles.next_button}
           onClick={handle_next}

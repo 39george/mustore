@@ -1,5 +1,5 @@
 @import "../../../colors.scss";
-.content_section {
+.products_section {
   width: 100%;
   max-width: 72.75rem;
 
@@ -21,6 +21,7 @@
 
   span {
     position: relative;
+    cursor: pointer;
     .underline {
       position: absolute;
       left: -0.5rem;
@@ -29,7 +30,7 @@
   }
 }
 
-.chevron {
+.header_chevron {
   font-size: 1.5rem;
   margin-left: 1rem;
   flex-shrink: 0;
@@ -40,27 +41,10 @@
   margin-top: 5rem;
 }
 
-.main_content {
+.content {
   min-height: 100vh;
 
   margin-top: 5rem;
-
-  font-family: "Montserrat", sans-serif;
-}
-
-.title {
-  display: flex;
-  align-items: center;
-  margin-left: 1.5rem;
-}
-
-.h2 {
-  font-size: 0.875rem;
-  font-weight: 500;
-
-  span {
-    color: $accent_pink;
-  }
 }
 
 .title_icon {

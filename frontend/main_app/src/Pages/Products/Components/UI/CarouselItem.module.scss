@@ -30,22 +30,23 @@
 }
 
 .name {
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .author,
 .price,
 .likes_amount {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
 }
 
 .author {
   margin-bottom: 0.5rem;
-  opacity: 0.6;
+  font-weight: 400;
+  opacity: 0.5;
 }
 
 .price {
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .action_icons {
@@ -101,22 +102,15 @@
   margin-left: 1.25rem;
 
   & p:not(:last-child) {
-    margin-bottom: 0.375rem;
+    margin-bottom: 0.125rem;
   }
 }
 
-.name_new {
-  font-size: 0.875rem;
-}
-
+.name_new,
 .author_new,
 .price_new,
 .likes_amount_new {
-  font-size: 0.625rem;
-}
-
-.price_and_actions_new {
-  margin-left: 1rem;
+  font-size: 0.875rem;
 }
 
 .author_new {
