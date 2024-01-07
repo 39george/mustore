@@ -144,11 +144,11 @@ VALUES (:key, 'audio', :song_id, :beat_id);
 INSERT INTO objects(key, object_type, multitrack_songs_id, multitrack_beats_id)
 VALUES (:key, 'multitrack', :song_id, :beat_id);
 
---! insert_lyric_and_get_lyric_id
+--! insert_lyric
 INSERT INTO lyrics (products_id, text)
 VALUES (:product_id, :text);
 
---! insert_cover_and_get_cover_id
+--! insert_cover
 INSERT INTO covers (products_id)
 VALUES (:product_id);
 

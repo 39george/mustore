@@ -286,13 +286,13 @@ async fn submit_other_product(
         .map_err(ResponseError::UnexpectedError)?;
 
     if let Some(text) = lyric {
-        creator_access::insert_lyric_and_get_lyric_id()
+        creator_access::insert_lyric()
             .bind(&transaction, &product_id, &text)
             .await
             .context("Failed to insert lyric into pg")
             .map_err(ResponseError::UnexpectedError)?;
     } else {
-        creator_access::insert_cover_and_get_cover_id()
+        creator_access::insert_cover()
             .bind(&transaction, &product_id)
             .await
             .context("Failed to insert cover into pg")
