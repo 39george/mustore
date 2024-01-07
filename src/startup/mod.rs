@@ -11,6 +11,8 @@ use deadpool_postgres::Pool;
 use fred::clients::RedisClient;
 use fred::clients::RedisPool;
 use fred::types::RedisConfig;
+use http::HeaderValue;
+use http::Method;
 use http::StatusCode;
 use secrecy::ExposeSecret;
 
@@ -19,6 +21,7 @@ use time::UtcOffset;
 use tokio::net::TcpListener;
 use tokio_postgres::NoTls;
 use tower::ServiceBuilder;
+use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
@@ -214,6 +217,17 @@ impl Application {
                             .level(tracing::Level::ERROR),
                     ),
             );
+        }
+
+        if let Ok(e) = std::env::var("ENVIRONMENT") {
+            if e.eq("development") {
+                let cors = CorsLayer::new()
+                    // allow requests from any origin
+                    .allow_origin(
+                        "http://127.0.0.1:5173".parse::<HeaderValue>().unwrap(),
+                    );
+                app = app.layer(cors);
+            }
         }
 
         axum::serve(listener, app)
