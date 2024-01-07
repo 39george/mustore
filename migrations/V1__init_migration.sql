@@ -221,8 +221,7 @@ CREATE TABLE listenings (
         +
         COALESCE((beats_id)::BOOLEAN::INTEGER, 0)
         = 1
-    ),
-    UNIQUE (users_id, songs_id, beats_id)
+    )
 );
 
 -- Services
