@@ -497,13 +497,16 @@ CREATE TABLE objects (
     cover_credits_cover_design_id INTEGER DEFAULT NULL REFERENCES cover_design(id) ON DELETE RESTRICT,
     cover_services_id INTEGER DEFAULT NULL REFERENCES services(id) ON DELETE CASCADE UNIQUE,
 
-    -- Audio
+    -- Songs
     master_songs_id INTEGER DEFAULT NULL REFERENCES songs(id) ON DELETE RESTRICT UNIQUE,
     tagged_master_songs_id INTEGER DEFAULT NULL REFERENCES songs(id) ON DELETE RESTRICT UNIQUE,
     multitrack_songs_id INTEGER DEFAULT NULL REFERENCES songs(id) ON DELETE RESTRICT UNIQUE,
+    -- Beats
     master_beats_id INTEGER DEFAULT NULL REFERENCES beats(id) ON DELETE RESTRICT UNIQUE,
     tagged_master_beats_id INTEGER DEFAULT NULL REFERENCES beats(id) ON DELETE RESTRICT UNIQUE,
     multitrack_beats_id INTEGER DEFAULT NULL REFERENCES beats(id) ON DELETE RESTRICT UNIQUE,
+
+    -- Audio credits
     mixing_credits_mixing_id INTEGER DEFAULT NULL REFERENCES mixing(id) ON DELETE RESTRICT,
     song_credits_songs_id INTEGER DEFAULT NULL REFERENCES song_writing(id) ON DELETE RESTRICT,
     beat_credits_beat_writing_id INTEGER DEFAULT NULL REFERENCES beat_writing(id) ON DELETE RESTRICT,
