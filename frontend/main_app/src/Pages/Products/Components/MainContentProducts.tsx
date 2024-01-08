@@ -1,89 +1,21 @@
 import { IoSearch } from "react-icons/io5";
 import styles from "./MainContentProducts.module.scss";
-import { FC, useEffect, useState } from "react";
+import { FC } from "react";
 import { GoChevronDown } from "react-icons/go";
-import axios, { AxiosError } from "axios";
-import { API_URL } from "../../../config";
-
-const MAX_RETRIES = 3;
-const RETRY_DELAY_MS = 400;
-
-type GenreOrMood = string[];
+import { music_keys } from "../helpers";
+import useGenresMoodsApi from "../../../hooks/useGenresMoodsApi";
 
 const MainContentProducts: FC = () => {
-  const [genres, set_genres] = useState<GenreOrMood>([]);
-  const [genres_error, set_genres_error] = useState<string | null>(null);
-
-  // GET genres request
-  useEffect(() => {
-    const wait = (ms: number) =>
-      new Promise((resolve) => setTimeout(resolve, ms));
-
-    const get_genre_list = async (attempts: number = 1) => {
-      try {
-        const response = await axios.get<GenreOrMood>(`${API_URL}/open/genres`);
-        if (Array.isArray(response.data)) {
-          set_genres(response.data);
-        } else {
-          console.error("Unexpected response type:", response.data);
-        }
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          if (error.response) {
-            console.error(
-              "API Error:",
-              error.response.status,
-              error.response.data
-            );
-
-            if (attempts < MAX_RETRIES) {
-              await wait(RETRY_DELAY_MS);
-              get_genre_list(attempts + 1);
-            } else {
-              handle_axios_error(error);
-            }
-          } else if (error.request) {
-            if (attempts < MAX_RETRIES) {
-              await wait(RETRY_DELAY_MS);
-              get_genre_list(attempts + 1);
-            } else {
-              set_genres_error(
-                "No response from server. Please, check your internet connection and try again"
-              );
-            }
-          } else {
-            set_genres_error("Error in setting up the request.");
-            console.error("API Error: Reqest setup error:", error.message);
-          }
-        } else {
-          set_genres_error("An unexpected error occured.");
-          console.error("Non-Axios:", error);
-        }
-      }
-    };
-
-    const handle_axios_error = (error: AxiosError) => {
-      if (error.response) {
-        switch (error.response.status) {
-          case 400:
-            set_genres_error(
-              "Bad input, please check your request and try again"
-            );
-            break;
-          case 500:
-            set_genres_error("Internal server error. Please try again later.");
-            break;
-          default:
-            set_genres_error(
-              "An unexpected error occured. Please, try again later."
-            );
-            break;
-        }
-      }
-    };
-
-    get_genre_list();
-  }, []);
+  const {
+    data: genres,
+    error: genres_error,
+    retry: retry_genres,
+  } = useGenresMoodsApi("genres");
+  const {
+    data: moods,
+    error: moods_error,
+    retry: retry_moods,
+  } = useGenresMoodsApi("tags");
 
   return (
     <div className={styles.main_seciton}>
@@ -131,15 +63,79 @@ const MainContentProducts: FC = () => {
             <label htmlFor="female">Женский</label>
           </li>
         </ul>
-        <ul className={`${styles.block} ${styles.genre_block}`}>
-          <li>
-            <input
-              type="checkbox"
-              id="pop"
-              name="genre"
-            />
-            <label htmlFor="pop">Поп</label>
-          </li>
+        <ul className={`${styles.block} ${styles.genres_block}`}>
+          <li className={styles.block_title}>Жанр</li>
+          {genres_error ? (
+            <li>{genres_error}</li>
+          ) : (
+            <ul className={styles.genres_content}>
+              {genres.map((genre, index) => {
+                return (
+                  <li key={index}>
+                    <input
+                      type="checkbox"
+                      id={genre}
+                      name="genre"
+                      className={styles.checkbox}
+                    />
+                    <label htmlFor={genre}>{genre}</label>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </ul>
+        <div className={`${styles.block} ${styles.bpm_block}`}>
+          <p className={styles.block_title}>Темп (BPM)</p>
+          <div className={styles.range_bar}>
+            <div className={styles.range_bar_low}>
+              <div className={styles.knob}></div>
+              <p className={styles.low_number}>40</p>
+            </div>
+            <div className={styles.range_bar_line}></div>
+            <div className={styles.range_bar_high}>
+              <div className={styles.knob}></div>
+              <p className={styles.high_number}>320</p>
+            </div>
+          </div>
+        </div>
+        <ul className={`${styles.block} ${styles.music_keys_block}`}>
+          <li className={styles.block_title}>Тональность</li>
+          {music_keys.map((key, index) => {
+            return (
+              <li key={index}>
+                <input
+                  type="checkbox"
+                  id={key}
+                  name="key"
+                  className={styles.checkbox}
+                />
+                <label htmlFor={key}>{key}</label>
+              </li>
+            );
+          })}
+        </ul>
+        <ul className={`${styles.block} ${styles.moods_block}`}>
+          <li className={styles.block_title}>Mood</li>
+          {moods_error ? (
+            <li>{moods_error}</li>
+          ) : (
+            <ul className={styles.moods_content}>
+              {moods.map((mood, index) => {
+                return (
+                  <li key={index}>
+                    <input
+                      type="checkbox"
+                      id={mood}
+                      name="mood"
+                      className={styles.checkbox}
+                    />
+                    <label htmlFor={mood}>{mood}</label>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </ul>
       </div>
     </div>

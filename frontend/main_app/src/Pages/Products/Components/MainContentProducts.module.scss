@@ -1,1 +1,11 @@
 @import "../../../colors.scss";
+
+.block {
+  width: fit-content;
+}
+
+.genres_content,
+.moods_content {
+  height: 320px;
+  overflow-y: auto;
+}
