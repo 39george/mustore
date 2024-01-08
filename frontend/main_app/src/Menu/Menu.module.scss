@@ -24,7 +24,7 @@ li {
   -webkit-backdrop-filter: blur(7px);
 
   transition: color, background-color 0.2s ease-out;
-  z-index: 999;
+  z-index: 998;
 }
 
 .nav_bar_dark_default {
@@ -74,7 +74,7 @@ li {
 
   &:hover {
     .chevron {
-      color: $accent_pink;
+      color: $accent_red;
       transform: rotate(-180deg);
     }
 
@@ -178,7 +178,7 @@ a {
     transition: color 0.2s ease-out;
 
     &:hover {
-      color: $accent_pink;
+      color: $accent_red;
     }
   }
 }
@@ -249,7 +249,7 @@ a {
       transition: color 0.2s ease-out;
 
       &:hover {
-        color: $accent_pink;
+        color: $accent_red;
       }
     }
   }
@@ -305,7 +305,7 @@ a {
         color: $main_bright;
         transition: color 0.1s ease-out;
         &:hover {
-          color: $accent_pink;
+          color: $accent_red;
         }
       }
     }
@@ -325,7 +325,7 @@ a {
 
   .sidebar_nav_link {
     .sidebar_chevron {
-      color: $accent_pink;
+      color: $accent_red;
       transform: rotate(-180deg);
     }
   }

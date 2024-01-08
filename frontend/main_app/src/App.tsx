@@ -5,6 +5,7 @@ import HomePage from "./Pages/Home/HomePage";
 import Footer from "./Pages/Footer";
 import ProductsPage from "./Pages/Products/ProductsPage";
 import ContentSection from "./Pages/Products/Components/ContentSection";
+import SignUp from "./Components/SignUp";
 
 function App() {
   return (
@@ -14,6 +15,10 @@ function App() {
           path="/"
           element={<MainLayout />}
         >
+          <Route
+            path="signup"
+            element={<SignUp />}
+          />
           <Route
             path="/"
             element={<HomePage />}

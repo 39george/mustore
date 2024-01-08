@@ -34,6 +34,7 @@ const Menu: FC = () => {
   );
   const [is_nav_dark, set_is_nav_dark] = useState(false);
 
+  // Define class names based on the intersecting section
   useEffect(() => {
     switch (intersecting_section) {
       case "hero":
@@ -67,6 +68,7 @@ const Menu: FC = () => {
     }
   }, [intersecting_section]);
 
+  // Handle open / close state for nav links
   const toggle_link = (link_name: LinkName) => {
     set_link_toggled((prev_state) => ({
       ...prev_state,
@@ -77,8 +79,6 @@ const Menu: FC = () => {
   const toggle_sidebar = () => {
     set_sidebar_open(!sidebar_open);
   };
-
-  const handle_page_navigation = usePageNavigation();
 
   const close_all = () => {
     set_link_toggled({
@@ -106,6 +106,9 @@ const Menu: FC = () => {
       document.removeEventListener("mousedown", handle_click_outside);
     };
   }, []);
+
+  // Handle navigation
+  const handle_page_navigation = usePageNavigation();
 
   return (
     <nav className={nav_bar_class_names}>
@@ -313,7 +316,12 @@ const Menu: FC = () => {
       <div className={styles.logging}>
         <div className={styles.log}>войти</div>
         <div className={styles.divider}>|</div>
-        <div className={styles.log}>создать аккаунт</div>
+        <NavLink
+          to="signup"
+          className={styles.log}
+        >
+          создать аккаунт
+        </NavLink>
       </div>
       <div className={styles.toggle_icons_container}>
         <IoMenu

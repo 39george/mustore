@@ -1,9 +1,26 @@
 import { IoSearch } from "react-icons/io5";
 import styles from "./MainContentProducts.module.scss";
-import { FC } from "react";
+import { FC, useEffect } from "react";
 import { GoChevronDown } from "react-icons/go";
+import axios from "axios";
+
+const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
 
 const MainContentProducts: FC = () => {
+  useEffect(() => {
+    const get_genre_list = async () => {
+      try {
+        const response = await fetch(`${API_URL}/open/genres`);
+        const data = await response.json();
+        console.log(data);
+      } catch (error) {
+        console.log("error message:", error);
+      }
+    };
+
+    get_genre_list();
+  }, []);
+
   return (
     <div className={styles.main_seciton}>
       <div className={styles.left_bar}>

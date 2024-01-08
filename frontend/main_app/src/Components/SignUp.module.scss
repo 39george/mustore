@@ -1,0 +1,16 @@
+@import "../colors.scss";
+.sign_up_window {
+  position: fixed;
+
+  width: 100vw;
+  height: 100vh;
+
+  background-color: $main_bright;
+
+  z-index: 999;
+}
+
+.close_icon {
+  font-size: 2.5rem;
+  cursor: pointer;
+}
