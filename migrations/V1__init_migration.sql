@@ -269,9 +269,9 @@ CREATE TABLE music_services_genres (
     id SERIAL PRIMARY KEY,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     genres_id INTEGER NOT NULL REFERENCES genres(id) ON DELETE RESTRICT,
-    beat_writing_id INTEGER DEFAULT NULL REFERENCES songs(id) ON DELETE CASCADE,
-    song_writing_id INTEGER DEFAULT NULL REFERENCES songs(id) ON DELETE CASCADE,
-    mixing_id INTEGER DEFAULT NULL REFERENCES beats(id) ON DELETE CASCADE,
+    beat_writing_id INTEGER DEFAULT NULL REFERENCES beat_writing(id) ON DELETE CASCADE,
+    song_writing_id INTEGER DEFAULT NULL REFERENCES song_writing(id) ON DELETE CASCADE,
+    mixing_id INTEGER DEFAULT NULL REFERENCES mixing(id) ON DELETE CASCADE,
     CHECK (
         COALESCE((beat_writing_id)::BOOLEAN::INTEGER, 0)
         +
@@ -495,7 +495,7 @@ CREATE TABLE objects (
     -- Images
     avatar_users_id INTEGER DEFAULT NULL REFERENCES users(id) ON DELETE RESTRICT UNIQUE,
     cover_products_id INTEGER DEFAULT NULL REFERENCES products(id) ON DELETE RESTRICT UNIQUE,
-    cover_credits_cover_design_id INTEGER DEFAULT NULL REFERENCES cover_design(id) ON DELETE RESTRICT,
+    credit_cover_design_id INTEGER DEFAULT NULL REFERENCES cover_design(id) ON DELETE RESTRICT,
     cover_services_id INTEGER DEFAULT NULL REFERENCES services(id) ON DELETE CASCADE UNIQUE,
 
     -- Songs
@@ -508,9 +508,9 @@ CREATE TABLE objects (
     multitrack_beats_id INTEGER DEFAULT NULL REFERENCES beats(id) ON DELETE RESTRICT UNIQUE,
 
     -- Audio credits
-    mixing_credits_mixing_id INTEGER DEFAULT NULL REFERENCES mixing(id) ON DELETE RESTRICT,
-    song_credits_songs_id INTEGER DEFAULT NULL REFERENCES song_writing(id) ON DELETE RESTRICT,
-    beat_credits_beat_writing_id INTEGER DEFAULT NULL REFERENCES beat_writing(id) ON DELETE RESTRICT,
+    credit_mixing_id INTEGER DEFAULT NULL REFERENCES mixing(id) ON DELETE RESTRICT,
+    credit_song_writing_id INTEGER DEFAULT NULL REFERENCES song_writing(id) ON DELETE RESTRICT,
+    credit_beat_writing_id INTEGER DEFAULT NULL REFERENCES beat_writing(id) ON DELETE RESTRICT,
 
     -- Other
     video_description_services_id INTEGER DEFAULT NULL REFERENCES services(id) ON DELETE RESTRICT UNIQUE,
@@ -532,13 +532,13 @@ CREATE TABLE objects (
         +
         COALESCE((video_description_services_id)::BOOLEAN::INTEGER, 0)
         +
-        COALESCE((mixing_credits_mixing_id)::BOOLEAN::INTEGER, 0)
+        COALESCE((credit_mixing_id)::BOOLEAN::INTEGER, 0)
         +
-        COALESCE((song_credits_songs_id)::BOOLEAN::INTEGER, 0)
+        COALESCE((credit_song_writing_id)::BOOLEAN::INTEGER, 0)
         +
-        COALESCE((beat_credits_beat_writing_id)::BOOLEAN::INTEGER, 0)
+        COALESCE((credit_beat_writing_id)::BOOLEAN::INTEGER, 0)
         +
-        COALESCE((cover_credits_cover_design_id)::BOOLEAN::INTEGER, 0)
+        COALESCE((credit_cover_design_id)::BOOLEAN::INTEGER, 0)
         +
         COALESCE((message_attachment)::BOOLEAN::INTEGER, 0)
         = 1
@@ -644,27 +644,27 @@ EXECUTE FUNCTION validate_avatar_users_id();
 CREATE OR REPLACE FUNCTION check_credits_limit()
 RETURNS TRIGGER AS $$
 BEGIN
-    IF NEW.cover_credits_cover_design_id IS NOT NULL THEN
-        IF (SELECT COUNT(*) FROM objects WHERE cover_credits_cover_design_id = NEW.cover_credits_cover_design_id) >= 3 THEN
-            RAISE EXCEPTION 'Only 3 cover_credits_cover_design_id values allowed per cover_design service';
+    IF NEW.credit_cover_design_id IS NOT NULL THEN
+        IF (SELECT COUNT(*) FROM objects WHERE credit_cover_design_id = NEW.credit_cover_design_id) >= 3 THEN
+            RAISE EXCEPTION 'Only 3 credit_cover_design_id values allowed per cover_design service';
         END IF;
     END IF;
 
-    IF NEW.mixing_credits_mixing_id IS NOT NULL THEN
-        IF (SELECT COUNT(*) FROM objects WHERE mixing_credits_mixing_id = NEW.mixing_credits_mixing_id) >= 3 THEN
-            RAISE EXCEPTION 'Only 3 mixing_credits_mixing_id values allowed per mixing service';
+    IF NEW.credit_mixing_id IS NOT NULL THEN
+        IF (SELECT COUNT(*) FROM objects WHERE credit_mixing_id = NEW.credit_mixing_id) >= 3 THEN
+            RAISE EXCEPTION 'Only 3 credit_mixing_id values allowed per mixing service';
         END IF;
     END IF;
 
-    IF NEW.song_credits_songs_id IS NOT NULL THEN
-        IF (SELECT COUNT(*) FROM objects WHERE song_credits_songs_id = NEW.song_credits_songs_id) >= 3 THEN
-            RAISE EXCEPTION 'Only 3 song_credits_songs_id values allowed per song';
+    IF NEW.credit_song_writing_id IS NOT NULL THEN
+        IF (SELECT COUNT(*) FROM objects WHERE credit_song_writing_id = NEW.credit_song_writing_id) >= 3 THEN
+            RAISE EXCEPTION 'Only 3 credit_songs_id values allowed per song';
         END IF;
     END IF;
 
-    IF NEW.beat_credits_beat_writing_id IS NOT NULL THEN
-        IF (SELECT COUNT(*) FROM objects WHERE beat_credits_beat_writing_id = NEW.beat_credits_beat_writing_id) >= 3 THEN
-            RAISE EXCEPTION 'Only 3 beat_credits_beat_writing_id values allowed per beat writing service';
+    IF NEW.credit_beat_writing_id IS NOT NULL THEN
+        IF (SELECT COUNT(*) FROM objects WHERE credit_beat_writing_id = NEW.credit_beat_writing_id) >= 3 THEN
+            RAISE EXCEPTION 'Only 3 credit_beat_writing_id values allowed per beat writing service';
         END IF;
     END IF;
 
