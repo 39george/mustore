@@ -144,13 +144,68 @@ VALUES (:key, 'audio', :song_id, :beat_id);
 INSERT INTO objects(key, object_type, multitrack_songs_id, multitrack_beats_id)
 VALUES (:key, 'multitrack', :song_id, :beat_id);
 
---! insert_lyric
-INSERT INTO lyrics (products_id, text)
-VALUES (:product_id, :text);
+--! insert_lyric (sex?)
+INSERT INTO lyrics (products_id, text, sex)
+VALUES (:product_id, :text, :sex);
 
 --! insert_cover
 INSERT INTO covers (products_id)
 VALUES (:product_id);
+
+-- Services
+
+--! insert_service_get_id (description?)
+INSERT INTO services (creator_id, name, description, display_price)
+VALUES (:creator_id, :name, :description, :display_price) returning id;
+
+--! insert_mixing
+INSERT INTO mixing (services_id)
+VALUES (:service_id) returning id;
+
+--! insert_song_writing
+INSERT INTO song_writing (services_id)
+VALUES (:service_id) returning id;
+
+--! insert_ghost_writing (ghost_credits?)
+INSERT INTO ghost_writing (services_id, ghost_credits)
+VALUES (:service_id, :ghost_credits);
+
+--! insert_beat_writing
+INSERT INTO beat_writing (services_id)
+VALUES (:service_id) returning id;
+
+--! insert_cover_design
+INSERT INTO cover_design (services_id)
+VALUES (:service_id) returning id;
+
+--! insert_service_cover_object_key
+INSERT INTO objects(key, object_type, cover_services_id)
+VALUES (:key, 'image', :service_id);
+
+--! insert_mixing_credit_object_key
+INSERT INTO objects(key, object_type, credit_mixing_id)
+VALUES (:key, :object_type, :credit_mixing_id);
+
+--! insert_song_writing_credit_object_key
+INSERT INTO objects(key, object_type, credit_song_writing_id)
+VALUES (:key, :object_type, :credit_song_writing_id);
+
+--! insert_beat_writing_credit_object_key
+INSERT INTO objects(key, object_type, credit_beat_writing_id)
+VALUES (:key, :object_type, :credit_beat_writing_id);
+
+--! insert_cover_design_credit_object_key
+INSERT INTO objects(key, object_type, credit_cover_design_id)
+VALUES (:key, :object_type, :credit_cover_design_id);
+
+--! insert_music_service_genre (beat_writing_id?, song_writing_id?, mixing_id?)
+INSERT INTO music_services_genres(genres_id, beat_writing_id, song_writing_id, mixing_id)
+VALUES (
+    (SELECT id FROM genres WHERE name = :genre),
+    :beat_writing_id,
+    :song_writing_id,
+    :mixing_id
+);
 
 -- Offers
 
