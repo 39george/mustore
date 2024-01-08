@@ -109,7 +109,7 @@ async fn get_values_list(
                 .await
                 .context("Failed to get genres list from pg")?,
         )),
-        "tags" => Ok(Json(
+        "moods" => Ok(Json(
             open_access::get_moods_list()
                 .bind(&pg_pool)
                 .all()

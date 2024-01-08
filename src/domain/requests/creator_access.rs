@@ -147,108 +147,61 @@ pub enum SubmitProductRequest {
     }
 }
 
-// mod inner {
-//     use garde::Validate;
-//     use rust_decimal::Decimal;
-//     use serde::{Deserialize, Serialize};
+#[derive(Serialize, Deserialize, Debug, Validate)]
+pub struct Service {
+    #[garde(
+        length(min = PRDCT_NAME_MIN_LEN, max = PRDCT_NAME_MAX_LEN),
+        custom(forbidden_characters),
+        custom(contains_no_control_characters)
+    )]
+    pub name: String,
+    #[garde(inner(
+        length(min = PRDCT_DESC_MIN_LEN, max = PRDCT_DESC_MAX_LEN),
+        custom(forbidden_characters),
+        custom(contains_no_control_characters)
+    ))]
+    pub description: Option<String>,
+    #[garde(dive)]
+    pub cover_object_key: ObjKey,
+    #[garde(skip)]
+    pub display_price: Decimal,
+    // FIXME: check that lenght works correcly here
+    #[garde(
+        dive,
+        length(min = 1, max = 3),
+    )]
+    pub credits_object_keys: Option<Vec<ObjKey>>,
+}
 
-//     const MIN: usize = 1;
-//     const MAX: usize = 1000;
+#[derive(Serialize, Deserialize, Debug, Validate)]
+pub struct MusicService {
+    #[garde(dive)]
+    pub service: Service,
+    #[garde(inner(inner(
+        custom(forbidden_characters),
+        custom(contains_no_control_characters)
+    )))]
+    pub genres: Option<Vec<String>>
+}
 
-//     #[derive(Serialize, Deserialize, Debug, Validate)]
-//     pub struct Service {
-//         // #[validate(
-//         //     length(min = 2, max = 30),
-//         //     non_control_character,
-//         //     custom = "crate::domain::forbidden_characters"
-//         // )]
-//         #[garde(length(min = MIN, max = MAX))]
-//         pub name: String,
-//         // #[validate(
-//         //     length(min = 15, max = 400),
-//         //     non_control_character,
-//         //     custom = "crate::domain::forbidden_characters"
-//         // )]
-//         // pub description: Option<String>,
-//         // #[validate(
-//         //     length(min = 10, max = 500),
-//         //     non_control_character,
-//         //     custom = "crate::domain::forbidden_characters"
-//         // )]
-//         // pub cover_object_key: String,
-//         // #[validate(custom = "validate_credits_object_keys")]
-//         // pub credits_object_keys: Option<Vec<String>>,
-//         // pub display_price: Decimal,
-//     }
+#[derive(Serialize, Deserialize, Debug, Validate)]
+pub enum SubmitServiceRequest {
+    Mixing(#[garde(dive)] MusicService),
+    SongWriting(#[garde(dive)] MusicService),
+    BeatWriting(#[garde(dive)] MusicService),
 
-//     #[derive(Serialize, Deserialize, Debug)]
-//     pub enum SubmitServiceRequest {
-//         /// Vec with genres list for all musical services
-//         Mixing(Service, Vec<String>),
-//         SongWriting(Service, Vec<String>),
-//         BeatWriting(Service, Vec<String>),
-
-//         /// Vec with credits
-//         GhostWriting(Service, Vec<String>),
-//         CoverDesign(Service),
-//     }
-
-//     // impl Validate for SubmitServiceRequest {
-//     //     fn validate(&self) -> Result<(), ValidationErrors> {
-//     //         let mut errors = ValidationErrors::new();
-//     //         let mut result = Result::Ok(());
-//     //         let service = match self {
-//     //             SubmitServiceRequest::Mixing(service, genres) => {
-//     //                 if let Err(e) = validate_moods_genres(genres) {
-//     //                     errors.add("mixing genres", e);
-//     //                 }
-//     //                 service
-//     //             }
-//     //             SubmitServiceRequest::SongWriting(service, genres) => {
-//     //                 if let Err(e) = validate_moods_genres(genres) {
-//     //                     errors.add("song writing genres", e);
-//     //                 }
-//     //                 service
-//     //             }
-//     //             SubmitServiceRequest::BeatWriting(service, genres) => {
-//     //                 if let Err(e) = validate_moods_genres(genres) {
-//     //                     errors.add("beat writing genres", e);
-//     //                 }
-//     //                 service
-//     //             }
-//     //             SubmitServiceRequest::GhostWriting(service, credits) => {
-//     //                 if credits.len() > 5 {
-//     //                     errors.add(
-//     //                         "ghost writing",
-//     //                         ValidationError::new(
-//     //                             "Maximum credits for ghost writing is 5",
-//     //                         ),
-//     //                     );
-//     //                 }
-//     //                 for credit in credits.iter() {
-//     //                     if credit.len() > 5000 {
-//     //                         errors.add(
-//     //                     "ghost writing",
-//     //                     ValidationError::new(
-//     //                         "Maximum length for ghost writing credits is 5000",
-//     //                     ),
-//     //                 );
-//     //                     }
-//     //                     break;
-//     //                 }
-//     //                 service
-//     //             }
-//     //             SubmitServiceRequest::CoverDesign(service) => service,
-//     //         };
-//     //         result = ValidationErrors::merge(
-//     //             result,
-//     //             "mixing service",
-//     //             service.validate(),
-//     //         );
-//     //         result
-//     //     }
-//     // }
-// }
+    GhostWriting {
+        #[garde(dive)]
+        service: Service,
+        // FIXME: check that it works correctly
+        #[garde(inner(
+            length(min = MIN_LYRIC_LEN, max = MAX_LYRIC_LEN),
+            inner(custom(contains_no_control_characters))
+        ))]
+        credits: Option<Vec<String>>
+    },
+    CoverDesign(#[garde(dive)] Service),
+}
 
 #[derive(Serialize, Deserialize, Debug, Validate)]
 #[garde(allow_unvalidated)]
