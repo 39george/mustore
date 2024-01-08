@@ -154,45 +154,81 @@ POST /api/protected/creator/submit_music_product
 Example json:
 {
   "Song": {
-    "lyric": "this is song's lyric. Is it long enough or not?",
-    "sex": "Female",
-    "music_product": {
-      "master_object_key": "Alycia Daniel-27402d05-a1f7-4562-a082-e6268ffe9d43-song.mp3",
-      "master_tagged_object_key": null,
-      "multitrack_object_key": "Alycia Daniel-e61dfa06-abb7-4ebd-98ab-2c9002a5e850-arch.zip",
-      "cover_object_key": "Alycia Daniel-401ad043-994b-44f3-9458-2c0044625567-image.png",
+    "product": {
       "name": "some_song",
       "description": null,
       "moods": [
         "веселый"
       ],
+      "cover_object_key": "Lenora Ryan-95c9a0bf-2391-42fb-823a-36eb124a643c-image.png",
+      "price": "100"
+    },
+    "music_product": {
+      "master_object_key": "Lenora Ryan-4c8295bd-dff5-45aa-a706-dcea503e5015-song.mp3",
+      "master_tagged_object_key": null,
+      "multitrack_object_key": "Lenora Ryan-424f5e87-3dd9-48d0-9c70-687f7a23e4d6-arch.zip",
       "primary_genre": "Хор",
       "secondary_genre": null,
       "tempo": 100,
       "duration": 30,
-      "price": "100",
+      "key": "a_major"
+    },
+    "lyric": "this is song's lyric. Is it long enough or not?",
+    "sex": "Female"
+  }
+}
+OR
+{
+  "Beat": {
+    "product": {
+      "name": "some_song",
+      "description": null,
+      "moods": [
+        "веселый"
+      ],
+      "cover_object_key": "Jerel Schuppe-4e4f2d6f-3fe8-4d4c-a983-44b2c72c102c-image.png",
+      "price": "100"
+    },
+    "music_product": {
+      "master_object_key": "Jerel Schuppe-aa877066-116e-46c9-90cc-2f52674151a1-song.mp3",
+      "master_tagged_object_key": null,
+      "multitrack_object_key": "Jerel Schuppe-f2f0c47a-ab76-4247-a596-1ca97cf597b2-arch.zip",
+      "primary_genre": "Хор",
+      "secondary_genre": null,
+      "tempo": 100,
+      "duration": 30,
       "key": "a_major"
     }
   }
 }
 OR
 {
-  "Beat": {
-    "master_object_key": "Brandi Prosacco-cbc6fdc3-f11f-432f-85b5-0c5b50122e7e-song.mp3",
-    "master_tagged_object_key": null,
-    "multitrack_object_key": "Brandi Prosacco-421f1174-b2ce-494d-a7c0-b54d51a9a34d-arch.zip",
-    "cover_object_key": "Brandi Prosacco-b1c79d98-1257-4299-8b81-38bb4d2ddf26-image.png",
-    "name": "some_song",
-    "description": null,
-    "moods": [
-      "веселый"
-    ],
-    "primary_genre": "Хор",
-    "secondary_genre": null,
-    "tempo": 100,
-    "duration": 30,
-    "price": "100",
-    "key": "a_major"
+  "Cover": {
+    "product": {
+      "name": "some_song",
+      "description": null,
+      "moods": [
+        "веселый"
+      ],
+      "cover_object_key": "Maryse Bergstrom-4e81b68b-5bba-47ce-835b-794add89b9f4-image.png",
+      "price": "100"
+    }
+  }
+}
+OR
+{
+  "Lyric": {
+    "product": {
+      "name": "some_song",
+      "description": null,
+      "moods": [
+        "веселый"
+      ],
+      "cover_object_key": "Kaley Goodwin-002ef652-11ea-4923-8985-fce8c5ab3de7-image.png",
+      "price": "100"
+    },
+    "lyric": "this is just lyric. Is it long enough or not?",
+    "sex": null
   }
 }
 ← FROM
