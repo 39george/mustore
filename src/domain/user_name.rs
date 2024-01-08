@@ -12,7 +12,7 @@ impl UserName {
         let is_empty_or_whitespace = name.trim().is_empty();
         let is_too_long = name.chars().count() > 256;
         let is_too_short = name.chars().count() < 3;
-        let contains_forbidden_chars = forbidden_characters(name).is_err();
+        let contains_forbidden_chars = forbidden_characters(name, &()).is_err();
 
         if is_empty_or_whitespace {
             Err(anyhow::anyhow!("String is emtpy"))

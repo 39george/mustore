@@ -7,9 +7,9 @@ use axum::extract::State;
 use axum::routing;
 use axum::Json;
 use axum::Router;
+use garde::Validate;
 use serde::Deserialize;
 use serde::Serialize;
-use validator::ValidateArgs;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
@@ -128,7 +128,7 @@ async fn get_songs(
     State(app_state): State<AppState>,
     Json(params): Json<GetSongsListRequest>,
 ) -> Result<Json<Vec<GetSongs>>, ResponseError> {
-    params.validate_args((40, 320))?;
+    params.validate(&())?;
 
     let user_id = auth_session.user.map(|u| u.id);
 

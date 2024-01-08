@@ -4,7 +4,7 @@ use crate::helpers::{TestApp, TestUser};
 use mustore::{
     config::Settings,
     domain::requests::creator_access::{
-        MusicProduct, SongMusicProduct, SubmitMusicProductRequest,
+        MusicProduct, Product, SubmitProductRequest,
     },
 };
 
@@ -40,29 +40,31 @@ async fn song_uploading_success() {
         .await;
     assert_eq!(response.status().as_u16(), 200);
 
-    let body = SubmitMusicProductRequest::Song(SongMusicProduct {
-        lyric: "this is song's lyric. Is it long enough or not?".to_string(),
-        sex: mustore::domain::music_parameters::Sex::Female,
-        music_product: MusicProduct {
-            master_object_key: song_key,
-            master_tagged_object_key: None,
-            multitrack_object_key: arch_key,
-            cover_object_key: image_key,
+    let body = SubmitProductRequest::Song {
+        product: Product {
             name: "some_song".to_string(),
             description: None,
             moods: vec!["веселый".to_string()],
+            cover_object_key: image_key.into(),
+            price: 100.into(),
+        },
+        music_product: MusicProduct {
+            master_object_key: song_key.into(),
+            master_tagged_object_key: None,
+            multitrack_object_key: arch_key.into(),
             primary_genre: "Хор".to_string(),
             secondary_genre: None,
             tempo: 100,
             duration: 30,
-            price: 100.into(),
             key: mustore::domain::music_parameters::MusicKey::a_major,
         },
-    });
+        lyric: "this is song's lyric. Is it long enough or not?".into(),
+        sex: mustore::domain::music_parameters::Sex::Female,
+    };
 
     let response = client
         .post(format!(
-            "{}/api/protected/creator/submit_music_product",
+            "{}/api/protected/creator/submit_product",
             app.address
         ))
         .json(&body)
@@ -85,29 +87,31 @@ async fn song_uploading_without_files_fails() {
         .unwrap();
     assert_eq!(app.login_user(&test_user, &client).await.as_u16(), 200);
 
-    let body = SubmitMusicProductRequest::Song(SongMusicProduct {
-        lyric: "this is song's lyric. Is it long enough or not?".to_string(),
-        sex: mustore::domain::music_parameters::Sex::Female,
-        music_product: MusicProduct {
-            master_object_key: "some_keyyyyyyyyyyyy".to_string(),
-            master_tagged_object_key: None,
-            multitrack_object_key: "some_keyyyyyyyyyyyy".to_string(),
-            cover_object_key: "some_keyyyyyyyyyyyy".to_string(),
+    let body = SubmitProductRequest::Song {
+        product: Product {
             name: "some_song".to_string(),
             description: None,
-            moods: vec!["calm".to_string()],
-            primary_genre: "pop".to_string(),
+            moods: vec!["веселый".to_string()],
+            cover_object_key: "some_keyyyyyyyyyyyy".into(),
+            price: 100.into(),
+        },
+        music_product: MusicProduct {
+            master_object_key: "some_keyyyyyyyyyyyy".into(),
+            master_tagged_object_key: None,
+            multitrack_object_key: "some_keyyyyyyyyyyyy".into(),
+            primary_genre: "Хор".to_string(),
             secondary_genre: None,
             tempo: 100,
             duration: 30,
-            price: 100.into(),
             key: mustore::domain::music_parameters::MusicKey::a_major,
         },
-    });
+        lyric: "this is song's lyric. Is it long enough or not?".into(),
+        sex: mustore::domain::music_parameters::Sex::Female,
+    };
 
     let response = client
         .post(format!(
-            "{}/api/protected/creator/submit_music_product",
+            "{}/api/protected/creator/submit_product",
             app.address
         ))
         .json(&body)
@@ -149,28 +153,34 @@ async fn beat_uploading_success() {
         .await;
     assert_eq!(response.status().as_u16(), 200);
 
-    let body = SubmitMusicProductRequest::Beat(MusicProduct {
-        master_object_key: beat_key,
-        master_tagged_object_key: None,
-        multitrack_object_key: arch_key,
-        cover_object_key: image_key,
-        name: "some_song".to_string(),
-        description: None,
-        moods: vec!["веселый".to_string()],
-        primary_genre: "Хор".to_string(),
-        secondary_genre: None,
-        tempo: 100,
-        duration: 30,
-        price: 100.into(),
-        key: mustore::domain::music_parameters::MusicKey::a_major,
-    });
+    let body = SubmitProductRequest::Song {
+        product: Product {
+            name: "some_song".to_string(),
+            description: None,
+            moods: vec!["веселый".to_string()],
+            cover_object_key: image_key.into(),
+            price: 100.into(),
+        },
+        music_product: MusicProduct {
+            master_object_key: beat_key.into(),
+            master_tagged_object_key: None,
+            multitrack_object_key: arch_key.into(),
+            primary_genre: "Хор".to_string(),
+            secondary_genre: None,
+            tempo: 100,
+            duration: 30,
+            key: mustore::domain::music_parameters::MusicKey::a_major,
+        },
+        lyric: "this is song's lyric. Is it long enough or not?".into(),
+        sex: mustore::domain::music_parameters::Sex::Female,
+    };
 
     let js = serde_json::to_string_pretty(&body).unwrap();
     println!("{js}");
 
     let response = client
         .post(format!(
-            "{}/api/protected/creator/submit_music_product",
+            "{}/api/protected/creator/submit_product",
             app.address
         ))
         .json(&body)

@@ -2,7 +2,6 @@ use axum::body::Body;
 use axum::response::IntoResponse;
 use axum::response::Response;
 use http::StatusCode;
-use validator::ValidationErrors;
 
 use crate::error_chain_fmt;
 
@@ -19,7 +18,7 @@ pub enum ResponseError {
     #[error("Bad request")]
     BadRequest(#[source] anyhow::Error),
     #[error("Validation failed")]
-    ValidationError(#[from] ValidationErrors),
+    ValidationError(#[from] garde::Report),
     #[error("Can't process that input")]
     NotAcceptableError,
     #[error("No such user")]

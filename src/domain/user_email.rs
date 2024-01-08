@@ -6,7 +6,7 @@ pub struct UserEmail(String);
 
 impl UserEmail {
     pub fn parse(email: &str) -> Result<Self, anyhow::Error> {
-        if validator::validate_email(email) {
+        if garde::rules::email::parse_email(email).is_ok() {
             Ok(Self(email.to_string()))
         } else {
             Err(anyhow::anyhow!("Is not a valid subscriber email."))

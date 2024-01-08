@@ -9,16 +9,15 @@ use fred::clients::RedisPool;
 use fred::error::RedisError;
 use fred::interfaces::KeysInterface;
 use fred::prelude::RedisResult;
+use garde::Validate;
 use http::StatusCode;
-use validator::Validate;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
 use crate::auth::users::AuthSession;
 use crate::cornucopia::queries::creator_access;
 use crate::domain::requests::creator_access::CreateOfferRequest;
-use crate::domain::requests::creator_access::SubmitMusicProductRequest;
-use crate::domain::requests::creator_access::SubmitOtherProductRequest;
+use crate::domain::requests::creator_access::SubmitProductRequest;
 use crate::error_chain_fmt;
 use crate::routes::ResponseError;
 use crate::startup::AppState;
@@ -56,8 +55,7 @@ impl IntoResponse for CreatorResponseError {
 pub fn creator_router() -> Router<AppState> {
     Router::new()
         .route("/health_check", routing::get(health_check))
-        .route("/submit_music_product", routing::post(submit_music_product))
-        .route("/submit_other_product", routing::post(submit_other_product))
+        .route("/submit_product", routing::post(submit_product))
         .route("/create_offer", routing::post(create_offer))
         .layer(permission_required!(crate::auth::users::Backend, "creator"))
 }
@@ -67,190 +65,46 @@ async fn health_check() -> StatusCode {
     StatusCode::OK
 }
 
-#[tracing::instrument(name = "Submit a new song", skip_all)]
-async fn submit_music_product(
+#[tracing::instrument(name = "Submit a new product", skip_all)]
+async fn submit_product(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
-    Json(req): Json<SubmitMusicProductRequest>,
+    Json(req): Json<SubmitProductRequest>,
 ) -> Result<StatusCode, CreatorResponseError> {
     let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
 
-    req.validate().map_err(ResponseError::ValidationError)?;
+    req.validate(&()).map_err(ResponseError::ValidationError)?;
 
-    let (music_product, song) = match req {
-        SubmitMusicProductRequest::Beat(m) => (m, None),
-        SubmitMusicProductRequest::Song(s) => {
-            (s.music_product, Some((s.lyric, s.sex)))
-        }
+    let (product, music_product, lyric, sex) = match req {
+        SubmitProductRequest::Beat {
+            product,
+            music_product,
+        } => (product, Some(music_product), None, None),
+        SubmitProductRequest::Song {
+            product,
+            music_product,
+            lyric,
+            sex,
+        } => (product, Some(music_product), Some(lyric), Some(sex)),
+        SubmitProductRequest::Lyric {
+            product,
+            lyric,
+            sex,
+        } => (product, None, Some(lyric), sex),
+        SubmitProductRequest::Cover { product } => (product, None, None, None),
     };
 
-    let mut object_keys = vec![
-        music_product.master_object_key.as_str(),
-        music_product.multitrack_object_key.as_str(),
-        music_product.cover_object_key.as_str(),
-    ];
-    if let Some(ref tagged) = music_product.master_tagged_object_key {
-        object_keys.push(tagged.as_str());
-    }
+    let mut object_keys = vec![product.cover_object_key.as_ref()];
 
-    verify_upload_request_data_in_redis(
-        &app_state.redis_pool,
-        &object_keys,
-        user.id,
-    )
-    .await?;
-
-    let mut db_client = app_state
-        .pg_pool
-        .get()
-        .await
-        .context("Failed to get connection from postgres pool")
-        .map_err(ResponseError::UnexpectedError)?;
-
-    let transaction = db_client
-        .transaction()
-        .await
-        .context("Failed to get a transaction from pg")
-        .map_err(ResponseError::UnexpectedError)?;
-
-    let product_id = creator_access::insert_product_and_get_product_id()
-        .bind(
-            &transaction,
-            &user.id,
-            &music_product.name,
-            &music_product.description,
-            &music_product.price,
-        )
-        .one()
-        .await
-        .context("Failed to insert music product into the pg")
-        .map_err(ResponseError::UnexpectedError)?;
-
-    // match
-    let (beat_id, song_id) = match song {
-        Some((lyric, sex)) => {
-            let song_id = creator_access::insert_song_and_get_song_id()
-                .bind(
-                    &transaction,
-                    &product_id,
-                    &music_product.primary_genre,
-                    &music_product.secondary_genre,
-                    &sex.to_string(),
-                    &music_product.tempo,
-                    &music_product.key.clone().into(),
-                    &music_product.duration,
-                    &lyric,
-                )
-                .one()
-                .await
-                .context("Failed to insert song data into the pg")
-                .map_err(ResponseError::UnexpectedError)?;
-            (None, Some(song_id))
+    if let Some(ref mp) = music_product {
+        object_keys.push(mp.master_object_key.as_ref());
+        object_keys.push(mp.multitrack_object_key.as_ref());
+        if let Some(ref tagged) = mp.master_tagged_object_key {
+            object_keys.push(tagged.as_ref());
         }
-        None => {
-            let beat_id = creator_access::insert_beat_and_get_beat_id()
-                .bind(
-                    &transaction,
-                    &product_id,
-                    &music_product.primary_genre,
-                    &music_product.secondary_genre,
-                    &music_product.tempo,
-                    &music_product.key.clone().into(),
-                    &music_product.duration,
-                )
-                .one()
-                .await
-                .context("Failed to insert beat data into the pg")
-                .map_err(ResponseError::UnexpectedError)?;
-            (Some(beat_id), None)
-        }
-    };
-
-    creator_access::insert_product_cover_object_key()
-        .bind(&transaction, &music_product.cover_object_key, &product_id)
-        .await
-        .context("Failed to insert cover_object_key into pg")
-        .map_err(ResponseError::UnexpectedError)?;
-
-    creator_access::insert_music_product_master_object_key()
-        .bind(
-            &transaction,
-            &music_product.master_object_key,
-            &song_id,
-            &beat_id,
-        )
-        .await
-        .context("Failed to insert song_master_object_key into pg")
-        .map_err(ResponseError::UnexpectedError)?;
-
-    if let Some(ref tagged_key) = music_product.master_tagged_object_key {
-        creator_access::insert_music_product_master_tagged_object_key()
-            .bind(&transaction, &tagged_key, &song_id, &beat_id)
-            .await
-            .context("Failed to insert song_master_object_key into pg")
-            .map_err(ResponseError::UnexpectedError)?;
     }
-
-    creator_access::insert_music_product_multitrack_object_key()
-        .bind(
-            &transaction,
-            &music_product.multitrack_object_key,
-            &song_id,
-            &beat_id,
-        )
-        .await
-        .context("Failed to insert song_master_object_key into pg")
-        .map_err(ResponseError::UnexpectedError)?;
-
-    for mood in music_product.moods.iter() {
-        creator_access::insert_product_mood_by_name()
-            .bind(&transaction, &product_id, mood)
-            .await
-            .context("Failed to insert mood for product into pg")
-            .map_err(ResponseError::UnexpectedError)?;
-    }
-
-    if let Err(e) = transaction
-        .commit()
-        .await
-        .context("Failed to commit a pg transaction")
-    {
-        return Err(ResponseError::UnexpectedError(e).into());
-    }
-
-    // Now we can safely delete upload data from redis
-    delete_upload_request_data_from_redis(
-        &app_state.redis_pool,
-        &object_keys,
-        user.id,
-    )
-    .await?;
-
-    Ok(StatusCode::CREATED)
-}
-
-#[tracing::instrument(name = "Submit other product", skip_all)]
-async fn submit_other_product(
-    auth_session: AuthSession,
-    State(app_state): State<AppState>,
-    Json(req): Json<SubmitOtherProductRequest>,
-) -> Result<StatusCode, CreatorResponseError> {
-    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
-        anyhow::anyhow!("No such user in AuthSession!"),
-    ))?;
-
-    req.validate().map_err(ResponseError::ValidationError)?;
-
-    let (product, lyric) = match req {
-        SubmitOtherProductRequest::Lyric(product, lyric) => {
-            (product, Some(lyric))
-        }
-        SubmitOtherProductRequest::Cover(product) => (product, None),
-    };
-
-    let object_keys = vec![product.cover_object_key.as_str()];
 
     verify_upload_request_data_in_redis(
         &app_state.redis_pool,
@@ -285,25 +139,105 @@ async fn submit_other_product(
         .context("Failed to insert music product into the pg")
         .map_err(ResponseError::UnexpectedError)?;
 
-    if let Some(text) = lyric {
-        creator_access::insert_lyric()
-            .bind(&transaction, &product_id, &text)
-            .await
-            .context("Failed to insert lyric into pg")
-            .map_err(ResponseError::UnexpectedError)?;
-    } else {
-        creator_access::insert_cover()
-            .bind(&transaction, &product_id)
-            .await
-            .context("Failed to insert cover into pg")
-            .map_err(ResponseError::UnexpectedError)?;
-    }
-
     creator_access::insert_product_cover_object_key()
-        .bind(&transaction, &product.cover_object_key, &product_id)
+        .bind(
+            &transaction,
+            &product.cover_object_key.as_ref(),
+            &product_id,
+        )
         .await
         .context("Failed to insert cover_object_key into pg")
         .map_err(ResponseError::UnexpectedError)?;
+
+    // match
+    let (beat_id, song_id) = match (&music_product, lyric, sex) {
+        (None, None, None) => {
+            creator_access::insert_cover()
+                .bind(&transaction, &product_id)
+                .await
+                .context("Failed to insert cover into pg")
+                .map_err(ResponseError::UnexpectedError)?;
+            (None, None)
+        }
+        // FIXME: add sex to query
+        (None, Some(lyric), sex) => {
+            creator_access::insert_lyric()
+                .bind(&transaction, &product_id, &lyric.as_ref())
+                .await
+                .context("Failed to insert lyric into pg")
+                .map_err(ResponseError::UnexpectedError)?;
+            (None, None)
+        }
+        (Some(music_product), None, None) => {
+            let beat_id = creator_access::insert_beat_and_get_beat_id()
+                .bind(
+                    &transaction,
+                    &product_id,
+                    &music_product.primary_genre,
+                    &music_product.secondary_genre,
+                    &music_product.tempo,
+                    &music_product.key.clone().into(),
+                    &music_product.duration,
+                )
+                .one()
+                .await
+                .context("Failed to insert beat data into the pg")
+                .map_err(ResponseError::UnexpectedError)?;
+            (Some(beat_id), None)
+        }
+        (Some(music_product), Some(lyric), Some(sex)) => {
+            let song_id = creator_access::insert_song_and_get_song_id()
+                .bind(
+                    &transaction,
+                    &product_id,
+                    &music_product.primary_genre,
+                    &music_product.secondary_genre,
+                    &sex.to_string(),
+                    &music_product.tempo,
+                    &music_product.key.clone().into(),
+                    &music_product.duration,
+                    &lyric.as_ref(),
+                )
+                .one()
+                .await
+                .context("Failed to insert song data into the pg")
+                .map_err(ResponseError::UnexpectedError)?;
+            (None, Some(song_id))
+        }
+        _ => unreachable!(),
+    };
+
+    if let Some(ref music_product) = music_product {
+        creator_access::insert_music_product_master_object_key()
+            .bind(
+                &transaction,
+                &music_product.master_object_key.as_ref(),
+                &song_id,
+                &beat_id,
+            )
+            .await
+            .context("Failed to insert song_master_object_key into pg")
+            .map_err(ResponseError::UnexpectedError)?;
+
+        if let Some(ref tagged_key) = music_product.master_tagged_object_key {
+            creator_access::insert_music_product_master_tagged_object_key()
+                .bind(&transaction, &tagged_key.as_ref(), &song_id, &beat_id)
+                .await
+                .context("Failed to insert song_master_object_key into pg")
+                .map_err(ResponseError::UnexpectedError)?;
+        }
+
+        creator_access::insert_music_product_multitrack_object_key()
+            .bind(
+                &transaction,
+                &music_product.multitrack_object_key.as_ref(),
+                &song_id,
+                &beat_id,
+            )
+            .await
+            .context("Failed to insert song_master_object_key into pg")
+            .map_err(ResponseError::UnexpectedError)?;
+    }
 
     for mood in product.moods.iter() {
         creator_access::insert_product_mood_by_name()
@@ -331,6 +265,121 @@ async fn submit_other_product(
 
     Ok(StatusCode::CREATED)
 }
+
+// #[tracing::instrument(name = "Submit other product", skip_all)]
+// async fn submit_other_product(
+//     auth_session: AuthSession,
+//     State(app_state): State<AppState>,
+//     Json(req): Json<SubmitOtherProductRequest>,
+// ) -> Result<StatusCode, CreatorResponseError> {
+//     let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
+//         anyhow::anyhow!("No such user in AuthSession!"),
+//     ))?;
+
+//     req.validate().map_err(ResponseError::ValidationError)?;
+
+//     let (product, lyric) = match req {
+//         SubmitOtherProductRequest::Lyric(product, lyric) => {
+//             (product, Some(lyric))
+//         }
+//         SubmitOtherProductRequest::Cover(product) => (product, None),
+//     };
+
+//     let object_keys = vec![product.cover_object_key.as_str()];
+
+//     verify_upload_request_data_in_redis(
+//         &app_state.redis_pool,
+//         &object_keys,
+//         user.id,
+//     )
+//     .await?;
+
+//     let mut db_client = app_state
+//         .pg_pool
+//         .get()
+//         .await
+//         .context("Failed to get connection from postgres pool")
+//         .map_err(ResponseError::UnexpectedError)?;
+
+//     let transaction = db_client
+//         .transaction()
+//         .await
+//         .context("Failed to get a transaction from pg")
+//         .map_err(ResponseError::UnexpectedError)?;
+
+//     let product_id = creator_access::insert_product_and_get_product_id()
+//         .bind(
+//             &transaction,
+//             &user.id,
+//             &product.name,
+//             &product.description,
+//             &product.price,
+//         )
+//         .one()
+//         .await
+//         .context("Failed to insert music product into the pg")
+//         .map_err(ResponseError::UnexpectedError)?;
+
+//     if let Some(text) = lyric {
+//         creator_access::insert_lyric()
+//             .bind(&transaction, &product_id, &text)
+//             .await
+//             .context("Failed to insert lyric into pg")
+//             .map_err(ResponseError::UnexpectedError)?;
+//     } else {
+//         creator_access::insert_cover()
+//             .bind(&transaction, &product_id)
+//             .await
+//             .context("Failed to insert cover into pg")
+//             .map_err(ResponseError::UnexpectedError)?;
+//     }
+
+//     creator_access::insert_product_cover_object_key()
+//         .bind(&transaction, &product.cover_object_key, &product_id)
+//         .await
+//         .context("Failed to insert cover_object_key into pg")
+//         .map_err(ResponseError::UnexpectedError)?;
+
+//     for mood in product.moods.iter() {
+//         creator_access::insert_product_mood_by_name()
+//             .bind(&transaction, &product_id, mood)
+//             .await
+//             .context("Failed to insert mood for product into pg")
+//             .map_err(ResponseError::UnexpectedError)?;
+//     }
+
+//     if let Err(e) = transaction
+//         .commit()
+//         .await
+//         .context("Failed to commit a pg transaction")
+//     {
+//         return Err(ResponseError::UnexpectedError(e).into());
+//     }
+
+//     // Now we can safely delete upload data from redis
+//     delete_upload_request_data_from_redis(
+//         &app_state.redis_pool,
+//         &object_keys,
+//         user.id,
+//     )
+//     .await?;
+
+//     Ok(StatusCode::CREATED)
+// }
+
+// #[tracing::instrument(name = "Submit service", skip_all)]
+// async fn submit_service(
+//     auth_session: AuthSession,
+//     State(app_state): State<AppState>,
+//     Json(req): Json<SubmitServiceRequest>,
+// ) -> Result<StatusCode, CreatorResponseError> {
+//     let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
+//         anyhow::anyhow!("No such user in AuthSession!"),
+//     ))?;
+
+//     req.validate().map_err(ResponseError::ValidationError)?;
+//     Ok(StatusCode::OK)
+// }
 
 #[tracing::instrument(name = "Create a new offer", skip_all)]
 async fn create_offer(

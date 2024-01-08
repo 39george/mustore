@@ -12,11 +12,11 @@ use fred::interfaces::KeysInterface;
 use fred::prelude::RedisResult;
 use fred::types::Scanner;
 use futures::TryStreamExt;
+use garde::Validate;
 use http::StatusCode;
 use mediatype::media_type;
 use mediatype::MediaTypeBuf;
 use time::OffsetDateTime;
-use validator::Validate;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
@@ -86,7 +86,7 @@ async fn request_obj_storage_upload(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
 
-    params.validate()?;
+    params.validate(&())?;
 
     check_current_user_uploads(&app_state.redis_pool, user.id)
         .await
@@ -230,7 +230,7 @@ async fn send_message(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
 
-    params.validate()?;
+    params.validate(&())?;
 
     let mut db_client = app_state
         .pg_pool

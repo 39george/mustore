@@ -1,15 +1,17 @@
+use garde::Validate;
 use serde::Deserialize;
 use serde::Serialize;
-use validator::Validate;
-use validator::ValidationError;
+
+use crate::domain::*;
 
 #[derive(Deserialize, Debug, Validate)]
 pub struct UploadFileRequest {
+    #[garde(skip)]
     pub media_type: mediatype::MediaTypeBuf,
-    #[validate(
-        length(min = 2, max = 50),
-        non_control_character,
-        custom = "crate::domain::forbidden_characters"
+    #[garde(
+        length(min = MIN_FILENAME_LEN, max = MAX_FILENAME_LEN),
+        custom(forbidden_characters),
+        custom(contains_no_control_characters)
     )]
     pub file_name: String,
 }
@@ -25,22 +27,15 @@ pub struct CreateConversationRequest {
 }
 
 #[derive(Serialize, Deserialize, Debug, Validate)]
+#[garde(allow_unvalidated)]
 pub struct SendMessageRequest {
     pub conversation_id: i32,
-    #[validate(length(min = 1, max = 2500))]
+    #[garde(length(min = MIN_MESSAGE_LEN, max = MAX_MESSAGE_LEN))]
     pub text: String,
     pub service_id: Option<i32>,
-    #[validate(custom = "check_length")]
+    #[garde(length(min = 0, max = MAX_ATTACHMENTS_COUNT))]
     pub attachments: Vec<String>,
     pub reply_message_id: Option<i32>,
-}
-
-fn check_length(input: &Vec<String>) -> Result<(), ValidationError> {
-    if input.len() > 10 {
-        Err(ValidationError::new("Too many attachments"))
-    } else {
-        Ok(())
-    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]

@@ -1,7 +1,5 @@
-use axum::error_handling::HandleErrorLayer;
 use axum::routing;
 use axum::serve::Serve;
-use axum::BoxError;
 use axum::Router;
 use axum_login::AuthManagerLayerBuilder;
 use deadpool_postgres::Client;
@@ -11,16 +9,12 @@ use deadpool_postgres::Pool;
 use fred::clients::RedisClient;
 use fred::clients::RedisPool;
 use fred::types::RedisConfig;
-use http::HeaderValue;
-use http::Method;
-use http::StatusCode;
 use secrecy::ExposeSecret;
 
 use time::Duration;
 use time::UtcOffset;
 use tokio::net::TcpListener;
 use tokio_postgres::NoTls;
-use tower::ServiceBuilder;
 use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
 
