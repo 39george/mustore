@@ -9,7 +9,7 @@ use mustore::{
 };
 
 #[tokio::test]
-async fn song_uploading_success() {
+async fn song_submit_success() {
     let app =
         TestApp::spawn_app(Settings::load_configuration().unwrap(), 1).await;
 
@@ -75,7 +75,7 @@ async fn song_uploading_success() {
 }
 
 #[tokio::test]
-async fn song_uploading_without_files_fails() {
+async fn song_submit_without_files_fails() {
     let app =
         TestApp::spawn_app(Settings::load_configuration().unwrap(), 1).await;
 
@@ -122,7 +122,7 @@ async fn song_uploading_without_files_fails() {
 }
 
 #[tokio::test]
-async fn beat_uploading_success() {
+async fn beat_submit_success() {
     let app =
         TestApp::spawn_app(Settings::load_configuration().unwrap(), 1).await;
 
@@ -153,7 +153,7 @@ async fn beat_uploading_success() {
         .await;
     assert_eq!(response.status().as_u16(), 200);
 
-    let body = SubmitProductRequest::Song {
+    let body = SubmitProductRequest::Beat {
         product: Product {
             name: "some_song".to_string(),
             description: None,
@@ -171,12 +171,91 @@ async fn beat_uploading_success() {
             duration: 30,
             key: mustore::domain::music_parameters::MusicKey::a_major,
         },
-        lyric: "this is song's lyric. Is it long enough or not?".into(),
-        sex: mustore::domain::music_parameters::Sex::Female,
     };
 
-    let js = serde_json::to_string_pretty(&body).unwrap();
-    println!("{js}");
+    let response = client
+        .post(format!(
+            "{}/api/protected/creator/submit_product",
+            app.address
+        ))
+        .json(&body)
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(response.status().as_u16(), 201);
+}
+
+#[tokio::test]
+async fn cover_submit_success() {
+    let app =
+        TestApp::spawn_app(Settings::load_configuration().unwrap(), 1).await;
+
+    let test_user = TestUser::generate_user(String::from("creator"), 0);
+    app.register_user(&test_user).await;
+    let client = reqwest::Client::builder()
+        .cookie_store(true)
+        .build()
+        .unwrap();
+    assert_eq!(app.login_user(&test_user, &client).await.as_u16(), 200);
+
+    let image_file = std::fs::read("assets/image.png").unwrap();
+    let (response, image_key) = app
+        .upload_file(&client, "image/png", "image.png", image_file)
+        .await;
+    assert_eq!(response.status().as_u16(), 200);
+
+    let body = SubmitProductRequest::Cover {
+        product: Product {
+            name: "some_song".to_string(),
+            description: None,
+            moods: vec!["веселый".to_string()],
+            cover_object_key: image_key.into(),
+            price: 100.into(),
+        },
+    };
+
+    let response = client
+        .post(format!(
+            "{}/api/protected/creator/submit_product",
+            app.address
+        ))
+        .json(&body)
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(response.status().as_u16(), 201);
+}
+
+#[tokio::test]
+async fn lyric_submit_success() {
+    let app =
+        TestApp::spawn_app(Settings::load_configuration().unwrap(), 1).await;
+
+    let test_user = TestUser::generate_user(String::from("creator"), 0);
+    app.register_user(&test_user).await;
+    let client = reqwest::Client::builder()
+        .cookie_store(true)
+        .build()
+        .unwrap();
+    assert_eq!(app.login_user(&test_user, &client).await.as_u16(), 200);
+
+    let image_file = std::fs::read("assets/image.png").unwrap();
+    let (response, image_key) = app
+        .upload_file(&client, "image/png", "image.png", image_file)
+        .await;
+    assert_eq!(response.status().as_u16(), 200);
+
+    let body = SubmitProductRequest::Lyric {
+        product: Product {
+            name: "some_song".to_string(),
+            description: None,
+            moods: vec!["веселый".to_string()],
+            cover_object_key: image_key.into(),
+            price: 100.into(),
+        },
+        lyric: "this is just lyric. Is it long enough or not?".into(),
+        sex: None,
+    };
 
     let response = client
         .post(format!(
