@@ -180,7 +180,8 @@ CREATE TABLE beats (
 CREATE TABLE lyrics (
     id SERIAL PRIMARY KEY,
     products_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-    text VARCHAR(5000) NOT NULL
+    text VARCHAR(5000) NOT NULL,
+    sex VARCHAR(6) CHECK (sex IN ('male', 'female'))
 );
 
 CREATE TABLE covers (
