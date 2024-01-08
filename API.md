@@ -147,7 +147,7 @@ if Err:
 
 ### Creator routes
 
-- Submit a new music product (song / beat):
+- Submit a new product:
 ```
 → TO
 POST /api/protected/creator/submit_music_product
@@ -231,23 +231,6 @@ OR
     "sex": null
   }
 }
-← FROM
-If OK, StatusCode::CREATED (201)
-if Err:
-    1. If internal error > StatusCode::InternalError (500)
-    2. If bad input > StatusCode::NotAcceptable (406) 
-    3. If don't have permission > StatusCode::Forbidden (403)
-    4. If not authorized > StatusCode::Unautorized (401)
-    6. If filename containes forbidden characters > StatusCode::BadRequest (400) + error description in the body.
-    7. If no upload registered in the redis cache, > StatusCode::ExpectationFailed (417)
-```
-
-- Submit an other kind product (lyric / cover):
-```
-→ TO
-POST /api/protected/creator/submit_other_product
-Example json:
-
 ← FROM
 If OK, StatusCode::CREATED (201)
 if Err:
