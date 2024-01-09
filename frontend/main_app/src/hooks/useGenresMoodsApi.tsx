@@ -3,7 +3,7 @@ import { API_URL } from "../config";
 import axios, { AxiosError } from "axios";
 
 const MAX_RETRIES = 3;
-const RETRY_DELAY_MS = 400;
+const RETRY_DELAY_MS = 1000;
 
 type GenreOrMood = string[];
 
@@ -47,7 +47,7 @@ const useGenresMoodsApi = (endpoint: string) => {
               fetch_data(attempts + 1);
             } else {
               set_error(
-                "No response from server. Please, check your internet connection and try again"
+                "Нет ответа от сервера, пожалуйста, проверьте соединение с интернетом и попробуйте еще раз"
               );
             }
           } else {
@@ -67,7 +67,7 @@ const useGenresMoodsApi = (endpoint: string) => {
     if (error.response) {
       switch (error.response.status) {
         case 400:
-          set_error("Bad input, please check your request and try again");
+          set_error("Что-то не так с нашим сервером, мы уже работаем над этим");
           break;
         case 500:
           set_error("Internal server error. Please try again later.");

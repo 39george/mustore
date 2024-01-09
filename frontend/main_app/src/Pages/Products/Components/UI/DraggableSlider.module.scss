@@ -1,0 +1,52 @@
+@import "../../../../colors.scss";
+.slider {
+  display: flex;
+  align-items: center;
+
+  position: relative;
+
+  width: 152px;
+
+  margin: 2rem auto;
+
+  font-family: "Geologica", sans-serif;
+  font-size: 0.875rem;
+  font-weight: 200;
+}
+
+.knob {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  position: absolute;
+
+  width: 0.875rem;
+  height: 0.875rem;
+
+  background-color: $accent_red;
+  border-radius: 50%;
+
+  // cursor: grab;
+  z-index: 3;
+}
+
+.low_number,
+.high_number {
+  margin-top: 2.5rem;
+}
+
+.range_bar_line {
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background-color: $accent_red;
+  z-index: 2;
+}
+
+.range_bar_line_transparent {
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background-color: rgba($color: $main_dark, $alpha: 0.15);
+}

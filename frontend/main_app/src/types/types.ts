@@ -35,3 +35,7 @@ export interface CarouselProps {
   carousel_type: "recommended" | "new";
   carousel_items: CarouselItem[];
 }
+
+export interface CheckedItems {
+  [key: string]: boolean;
+}

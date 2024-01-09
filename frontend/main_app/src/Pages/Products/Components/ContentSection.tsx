@@ -77,7 +77,10 @@ const ContentSection: FC<ContentSectionProps> = ({ section_type }) => {
               carousel_items={carousel_items_new}
             />
           </div>
-          <MainContentProducts />
+          <div className={styles.main_content}>
+            <h2 className={styles.h2}>Все песни</h2>
+            <MainContentProducts />
+          </div>
         </div>
       )}
     </section>

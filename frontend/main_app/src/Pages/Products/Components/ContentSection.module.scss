@@ -42,8 +42,6 @@
 }
 
 .content {
-  min-height: 100vh;
-
   margin-top: 5rem;
 }
 
@@ -51,6 +49,16 @@
   margin-left: 0.75rem;
 }
 
-.new_block {
+.new_block,
+.main_content {
   margin-top: 4.5rem;
+}
+
+.h2 {
+  margin-left: 1.75rem;
+
+  font-size: 1.25rem;
+  font-weight: 600;
+
+  letter-spacing: 0.1rem;
 }

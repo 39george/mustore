@@ -1,11 +1,189 @@
 @import "../../../colors.scss";
+// General
+.left_bar {
+  width: 100%;
+  max-width: 16.5rem;
 
-.block {
-  width: fit-content;
+  margin-top: 2rem;
 }
 
+.block {
+  margin-bottom: 1rem;
+  padding: 1rem 0.875rem;
+
+  background-color: #fefefe;
+  border-radius: 0.75rem;
+  box-shadow: 0 0 1.5rem rgba($color: #000000, $alpha: 0.06);
+
+  letter-spacing: 0;
+}
+
+.block_title {
+  font-weight: 500;
+}
+
+.sex_content,
+.genres_content,
+.music_keys_content,
+.moods_content {
+  margin-top: 1.25rem;
+  margin-left: 1rem;
+
+  font-size: 0.875rem;
+
+  & .li_item:not(:last-child) {
+    margin-bottom: 1rem;
+  }
+}
+
+.li_item {
+  display: flex;
+  align-items: center;
+
+  width: fit-content;
+
+  cursor: pointer;
+
+  input {
+    cursor: pointer;
+  }
+
+  .label {
+    margin-left: 0.875rem;
+    color: rgba($color: $main_dark, $alpha: 0.8);
+    cursor: pointer;
+  }
+
+  .checked_label {
+    color: $main_dark;
+  }
+
+  &:hover {
+    .label {
+      color: $main_dark;
+    }
+
+    .custom_checkbox {
+      .checkmark {
+        border: 1px solid $accent_red;
+      }
+    }
+  }
+}
+
+// Custom checkbox
+.checkbox {
+  position: absolute;
+  height: 0;
+  width: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.custom_checkbox {
+  .checkmark {
+    display: inline-block;
+    vertical-align: middle;
+
+    position: relative;
+    top: 0;
+    left: 0;
+
+    width: 1rem;
+    height: 1rem;
+
+    border-radius: 4px;
+    border: 1px solid rgba($color: $main_dark, $alpha: 0.5);
+
+    cursor: pointer;
+
+    &::after {
+      content: "";
+      display: none;
+      position: absolute;
+      bottom: 3px;
+      left: 3px;
+
+      width: 5px;
+      height: 10px;
+
+      border: solid $accent_red;
+      border-width: 0 2px 2px 0;
+      -webkit-transform: rotate(45deg);
+      -ms-transform: rotate(45deg);
+      transform: rotate(45deg);
+    }
+  }
+
+  input:checked ~ .checkmark {
+    border: 1px solid $accent_red;
+    &::after {
+      display: block;
+    }
+  }
+}
+
+// Search & filter
+.search_block,
+.filter_block {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.input {
+  width: 100%;
+
+  font-family: "Raleway", sans-serif;
+  font-size: 0.875rem;
+
+  border: none;
+  border-bottom: 1px solid transparent;
+
+  &::placeholder {
+    color: rgba($color: $main_dark, $alpha: 0.6);
+  }
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.search_icon {
+  color: rgba($color: $main_dark, $alpha: 0.6);
+  cursor: pointer;
+}
+
+.filter_block {
+  cursor: pointer;
+}
+
+.filter_chevron {
+  color: $accent_red;
+  font-size: 1.5rem;
+}
+
+// Genres & moods
 .genres_content,
 .moods_content {
   height: 320px;
-  overflow-y: auto;
+  overflow-y: scroll;
+
+  scrollbar-width: 0;
+}
+
+.genres_content::-webkit-scrollbar {
+  display: none;
+}
+
+.moods_content::-webkit-scrollbar {
+  display: none;
+}
+
+// Error
+.error {
+  margin-top: 1.25rem;
+  margin-left: 1rem;
+  font-size: 0.875rem;
+  opacity: 0.8;
 }
