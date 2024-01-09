@@ -1,6 +1,6 @@
 //! tests/api/upload_song.rs
 
-use std::ops::{Range, RangeBounds};
+use std::ops::RangeBounds;
 
 use crate::helpers::{TestApp, TestUser};
 use mustore::{
@@ -275,7 +275,7 @@ async fn lyric_submit_success() {
 }
 
 #[tokio::test]
-async fn service_submit_without_credits_success() {
+async fn mixing_service_submit_without_credits_success() {
     let app =
         TestApp::spawn_app(Settings::load_configuration().unwrap(), 1).await;
 
@@ -364,6 +364,131 @@ async fn service_submit_without_credits_success() {
 
     for genre in service_genres {
         assert!(genres.contains(&genre));
+    }
+}
+
+#[tokio::test]
+async fn submit_all_kinds_of_services_without_credits_success() {
+    let app =
+        TestApp::spawn_app(Settings::load_configuration().unwrap(), 1).await;
+
+    let test_user = TestUser::generate_user(String::from("creator"), 0);
+    app.register_user(&test_user).await;
+    let client = reqwest::Client::builder()
+        .cookie_store(true)
+        .build()
+        .unwrap();
+    assert_eq!(app.login_user(&test_user, &client).await.as_u16(), 200);
+
+    let image_file = std::fs::read("assets/image.png").unwrap();
+
+    let (response, image_key) = app
+        .upload_file(&client, "image/png", "image.png", image_file.clone())
+        .await;
+    assert_eq!(response.status().as_u16(), 200);
+
+    let genres_list = open_access::get_genres_list()
+        .bind(&app.pg_client)
+        .all()
+        .await
+        .unwrap();
+
+    let genres: Vec<_> =
+        get_rand_subiter(&genres_list, 0..10).cloned().collect();
+
+    let mixing = SubmitServiceRequest::Mixing(MusicService {
+        service: mustore::domain::requests::creator_access::Service {
+            name: "Some service".to_string(),
+            description: None,
+            cover_object_key: image_key.into(),
+            display_price: 500.into(),
+            credits_object_keys: None,
+        },
+        genres: Some(genres.clone()),
+    });
+
+    let (response, image_key) = app
+        .upload_file(&client, "image/png", "image.png", image_file.clone())
+        .await;
+    assert_eq!(response.status().as_u16(), 200);
+
+    let song_writing = SubmitServiceRequest::SongWriting(MusicService {
+        service: mustore::domain::requests::creator_access::Service {
+            name: "Some service".to_string(),
+            description: None,
+            cover_object_key: image_key.into(),
+            display_price: 500.into(),
+            credits_object_keys: None,
+        },
+        genres: Some(genres.clone()),
+    });
+
+    let (response, image_key) = app
+        .upload_file(&client, "image/png", "image.png", image_file.clone())
+        .await;
+    assert_eq!(response.status().as_u16(), 200);
+
+    let beat_writing = SubmitServiceRequest::BeatWriting(MusicService {
+        service: mustore::domain::requests::creator_access::Service {
+            name: "Some service".to_string(),
+            description: None,
+            cover_object_key: image_key.into(),
+            display_price: 500.into(),
+            credits_object_keys: None,
+        },
+        genres: Some(genres.clone()),
+    });
+
+    let (response, image_key) = app
+        .upload_file(&client, "image/png", "image.png", image_file.clone())
+        .await;
+    assert_eq!(response.status().as_u16(), 200);
+
+    let ghost_writing = SubmitServiceRequest::GhostWriting {
+        service: mustore::domain::requests::creator_access::Service {
+            name: "Some service".to_string(),
+            description: None,
+            cover_object_key: image_key.into(),
+            display_price: 500.into(),
+            credits_object_keys: None,
+        },
+        credits: None,
+    };
+
+    let (response, image_key) = app
+        .upload_file(&client, "image/png", "image.png", image_file.clone())
+        .await;
+    assert_eq!(response.status().as_u16(), 200);
+
+    let cover_design = SubmitServiceRequest::CoverDesign(
+        mustore::domain::requests::creator_access::Service {
+            name: "Some service".to_string(),
+            description: None,
+            cover_object_key: image_key.into(),
+            display_price: 500.into(),
+            credits_object_keys: None,
+        },
+    );
+
+    for body in vec![
+        mixing,
+        song_writing,
+        beat_writing,
+        ghost_writing,
+        cover_design,
+    ]
+    .into_iter()
+    {
+        let response = client
+            .post(format!(
+                "{}/api/protected/creator/submit_service",
+                app.address
+            ))
+            .json(&body)
+            .send()
+            .await
+            .unwrap();
+        assert_eq!(response.status().as_u16(), 201);
     }
 }
 

@@ -150,7 +150,7 @@ if Err:
 - Submit a new product:
 ```
 → TO
-POST /api/protected/creator/submit_music_product
+POST /api/protected/creator/submit_product
 Example json:
 {
   "Song": {
@@ -229,6 +229,99 @@ OR
     },
     "lyric": "this is just lyric. Is it long enough or not?",
     "sex": null
+  }
+}
+← FROM
+If OK, StatusCode::CREATED (201)
+if Err:
+    1. If internal error > StatusCode::InternalError (500)
+    2. If bad input > StatusCode::NotAcceptable (406) 
+    3. If don't have permission > StatusCode::Forbidden (403)
+    4. If not authorized > StatusCode::Unautorized (401)
+    6. If filename containes forbidden characters > StatusCode::BadRequest (400) + error description in the body.
+    7. If no upload registered in the redis cache, > StatusCode::ExpectationFailed (417)
+```
+
+- Submit a new service
+
+```
+→ TO
+POST /api/protected/creator/submit_service
+Example json:
+{
+  "Mixing": {
+    "service": {
+      "name": "Some service",
+      "description": null,
+      "cover_object_key": "Leilani Kemmer-307e6f94-5a81-4e0a-9b4e-9c3fd7cc37f2-image.png",
+      "display_price": "500",
+      "credits_object_keys": null
+    },
+    "genres": [
+      "Нью вейв",
+      "Бас",
+      "Джаз",
+      "Национальный фолк"
+    ]
+  }
+}
+OR
+{
+  "SongWriting": {
+    "service": {
+      "name": "Some service",
+      "description": null,
+      "cover_object_key": "Leilani Kemmer-307e6f94-5a81-4e0a-9b4e-9c3fd7cc37f2-image.png",
+      "display_price": "500",
+      "credits_object_keys": null
+    },
+    "genres": [
+      "Нью вейв",
+      "Бас",
+      "Джаз",
+      "Национальный фолк"
+    ]
+  }
+}
+OR
+{
+  "BeatWriting": {
+    "service": {
+      "name": "Some service",
+      "description": null,
+      "cover_object_key": "Leilani Kemmer-307e6f94-5a81-4e0a-9b4e-9c3fd7cc37f2-image.png",
+      "display_price": "500",
+      "credits_object_keys": null
+    },
+    "genres": [
+      "Нью вейв",
+      "Бас",
+      "Джаз",
+      "Национальный фолк"
+    ]
+  }
+}
+OR
+{
+  "GhostWriting": {
+    "service": {
+      "name": "Some service",
+      "description": null,
+      "cover_object_key": "Leilani Kemmer-307e6f94-5a81-4e0a-9b4e-9c3fd7cc37f2-image.png",
+      "display_price": "500",
+      "credits_object_keys": null
+    },
+    "credits": null
+  }
+}
+OR
+{
+  "CoverDesign": {
+    "name": "Some service",
+    "description": null,
+    "cover_object_key": "Leilani Kemmer-307e6f94-5a81-4e0a-9b4e-9c3fd7cc37f2-image.png",
+    "display_price": "500",
+    "credits_object_keys": null
   }
 }
 ← FROM
