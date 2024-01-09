@@ -6,6 +6,7 @@ use http::StatusCode;
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
 use self::admin::admin_router;
+use self::consumer::consumer_router;
 use self::creator::creator_router;
 use self::user::user_router;
 use crate::startup::AppState;
@@ -13,6 +14,7 @@ use crate::startup::AppState;
 // ───── Submodules ───────────────────────────────────────────────────────── //
 
 mod admin;
+mod consumer;
 mod creator;
 mod user;
 
@@ -24,6 +26,7 @@ pub fn protected_router() -> Router<AppState> {
         .route_layer(permission_required!(crate::auth::users::Backend, "user"))
         .nest("/user", user_router())
         .nest("/creator", creator_router())
+        .nest("/consumer", consumer_router())
         .nest("/admin", admin_router())
 }
 
