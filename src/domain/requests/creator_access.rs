@@ -165,9 +165,9 @@ pub struct Service {
     pub cover_object_key: ObjKey,
     #[garde(skip)]
     pub display_price: Decimal,
-    // FIXME: check that lenght works correcly here
     #[garde(
         dive,
+        // Checked, length works as expected here
         length(min = 1, max = 3),
     )]
     pub credits_object_keys: Option<Vec<ObjKey>>,
@@ -195,8 +195,11 @@ pub enum SubmitServiceRequest {
         service: Service,
         // FIXME: check that it works correctly
         #[garde(inner(
-            length(min = MIN_LYRIC_LEN, max = MAX_LYRIC_LEN),
-            inner(custom(contains_no_control_characters))
+            length(min = MIN_LYRIC_COUNT, max = MAX_LYRIC_COUNT),
+            inner(
+                length(min = MIN_LYRIC_LEN, max = MAX_LYRIC_LEN),
+                custom(contains_no_control_characters)
+            )
         ))]
         credits: Option<Vec<String>>
     },

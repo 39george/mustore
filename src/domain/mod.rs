@@ -33,6 +33,8 @@ pub const MIN_AUDIO_DURATION_SEC: i16 = 15;
 pub const MAX_AUDIO_DURATION_SEC: i16 = 600;
 pub const MIN_LYRIC_LEN: usize = 1;
 pub const MAX_LYRIC_LEN: usize = 5000;
+pub const MIN_LYRIC_COUNT: usize = 1;
+pub const MAX_LYRIC_COUNT: usize = 5;
 
 pub const MAX_ATTACHMENTS_COUNT: usize = 10;
 

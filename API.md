@@ -308,7 +308,7 @@ OR
       "description": null,
       "cover_object_key": "Leilani Kemmer-307e6f94-5a81-4e0a-9b4e-9c3fd7cc37f2-image.png",
       "display_price": "500",
-      "credits_object_keys": null
+      "credits_object_keys": null // ATTENTION! For ghost writing this should be null!
     },
     "credits": null
   }

@@ -275,7 +275,7 @@ async fn lyric_submit_success() {
 }
 
 #[tokio::test]
-async fn mixing_service_submit_without_credits_success() {
+async fn mixing_service_submit_with_credits_success() {
     let app =
         TestApp::spawn_app(Settings::load_configuration().unwrap(), 1).await;
 
@@ -288,11 +288,25 @@ async fn mixing_service_submit_without_credits_success() {
     assert_eq!(app.login_user(&test_user, &client).await.as_u16(), 200);
 
     let image_file = std::fs::read("assets/image.png").unwrap();
-
     let (response, image_key) = app
         .upload_file(&client, "image/png", "image.png", image_file)
         .await;
     assert_eq!(response.status().as_u16(), 200);
+
+    let mut credits = Vec::new();
+    for i in 0..3 {
+        let credit_file = std::fs::read("assets/song.mp3").unwrap();
+        let (response, credit_key) = app
+            .upload_file(
+                &client,
+                "audio/mpeg",
+                &format!("song-{i}.mp3"),
+                credit_file,
+            )
+            .await;
+        assert_eq!(response.status().as_u16(), 200);
+        credits.push(credit_key.into());
+    }
 
     let genres_list = open_access::get_genres_list()
         .bind(&app.pg_client)
@@ -309,13 +323,10 @@ async fn mixing_service_submit_without_credits_success() {
             description: None,
             cover_object_key: image_key.into(),
             display_price: 500.into(),
-            credits_object_keys: None,
+            credits_object_keys: Some(credits),
         },
         genres: Some(genres.clone()),
     });
-
-    let js = serde_json::to_string_pretty(&body).unwrap();
-    println!("{js}");
 
     let response = client
         .post(format!(
@@ -490,6 +501,171 @@ async fn submit_all_kinds_of_services_without_credits_success() {
             .unwrap();
         assert_eq!(response.status().as_u16(), 201);
     }
+}
+
+#[tokio::test]
+async fn submitting_service_too_much_credits_fails() {
+    let app =
+        TestApp::spawn_app(Settings::load_configuration().unwrap(), 1).await;
+
+    let test_user = TestUser::generate_user(String::from("creator"), 0);
+    app.register_user(&test_user).await;
+    let client = reqwest::Client::builder()
+        .cookie_store(true)
+        .build()
+        .unwrap();
+    assert_eq!(app.login_user(&test_user, &client).await.as_u16(), 200);
+
+    let image_file = std::fs::read("assets/image.png").unwrap();
+
+    let (response, image_key) = app
+        .upload_file(&client, "image/png", "image.png", image_file)
+        .await;
+    assert_eq!(response.status().as_u16(), 200);
+
+    let mut credits = Vec::new();
+    for i in 0..4 {
+        let credit_file = std::fs::read("assets/song.mp3").unwrap();
+        let (response, credit_key) = app
+            .upload_file(
+                &client,
+                "audio/mpeg",
+                &format!("song-{i}.mp3"),
+                credit_file,
+            )
+            .await;
+        assert_eq!(response.status().as_u16(), 200);
+        credits.push(credit_key.into());
+    }
+
+    let genres_list = open_access::get_genres_list()
+        .bind(&app.pg_client)
+        .all()
+        .await
+        .unwrap();
+
+    let genres: Vec<_> =
+        get_rand_subiter(&genres_list, 0..10).cloned().collect();
+
+    let body = SubmitServiceRequest::Mixing(MusicService {
+        service: mustore::domain::requests::creator_access::Service {
+            name: "Some service".to_string(),
+            description: None,
+            cover_object_key: image_key.into(),
+            display_price: 500.into(),
+            credits_object_keys: Some(credits),
+        },
+        genres: Some(genres.clone()),
+    });
+
+    let response = client
+        .post(format!(
+            "{}/api/protected/creator/submit_service",
+            app.address
+        ))
+        .json(&body)
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(response.status().as_u16(), 400);
+}
+
+#[tokio::test]
+async fn submitting_ghost_writing_service_bad_formed_credits_fails() {
+    let app =
+        TestApp::spawn_app(Settings::load_configuration().unwrap(), 1).await;
+
+    let test_user = TestUser::generate_user(String::from("creator"), 0);
+    app.register_user(&test_user).await;
+    let client = reqwest::Client::builder()
+        .cookie_store(true)
+        .build()
+        .unwrap();
+    assert_eq!(app.login_user(&test_user, &client).await.as_u16(), 200);
+
+    // Should be rejected because lyric is too long
+    let image_file = std::fs::read("assets/image.png").unwrap();
+    let (response, image_key) = app
+        .upload_file(&client, "image/png", "image.png", image_file.clone())
+        .await;
+    assert_eq!(response.status().as_u16(), 200);
+    let credit_string = std::iter::repeat('a').take(5001).collect::<String>();
+    let body = SubmitServiceRequest::GhostWriting {
+        service: mustore::domain::requests::creator_access::Service {
+            name: "Some service".to_string(),
+            description: None,
+            cover_object_key: image_key.into(),
+            display_price: 500.into(),
+            credits_object_keys: None,
+        },
+        credits: Some(vec![credit_string.into()]),
+    };
+    let response = client
+        .post(format!(
+            "{}/api/protected/creator/submit_service",
+            app.address
+        ))
+        .json(&body)
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(response.status().as_u16(), 400);
+
+    // Should be rejected because too many credits
+    let (response, image_key) = app
+        .upload_file(&client, "image/png", "image.png", image_file.clone())
+        .await;
+    assert_eq!(response.status().as_u16(), 200);
+    let credits = std::iter::repeat(String::from("abc"))
+        .take(10)
+        .collect::<Vec<_>>();
+    let body = SubmitServiceRequest::GhostWriting {
+        service: mustore::domain::requests::creator_access::Service {
+            name: "Some service".to_string(),
+            description: None,
+            cover_object_key: image_key.into(),
+            display_price: 500.into(),
+            credits_object_keys: None,
+        },
+        credits: Some(credits),
+    };
+    let response = client
+        .post(format!(
+            "{}/api/protected/creator/submit_service",
+            app.address
+        ))
+        .json(&body)
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(response.status().as_u16(), 400);
+
+    // Should be rejected because lyric contains control characters
+    let (response, image_key) = app
+        .upload_file(&client, "image/png", "image.png", image_file.clone())
+        .await;
+    assert_eq!(response.status().as_u16(), 200);
+    let credits_string = String::from("hello\r\r");
+    let body = SubmitServiceRequest::GhostWriting {
+        service: mustore::domain::requests::creator_access::Service {
+            name: "Some service".to_string(),
+            description: None,
+            cover_object_key: image_key.into(),
+            display_price: 500.into(),
+            credits_object_keys: None,
+        },
+        credits: Some(vec![credits_string]),
+    };
+    let response = client
+        .post(format!(
+            "{}/api/protected/creator/submit_service",
+            app.address
+        ))
+        .json(&body)
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(response.status().as_u16(), 400);
 }
 
 // ───── Functions ────────────────────────────────────────────────────────── //
