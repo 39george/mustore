@@ -1,12 +1,17 @@
 //! tests/api/upload_song.rs
 
+use std::ops::{Range, RangeBounds};
+
 use crate::helpers::{TestApp, TestUser};
 use mustore::{
     config::Settings,
+    cornucopia::queries::open_access,
     domain::requests::creator_access::{
-        MusicProduct, Product, SubmitProductRequest,
+        MusicProduct, MusicService, Product, SubmitProductRequest,
+        SubmitServiceRequest,
     },
 };
+use rand::Rng;
 
 #[tokio::test]
 async fn song_submit_success() {
@@ -267,4 +272,131 @@ async fn lyric_submit_success() {
         .await
         .unwrap();
     assert_eq!(response.status().as_u16(), 201);
+}
+
+#[tokio::test]
+async fn service_submit_without_credits_success() {
+    let app =
+        TestApp::spawn_app(Settings::load_configuration().unwrap(), 1).await;
+
+    let test_user = TestUser::generate_user(String::from("creator"), 0);
+    app.register_user(&test_user).await;
+    let client = reqwest::Client::builder()
+        .cookie_store(true)
+        .build()
+        .unwrap();
+    assert_eq!(app.login_user(&test_user, &client).await.as_u16(), 200);
+
+    let image_file = std::fs::read("assets/image.png").unwrap();
+
+    let (response, image_key) = app
+        .upload_file(&client, "image/png", "image.png", image_file)
+        .await;
+    assert_eq!(response.status().as_u16(), 200);
+
+    let genres_list = open_access::get_genres_list()
+        .bind(&app.pg_client)
+        .all()
+        .await
+        .unwrap();
+
+    let genres: Vec<_> =
+        get_rand_subiter(&genres_list, 0..10).cloned().collect();
+
+    let body = SubmitServiceRequest::Mixing(MusicService {
+        service: mustore::domain::requests::creator_access::Service {
+            name: "Some service".to_string(),
+            description: None,
+            cover_object_key: image_key.into(),
+            display_price: 500.into(),
+            credits_object_keys: None,
+        },
+        genres: Some(genres.clone()),
+    });
+
+    let js = serde_json::to_string_pretty(&body).unwrap();
+    println!("{js}");
+
+    let response = client
+        .post(format!(
+            "{}/api/protected/creator/submit_service",
+            app.address
+        ))
+        .json(&body)
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(response.status().as_u16(), 201);
+
+    let row = app
+        .pg_client
+        .query_one("SELECT name, description, display_price::INTEGER, status::TEXT FROM services WHERE id = 1", &[])
+        .await
+        .unwrap();
+
+    assert_eq!(row.get::<&str, &str>("name"), "Some service");
+    assert_eq!(row.get::<&str, Option<&str>>("description"), None);
+    assert_eq!(row.get::<&str, i32>("display_price"), 500);
+    assert_eq!(row.get::<&str, &str>("status"), "moderation");
+
+    let row = app
+        .pg_client
+        .query_one("SELECT services_id FROM mixing WHERE id = 1", &[])
+        .await
+        .unwrap();
+
+    assert_eq!(row.get::<&str, i32>("services_id"), 1);
+
+    let service_genres = app
+        .pg_client
+        .query(
+            "
+            SELECT genres.name AS genre
+            FROM music_services_genres
+            JOIN genres ON genres.id = music_services_genres.genres_id
+            WHERE mixing_id = 1",
+            &[],
+        )
+        .await
+        .unwrap()
+        .into_iter()
+        .map(|row| row.get::<&str, String>("genre"));
+
+    for genre in service_genres {
+        assert!(genres.contains(&genre));
+    }
+}
+
+// ───── Functions ────────────────────────────────────────────────────────── //
+
+fn get_rand_subiter<'a, T, R>(
+    input: &'a [T],
+    bounds: R,
+) -> impl Iterator<Item = &'a T> + 'a + std::fmt::Debug
+where
+    T: std::fmt::Debug,
+    R: RangeBounds<usize>,
+{
+    let mut rng = rand::thread_rng();
+
+    let start = match bounds.start_bound() {
+        std::ops::Bound::Included(&start) => start,
+        std::ops::Bound::Excluded(&start) => start + 1,
+        std::ops::Bound::Unbounded => 0,
+    };
+
+    let end = match bounds.end_bound() {
+        std::ops::Bound::Included(&end) => end + 1,
+        std::ops::Bound::Excluded(&end) => end,
+        std::ops::Bound::Unbounded => input.len(),
+    };
+
+    let count = rng.gen_range(start..end);
+
+    let indices: Vec<usize> =
+        rand::seq::index::sample(&mut rng, input.len(), count)
+            .into_iter()
+            .collect();
+
+    indices.into_iter().map(move |i| &input[i])
 }
