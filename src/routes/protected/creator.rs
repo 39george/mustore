@@ -58,6 +58,7 @@ pub fn creator_router() -> Router<AppState> {
     Router::new()
         .route("/health_check", routing::get(health_check))
         .route("/submit_product", routing::post(submit_product))
+        .route("/submit_service", routing::post(submit_service))
         .route("/create_offer", routing::post(create_offer))
         .layer(permission_required!(crate::auth::users::Backend, "creator"))
 }
@@ -438,7 +439,7 @@ async fn submit_service(
     )
     .await?;
 
-    Ok(StatusCode::OK)
+    Ok(StatusCode::CREATED)
 }
 
 #[tracing::instrument(name = "Create a new offer", skip_all)]
