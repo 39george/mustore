@@ -6,8 +6,7 @@ import underline_lilac from "../../../assets/svg/underline_lilac.svg";
 import underline_green from "../../../assets/svg/underline_green.svg";
 import { FC } from "react";
 import Carousel from "./UI/Carousel";
-import { carousel_items_rec } from "./UI/content_dummies";
-import { carousel_items_new } from "./UI/content_dummies";
+import { carousel_items } from "./UI/content_dummies";
 import MainContentProducts from "./MainContentProducts";
 
 interface ContentSectionProps {
@@ -68,13 +67,13 @@ const ContentSection: FC<ContentSectionProps> = ({ section_type }) => {
           <div className={styles.recommendations_block}>
             <Carousel
               carousel_type="recommended"
-              carousel_items={carousel_items_rec}
+              carousel_items={carousel_items}
             />
           </div>
           <div className={styles.new_block}>
             <Carousel
               carousel_type="new"
-              carousel_items={carousel_items_new}
+              carousel_items={carousel_items}
             />
           </div>
           <div className={styles.main_content}>

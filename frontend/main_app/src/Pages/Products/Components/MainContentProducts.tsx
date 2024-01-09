@@ -7,6 +7,8 @@ import useGenresMoodsApi from "../../../hooks/useGenresMoodsApi";
 import useCheckboxState from "../../../hooks/useCheckboxState";
 import { CheckedItems } from "../../../types/types";
 import DraggableSlider from "./UI/DraggableSlider";
+import { song_items } from "./UI/content_dummies";
+import SongItem from "./UI/SongItem";
 
 const MainContentProducts: FC = () => {
   const { data: genres, error: genres_error } = useGenresMoodsApi("genres");
@@ -246,6 +248,21 @@ const MainContentProducts: FC = () => {
             </ul>
           )}
         </ul>
+      </div>
+      <div className={styles.products_container}>
+        {song_items.map((item) => {
+          return (
+            <SongItem
+              key={item.id}
+              name={item.name}
+              cover_url={item.cover_url}
+              author={item.author}
+              likes={item.likes}
+              listenings={item.listenings}
+              price={item.price}
+            />
+          );
+        })}
       </div>
     </div>
   );

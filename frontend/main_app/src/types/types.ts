@@ -36,6 +36,17 @@ export interface CarouselProps {
   carousel_items: CarouselItem[];
 }
 
+export interface SongItem {
+  id?: number;
+  created_at?: Date;
+  cover_url: string;
+  name: string;
+  author: string;
+  likes: number;
+  listenings: number;
+  price: number;
+}
+
 export interface CheckedItems {
   [key: string]: boolean;
 }

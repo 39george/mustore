@@ -1,5 +1,11 @@
 @import "../../../colors.scss";
 // General
+.main_seciton {
+  display: flex;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
 .left_bar {
   width: 100%;
   max-width: 16.5rem;
@@ -186,4 +192,15 @@
   margin-left: 1rem;
   font-size: 0.875rem;
   opacity: 0.8;
+}
+
+// Products
+.products_container {
+  display: flex;
+  // justify-content: space-between;
+  row-gap: 1.25rem;
+  column-gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+  margin-left: 1.25rem;
 }

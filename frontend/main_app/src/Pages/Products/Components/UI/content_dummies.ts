@@ -1,4 +1,4 @@
-import { CarouselItem } from "../../../../types/types";
+import { CarouselItem, SongItem } from "../../../../types/types";
 import cover_1 from "../../../../assets/HomePage/album_covers/ablum_cover_1.png";
 import cover_2 from "../../../../assets/HomePage/album_covers/ablum_cover_2.png";
 import cover_3 from "../../../../assets/HomePage/album_covers/ablum_cover_3.png";
@@ -8,7 +8,7 @@ import cover_6 from "../../../../assets/HomePage/album_covers/ablum_cover_6.png"
 import cover_7 from "../../../../assets/HomePage/album_covers/ablum_cover_7.png";
 import cover_8 from "../../../../assets/HomePage/album_covers/ablum_cover_8.png";
 
-export const carousel_items_rec: CarouselItem[] = [
+export const carousel_items: CarouselItem[] = [
   {
     id: 1,
     cover_url: cover_1,
@@ -131,7 +131,7 @@ export const carousel_items_rec: CarouselItem[] = [
   },
 ];
 
-export const carousel_items_new: CarouselItem[] = [
+export const song_items: SongItem[] = [
   {
     id: 1,
     cover_url: cover_1,
@@ -139,6 +139,7 @@ export const carousel_items_new: CarouselItem[] = [
     author: "ALENA NAI",
     price: 100_000,
     likes: 49,
+    listenings: 399,
   },
   {
     id: 2,
@@ -147,6 +148,7 @@ export const carousel_items_new: CarouselItem[] = [
     author: "KartenMusic",
     price: 70_000,
     likes: 35,
+    listenings: 399,
   },
   {
     id: 3,
@@ -155,6 +157,7 @@ export const carousel_items_new: CarouselItem[] = [
     author: "Camely",
     price: 90_000,
     likes: 32,
+    listenings: 399,
   },
   {
     id: 4,
@@ -163,6 +166,7 @@ export const carousel_items_new: CarouselItem[] = [
     author: "Atires",
     price: 60_000,
     likes: 29,
+    listenings: 399,
   },
   {
     id: 5,
@@ -171,6 +175,7 @@ export const carousel_items_new: CarouselItem[] = [
     author: "SIBERD",
     price: 30_000,
     likes: 13,
+    listenings: 399,
   },
   {
     id: 6,
@@ -179,6 +184,7 @@ export const carousel_items_new: CarouselItem[] = [
     author: "Ababbul",
     price: 56_000,
     likes: 21,
+    listenings: 399,
   },
   {
     id: 7,
@@ -187,6 +193,7 @@ export const carousel_items_new: CarouselItem[] = [
     author: "ALENA NAI",
     price: 100_000,
     likes: 49,
+    listenings: 399,
   },
   {
     id: 8,
@@ -195,6 +202,7 @@ export const carousel_items_new: CarouselItem[] = [
     author: "KartenMusic",
     price: 70_000,
     likes: 35,
+    listenings: 399,
   },
   {
     id: 9,
@@ -203,6 +211,7 @@ export const carousel_items_new: CarouselItem[] = [
     author: "Camely",
     price: 90_000,
     likes: 32,
+    listenings: 399,
   },
   {
     id: 10,
@@ -211,6 +220,7 @@ export const carousel_items_new: CarouselItem[] = [
     author: "Atires",
     price: 60_000,
     likes: 29,
+    listenings: 399,
   },
   {
     id: 11,
@@ -219,6 +229,7 @@ export const carousel_items_new: CarouselItem[] = [
     author: "SIBERD",
     price: 30_000,
     likes: 13,
+    listenings: 399,
   },
   {
     id: 12,
@@ -227,6 +238,7 @@ export const carousel_items_new: CarouselItem[] = [
     author: "Ababbul",
     price: 56_000,
     likes: 21,
+    listenings: 399,
   },
   {
     id: 13,
@@ -235,6 +247,7 @@ export const carousel_items_new: CarouselItem[] = [
     author: "Ababbul",
     price: 56_000,
     likes: 21,
+    listenings: 399,
   },
   {
     id: 14,
@@ -243,6 +256,7 @@ export const carousel_items_new: CarouselItem[] = [
     author: "ALENA NAI",
     price: 100_000,
     likes: 49,
+    listenings: 399,
   },
   {
     id: 15,
@@ -251,5 +265,6 @@ export const carousel_items_new: CarouselItem[] = [
     author: "KartenMusic",
     price: 70_000,
     likes: 35,
+    listenings: 399,
   },
 ];

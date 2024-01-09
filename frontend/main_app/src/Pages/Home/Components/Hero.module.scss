@@ -142,17 +142,16 @@
   -webkit-user-drag: none;
   // user-drag: none;
 
-  opacity: 0;
+  opacity: 1;
 }
 
 .cover_1 {
   width: 72px;
   bottom: 13%;
   left: 8%;
-  transform: translateX(0);
 
-  animation: cover_fade_in 0.3s ease-out forwards 0.8s,
-    cover_left_transform 0.5s ease-out forwards 0.8s;
+  // animation: cover_fade_in 0.3s ease-out forwards 0.8s,
+  //   cover_left_transform 0.5s ease-out forwards 0.8s;
 }
 
 .cover_2 {
@@ -160,8 +159,8 @@
   bottom: 35%;
   left: 26%;
 
-  animation: cover_fade_in 0.5s ease-out forwards 0.8s,
-    cover_left_transform 0.5s ease-out forwards 0.8s;
+  // animation: cover_fade_in 0.5s ease-out forwards 0.8s,
+  //   cover_left_transform 0.5s ease-out forwards 0.8s;
 }
 
 .cover_3 {
@@ -169,8 +168,8 @@
   top: 10%;
   left: 12%;
 
-  animation: cover_fade_in 0.4s ease-out forwards 0.8s,
-    cover_left_transform 0.5s ease-out forwards 0.8s;
+  // animation: cover_fade_in 0.4s ease-out forwards 0.8s,
+  //   cover_left_transform 0.5s ease-out forwards 0.8s;
 }
 
 .cover_4 {
@@ -178,8 +177,8 @@
   top: 28%;
   left: 60%;
 
-  animation: cover_fade_in 0.5s ease-out forwards 0.8s,
-    cover_left_transform 0.5s ease-out forwards 0.8s;
+  // animation: cover_fade_in 0.5s ease-out forwards 0.8s,
+  //   cover_left_transform 0.5s ease-out forwards 0.8s;
 }
 
 .cover_5 {
@@ -187,8 +186,8 @@
   top: 12%;
   right: 35%;
 
-  animation: cover_fade_in 0.6s ease-out forwards 0.8s,
-    cover_right_transform 0.5s ease-out forwards 0.8s;
+  // animation: cover_fade_in 0.6s ease-out forwards 0.8s,
+  //   cover_right_transform 0.5s ease-out forwards 0.8s;
 }
 
 .cover_6 {
@@ -196,8 +195,8 @@
   top: 33%;
   right: 18%;
 
-  animation: cover_fade_in 0.5s ease-out forwards 0.8s,
-    cover_right_transform 0.5s ease-out forwards 0.8s;
+  // animation: cover_fade_in 0.5s ease-out forwards 0.8s,
+  //   cover_right_transform 0.5s ease-out forwards 0.8s;
 }
 
 .cover_7 {
@@ -205,8 +204,8 @@
   bottom: 26%;
   right: 55%;
 
-  animation: cover_fade_in 0.4s ease-out forwards 0.8s,
-    cover_right_transform 0.5s ease-out forwards 0.8s;
+  // animation: cover_fade_in 0.4s ease-out forwards 0.8s,
+  //   cover_right_transform 0.5s ease-out forwards 0.8s;
 }
 
 .cover_8 {
@@ -214,8 +213,8 @@
   bottom: 8%;
   right: 2%;
 
-  animation: cover_fade_in 0.3s ease-out forwards 0.8s,
-    cover_right_transform 0.5s ease-out forwards 0.8s;
+  // animation: cover_fade_in 0.3s ease-out forwards 0.8s,
+  //   cover_right_transform 0.5s ease-out forwards 0.8s;
 }
 
 // Background circle decors
