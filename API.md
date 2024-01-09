@@ -253,16 +253,15 @@ Example json:
     "service": {
       "name": "Some service",
       "description": null,
-      "cover_object_key": "Leilani Kemmer-307e6f94-5a81-4e0a-9b4e-9c3fd7cc37f2-image.png",
+      "cover_object_key": "Alfonso Johnson-ec0d2295-36e1-43f8-a309-2346bd4725be-image.png",
       "display_price": "500",
-      "credits_object_keys": null
+      "credits_object_keys": [
+        "Alfonso Johnson-c0b0cdbe-5443-4e90-aa22-0ca81c08c747-song-0.mp3",
+        "Alfonso Johnson-eec512ea-019a-48f5-9191-be873efee010-song-1.mp3",
+        "Alfonso Johnson-de3bd615-1635-4ae3-9a41-f65a943ecebe-song-2.mp3"
+      ]
     },
-    "genres": [
-      "Нью вейв",
-      "Бас",
-      "Джаз",
-      "Национальный фолк"
-    ]
+    "genres": []
   }
 }
 OR
