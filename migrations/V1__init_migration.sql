@@ -235,7 +235,7 @@ CREATE TABLE services (
     name VARCHAR(30) NOT NULL,
     description VARCHAR(400),
     display_price NUMERIC(10, 2) NOT NULL,
-    status ServiceStatus NOT NULL DEFAULT 'active'
+    status ServiceStatus NOT NULL DEFAULT 'moderation'
 );
 
 CREATE TABLE mixing (
