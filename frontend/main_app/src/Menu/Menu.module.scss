@@ -15,7 +15,6 @@ li {
 
   padding: 0 3em;
 
-  // font-family: "Raleway", sans-serif;
   font-size: 1rem;
 
   background-color: rgba($color: $main_bright, $alpha: 0.7);
@@ -91,6 +90,8 @@ li {
   display: flex;
   align-items: center;
 
+  font-weight: 500;
+
   cursor: pointer;
 }
 
@@ -138,7 +139,7 @@ a {
 }
 
 .submenu_header {
-  font-weight: 300;
+  font-weight: 500;
   font-size: 1rem;
   margin-bottom: 1rem;
   cursor: default;
@@ -146,7 +147,6 @@ a {
 
 .submenu_body {
   a {
-    font-weight: 200;
     font-size: 0.875rem;
     color: rgba($color: $main_dark, $alpha: 0.8);
 
@@ -167,6 +167,8 @@ a {
   gap: 0.5em;
 
   margin-left: auto;
+
+  font-weight: 500;
 
   .divider {
     -webkit-user-select: none;
@@ -231,7 +233,6 @@ a {
   // min-height: calc(4.5rem + 30rem);
 
   font-size: 1rem;
-  font-weight: 300;
 
   color: $main_bright;
   background-color: rgba($color: $main_dark, $alpha: 1);
@@ -243,8 +244,11 @@ a {
   .sidebar_logging {
     display: flex;
     flex-direction: column;
-    margin: 2rem 1rem;
     gap: 1rem;
+
+    margin: 2rem 1rem;
+
+    font-weight: 500;
 
     .sidebar_log {
       cursor: pointer;
@@ -282,6 +286,8 @@ a {
     .sidebar_nav_link {
       display: flex;
       align-items: center;
+
+      font-weight: 500;
 
       cursor: pointer;
 
