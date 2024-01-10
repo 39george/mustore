@@ -181,7 +181,7 @@ const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
         </div>
       )}
 
-      <div className={styles.show_all}>показать все...</div>
+      <div className={styles.show_all}>показать все</div>
     </div>
   );
 };

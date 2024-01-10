@@ -5,6 +5,8 @@
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+
+  max-width: 9rem;
 }
 
 .image_wrapper {
@@ -31,6 +33,13 @@
 
 .name {
   font-weight: 500;
+}
+
+.name,
+.author {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .author,
@@ -81,6 +90,8 @@
 .item_container_new {
   flex-direction: row;
   align-items: center;
+
+  max-width: 17.25rem;
 }
 
 .image_wrapper_new {
@@ -111,6 +122,14 @@
 .price_new,
 .likes_amount_new {
   font-size: 0.875rem;
+}
+
+.name_new,
+.author_new {
+  max-width: 7.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .author_new {

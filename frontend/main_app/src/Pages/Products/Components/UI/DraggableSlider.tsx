@@ -93,7 +93,6 @@ const DraggableSlider: FC = () => {
             152
           );
           const step_number = Math.round(snapped_position / step_size);
-          console.log(step_number);
           const new_min_bpm = 320 - (250 - step_number * 10);
 
           set_knob_position((prev_position) => ({

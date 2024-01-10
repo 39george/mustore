@@ -7,6 +7,8 @@
 }
 
 .left_bar {
+  flex-shrink: 0;
+
   width: 100%;
   max-width: 16.5rem;
 
@@ -197,10 +199,11 @@
 // Products
 .products_container {
   display: flex;
-  // justify-content: space-between;
-  row-gap: 1.25rem;
-  column-gap: 0.5rem;
+  justify-content: flex-start;
   flex-wrap: wrap;
+
+  height: fit-content;
+
   margin-top: 2rem;
-  margin-left: 1.25rem;
+  margin-left: 0.5rem;
 }
