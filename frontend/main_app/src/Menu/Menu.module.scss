@@ -80,6 +80,7 @@ li {
     }
 
     .submenu {
+      top: 100%;
       visibility: visible;
       opacity: 1;
     }
@@ -102,7 +103,7 @@ a {
 
 .submenu {
   position: absolute;
-  top: 100%;
+  top: 120%;
   left: 50%;
   transform: translateX(-50%);
 
@@ -120,7 +121,7 @@ a {
   visibility: hidden;
   opacity: 0;
 
-  transition: opacity 0.1s ease-out;
+  transition: opacity 0.1s ease-out, top 0.2s ease-out;
 
   &::before {
     content: "";
