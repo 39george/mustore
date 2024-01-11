@@ -35,7 +35,7 @@ const AuthorsReviews: FC = () => {
               Интуитивно понятный интерфейс и быстрые выплаты сделали мой опыт
               невероятно удобным
             </p>
-            <p className={styles.author_name}>MISHA LETNIY</p>
+            <p className={styles.author_name}>ARTUR KREMNEV</p>
           </div>
         </div>
         <div className={styles.review}>
