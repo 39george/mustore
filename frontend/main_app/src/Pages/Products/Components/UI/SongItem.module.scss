@@ -112,3 +112,15 @@
 .more_info_icon {
   cursor: pointer;
 }
+
+@media (max-width: 1200px) {
+  .song_item {
+    margin-left: 0.875rem;
+  }
+}
+
+@media (max-width: 960px) {
+  .song_item {
+    margin-left: 1.1rem;
+  }
+}

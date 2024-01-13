@@ -1,18 +1,29 @@
 @import "../../../colors.scss";
 // General
 .main_seciton {
+  position: relative;
   display: flex;
   margin-bottom: 2rem;
-  position: relative;
+  height: 100%;
+}
+
+.left_bar_wrapper {
+  // position: relative;
+
+  flex-shrink: 0;
+  // height: 1780px;
+  // height: 100%;
+  width: 16.5rem;
 }
 
 .left_bar {
-  flex-shrink: 0;
-
   width: 100%;
   max-width: 16.5rem;
+  height: fit-content;
 
   margin-top: 2rem;
+
+  z-index: 2;
 }
 
 .block {
@@ -205,4 +216,6 @@
 
   margin-top: 2rem;
   margin-left: 0.5rem;
+
+  overflow-y: auto;
 }
