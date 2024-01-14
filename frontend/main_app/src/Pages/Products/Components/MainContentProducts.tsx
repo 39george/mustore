@@ -44,15 +44,15 @@ const MainContentProducts: FC = () => {
   const last_scroll_top = useRef(0);
   const last_scroll_direction = useRef<ScrollDirection>("down");
   const last_offset = useRef(0);
-  const [nav_bar_height, set_nav_bar_height] = useState(70);
-  const [scroll_consts, set_scroll_consts] = useState<ScrollConsts>({
+  const [nav_bar_height, set_nav_bar_height] = useState(83);
+  const scroll_consts = useRef<ScrollConsts>({
     height_diff_viewport_main_content: 0,
     height_diff_viewport_left_bar: 0,
     main_content: main_section_ref.current,
     left_bar: left_bar_ref.current,
   });
-  const [left_bar_state, set_left_bar_state] =
-    useState<LeftBarStates>("absolute_top");
+  const left_bar_state = useRef<LeftBarStates>("absolute_top");
+  const left_bar_prev_state = useRef<LeftBarStates>("absolute_top");
   const { data: genres, error: genres_error } = useGenresMoodsApi("genres");
   const { data: moods, error: moods_error } = useGenresMoodsApi("tags");
   const {
@@ -76,29 +76,32 @@ const MainContentProducts: FC = () => {
   // Handle scroll and change left_bar position
   useEffect(() => {
     if (main_section_ref.current && left_bar_ref.current) {
-      set_scroll_consts({
+      scroll_consts.current = {
         height_diff_viewport_main_content:
           window.innerHeight - main_section_ref.current.offsetHeight,
         height_diff_viewport_left_bar:
           window.innerHeight - left_bar_ref.current.offsetHeight,
         main_content: main_section_ref.current,
         left_bar: left_bar_ref.current,
-      });
+      };
     }
-  }, [window.innerHeight, main_section_ref.current, left_bar_ref.current]);
+  }, [window.innerHeight]);
 
-  const check_sticky = () => {
+  const set_left_bar_position = () => {
     // Check for null
-    if (!scroll_consts.main_content || !scroll_consts.left_bar) {
+    if (
+      !scroll_consts.current.main_content ||
+      !scroll_consts.current.left_bar
+    ) {
       return;
     }
 
     // Variables declaration
     const dist_from_top_viewport_to_main_content =
-      scroll_consts.main_content.getBoundingClientRect().top;
+      scroll_consts.current.main_content.getBoundingClientRect().top;
 
     const dist_from_top_viewport_to_left_bar =
-      scroll_consts.left_bar.getBoundingClientRect().top;
+      scroll_consts.current.left_bar.getBoundingClientRect().top;
 
     const current_scroll = window.scrollY;
 
@@ -108,7 +111,7 @@ const MainContentProducts: FC = () => {
     const main_content_fully_scrolled_to_bottom = () => {
       return (
         dist_from_top_viewport_to_main_content <=
-        scroll_consts.height_diff_viewport_main_content
+        scroll_consts.current.height_diff_viewport_main_content
       );
     };
 
@@ -119,7 +122,7 @@ const MainContentProducts: FC = () => {
     const left_bar_fully_scrolled_to_bottom = () => {
       return (
         dist_from_top_viewport_to_left_bar <=
-        scroll_consts.height_diff_viewport_left_bar
+        scroll_consts.current.height_diff_viewport_left_bar
       );
     };
 
@@ -129,7 +132,7 @@ const MainContentProducts: FC = () => {
 
     // Check scroll direction changing
     if (scroll_direction !== last_scroll_direction.current) {
-      last_offset.current = Math.round(
+      last_offset.current = Math.floor(
         dist_from_top_viewport_to_main_content -
           dist_from_top_viewport_to_left_bar
       );
@@ -139,86 +142,109 @@ const MainContentProducts: FC = () => {
     last_scroll_top.current = current_scroll;
 
     // Main logic
-    switch (left_bar_state) {
-      case "absolute_top":
-        set_sticky({
-          position: "absolute",
-          top: "",
-          bottom: "",
-        });
-        break;
-      case "absolute_bottom":
-        set_sticky({
-          position: "absolute",
-          top: "",
-          bottom: "0px",
-        });
-        break;
-      case "sticky_top":
-        set_sticky({
-          position: "fixed",
-          top: `${nav_bar_height}px`,
-          bottom: "",
-        });
-        break;
-      case "sticky_bottom":
-        set_sticky({
-          position: "fixed",
-          top: "",
-          bottom: "0px",
-        });
-        break;
-      case "absolute_offset":
-        set_sticky({
-          position: "absolute",
-          top: `${-last_offset.current - 32}px`,
-          bottom: "",
-        });
-        break;
+    if (scroll_direction === "down") {
+      if (main_content_fully_scrolled_to_bottom()) {
+        left_bar_state.current = "absolute_bottom";
+      }
+      if (
+        left_bar_fully_scrolled_to_bottom() &&
+        !main_content_fully_scrolled_to_bottom()
+      ) {
+        left_bar_state.current = "sticky_bottom";
+      }
+      if (left_bar_state.current === "sticky_top") {
+        if (!left_bar_fully_scrolled_to_bottom()) {
+          left_bar_state.current = "absolute_offset";
+        }
+      }
     }
 
-    if (main_content_fully_scrolled_to_bottom()) {
-      set_left_bar_state("absolute_bottom");
-    } else {
-      if (left_bar_fully_scrolled_to_bottom()) {
-        set_left_bar_state("sticky_bottom");
+    if (scroll_direction === "up") {
+      if (main_content_fully_scrolled_to_top()) {
+        left_bar_state.current = "absolute_top";
       }
-      if (scroll_direction === "down") {
-        if (left_bar_state === "sticky_top") {
-          if (!left_bar_fully_scrolled_to_bottom()) {
-            set_left_bar_state("absolute_offset");
-          }
-        }
+      if (
+        left_bar_fully_scrolled_to_top() &&
+        !main_content_fully_scrolled_to_top()
+      ) {
+        left_bar_state.current = "sticky_top";
       }
-      if (scroll_direction === "up") {
-        if (left_bar_fully_scrolled_to_top()) {
-          set_left_bar_state("sticky_top");
-        }
-        if (main_content_fully_scrolled_to_top()) {
-          set_left_bar_state("absolute_top");
-        }
-        if (left_bar_state === "sticky_bottom") {
-          if (!left_bar_fully_scrolled_to_top()) {
-            set_left_bar_state("absolute_offset");
-          }
+      if (left_bar_state.current === "sticky_bottom") {
+        if (!left_bar_fully_scrolled_to_top()) {
+          left_bar_state.current = "absolute_offset";
         }
       }
+    }
+
+    if (left_bar_prev_state.current !== left_bar_state.current) {
+      switch (left_bar_state.current) {
+        case "absolute_top":
+          set_sticky({
+            position: "absolute",
+            top: "",
+            bottom: "",
+          });
+          break;
+        case "absolute_bottom":
+          set_sticky({
+            position: "absolute",
+            top: "",
+            bottom: "0",
+          });
+          break;
+        case "sticky_top":
+          set_sticky({
+            position: "fixed",
+            top: `${nav_bar_height}px`,
+            bottom: "",
+          });
+          break;
+        case "sticky_bottom":
+          set_sticky({
+            position: "fixed",
+            top: "",
+            bottom: "0",
+          });
+          break;
+        case "absolute_offset":
+          set_sticky({
+            position: "absolute",
+            top: `${-last_offset.current - 32}px`,
+            bottom: "",
+          });
+          break;
+      }
+
+      left_bar_prev_state.current = left_bar_state.current;
     }
   };
 
   useEffect(() => {
-    window.addEventListener("scroll", check_sticky);
+    window.addEventListener("scroll", set_left_bar_position);
+    window.addEventListener("resize", set_left_bar_position);
 
     return () => {
-      window.removeEventListener("scroll", check_sticky);
+      window.removeEventListener("scroll", set_left_bar_position);
+      window.removeEventListener("resize", set_left_bar_position);
     };
-  }, [scroll_consts, left_bar_state, nav_bar_height]);
+  }, []);
 
+  // Check the viewport width to change nav bar height
   useEffect(() => {
-    if (window.innerWidth > 1010) {
-      set_nav_bar_height(83);
-    }
-  }, [window.innerWidth]);
+    const change_nav_bar_height = () => {
+      if (window.innerWidth <= 1010) {
+        set_nav_bar_height(70);
+      } else {
+        set_nav_bar_height(83);
+      }
+    };
+
+    window.addEventListener("resize", change_nav_bar_height);
+
+    return () => {
+      window.removeEventListener("resize", change_nav_bar_height);
+    };
+  }, []);
 
   return (
     <div

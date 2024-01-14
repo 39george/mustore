@@ -268,7 +268,7 @@ export const song_items: SongItem[] = [
     listenings: 399,
   },
   {
-    id: 1,
+    id: 16,
     cover_url: cover_1,
     name: "Будь рядом",
     author: "ALENA NAI",
@@ -277,7 +277,7 @@ export const song_items: SongItem[] = [
     listenings: 399,
   },
   {
-    id: 2,
+    id: 17,
     cover_url: cover_2,
     name: "Закат",
     author: "KartenMusic",
@@ -286,7 +286,7 @@ export const song_items: SongItem[] = [
     listenings: 399,
   },
   {
-    id: 3,
+    id: 18,
     cover_url: cover_3,
     name: "Ночные часы",
     author: "Camely",
@@ -295,7 +295,7 @@ export const song_items: SongItem[] = [
     listenings: 399,
   },
   {
-    id: 4,
+    id: 19,
     cover_url: cover_4,
     name: "Забуду тебя",
     author: "Atires",
@@ -304,7 +304,7 @@ export const song_items: SongItem[] = [
     listenings: 399,
   },
   {
-    id: 5,
+    id: 20,
     cover_url: cover_5,
     name: "В окне",
     author: "SIBERD",
@@ -313,7 +313,7 @@ export const song_items: SongItem[] = [
     listenings: 399,
   },
   {
-    id: 6,
+    id: 21,
     cover_url: cover_6,
     name: "Вечером одна",
     author: "Ababbul",
@@ -322,7 +322,7 @@ export const song_items: SongItem[] = [
     listenings: 399,
   },
   {
-    id: 7,
+    id: 22,
     cover_url: cover_7,
     name: "Будь рядом",
     author: "ALENA NAI",
@@ -331,7 +331,7 @@ export const song_items: SongItem[] = [
     listenings: 399,
   },
   {
-    id: 8,
+    id: 23,
     cover_url: cover_8,
     name: "Закат",
     author: "KartenMusic",
@@ -340,7 +340,7 @@ export const song_items: SongItem[] = [
     listenings: 399,
   },
   {
-    id: 9,
+    id: 24,
     cover_url: cover_3,
     name: "Ночные часы",
     author: "Camely",
@@ -349,7 +349,7 @@ export const song_items: SongItem[] = [
     listenings: 399,
   },
   {
-    id: 10,
+    id: 25,
     cover_url: cover_4,
     name: "Забуду тебя",
     author: "Atires",
@@ -358,7 +358,7 @@ export const song_items: SongItem[] = [
     listenings: 399,
   },
   {
-    id: 11,
+    id: 26,
     cover_url: cover_5,
     name: "В окне",
     author: "SIBERD",
@@ -367,7 +367,7 @@ export const song_items: SongItem[] = [
     listenings: 399,
   },
   {
-    id: 12,
+    id: 27,
     cover_url: cover_6,
     name: "Вечером одна",
     author: "Ababbul",
@@ -376,7 +376,7 @@ export const song_items: SongItem[] = [
     listenings: 399,
   },
   {
-    id: 13,
+    id: 28,
     cover_url: cover_1,
     name: "Вечером одна",
     author: "Ababbul",
@@ -385,7 +385,7 @@ export const song_items: SongItem[] = [
     listenings: 399,
   },
   {
-    id: 14,
+    id: 29,
     cover_url: cover_7,
     name: "Будь рядом",
     author: "ALENA NAI",
@@ -394,7 +394,7 @@ export const song_items: SongItem[] = [
     listenings: 399,
   },
   {
-    id: 15,
+    id: 30,
     cover_url: cover_8,
     name: "Закат",
     author: "KartenMusic",
