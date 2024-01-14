@@ -10,7 +10,7 @@ const useCheckboxState = (init_state: CheckedItems = {}) => {
     });
   }, []);
 
-  return { checked_items, handle_checkbox_change };
+  return { checked_items, set_checked_items, handle_checkbox_change };
 };
 
 export default useCheckboxState;

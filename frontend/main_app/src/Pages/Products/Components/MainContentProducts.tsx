@@ -58,14 +58,17 @@ const MainContentProducts: FC = () => {
   const { data: moods, error: moods_error } = useGenresMoodsApi("tags");
   const {
     checked_items: checked_genres,
+    set_checked_items: set_checked_genres,
     handle_checkbox_change: handle_genres_checkbox_change,
   } = useCheckboxState();
   const {
     checked_items: checked_music_key,
+    set_checked_items: set_checked_music_key,
     handle_checkbox_change: handle_music_key_checkbox_change,
   } = useCheckboxState();
   const {
     checked_items: checked_moods,
+    set_checked_items: set_checked_moods,
     handle_checkbox_change: handle_moods_checkbox_change,
   } = useCheckboxState();
   const [checked_sex, set_checked_sex] = useState<CheckedItems>({ any: true });
@@ -81,12 +84,38 @@ const MainContentProducts: FC = () => {
     return Object.values(obj).every((value) => value === false);
   };
 
+  // Set all values of an object to `false`
+  const set_all_to_false = (
+    obj: CheckedItems,
+    obj_kind: "genres" | "music_key" | "moods"
+  ) => {
+    let new_obj: CheckedItems = {};
+    Object.keys(obj).forEach((key) => {
+      new_obj[key] = false;
+    });
+
+    switch (obj_kind) {
+      case "genres":
+        set_checked_genres(new_obj);
+        break;
+      case "music_key":
+        set_checked_music_key(new_obj);
+        break;
+      case "moods":
+        set_checked_moods(new_obj);
+        break;
+    }
+  };
+
   // Get left bar height
   useEffect(() => {
     if (scroll_consts.current.left_bar) {
       set_left_bar_height(scroll_consts.current.left_bar.offsetHeight);
     }
-  }, [scroll_consts.current.left_bar]);
+  }, [
+    scroll_consts.current.left_bar,
+    scroll_consts.current.left_bar?.offsetHeight,
+  ]);
 
   // Handle scroll and change left_bar position
   useEffect(() => {
@@ -285,7 +314,7 @@ const MainContentProducts: FC = () => {
               type="text"
               name="search"
               className={styles.input}
-              placeholder="Поиск..."
+              placeholder="Поиск по названию, автору..."
             />
             <IoSearch className={styles.search_icon} />
           </div>
@@ -371,7 +400,17 @@ const MainContentProducts: FC = () => {
             </ul>
           </ul>
           <ul className={`${styles.block} ${styles.genres_block}`}>
-            <li className={styles.block_title}>Жанр</li>
+            <li className={styles.block_title}>
+              <p>Жанр</p>
+              <form className={styles.search_form}>
+                <input
+                  type="text"
+                  name="search"
+                  placeholder="Поиск"
+                />
+                <IoSearch className={styles.search_icon} />
+              </form>
+            </li>
             {genres_error ? (
               <li className={styles.error}>{genres_error}</li>
             ) : (
@@ -412,7 +451,12 @@ const MainContentProducts: FC = () => {
               </ul>
             )}
             {!no_true_values(checked_genres) && (
-              <li className={styles.uncheck_all}>отменить выбор</li>
+              <li
+                className={styles.uncheck_all}
+                onClick={() => set_all_to_false(checked_genres, "genres")}
+              >
+                отменить выбор
+              </li>
             )}
           </ul>
           <div className={`${styles.block} ${styles.bpm_block}`}>
@@ -455,6 +499,16 @@ const MainContentProducts: FC = () => {
                   </li>
                 );
               })}
+              {!no_true_values(checked_music_key) && (
+                <li
+                  className={styles.uncheck_all}
+                  onClick={() =>
+                    set_all_to_false(checked_music_key, "music_key")
+                  }
+                >
+                  отменить выбор
+                </li>
+              )}
             </ul>
           </ul>
           <ul className={`${styles.block} ${styles.moods_block}`}>
@@ -499,7 +553,12 @@ const MainContentProducts: FC = () => {
               </ul>
             )}
             {!no_true_values(checked_moods) && (
-              <li className={styles.uncheck_all}>отменить выбор</li>
+              <li
+                className={styles.uncheck_all}
+                onClick={() => set_all_to_false(checked_moods, "moods")}
+              >
+                отменить выбор
+              </li>
             )}
           </ul>
         </div>
