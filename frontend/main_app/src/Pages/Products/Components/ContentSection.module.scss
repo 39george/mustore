@@ -72,6 +72,7 @@
 .pop_up_menu {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
 
   margin-left: 1em;
 
@@ -81,6 +82,7 @@
 
 .pop_up_item {
   margin-right: 1.125rem;
+  margin-bottom: 1.125rem;
   padding: 0.25rem 0.625rem;
 
   color: rgba($color: $main_dark, $alpha: 0.3);

@@ -45,6 +45,7 @@ const MainContentProducts: FC = () => {
   const last_scroll_direction = useRef<ScrollDirection>("down");
   const last_offset = useRef(0);
   const [nav_bar_height, set_nav_bar_height] = useState(83);
+  const [left_bar_height, set_left_bar_height] = useState(0);
   const scroll_consts = useRef<ScrollConsts>({
     height_diff_viewport_main_content: 0,
     height_diff_viewport_left_bar: 0,
@@ -64,14 +65,28 @@ const MainContentProducts: FC = () => {
     handle_checkbox_change: handle_music_key_checkbox_change,
   } = useCheckboxState();
   const {
-    checked_items: checked_mood,
-    handle_checkbox_change: handle_mood_checkbox_change,
+    checked_items: checked_moods,
+    handle_checkbox_change: handle_moods_checkbox_change,
   } = useCheckboxState();
   const [checked_sex, set_checked_sex] = useState<CheckedItems>({ any: true });
 
   const handle_sex_checkbox_change = (sex: string) => {
     set_checked_sex({ [sex]: true });
   };
+
+  // console.log(checked_genres);
+
+  // Check if an object has any `true` value
+  const no_true_values = (obj: CheckedItems) => {
+    return Object.values(obj).every((value) => value === false);
+  };
+
+  // Get left bar height
+  useEffect(() => {
+    if (scroll_consts.current.left_bar) {
+      set_left_bar_height(scroll_consts.current.left_bar.offsetHeight);
+    }
+  }, [scroll_consts.current.left_bar]);
 
   // Handle scroll and change left_bar position
   useEffect(() => {
@@ -254,6 +269,7 @@ const MainContentProducts: FC = () => {
       <div
         ref={wrapper_ref}
         className={styles.left_bar_wrapper}
+        style={{ height: `${left_bar_height}px` }}
       >
         <div
           ref={left_bar_ref}
@@ -273,8 +289,8 @@ const MainContentProducts: FC = () => {
             />
             <IoSearch className={styles.search_icon} />
           </div>
-          <div className={`${styles.block} ${styles.filter_block}`}>
-            <p className={styles.block_title}>Популярные</p>
+          <div className={`${styles.block} ${styles.sort_block}`}>
+            <p className={styles.block_title}>Сначала попоулярные</p>
             <GoChevronDown className={styles.filter_chevron} />
           </div>
           <ul className={`${styles.block} ${styles.sex_block}`}>
@@ -395,6 +411,9 @@ const MainContentProducts: FC = () => {
                 })}
               </ul>
             )}
+            {!no_true_values(checked_genres) && (
+              <li className={styles.uncheck_all}>отменить выбор</li>
+            )}
           </ul>
           <div className={`${styles.block} ${styles.bpm_block}`}>
             <p className={styles.block_title}>Темп (BPM)</p>
@@ -460,16 +479,16 @@ const MainContentProducts: FC = () => {
                           name="mood"
                           className={styles.checkbox}
                           onChange={() =>
-                            handle_mood_checkbox_change(`${mood}`)
+                            handle_moods_checkbox_change(`${mood}`)
                           }
-                          checked={checked_mood[mood] || false}
+                          checked={checked_moods[mood] || false}
                         />
                         <span className={styles.checkmark}></span>
                       </label>
                       <label
                         htmlFor={mood}
                         className={`${styles.label} ${
-                          checked_mood[mood] ? styles.checked_label : ""
+                          checked_moods[mood] ? styles.checked_label : ""
                         }`}
                       >
                         {mood}
@@ -478,6 +497,9 @@ const MainContentProducts: FC = () => {
                   );
                 })}
               </ul>
+            )}
+            {!no_true_values(checked_moods) && (
+              <li className={styles.uncheck_all}>отменить выбор</li>
             )}
           </ul>
         </div>
