@@ -171,8 +171,6 @@ const MainContentProducts: FC = () => {
     }
   };
 
-  // console.log(filtered_results);
-
   // Get left bar height
   useEffect(() => {
     if (scroll_consts.current.left_bar) {
@@ -185,17 +183,25 @@ const MainContentProducts: FC = () => {
 
   // Handle scroll and change left_bar position
   useEffect(() => {
-    if (main_section_ref.current && left_bar_ref.current) {
-      scroll_consts.current = {
-        height_diff_viewport_main_content:
-          window.innerHeight - main_section_ref.current.offsetHeight,
-        height_diff_viewport_left_bar:
-          window.innerHeight - left_bar_ref.current.offsetHeight,
-        main_content: main_section_ref.current,
-        left_bar: left_bar_ref.current,
-      };
-    }
-  }, [window.innerHeight]);
+    const handle_resize = () => {
+      if (main_section_ref.current && left_bar_ref.current) {
+        scroll_consts.current = {
+          height_diff_viewport_main_content:
+            window.innerHeight - main_section_ref.current.offsetHeight,
+          height_diff_viewport_left_bar:
+            window.innerHeight - left_bar_ref.current.offsetHeight,
+          main_content: main_section_ref.current,
+          left_bar: left_bar_ref.current,
+        };
+      }
+    };
+
+    window.addEventListener("resize", handle_resize);
+
+    handle_resize();
+
+    return () => window.removeEventListener("resize", handle_resize);
+  }, []);
 
   const set_left_bar_position = () => {
     // Check for null
