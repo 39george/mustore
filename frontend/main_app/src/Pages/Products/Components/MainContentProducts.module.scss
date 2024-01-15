@@ -189,7 +189,7 @@
   align-items: center;
 }
 
-.input {
+.global_search {
   width: 100%;
 
   font-family: "Raleway", sans-serif;
@@ -224,7 +224,8 @@
 // Genres & moods
 .genres_content,
 .moods_content {
-  height: 20.5rem;
+  height: fit-content;
+  max-height: 20.5rem;
   overflow-y: scroll;
 
   scrollbar-width: thin;
@@ -237,9 +238,36 @@
   );
 }
 
-.search_form {
+.form_search {
   display: flex;
+  justify-content: flex-end;
   align-items: center;
+
+  input {
+    width: 30%;
+
+    font-family: "Raleway", sans-serif;
+    font-size: 0.875rem;
+
+    border: none;
+    border-bottom: 1px solid transparent;
+    color: rgba($color: $main_dark, $alpha: 0.8);
+    transition: width 0.2s ease-out, border-bottom 0.1s ease-out;
+
+    &::placeholder {
+      color: rgba($color: $main_dark, $alpha: 0.6);
+    }
+
+    &:focus {
+      width: 100%;
+      border-bottom: 1px solid rgba($color: $main_dark, $alpha: 0.6);
+      outline: none;
+    }
+  }
+
+  .search_icon {
+    margin-left: 0.5rem;
+  }
 }
 
 // BPM

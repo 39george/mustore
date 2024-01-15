@@ -379,7 +379,7 @@ const MainContentProducts: FC = () => {
             <input
               type="text"
               name="search"
-              className={styles.input}
+              className={styles.global_search}
               placeholder="Поиск по названию, автору..."
             />
             <IoSearch className={styles.search_icon} />
@@ -468,7 +468,10 @@ const MainContentProducts: FC = () => {
           <ul className={`${styles.block} ${styles.genres_block}`}>
             <li className={styles.block_title}>
               <p>Жанр</p>
-              <form className={styles.search_form}>
+              <form
+                className={styles.form_search}
+                onSubmit={(e) => e.preventDefault()}
+              >
                 <input
                   type="text"
                   name="search"
@@ -481,7 +484,6 @@ const MainContentProducts: FC = () => {
                     }))
                   }
                 />
-                <IoSearch className={styles.search_icon} />
               </form>
             </li>
             {genres_error ? (
@@ -586,8 +588,11 @@ const MainContentProducts: FC = () => {
           </ul>
           <ul className={`${styles.block} ${styles.moods_block}`}>
             <li className={styles.block_title}>
-              <p>Mood песни</p>
-              <form className={styles.search_form}>
+              <p>Mood</p>
+              <form
+                className={styles.form_search}
+                onSubmit={(e) => e.preventDefault()}
+              >
                 <input
                   type="text"
                   name="search"
@@ -600,7 +605,6 @@ const MainContentProducts: FC = () => {
                     }))
                   }
                 />
-                <IoSearch className={styles.search_icon} />
               </form>
             </li>
             {moods_error ? (
