@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import "./App.scss";
 import MainLayout from "./layouts/MainLayout";
 import HomePage from "./Pages/Home/HomePage";
@@ -45,7 +45,12 @@ function App() {
             />
             <Route
               index
-              element={<ContentSection section_type="songs" />}
+              element={
+                <Navigate
+                  to="songs"
+                  replace
+                />
+              }
             />
           </Route>
           <Route
