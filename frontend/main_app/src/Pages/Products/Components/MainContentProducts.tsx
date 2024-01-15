@@ -32,10 +32,24 @@ type LeftBarStates =
 
 type ScrollDirection = "down" | "up";
 
+type FilteredType = "filtered_genres" | "filtered_moods";
+
+interface FilteredResults {
+  filtered_genres: string[];
+  filtered_moods: string[];
+}
+
+interface SearchTerms {
+  genres: string;
+  moods: string;
+}
+
 const MainContentProducts: FC = () => {
+  // HTML refs
   const main_section_ref = useRef<HTMLDivElement>(null);
   const wrapper_ref = useRef<HTMLDivElement>(null);
   const left_bar_ref = useRef<HTMLDivElement>(null);
+  // Consts for left bar sticky logic
   const [sticky, set_sticky] = useState<StickyState>({
     position: "absolute",
     top: "",
@@ -54,8 +68,17 @@ const MainContentProducts: FC = () => {
   });
   const left_bar_state = useRef<LeftBarStates>("absolute_top");
   const left_bar_prev_state = useRef<LeftBarStates>("absolute_top");
+  // Data consts
   const { data: genres, error: genres_error } = useGenresMoodsApi("genres");
   const { data: moods, error: moods_error } = useGenresMoodsApi("tags");
+  const [filtered_results, set_filtered_results] = useState<FilteredResults>({
+    filtered_genres: [],
+    filtered_moods: [],
+  });
+  const [search_terms, set_search_terms] = useState<SearchTerms>({
+    genres: "",
+    moods: "",
+  });
   const {
     checked_items: checked_genres,
     set_checked_items: set_checked_genres,
@@ -76,8 +99,6 @@ const MainContentProducts: FC = () => {
   const handle_sex_checkbox_change = (sex: string) => {
     set_checked_sex({ [sex]: true });
   };
-
-  // console.log(checked_genres);
 
   // Check if an object has any `true` value
   const no_true_values = (obj: CheckedItems) => {
@@ -106,6 +127,51 @@ const MainContentProducts: FC = () => {
         break;
     }
   };
+
+  // Set initial filtered genres
+  useEffect(() => {
+    set_filtered_results({
+      filtered_genres: genres,
+      filtered_moods: moods,
+    });
+  }, [genres, moods]);
+
+  // Filter genres or moods
+  useEffect(() => {
+    if (search_terms.genres || search_terms.genres === "") {
+      handle_genres_moods_search(
+        genres,
+        search_terms.genres,
+        "filtered_genres"
+      );
+    }
+    if (search_terms.moods || search_terms.moods === "") {
+      handle_genres_moods_search(moods, search_terms.moods, "filtered_moods");
+    }
+  }, [search_terms]);
+
+  const handle_genres_moods_search = (
+    kind: string[],
+    search_term: string,
+    output: FilteredType
+  ) => {
+    let results = kind.filter((item) =>
+      item.toLowerCase().includes(search_term.toLowerCase())
+    );
+    if (search_term) {
+      set_filtered_results((prev) => ({
+        ...prev,
+        [output]: results,
+      }));
+    } else {
+      set_filtered_results((prev) => ({
+        ...prev,
+        [output]: kind,
+      }));
+    }
+  };
+
+  // console.log(filtered_results);
 
   // Get left bar height
   useEffect(() => {
@@ -407,6 +473,13 @@ const MainContentProducts: FC = () => {
                   type="text"
                   name="search"
                   placeholder="Поиск"
+                  value={search_terms.genres}
+                  onChange={(e) =>
+                    set_search_terms((prev) => ({
+                      ...prev,
+                      genres: e.target.value,
+                    }))
+                  }
                 />
                 <IoSearch className={styles.search_icon} />
               </form>
@@ -415,7 +488,7 @@ const MainContentProducts: FC = () => {
               <li className={styles.error}>{genres_error}</li>
             ) : (
               <ul className={styles.genres_content}>
-                {genres.map((genre, index) => {
+                {filtered_results.filtered_genres.map((genre, index) => {
                   return (
                     <li
                       key={index}
@@ -512,12 +585,29 @@ const MainContentProducts: FC = () => {
             </ul>
           </ul>
           <ul className={`${styles.block} ${styles.moods_block}`}>
-            <li className={styles.block_title}>Mood песни</li>
+            <li className={styles.block_title}>
+              <p>Mood песни</p>
+              <form className={styles.search_form}>
+                <input
+                  type="text"
+                  name="search"
+                  placeholder="Поиск"
+                  value={search_terms.moods}
+                  onChange={(e) =>
+                    set_search_terms((prev) => ({
+                      ...prev,
+                      moods: e.target.value,
+                    }))
+                  }
+                />
+                <IoSearch className={styles.search_icon} />
+              </form>
+            </li>
             {moods_error ? (
               <li className={styles.error}>{moods_error}</li>
             ) : (
               <ul className={styles.moods_content}>
-                {moods.map((mood, index) => {
+                {filtered_results.filtered_moods.map((mood, index) => {
                   return (
                     <li
                       key={index}
