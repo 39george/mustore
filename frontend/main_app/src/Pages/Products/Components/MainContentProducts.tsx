@@ -255,6 +255,9 @@ const MainContentProducts: FC = () => {
   }, [
     scroll_consts.current.left_bar,
     scroll_consts.current.left_bar?.offsetHeight,
+    checked_genres,
+    checked_moods,
+    checked_music_key,
   ]);
 
   // Handle scroll and change left_bar position
@@ -277,7 +280,7 @@ const MainContentProducts: FC = () => {
     handle_resize();
 
     return () => window.removeEventListener("resize", handle_resize);
-  }, []);
+  }, [scroll_consts.current.left_bar?.offsetHeight]);
 
   const set_left_bar_position = () => {
     // Check for null
@@ -458,6 +461,20 @@ const MainContentProducts: FC = () => {
       ref={main_section_ref}
       className={styles.main_seciton}
     >
+      {/* <div
+        style={{
+          position: "fixed",
+          left: "0",
+          top: "100px",
+          zIndex: "3000",
+          fontFamily: "JetBrains Mono",
+          backgroundColor: "lightpink",
+        }}
+      >
+        debug
+        <div>left bar state {left_bar_state.current}</div>
+        <div>left bar height {left_bar_height}</div>
+      </div> */}
       <div
         ref={wrapper_ref}
         className={styles.left_bar_wrapper}

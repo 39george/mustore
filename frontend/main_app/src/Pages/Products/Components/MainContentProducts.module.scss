@@ -29,7 +29,7 @@
 .main_seciton {
   position: relative;
   display: flex;
-  margin-bottom: 2rem;
+  // overflow-y: hidden;
 }
 
 .left_bar_wrapper {
@@ -234,6 +234,7 @@
 }
 
 // Genres & moods
+
 .genres_content,
 .moods_content {
   height: fit-content;

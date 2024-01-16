@@ -29,14 +29,16 @@
   max-width: 72.75rem;
 
   margin: 0 auto;
+  margin-top: 3.75rem;
+  margin-bottom: 2rem;
   padding: 0 1rem;
+
+  overflow-y: hidden;
 }
 
 .header {
   display: flex;
   align-items: first baseline;
-
-  margin-top: 3.75rem;
 }
 
 .h1 {
