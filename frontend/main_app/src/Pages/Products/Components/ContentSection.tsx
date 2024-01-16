@@ -3,7 +3,7 @@ import underline_red from "../../../assets/svg/underline_red.svg";
 import underline_coral from "../../../assets/svg/underline_coral.svg";
 import underline_lilac from "../../../assets/svg/underline_lilac.svg";
 import underline_green from "../../../assets/svg/underline_green.svg";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import Carousel from "./UI/Carousel";
 import { carousel_items } from "./UI/content_dummies";
 import MainContentProducts from "./MainContentProducts";
@@ -24,6 +24,8 @@ interface PopUpItem {
 }
 
 const ContentSection: FC<ContentSectionProps> = ({ section_type }) => {
+  const [pop_up_active, set_pop_up_active] = useState(false);
+  const [pop_up_style, set_pop_up_style] = useState<React.CSSProperties>({});
   const [links_class_names, set_links_class_names] = useState({
     link_1: `${styles.pop_up_item}`,
     link_2: `${styles.pop_up_item}`,
@@ -78,33 +80,47 @@ const ContentSection: FC<ContentSectionProps> = ({ section_type }) => {
       break;
   }
 
-  const handle_mouse_enter = () => {
-    set_links_class_names({
-      link_1: `${styles.pop_up_item} ${styles.item_1}`,
-      link_2: `${styles.pop_up_item} ${styles.item_2}`,
-      link_3: `${styles.pop_up_item} ${styles.item_3}`,
-    });
-  };
+  useEffect(() => {
+    if (pop_up_active) {
+      set_links_class_names({
+        link_1: `${styles.pop_up_item} ${styles.item_1}`,
+        link_2: `${styles.pop_up_item} ${styles.item_2}`,
+        link_3: `${styles.pop_up_item} ${styles.item_3}`,
+      });
+    } else {
+      set_links_class_names({
+        link_1: `${styles.pop_up_item} ${styles.item_hidden}`,
+        link_2: `${styles.pop_up_item} ${styles.item_hidden}`,
+        link_3: `${styles.pop_up_item} ${styles.item_hidden}`,
+      });
+    }
+  }, [pop_up_active]);
 
-  const handle_mouse_leave = () => {
-    set_links_class_names({
-      link_1: `${styles.pop_up_item} ${styles.item_hidden}`,
-      link_2: `${styles.pop_up_item} ${styles.item_hidden}`,
-      link_3: `${styles.pop_up_item} ${styles.item_hidden}`,
-    });
-  };
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (!pop_up_active) {
+      timer = setTimeout(() => {
+        set_pop_up_style({ display: "none" });
+      }, 200);
+    } else {
+      set_pop_up_style({ display: "flex" });
+    }
+
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
+  }, [pop_up_active]);
 
   return (
     <section className={styles.products_section}>
       <div className={styles.header}>
         <h1 className={styles.h1}>Библиотека</h1>
-        <div
-          className={styles.name_and_links}
-          onMouseLeave={handle_mouse_leave}
-        >
+        <div className={styles.name_and_links}>
           <div
             className={styles.section_name}
-            onMouseEnter={handle_mouse_enter}
+            onClick={() => set_pop_up_active(!pop_up_active)}
           >
             {section_props.section_name}
             <img
@@ -113,7 +129,10 @@ const ContentSection: FC<ContentSectionProps> = ({ section_type }) => {
               className={styles.underline}
             />
           </div>
-          <div className={styles.pop_up_menu}>
+          <div
+            className={styles.pop_up_menu}
+            style={pop_up_style}
+          >
             <NavLink
               to={pop_up_items[1].link}
               className={links_class_names.link_1}

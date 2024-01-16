@@ -90,8 +90,9 @@
 
 .reason_icon {
   flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
   margin-left: 0.5rem;
-  font-size: 1.5rem;
   color: #68b7ef;
 }
 
@@ -101,20 +102,6 @@
   line-height: 1.2rem;
 
   opacity: 0.7;
-}
-
-.bent_shape {
-  width: 200px;
-  height: 100px;
-  background-color: red;
-  /*
-    The clip-path below defines a polygon shape.
-    The first pair of values is the top-left coordinate.
-    The second pair is the top-right coordinate.
-    The third pair is the bottom-right coordinate.
-    The fourth pair is a coordinate for the bent side.
-  */
-  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 10% 50%);
 }
 
 // Media queries

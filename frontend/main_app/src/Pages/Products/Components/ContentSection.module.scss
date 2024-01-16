@@ -40,6 +40,8 @@
 }
 
 .h1 {
+  padding-bottom: 3.75rem;
+
   font-size: 2rem;
   font-weight: 600;
   letter-spacing: 0.2rem;
@@ -54,6 +56,7 @@
   position: relative;
 
   margin-left: 0.75rem;
+  padding-bottom: 0.25rem;
 
   font-size: 2rem;
   font-weight: 600;
@@ -71,18 +74,19 @@
 
 .pop_up_menu {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   flex-wrap: wrap;
 
   margin-left: 1em;
 
   font-size: 1.625rem;
   font-weight: 600;
+
+  display: none;
 }
 
 .pop_up_item {
   margin-right: 1.125rem;
-  margin-bottom: 1.125rem;
   padding: 0.25rem 0.625rem;
 
   color: rgba($color: $main_dark, $alpha: 0.3);
@@ -90,7 +94,7 @@
   border-radius: 0.25rem;
   box-shadow: 0 0 1.5rem rgba($color: #000000, $alpha: 0.1);
 
-  visibility: hidden;
+  display: none;
   opacity: 0;
 
   transition: color 0.2s ease-out, opacity 0.2s ease-out;
@@ -101,32 +105,35 @@
 }
 
 .item_1 {
+  display: block;
   animation: pop_up_item_reveal 0.2s ease-out forwards;
 }
 
 .item_2 {
+  display: block;
   animation: pop_up_item_reveal 0.2s ease-out 0.1s forwards;
 }
 
 .item_3 {
+  display: block;
   animation: pop_up_item_reveal 0.2s ease-out 0.2s forwards;
 }
 
 .item_hidden,
 .item_hidden,
 .item_hidden {
-  visibility: visible;
+  display: block;
   opacity: 1;
   animation: pop_up_item_hide 0.2s ease-out forwards;
 }
 
 .template {
   height: 100vh;
-  margin-top: 5rem;
+  margin-top: 1.25rem;
 }
 
 .content {
-  margin-top: 5rem;
+  margin-top: 1.25rem;
 }
 
 .title_icon {
@@ -154,12 +161,30 @@
 }
 
 @media (max-width: 960px) {
+  .content {
+    margin-top: 3rem;
+  }
+
   .products_section {
     max-width: 47rem;
+  }
+
+  .pop_up_menu {
+    & .pop_up_item:not(:last-child) {
+      margin-bottom: 1.125rem;
+    }
   }
 }
 
 @media (max-width: 768px) {
+  .h1 {
+    padding-bottom: 7.2rem;
+  }
+
+  .content {
+    margin-top: 1rem;
+  }
+
   .products_section {
     max-width: 42rem;
   }
@@ -172,6 +197,10 @@
 }
 
 @media (max-width: 600px) {
+  .h1 {
+    padding-bottom: 3rem;
+  }
+
   .name_and_links {
     flex-direction: column;
     align-items: flex-start;
@@ -190,6 +219,11 @@
 @media (max-width: 420px) {
   .header {
     flex-direction: column;
+    padding-bottom: 3rem;
+  }
+
+  .h1 {
+    padding-bottom: 0rem;
   }
 
   .section_name {

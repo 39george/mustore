@@ -56,7 +56,8 @@
 .more_info_icon {
   position: absolute;
   right: -8px;
-  font-size: 1.5rem;
+  width: 1.5rem;
+  height: 1.5rem;
   opacity: 0.2;
 }
 
@@ -86,7 +87,8 @@
 .like_icon,
 .listenings_icon {
   margin-right: 0.5rem;
-  font-size: 1.5rem;
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 .like_icon {
@@ -114,7 +116,8 @@
 }
 
 .cart_icon {
-  font-size: 1.25rem;
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 .like_icon,
@@ -186,7 +189,13 @@
   .like_icon,
   .listenings_icon,
   .more_info_icon {
-    font-size: clamp(
+    width: clamp(
+      1rem,
+      calc(1rem + (24 - 16) * ((100vw - 320px) / (460 - 320))),
+      1.5rem
+    );
+
+    height: clamp(
       1rem,
       calc(1rem + (24 - 16) * ((100vw - 320px) / (460 - 320))),
       1.5rem
@@ -194,7 +203,8 @@
   }
 
   .cart_icon {
-    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
   }
 
   .listenings {

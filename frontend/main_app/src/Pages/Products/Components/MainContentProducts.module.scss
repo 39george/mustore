@@ -113,11 +113,18 @@
   }
 }
 
+.music_symbol {
+  font-family: "JetBrains Mono", monospace;
+}
+
 .uncheck_all {
   display: flex;
-  justify-content: flex-end;
   align-items: center;
+
+  width: fit-content;
+
   margin-top: 1em;
+  margin-left: auto;
 
   font-size: 0.875rem;
   font-weight: 300;
@@ -160,13 +167,12 @@
       content: "";
       display: none;
       position: absolute;
-      top: 1px;
-      right: 1px;
-      bottom: 1px;
-      left: 1px;
+      top: 50%;
+      left: 50%;
+      transform: translateX(-50%) translateY(-50%);
 
-      width: 0.75rem;
-      height: 0.75rem;
+      width: 0.625rem;
+      height: 0.625rem;
 
       background-color: $accent_red;
       border-radius: 2px;
@@ -256,6 +262,7 @@
     font-size: 0.875rem;
 
     border: none;
+    border-radius: 0;
     border-bottom: 1px solid transparent;
     color: rgba($color: $main_dark, $alpha: 0.8);
     transition: width 0.2s ease-out, border-bottom 0.1s ease-out;
@@ -330,7 +337,7 @@
     overflow: hidden;
     cursor: pointer;
 
-    transition: height 0.2s ease-out; // Perfomance issues on phones?
+    transition: height 0.2s ease-out;
   }
 
   .filters_block {
@@ -377,11 +384,19 @@
   }
 
   .music_key_expanded {
-    height: 30.625rem;
+    height: 29.25rem;
   }
 
   .music_key_height_checked {
-    height: 32.625rem;
+    height: 31rem;
+  }
+
+  .music_key_iphone {
+    height: 30.25rem;
+  }
+
+  .music_key_checked_iphone {
+    height: 32rem;
   }
 
   .products_container {
@@ -390,6 +405,7 @@
   }
 }
 
+// Media queries
 @media (max-width: 672px) {
   .left_bar {
     flex-direction: column;

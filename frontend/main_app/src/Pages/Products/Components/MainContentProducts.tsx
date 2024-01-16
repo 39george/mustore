@@ -117,6 +117,8 @@ const MainContentProducts: FC = () => {
     handle_checkbox_change: handle_moods_checkbox_change,
   } = useCheckboxState();
   const [checked_sex, set_checked_sex] = useState<CheckedItems>({ any: true });
+  const music_symbols = ["♭", "♯"];
+  const [is_iphone, set_is_iphone] = useState(false);
 
   // Changing checkbox for sex block
   const handle_sex_checkbox_change = (sex: string) => {
@@ -222,6 +224,28 @@ const MainContentProducts: FC = () => {
       }));
     }
   };
+
+  // Formatting strings in keys array
+  const format_key_with_symbols = (keys: string) => {
+    return keys.split("").map((char, idx) => {
+      if (music_symbols.includes(char)) {
+        return (
+          <span
+            key={idx}
+            className={styles.music_symbol}
+          >
+            {char}
+          </span>
+        );
+      }
+      return char;
+    });
+  };
+
+  // Check if iphone
+  useEffect(() => {
+    set_is_iphone(/iPhone/.test(navigator.userAgent));
+  }, []);
 
   // Get left bar height
   useEffect(() => {
@@ -577,6 +601,7 @@ const MainContentProducts: FC = () => {
                   expanded_blocks.genres && `${styles.genres_moods_expanded}`
                 } ${
                   !no_true_values(checked_genres) &&
+                  expanded_blocks.genres &&
                   `${styles.genres_moods_height_checked}`
                 }`}
                 onClick={() => handle_blocks_expand("genres")}
@@ -586,7 +611,10 @@ const MainContentProducts: FC = () => {
                   <form
                     className={styles.form_search}
                     style={{
-                      display: expanded_blocks.genres ? "flex" : "none",
+                      display:
+                        expanded_blocks.genres || !is_small_screen
+                          ? "flex"
+                          : "none",
                     }}
                     onSubmit={(e) => e.preventDefault()}
                   >
@@ -674,10 +702,16 @@ const MainContentProducts: FC = () => {
               </div>
               <ul
                 className={`${styles.block} ${styles.music_keys_block} ${
-                  expanded_blocks.music_key && `${styles.music_key_expanded}`
+                  expanded_blocks.music_key &&
+                  `${styles.music_key_expanded} ${
+                    is_iphone && styles.music_key_iphone
+                  }`
                 } ${
                   !no_true_values(checked_music_key) &&
-                  `${styles.music_key_height_checked}`
+                  expanded_blocks.music_key &&
+                  `${styles.music_key_height_checked} ${
+                    is_iphone && styles.music_key_checked_iphone
+                  }`
                 }`}
                 onClick={() => handle_blocks_expand("music_key")}
               >
@@ -716,28 +750,29 @@ const MainContentProducts: FC = () => {
                             checked_music_key[key] ? styles.checked_label : ""
                           }`}
                         >
-                          {key}
+                          {format_key_with_symbols(key)}
                         </label>
                       </li>
                     );
                   })}
-                  {!no_true_values(checked_music_key) && (
-                    <li
-                      className={styles.uncheck_all}
-                      onClick={(e) =>
-                        set_all_to_false(e, checked_music_key, "music_key")
-                      }
-                    >
-                      отменить выбор
-                    </li>
-                  )}
                 </ul>
+                {!no_true_values(checked_music_key) && (
+                  <li
+                    className={styles.uncheck_all}
+                    onClick={(e) =>
+                      set_all_to_false(e, checked_music_key, "music_key")
+                    }
+                  >
+                    отменить выбор
+                  </li>
+                )}
               </ul>
               <ul
                 className={`${styles.block} ${styles.moods_block} ${
                   expanded_blocks.moods && `${styles.genres_moods_expanded}`
                 } ${
                   !no_true_values(checked_moods) &&
+                  expanded_blocks.moods &&
                   `${styles.genres_moods_height_checked}`
                 }`}
                 onClick={() => handle_blocks_expand("moods")}
@@ -747,7 +782,10 @@ const MainContentProducts: FC = () => {
                   <form
                     className={styles.form_search}
                     style={{
-                      display: expanded_blocks.moods ? "flex" : "none",
+                      display:
+                        expanded_blocks.moods || !is_small_screen
+                          ? "flex"
+                          : "none",
                     }}
                     onSubmit={(e) => e.preventDefault()}
                   >
