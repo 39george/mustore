@@ -122,3 +122,27 @@
   grid-template-rows: 44px 44px 44px;
   gap: 1rem 4rem;
 }
+
+@media (max-width: 1024px) {
+  .carousel_container {
+    &:hover {
+      .prev_button,
+      .next_button {
+        opacity: 1;
+      }
+    }
+  }
+
+  .prev_button,
+  .next_button {
+    opacity: 1;
+    box-shadow: 0px 0px 10px rgba($color: #000000, $alpha: 0.1);
+  }
+}
+
+@media (max-width: 768px) {
+  .prev_button,
+  .next_button {
+    display: none;
+  }
+}

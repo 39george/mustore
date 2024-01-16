@@ -156,21 +156,29 @@ const DraggableSlider: FC = () => {
   };
 
   const left_knob_mouse_down = (e: MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+
     start_drag(e, "left");
     set_knob_cursor({
       cursor: "grabbing",
     });
   };
   const right_knob_mouse_down = (e: MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+
     start_drag(e, "right");
     set_knob_cursor({
       cursor: "grabbing",
     });
   };
   const left_knob_touch_start = (e: TouchEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+
     start_drag(e, "left");
   };
   const right_knob_touch_start = (e: TouchEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+
     start_drag(e, "right");
   };
 

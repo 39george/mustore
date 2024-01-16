@@ -29,7 +29,7 @@
   max-width: 72.75rem;
 
   margin: 0 auto;
-  padding: 0 1.375rem;
+  padding: 0 1rem;
 }
 
 .header {
@@ -160,6 +160,15 @@
 }
 
 @media (max-width: 768px) {
+  .products_section {
+    max-width: 42rem;
+  }
+}
+
+@media (max-width: 672px) {
+  .products_section {
+    max-width: 36rem;
+  }
 }
 
 @media (max-width: 600px) {
@@ -174,6 +183,16 @@
   }
 
   .pop_up_menu {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 420px) {
+  .header {
+    flex-direction: column;
+  }
+
+  .section_name {
     margin-left: 0;
   }
 }

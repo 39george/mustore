@@ -41,9 +41,6 @@ const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
 
     return config;
   }, [carousel_type, items_per_slide, carousel_items.length]);
-  // const MAX_INDEX =
-  //   carousel_items.length -
-  //   (carousel_items.length % items_per_slide || items_per_slide);
   const [is_next_hovered, set_is_next_hovered] = useState(false);
   const carousel_ref = useRef<HTMLDivElement>(null);
   const class_names = useMemo<ClassNames>(() => {

@@ -227,10 +227,6 @@
   display: block;
 }
 
-.rest_blocks_hidden {
-  display: none;
-}
-
 // Genres & moods
 .genres_content,
 .moods_content {
@@ -314,15 +310,19 @@
 
   .left_bar {
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
+    gap: 1rem;
     max-width: 100%;
   }
 
   .search_and_sort,
   .filters_container {
-    // flex-shrink: 0;
     width: 16.5rem;
     height: fit-content;
+  }
+
+  .rest_blocks_hidden {
+    display: none;
   }
 
   .block {
@@ -330,7 +330,7 @@
     overflow: hidden;
     cursor: pointer;
 
-    transition: height 0.2s ease-out;
+    transition: height 0.2s ease-out; // Perfomance issues on phones?
   }
 
   .filters_block {
@@ -385,6 +385,25 @@
   }
 
   .products_container {
+    column-gap: 0.875rem;
     margin-left: 0;
+  }
+}
+
+@media (max-width: 672px) {
+  .left_bar {
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .products_container {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 460px) {
+  .products_container {
+    column-gap: 0.5rem;
   }
 }
