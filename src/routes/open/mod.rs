@@ -17,7 +17,7 @@ use crate::auth::users::AuthSession;
 use crate::cornucopia::queries::open_access;
 use crate::cornucopia::queries::open_access::GetNewSongs;
 use crate::cornucopia::queries::open_access::GetRecommendedSongs;
-use crate::cornucopia::queries::open_access::GetSongs;
+use crate::cornucopia::queries::open_access::GetSongsListResponse;
 use crate::domain::requests::open_access::GetSongsListRequest;
 use crate::startup::AppState;
 
@@ -25,11 +25,15 @@ use super::ResponseError;
 
 // ───── Types ────────────────────────────────────────────────────────────── //
 
-#[derive(Debug, Deserialize, Serialize)]
-struct Stats {
+#[derive(Debug, Deserialize, Serialize, utoipa::ToSchema)]
+pub struct Stats {
+    #[schema(example = "55")]
     beats: u32,
+    #[schema(example = "12")]
     songs: u32,
+    #[schema(example = "77")]
     lyrics: u32,
+    #[schema(example = "71")]
     covers: u32,
 }
 
@@ -70,8 +74,16 @@ pub fn open_router() -> Router<AppState> {
         .route("/recommended_songs", routing::get(get_recommended_songs))
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/open/stats",
+    responses(
+        (status = 200, description = "Got stats successfully", body = Stats),
+        (status = 500, description = "Some internal error")
+    )
+)]
 #[tracing::instrument(name = "Get products counts (stats)", skip_all)]
-async fn stats(
+pub async fn stats(
     State(app_state): State<AppState>,
 ) -> Result<Json<Stats>, ResponseError> {
     let pg_pool = app_state
@@ -89,7 +101,21 @@ async fn stats(
     Ok(Json::from(stats))
 }
 
-/// We should return json list
+/// Returns a json array with genres or moods
+#[utoipa::path(
+    get,
+    path = "/api/open/{what}",
+    params(
+        ("what" = String, Path, description = "Which values would you get")
+    ),
+    responses(
+        (status = 200, description = "Got values successfully", body = [String], content_type = "application/json",
+            example = json!(["genre1", "genre2", "genre3"])
+        ),
+        (status = 400, description = "Bad request"),
+        (status = 500, description = "Some internal error")
+    )
+)]
 #[tracing::instrument(name = "Get values list", skip(app_state))]
 async fn get_values_list(
     Path(path): Path<String>,
@@ -122,12 +148,31 @@ async fn get_values_list(
     }
 }
 
-#[tracing::instrument(name = "Get songs query", skip(app_state))]
+#[utoipa::path(
+    get,
+    path = "/api/open/songs",
+    params(
+        ("sex" = Option<Sex>, Query, description = "Filter by sex"),
+        ("tempo[]" = Option<Vec<i16>>, Query, description = "Filter by tempo range"),
+        ("key[]" = Option<Vec<MusicKey>>, Query, description = "Filter by music key"),
+        ("genres[]" = Option<Vec<String>>, Query, description = "Filter by genres"),
+        ("vibes[]" = Option<Vec<String>>, Query, description = "Filter by moods (vibes)"),
+        ("sort_by" = SortBy, Query, description = "Set sorting type"),
+        ("amount" = i64, Query, description = "Amount of songs"),
+        ("offset" = i64, Query, description = "Songs list offset"),
+    ),
+    responses(
+        (status = 200, description = "Got songs successfully", body = [GetSongsListResponse], content_type = "application/json"),
+        (status = 400, description = "Bad input error"),
+        (status = 500, description = "Some internal error")
+    )
+)]
+#[tracing::instrument(name = "Get songs query", skip_all)]
 async fn get_songs(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
-    Json(params): Json<GetSongsListRequest>,
-) -> Result<Json<Vec<GetSongs>>, ResponseError> {
+    Query(params): Query<GetSongsListRequest>,
+) -> Result<Json<Vec<GetSongsListResponse>>, ResponseError> {
     params.validate(&())?;
 
     let user_id = auth_session.user.map(|u| u.id);

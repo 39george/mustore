@@ -6,11 +6,13 @@ use crate::domain::music_parameters::Sex;
 use crate::domain::music_parameters::SortBy;
 use crate::domain::*;
 
-#[derive(Deserialize, Debug, Validate)]
+#[derive(Deserialize, Debug, Validate, utoipa::ToSchema, utoipa::IntoParams)]
+#[into_params(parameter_in = Query)]
 #[garde(allow_unvalidated)]
 pub struct GetSongsListRequest {
     pub sex: Option<Sex>,
     #[garde(inner(custom(validate_tempo_bounds)))]
+    #[param(value_type = Vec<i16>)]
     pub tempo: Option<Vec<i16>>,
     pub key: Option<Vec<MusicKey>>,
     #[garde(inner(inner(

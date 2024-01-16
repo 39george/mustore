@@ -10,13 +10,15 @@ use fred::clients::RedisClient;
 use fred::clients::RedisPool;
 use fred::types::RedisConfig;
 use secrecy::ExposeSecret;
-
 use time::Duration;
 use time::UtcOffset;
 use tokio::net::TcpListener;
 use tokio_postgres::NoTls;
 use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
+use utoipa::OpenApi;
+
+use utoipa_swagger_ui::SwaggerUi;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
@@ -32,8 +34,11 @@ use crate::routes::open::open_router;
 use crate::routes::protected::protected_router;
 use crate::service_providers::object_storage::ObjectStorage;
 
+use self::api_doc::ApiDoc;
+
 // ───── Submodules ───────────────────────────────────────────────────────── //
 
+mod api_doc;
 pub mod db_migration;
 mod tasks;
 
@@ -217,6 +222,10 @@ impl Application {
                     // allow requests from any origin
                     .allow_origin(origins);
                 app = app.layer(cors);
+                app = app.merge(
+                    SwaggerUi::new("/swagger-ui")
+                        .url("/api-docs/openapi.json", ApiDoc::openapi()),
+                );
             }
         }
 

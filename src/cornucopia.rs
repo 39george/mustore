@@ -877,27 +877,27 @@ where C : GenericClient
         res.map(| row | (self.mapper) ((self.extractor) (& row)))) .into_stream() ;
         Ok(it)
     }
-}#[derive(serde::Serialize, Debug, Clone, PartialEq, )] pub struct GetSongs
-{ pub song_id : i32,pub created_at : time::OffsetDateTime,pub cover_url : String,pub name : String,pub author : String,pub likes : i64,pub listenings : i64,pub relevance_score : rust_decimal::Decimal,pub price : rust_decimal::Decimal,pub is_user_liked : Option<bool>,}pub struct GetSongsBorrowed < 'a >
-{ pub song_id : i32,pub created_at : time::OffsetDateTime,pub cover_url : &'a str,pub name : &'a str,pub author : &'a str,pub likes : i64,pub listenings : i64,pub relevance_score : rust_decimal::Decimal,pub price : rust_decimal::Decimal,pub is_user_liked : Option<bool>,} impl < 'a > From < GetSongsBorrowed <
-'a >> for GetSongs
+}#[derive(serde::Serialize, Debug, Clone, PartialEq, )] pub struct GetSongsListResponse
+{ pub song_id : i32,pub created_at : time::OffsetDateTime,pub cover_url : String,pub name : String,pub author : String,pub likes : i64,pub listenings : i64,pub relevance_score : rust_decimal::Decimal,pub price : rust_decimal::Decimal,pub is_user_liked : Option<bool>,}pub struct GetSongsListResponseBorrowed < 'a >
+{ pub song_id : i32,pub created_at : time::OffsetDateTime,pub cover_url : &'a str,pub name : &'a str,pub author : &'a str,pub likes : i64,pub listenings : i64,pub relevance_score : rust_decimal::Decimal,pub price : rust_decimal::Decimal,pub is_user_liked : Option<bool>,} impl < 'a > From < GetSongsListResponseBorrowed <
+'a >> for GetSongsListResponse
 {
     fn
-    from(GetSongsBorrowed { song_id,created_at,cover_url,name,author,likes,listenings,relevance_score,price,is_user_liked,} : GetSongsBorrowed < 'a >)
+    from(GetSongsListResponseBorrowed { song_id,created_at,cover_url,name,author,likes,listenings,relevance_score,price,is_user_liked,} : GetSongsListResponseBorrowed < 'a >)
     -> Self { Self { song_id,created_at,cover_url: cover_url.into(),name: name.into(),author: author.into(),likes,listenings,relevance_score,price,is_user_liked,} }
-}pub struct GetSongsQuery < 'a, C : GenericClient, T, const N : usize >
+}pub struct GetSongsListResponseQuery < 'a, C : GenericClient, T, const N : usize >
 {
     client : & 'a  C, params :
     [& 'a (dyn postgres_types :: ToSql + Sync) ; N], stmt : & 'a mut cornucopia_async
-    :: private :: Stmt, extractor : fn(& tokio_postgres :: Row) -> GetSongsBorrowed,
-    mapper : fn(GetSongsBorrowed) -> T,
-} impl < 'a, C, T : 'a, const N : usize > GetSongsQuery < 'a, C, T, N >
+    :: private :: Stmt, extractor : fn(& tokio_postgres :: Row) -> GetSongsListResponseBorrowed,
+    mapper : fn(GetSongsListResponseBorrowed) -> T,
+} impl < 'a, C, T : 'a, const N : usize > GetSongsListResponseQuery < 'a, C, T, N >
 where C : GenericClient
 {
-    pub fn map < R > (self, mapper : fn(GetSongsBorrowed) -> R) -> GetSongsQuery
+    pub fn map < R > (self, mapper : fn(GetSongsListResponseBorrowed) -> R) -> GetSongsListResponseQuery
     < 'a, C, R, N >
     {
-        GetSongsQuery
+        GetSongsListResponseQuery
         {
             client : self.client, params : self.params, stmt : self.stmt,
             extractor : self.extractor, mapper,
@@ -1110,22 +1110,22 @@ LIMIT $9")) } pub
 struct GetSongsStmt(cornucopia_async :: private :: Stmt) ; impl
 GetSongsStmt { pub fn bind < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,T2 : cornucopia_async::ArraySql<Item = i16>,T3 : cornucopia_async::ArraySql<Item = super::super::types::public::Musickey>,T4 : cornucopia_async::StringSql,T5 : cornucopia_async::ArraySql<Item = T4>,T6 : cornucopia_async::StringSql,T7 : cornucopia_async::ArraySql<Item = T6>,T8 : cornucopia_async::StringSql,>
 (& 'a mut self, client : & 'a  C,
-user_id : & 'a Option<i32>,sex : & 'a Option<T1>,tempo : & 'a Option<T2>,key : & 'a Option<T3>,genre : & 'a Option<T5>,mood : & 'a Option<T7>,sort_by : & 'a T8,offset : & 'a i64,amount : & 'a i64,) -> GetSongsQuery < 'a, C,
-GetSongs, 9 >
+user_id : & 'a Option<i32>,sex : & 'a Option<T1>,tempo : & 'a Option<T2>,key : & 'a Option<T3>,genre : & 'a Option<T5>,mood : & 'a Option<T7>,sort_by : & 'a T8,offset : & 'a i64,amount : & 'a i64,) -> GetSongsListResponseQuery < 'a, C,
+GetSongsListResponse, 9 >
 {
-    GetSongsQuery
+    GetSongsListResponseQuery
     {
         client, params : [user_id,sex,tempo,key,genre,mood,sort_by,offset,amount,], stmt : & mut self.0, extractor :
-        | row | { GetSongsBorrowed { song_id : row.get(0),created_at : row.get(1),cover_url : row.get(2),name : row.get(3),author : row.get(4),likes : row.get(5),listenings : row.get(6),relevance_score : row.get(7),price : row.get(8),is_user_liked : row.get(9),} }, mapper : | it | { <GetSongs>::from(it) },
+        | row | { GetSongsListResponseBorrowed { song_id : row.get(0),created_at : row.get(1),cover_url : row.get(2),name : row.get(3),author : row.get(4),likes : row.get(5),listenings : row.get(6),relevance_score : row.get(7),price : row.get(8),is_user_liked : row.get(9),} }, mapper : | it | { <GetSongsListResponse>::from(it) },
     }
 } }impl < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,T2 : cornucopia_async::ArraySql<Item = i16>,T3 : cornucopia_async::ArraySql<Item = super::super::types::public::Musickey>,T4 : cornucopia_async::StringSql,T5 : cornucopia_async::ArraySql<Item = T4>,T6 : cornucopia_async::StringSql,T7 : cornucopia_async::ArraySql<Item = T6>,T8 : cornucopia_async::StringSql,> cornucopia_async ::
-Params < 'a, GetSongsParams < T1,T2,T3,T4,T5,T6,T7,T8,>, GetSongsQuery < 'a,
-C, GetSongs, 9 >, C > for GetSongsStmt
+Params < 'a, GetSongsParams < T1,T2,T3,T4,T5,T6,T7,T8,>, GetSongsListResponseQuery < 'a,
+C, GetSongsListResponse, 9 >, C > for GetSongsStmt
 {
     fn
     params(& 'a mut self, client : & 'a  C, params : & 'a
-    GetSongsParams < T1,T2,T3,T4,T5,T6,T7,T8,>) -> GetSongsQuery < 'a, C,
-    GetSongs, 9 >
+    GetSongsParams < T1,T2,T3,T4,T5,T6,T7,T8,>) -> GetSongsListResponseQuery < 'a, C,
+    GetSongsListResponse, 9 >
     { self.bind(client, & params.user_id,& params.sex,& params.tempo,& params.key,& params.genre,& params.mood,& params.sort_by,& params.offset,& params.amount,) }
 }pub fn get_new_songs() -> GetNewSongsStmt
 { GetNewSongsStmt(cornucopia_async :: private :: Stmt :: new("SELECT 

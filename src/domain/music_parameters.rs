@@ -4,7 +4,7 @@ use crate::cornucopia::types::public::Musickey;
 
 // ───── Body ─────────────────────────────────────────────────────────────── //
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, utoipa::ToSchema)]
 pub enum Sex {
     Male,
     Female,
@@ -19,7 +19,7 @@ impl std::fmt::Display for Sex {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, utoipa::ToSchema)]
 #[allow(non_camel_case_types)]
 pub enum MusicKey {
     a_minor,
@@ -79,7 +79,7 @@ impl From<MusicKey> for Musickey {
     }
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, utoipa::ToSchema)]
 pub enum SortBy {
     Relevance,
     NewFirst,

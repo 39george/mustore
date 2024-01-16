@@ -25,7 +25,7 @@ SELECT name from genres ORDER BY name;
 --! get_moods_list
 SELECT name from moods ORDER BY name;
 
---! get_songs (sex?, tempo?, key?, genre?, mood?, user_id?) : (is_user_liked?)
+--! get_songs (sex?, tempo?, key?, genre?, mood?, user_id?) : GetSongsListResponse (is_user_liked?)
 SELECT 
     s.song_id,
     s.created_at,

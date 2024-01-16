@@ -11,6 +11,7 @@ pub mod domain;
 pub mod email_client;
 pub mod html_template_gen;
 pub mod middleware;
+pub mod payments;
 pub mod routes;
 pub mod service_providers;
 pub mod startup;
