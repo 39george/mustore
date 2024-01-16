@@ -84,6 +84,10 @@ opentelemetry = "0.21.0"
 tracing-opentelemetry = "0.22.0"
 opentelemetry-jaeger = "0.20.0"
 
+# Documentation
+utoipa = { version = "4.2.0", features = ["axum_extras"] }
+utoipa-swagger-ui = { version = "6.0.0", features = ["axum"] }
+
 [dev-dependencies]
 # Sync version for testing purposes
 postgres = "0.19.7"
