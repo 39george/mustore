@@ -40,5 +40,4 @@ upload_build() {
     fi
 }
 
-npm run build
 upload_build

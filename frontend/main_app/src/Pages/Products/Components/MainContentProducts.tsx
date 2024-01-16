@@ -44,6 +44,16 @@ interface SearchTerms {
   moods: string;
 }
 
+interface ExpandedBlocks {
+  sex: boolean;
+  genres: boolean;
+  tempo: boolean;
+  music_key: boolean;
+  moods: boolean;
+}
+
+type ExpandingBlocks = "sex" | "genres" | "tempo" | "music_key" | "moods";
+
 const MainContentProducts: FC = () => {
   // HTML refs
   const main_section_ref = useRef<HTMLDivElement>(null);
@@ -68,6 +78,18 @@ const MainContentProducts: FC = () => {
   });
   const left_bar_state = useRef<LeftBarStates>("absolute_top");
   const left_bar_prev_state = useRef<LeftBarStates>("absolute_top");
+  // Consts for different screens styles
+  const [is_small_screen, set_is_small_screen] = useState(
+    window.innerWidth <= 768
+  );
+  const [is_filters_hidden, set_is_filters_hidden] = useState(true);
+  const [expanded_blocks, set_expanded_blocks] = useState<ExpandedBlocks>({
+    sex: false,
+    genres: false,
+    tempo: false,
+    music_key: false,
+    moods: false,
+  });
   // Data consts
   const { data: genres, error: genres_error } = useGenresMoodsApi("genres");
   const { data: moods, error: moods_error } = useGenresMoodsApi("tags");
@@ -96,20 +118,50 @@ const MainContentProducts: FC = () => {
   } = useCheckboxState();
   const [checked_sex, set_checked_sex] = useState<CheckedItems>({ any: true });
 
+  // Changing checkbox for sex block
   const handle_sex_checkbox_change = (sex: string) => {
     set_checked_sex({ [sex]: true });
   };
 
-  // Check if an object has any `true` value
+  // Expand blocks
+  const handle_blocks_expand = (name: ExpandingBlocks) => {
+    if (!is_small_screen) {
+      return;
+    }
+
+    set_expanded_blocks((prev) => ({
+      ...prev,
+      [name]: !prev[name],
+    }));
+  };
+
+  // Set small screen to `true` if viewport width <= 768
+  useEffect(() => {
+    const handle_resize = () => {
+      set_is_small_screen(window.innerWidth <= 768);
+    };
+
+    handle_resize();
+
+    window.addEventListener("resize", handle_resize);
+    return () => {
+      window.removeEventListener("resize", handle_resize);
+    };
+  }, []);
+
+  // Check if a check object has any `true` value
   const no_true_values = (obj: CheckedItems) => {
     return Object.values(obj).every((value) => value === false);
   };
 
-  // Set all values of an object to `false`
+  // Set all values of a chekced object to `false`
   const set_all_to_false = (
+    e: React.MouseEvent<HTMLLIElement>,
     obj: CheckedItems,
     obj_kind: "genres" | "music_key" | "moods"
   ) => {
+    e.stopPropagation();
+
     let new_obj: CheckedItems = {};
     Object.keys(obj).forEach((key) => {
       new_obj[key] = false;
@@ -336,12 +388,27 @@ const MainContentProducts: FC = () => {
   };
 
   useEffect(() => {
-    window.addEventListener("scroll", set_left_bar_position);
-    window.addEventListener("resize", set_left_bar_position);
+    const maybe_set_left_bar_position = () => {
+      if (window.innerWidth > 768) {
+        set_left_bar_position();
+      }
+    };
 
+    const handle_resize = () => {
+      if (window.innerWidth > 768) {
+        window.addEventListener("scroll", maybe_set_left_bar_position);
+      } else {
+        window.removeEventListener("scroll", maybe_set_left_bar_position);
+      }
+    };
+
+    handle_resize();
+
+    // window.addEventListener("resize", handle_resize);
+    window.addEventListener("scroll", maybe_set_left_bar_position);
     return () => {
-      window.removeEventListener("scroll", set_left_bar_position);
-      window.removeEventListener("resize", set_left_bar_position);
+      window.removeEventListener("resize", handle_resize);
+      window.removeEventListener("scroll", maybe_set_left_bar_position);
     };
   }, []);
 
@@ -370,297 +437,388 @@ const MainContentProducts: FC = () => {
       <div
         ref={wrapper_ref}
         className={styles.left_bar_wrapper}
-        style={{ height: `${left_bar_height}px` }}
+        style={{
+          height: `${is_small_screen ? "fit-content" : `${left_bar_height}px`}`,
+        }}
       >
         <div
           ref={left_bar_ref}
           className={styles.left_bar}
-          style={{
-            position: `${sticky.position}`,
-            top: `${sticky.top}`,
-            bottom: `${sticky.bottom}`,
-          }}
+          style={
+            is_small_screen
+              ? { position: "relative", top: "", bottom: "" }
+              : {
+                  position: `${sticky.position}`,
+                  top: `${sticky.top}`,
+                  bottom: `${sticky.bottom}`,
+                }
+          }
         >
-          <div className={`${styles.block} ${styles.search_block}`}>
-            <input
-              type="text"
-              name="search"
-              className={styles.global_search}
-              placeholder="Поиск по названию, автору..."
-            />
-            <IoSearch className={styles.search_icon} />
+          <div className={styles.search_and_sort}>
+            <div className={`${styles.block} ${styles.search_block}`}>
+              <input
+                type="text"
+                name="search"
+                className={styles.global_search}
+                placeholder="Поиск по названию, автору..."
+              />
+              <IoSearch className={styles.search_icon} />
+            </div>
+            <div className={`${styles.block} ${styles.sort_block}`}>
+              <p className={styles.block_title}>Сначала попоулярные</p>
+              <GoChevronDown className={styles.chevron} />
+            </div>
           </div>
-          <div className={`${styles.block} ${styles.sort_block}`}>
-            <p className={styles.block_title}>Сначала попоулярные</p>
-            <GoChevronDown className={styles.filter_chevron} />
-          </div>
-          <ul className={`${styles.block} ${styles.sex_block}`}>
-            <li className={styles.block_title}>Вокал</li>
-            <ul className={styles.sex_content}>
-              <li className={styles.li_item}>
-                <label
-                  htmlFor="any"
-                  className={styles.custom_checkbox}
-                >
-                  <input
-                    type="checkbox"
-                    id="any"
-                    name="sex"
-                    className={styles.checkbox}
-                    onChange={() => handle_sex_checkbox_change("any")}
-                    checked={checked_sex["any"] || false}
-                  />
-                  <span className={styles.checkmark}></span>
-                </label>
-                <label
-                  htmlFor="any"
-                  className={`${styles.label} ${
-                    checked_sex["any"] ? styles.checked_label : ""
-                  }`}
-                >
-                  Любой
-                </label>
-              </li>
-              <li className={styles.li_item}>
-                <label
-                  htmlFor="male"
-                  className={styles.custom_checkbox}
-                >
-                  <input
-                    type="checkbox"
-                    id="male"
-                    name="sex"
-                    className={styles.checkbox}
-                    onChange={() => handle_sex_checkbox_change("male")}
-                    checked={checked_sex["male"] || false}
-                  />
-                  <span className={styles.checkmark}></span>
-                </label>
-                <label
-                  htmlFor="male"
-                  className={`${styles.label} ${
-                    checked_sex["male"] ? styles.checked_label : ""
-                  }`}
-                >
-                  Мужской
-                </label>
-              </li>
-              <li className={styles.li_item}>
-                <label
-                  htmlFor="female"
-                  className={styles.custom_checkbox}
-                >
-                  <input
-                    type="checkbox"
-                    id="female"
-                    name="sex"
-                    className={styles.checkbox}
-                    onChange={() => handle_sex_checkbox_change("female")}
-                    checked={checked_sex["female"] || false}
-                  />
-                  <span className={styles.checkmark}></span>
-                </label>
-                <label
-                  htmlFor="female"
-                  className={`${styles.label} ${
-                    checked_sex["female"] ? styles.checked_label : ""
-                  }`}
-                >
-                  Женский
-                </label>
-              </li>
-            </ul>
-          </ul>
-          <ul className={`${styles.block} ${styles.genres_block}`}>
-            <li className={styles.block_title}>
-              <p>Жанр</p>
-              <form
-                className={styles.form_search}
-                onSubmit={(e) => e.preventDefault()}
+          <div className={styles.filters_container}>
+            {is_small_screen && (
+              <div
+                className={`${styles.block} ${styles.filters_block}`}
+                onClick={() => set_is_filters_hidden(!is_filters_hidden)}
               >
-                <input
-                  type="text"
-                  name="search"
-                  placeholder="Поиск"
-                  value={search_terms.genres}
-                  onChange={(e) =>
-                    set_search_terms((prev) => ({
-                      ...prev,
-                      genres: e.target.value,
-                    }))
-                  }
-                />
-              </form>
-            </li>
-            {genres_error ? (
-              <li className={styles.error}>{genres_error}</li>
-            ) : (
-              <ul className={styles.genres_content}>
-                {filtered_results.filtered_genres.map((genre, index) => {
-                  return (
-                    <li
-                      key={index}
-                      className={styles.li_item}
-                    >
-                      <label
-                        htmlFor={genre}
-                        className={styles.custom_checkbox}
-                      >
-                        <input
-                          type="checkbox"
-                          id={genre}
-                          name="genre"
-                          className={styles.checkbox}
-                          onChange={() =>
-                            handle_genres_checkbox_change(`${genre}`)
-                          }
-                          checked={checked_genres[genre] || false}
-                        />
-                        <span className={styles.checkmark}></span>
-                      </label>
-                      <label
-                        htmlFor={genre}
-                        className={`${styles.label} ${
-                          checked_genres[genre] ? styles.checked_label : ""
-                        }`}
-                      >
-                        {genre}
-                      </label>
-                    </li>
-                  );
-                })}
-              </ul>
+                <p className={styles.block_title}>Фильтры</p>
+              </div>
             )}
-            {!no_true_values(checked_genres) && (
-              <li
-                className={styles.uncheck_all}
-                onClick={() => set_all_to_false(checked_genres, "genres")}
+            <div
+              className={`${styles.rest_blocks} ${
+                is_small_screen && is_filters_hidden
+                  ? styles.rest_blocks_hidden
+                  : ""
+              }`}
+            >
+              <ul
+                className={`${styles.block} ${styles.sex_block} ${
+                  expanded_blocks.sex ? `${styles.sex_expanded}` : ""
+                }`}
+                onClick={() => handle_blocks_expand("sex")}
               >
-                отменить выбор
-              </li>
-            )}
-          </ul>
-          <div className={`${styles.block} ${styles.bpm_block}`}>
-            <p className={styles.block_title}>Темп (BPM)</p>
-            <DraggableSlider />
-          </div>
-          <ul className={`${styles.block} ${styles.music_keys_block}`}>
-            <li className={styles.block_title}>Тональность</li>
-            <ul className={styles.music_keys_content}>
-              {music_keys.map((key, index) => {
-                return (
-                  <li
-                    key={index}
-                    className={styles.li_item}
-                  >
+                <li className={styles.block_title}>
+                  <p>Вокал</p>
+                  {is_small_screen && (
+                    <GoChevronDown className={styles.chevron} />
+                  )}
+                </li>
+                <ul className={styles.sex_content}>
+                  <li className={styles.li_item}>
                     <label
-                      htmlFor={key}
+                      htmlFor="any"
                       className={styles.custom_checkbox}
                     >
                       <input
                         type="checkbox"
-                        id={key}
-                        name="key"
+                        id="any"
+                        name="sex"
                         className={styles.checkbox}
-                        onChange={() =>
-                          handle_music_key_checkbox_change(`${key}`)
-                        }
-                        checked={checked_music_key[key] || false}
+                        onChange={() => handle_sex_checkbox_change("any")}
+                        checked={checked_sex["any"] || false}
                       />
                       <span className={styles.checkmark}></span>
                     </label>
                     <label
-                      htmlFor={key}
+                      htmlFor="any"
                       className={`${styles.label} ${
-                        checked_music_key[key] ? styles.checked_label : ""
+                        checked_sex["any"] ? styles.checked_label : ""
                       }`}
                     >
-                      {key}
+                      Любой
                     </label>
                   </li>
-                );
-              })}
-              {!no_true_values(checked_music_key) && (
-                <li
-                  className={styles.uncheck_all}
-                  onClick={() =>
-                    set_all_to_false(checked_music_key, "music_key")
-                  }
-                >
-                  отменить выбор
-                </li>
-              )}
-            </ul>
-          </ul>
-          <ul className={`${styles.block} ${styles.moods_block}`}>
-            <li className={styles.block_title}>
-              <p>Mood</p>
-              <form
-                className={styles.form_search}
-                onSubmit={(e) => e.preventDefault()}
-              >
-                <input
-                  type="text"
-                  name="search"
-                  placeholder="Поиск"
-                  value={search_terms.moods}
-                  onChange={(e) =>
-                    set_search_terms((prev) => ({
-                      ...prev,
-                      moods: e.target.value,
-                    }))
-                  }
-                />
-              </form>
-            </li>
-            {moods_error ? (
-              <li className={styles.error}>{moods_error}</li>
-            ) : (
-              <ul className={styles.moods_content}>
-                {filtered_results.filtered_moods.map((mood, index) => {
-                  return (
-                    <li
-                      key={index}
-                      className={styles.li_item}
+                  <li className={styles.li_item}>
+                    <label
+                      htmlFor="male"
+                      className={styles.custom_checkbox}
                     >
-                      <label
-                        htmlFor={mood}
-                        className={styles.custom_checkbox}
-                      >
-                        <input
-                          type="checkbox"
-                          id={mood}
-                          name="mood"
-                          className={styles.checkbox}
-                          onChange={() =>
-                            handle_moods_checkbox_change(`${mood}`)
-                          }
-                          checked={checked_moods[mood] || false}
-                        />
-                        <span className={styles.checkmark}></span>
-                      </label>
-                      <label
-                        htmlFor={mood}
-                        className={`${styles.label} ${
-                          checked_moods[mood] ? styles.checked_label : ""
-                        }`}
-                      >
-                        {mood}
-                      </label>
-                    </li>
-                  );
-                })}
+                      <input
+                        type="checkbox"
+                        id="male"
+                        name="sex"
+                        className={styles.checkbox}
+                        onChange={() => handle_sex_checkbox_change("male")}
+                        checked={checked_sex["male"] || false}
+                      />
+                      <span className={styles.checkmark}></span>
+                    </label>
+                    <label
+                      htmlFor="male"
+                      className={`${styles.label} ${
+                        checked_sex["male"] ? styles.checked_label : ""
+                      }`}
+                    >
+                      Мужской
+                    </label>
+                  </li>
+                  <li className={styles.li_item}>
+                    <label
+                      htmlFor="female"
+                      className={styles.custom_checkbox}
+                    >
+                      <input
+                        type="checkbox"
+                        id="female"
+                        name="sex"
+                        className={styles.checkbox}
+                        onChange={() => handle_sex_checkbox_change("female")}
+                        checked={checked_sex["female"] || false}
+                      />
+                      <span className={styles.checkmark}></span>
+                    </label>
+                    <label
+                      htmlFor="female"
+                      className={`${styles.label} ${
+                        checked_sex["female"] ? styles.checked_label : ""
+                      }`}
+                    >
+                      Женский
+                    </label>
+                  </li>
+                </ul>
               </ul>
-            )}
-            {!no_true_values(checked_moods) && (
-              <li
-                className={styles.uncheck_all}
-                onClick={() => set_all_to_false(checked_moods, "moods")}
+              <ul
+                className={`${styles.block} ${styles.genres_block} ${
+                  expanded_blocks.genres && `${styles.genres_moods_expanded}`
+                } ${
+                  !no_true_values(checked_genres) &&
+                  `${styles.genres_moods_height_checked}`
+                }`}
+                onClick={() => handle_blocks_expand("genres")}
               >
-                отменить выбор
-              </li>
-            )}
-          </ul>
+                <li className={styles.block_title}>
+                  <p>Жанр</p>
+                  <form
+                    className={styles.form_search}
+                    style={{
+                      display: expanded_blocks.genres ? "flex" : "none",
+                    }}
+                    onSubmit={(e) => e.preventDefault()}
+                  >
+                    <input
+                      type="text"
+                      name="search"
+                      placeholder="Поиск"
+                      value={search_terms.genres}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) =>
+                        set_search_terms((prev) => ({
+                          ...prev,
+                          genres: e.target.value,
+                        }))
+                      }
+                    />
+                  </form>
+                  {is_small_screen && (
+                    <GoChevronDown className={styles.chevron} />
+                  )}
+                </li>
+                {genres_error ? (
+                  <li className={styles.error}>{genres_error}</li>
+                ) : (
+                  <ul className={styles.genres_content}>
+                    {filtered_results.filtered_genres.map((genre, index) => {
+                      return (
+                        <li
+                          key={index}
+                          className={styles.li_item}
+                        >
+                          <label
+                            htmlFor={genre}
+                            className={styles.custom_checkbox}
+                          >
+                            <input
+                              type="checkbox"
+                              id={genre}
+                              name="genre"
+                              className={styles.checkbox}
+                              onChange={() =>
+                                handle_genres_checkbox_change(`${genre}`)
+                              }
+                              checked={checked_genres[genre] || false}
+                            />
+                            <span className={styles.checkmark}></span>
+                          </label>
+                          <label
+                            htmlFor={genre}
+                            className={`${styles.label} ${
+                              checked_genres[genre] ? styles.checked_label : ""
+                            }`}
+                          >
+                            {genre}
+                          </label>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+                {!no_true_values(checked_genres) && (
+                  <li
+                    className={styles.uncheck_all}
+                    onClick={(e) =>
+                      set_all_to_false(e, checked_genres, "genres")
+                    }
+                  >
+                    отменить выбор
+                  </li>
+                )}
+              </ul>
+              <div
+                className={`${styles.block} ${styles.bpm_block} ${
+                  expanded_blocks.tempo ? `${styles.tempo_expanded}` : ""
+                }`}
+                onClick={() => handle_blocks_expand("tempo")}
+              >
+                <div className={styles.block_title}>
+                  <p>Темп (BPM)</p>
+                  {is_small_screen && (
+                    <GoChevronDown className={styles.chevron} />
+                  )}
+                </div>
+                <DraggableSlider />
+              </div>
+              <ul
+                className={`${styles.block} ${styles.music_keys_block} ${
+                  expanded_blocks.music_key && `${styles.music_key_expanded}`
+                } ${
+                  !no_true_values(checked_music_key) &&
+                  `${styles.music_key_height_checked}`
+                }`}
+                onClick={() => handle_blocks_expand("music_key")}
+              >
+                <li className={styles.block_title}>
+                  <p>Тональность</p>
+                  {is_small_screen && (
+                    <GoChevronDown className={styles.chevron} />
+                  )}
+                </li>
+                <ul className={styles.music_keys_content}>
+                  {music_keys.map((key, index) => {
+                    return (
+                      <li
+                        key={index}
+                        className={styles.li_item}
+                      >
+                        <label
+                          htmlFor={key}
+                          className={styles.custom_checkbox}
+                        >
+                          <input
+                            type="checkbox"
+                            id={key}
+                            name="key"
+                            className={styles.checkbox}
+                            onChange={() =>
+                              handle_music_key_checkbox_change(`${key}`)
+                            }
+                            checked={checked_music_key[key] || false}
+                          />
+                          <span className={styles.checkmark}></span>
+                        </label>
+                        <label
+                          htmlFor={key}
+                          className={`${styles.label} ${
+                            checked_music_key[key] ? styles.checked_label : ""
+                          }`}
+                        >
+                          {key}
+                        </label>
+                      </li>
+                    );
+                  })}
+                  {!no_true_values(checked_music_key) && (
+                    <li
+                      className={styles.uncheck_all}
+                      onClick={(e) =>
+                        set_all_to_false(e, checked_music_key, "music_key")
+                      }
+                    >
+                      отменить выбор
+                    </li>
+                  )}
+                </ul>
+              </ul>
+              <ul
+                className={`${styles.block} ${styles.moods_block} ${
+                  expanded_blocks.moods && `${styles.genres_moods_expanded}`
+                } ${
+                  !no_true_values(checked_moods) &&
+                  `${styles.genres_moods_height_checked}`
+                }`}
+                onClick={() => handle_blocks_expand("moods")}
+              >
+                <li className={styles.block_title}>
+                  <p>Mood</p>
+                  <form
+                    className={styles.form_search}
+                    style={{
+                      display: expanded_blocks.moods ? "flex" : "none",
+                    }}
+                    onSubmit={(e) => e.preventDefault()}
+                  >
+                    <input
+                      type="text"
+                      name="search"
+                      placeholder="Поиск"
+                      value={search_terms.moods}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) =>
+                        set_search_terms((prev) => ({
+                          ...prev,
+                          moods: e.target.value,
+                        }))
+                      }
+                    />
+                  </form>
+                  {is_small_screen && (
+                    <GoChevronDown className={styles.chevron} />
+                  )}
+                </li>
+                {moods_error ? (
+                  <li className={styles.error}>{moods_error}</li>
+                ) : (
+                  <ul className={styles.moods_content}>
+                    {filtered_results.filtered_moods.map((mood, index) => {
+                      return (
+                        <li
+                          key={index}
+                          className={styles.li_item}
+                        >
+                          <label
+                            htmlFor={mood}
+                            className={styles.custom_checkbox}
+                          >
+                            <input
+                              type="checkbox"
+                              id={mood}
+                              name="mood"
+                              className={styles.checkbox}
+                              onChange={() =>
+                                handle_moods_checkbox_change(`${mood}`)
+                              }
+                              checked={checked_moods[mood] || false}
+                            />
+                            <span className={styles.checkmark}></span>
+                          </label>
+                          <label
+                            htmlFor={mood}
+                            className={`${styles.label} ${
+                              checked_moods[mood] ? styles.checked_label : ""
+                            }`}
+                          >
+                            {mood}
+                          </label>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+                {!no_true_values(checked_moods) && (
+                  <li
+                    className={styles.uncheck_all}
+                    onClick={(e) => set_all_to_false(e, checked_moods, "moods")}
+                  >
+                    отменить выбор
+                  </li>
+                )}
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
       <div className={styles.products_container}>

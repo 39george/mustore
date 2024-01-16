@@ -158,3 +158,22 @@
     max-width: 47rem;
   }
 }
+
+@media (max-width: 768px) {
+}
+
+@media (max-width: 600px) {
+  .name_and_links {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .section_name {
+    margin-left: 0.625rem;
+    margin-bottom: 1.125rem;
+  }
+
+  .pop_up_menu {
+    margin-left: 0;
+  }
+}

@@ -2,7 +2,7 @@ import styles from "./SongItem.module.scss";
 import { FC } from "react";
 import { SongItem } from "../../../../types/types";
 import { BsThreeDotsVertical } from "react-icons/bs";
-import { GoHeartFill } from "react-icons/go";
+// import { GoHeartFill } from "react-icons/go";
 import { GoHeart } from "react-icons/go";
 import { PiHeadphonesFill, PiShoppingCartFill } from "react-icons/pi";
 

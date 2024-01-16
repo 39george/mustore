@@ -1,7 +1,7 @@
 import styles from "./CarouselItem.module.scss";
 import { FC, useMemo } from "react";
 import { CarouselItem } from "../../../../types/types";
-import { GoHeartFill } from "react-icons/go";
+// import { GoHeartFill } from "react-icons/go";
 import { GoHeart } from "react-icons/go";
 import { PiShoppingCartFill } from "react-icons/pi";
 
