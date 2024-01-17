@@ -157,6 +157,7 @@ const DraggableSlider: FC = () => {
 
   const left_knob_mouse_down = (e: MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
+    e.preventDefault();
 
     start_drag(e, "left");
     set_knob_cursor({
@@ -165,6 +166,7 @@ const DraggableSlider: FC = () => {
   };
   const right_knob_mouse_down = (e: MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
+    e.preventDefault();
 
     start_drag(e, "right");
     set_knob_cursor({
