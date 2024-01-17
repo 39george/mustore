@@ -9,7 +9,7 @@ pub mod health_check;
 pub mod open;
 pub mod protected;
 
-#[derive(thiserror::Error)]
+#[derive(thiserror::Error, utoipa::ToSchema)]
 pub enum ResponseError {
     #[error(transparent)]
     UnexpectedError(#[from] anyhow::Error),
@@ -56,9 +56,12 @@ impl IntoResponse for ResponseError {
                 StatusCode::TOO_MANY_REQUESTS.into_response()
             }
             ResponseError::ValidationError(e) => Response::builder()
-                .status(StatusCode::BAD_REQUEST)
-                .body(Body::from(e.to_string()))
-                .unwrap_or(StatusCode::BAD_REQUEST.into_response()),
+                .status(StatusCode::EXPECTATION_FAILED)
+                .header("Content-Type", "application/json")
+                .body(Body::from(
+                    serde_json::json!({"Caused by": e.to_string()}).to_string(),
+                ))
+                .unwrap_or(StatusCode::EXPECTATION_FAILED.into_response()),
         }
     }
 }

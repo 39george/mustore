@@ -6,13 +6,11 @@ use crate::domain::music_parameters::Sex;
 use crate::domain::music_parameters::SortBy;
 use crate::domain::*;
 
-#[derive(Deserialize, Debug, Validate, utoipa::ToSchema, utoipa::IntoParams)]
-#[into_params(parameter_in = Query)]
+#[derive(Deserialize, Debug, Validate, utoipa::ToSchema)]
 #[garde(allow_unvalidated)]
 pub struct GetSongsListRequest {
     pub sex: Option<Sex>,
     #[garde(inner(custom(validate_tempo_bounds)))]
-    #[param(value_type = Vec<i16>)]
     pub tempo: Option<Vec<i16>>,
     pub key: Option<Vec<MusicKey>>,
     #[garde(inner(inner(
@@ -43,7 +41,7 @@ fn validate_tempo_bounds(tempos: &[i16], _: &()) -> garde::Result {
     {
         Err(garde::Error::new("Tempo is out of bounds"))
     } else if tempos[0] > tempos[1] {
-        Err(garde::Error::new("First tempo markers can't be reversed"))
+        Err(garde::Error::new("First tempo marker can't be less than second"))
     } else {
         Ok(())
     }

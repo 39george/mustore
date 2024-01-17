@@ -7,11 +7,15 @@ use crate::routes::open;
 
 // #[derive(utoipa::ToSchema)]
 // #[schema(as = anyhow::Error)]
-// struct AnyhowError(String);
+// struct AnyhowError {
+//     message: String,
+// }
 
 // #[derive(utoipa::ToSchema)]
 // #[schema(as = garde::Report)]
-// struct GardeReport(String);
+// struct GardeReport {
+//     message: String,
+// }
 
 #[derive(utoipa::ToSchema)]
 #[schema(as = GetSongsListResponse)]

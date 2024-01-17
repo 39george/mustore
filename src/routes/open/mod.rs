@@ -69,7 +69,7 @@ pub fn open_router() -> Router<AppState> {
     Router::new()
         .route("/stats", routing::get(stats))
         .route("/:what", routing::get(get_values_list))
-        .route("/songs", routing::get(get_songs))
+        .route("/get_songs", routing::post(get_songs))
         .route("/new_songs", routing::get(get_new_songs))
         .route("/recommended_songs", routing::get(get_recommended_songs))
 }
@@ -148,30 +148,26 @@ async fn get_values_list(
     }
 }
 
+/// It's post request for songs list retrieval.
 #[utoipa::path(
-    get,
-    path = "/api/open/songs",
-    params(
-        ("sex" = Option<Sex>, Query, description = "Filter by sex"),
-        ("tempo[]" = Option<Vec<i16>>, Query, description = "Filter by tempo range"),
-        ("key[]" = Option<Vec<MusicKey>>, Query, description = "Filter by music key"),
-        ("genres[]" = Option<Vec<String>>, Query, description = "Filter by genres"),
-        ("vibes[]" = Option<Vec<String>>, Query, description = "Filter by moods (vibes)"),
-        ("sort_by" = SortBy, Query, description = "Set sorting type"),
-        ("amount" = i64, Query, description = "Amount of songs"),
-        ("offset" = i64, Query, description = "Songs list offset"),
-    ),
+    post,
+    path = "/api/open/get_songs",
+    request_body = GetSongsListRequest,
     responses(
         (status = 200, description = "Got songs successfully", body = [GetSongsListResponse], content_type = "application/json"),
-        (status = 400, description = "Bad input error"),
+        (status = 400, description = "Bad request error"),
+        (status = 417, description = "Validation error",
+            content_type = "application/json",
+            example = json!({"Validation error": "Tempo is out of bounds"})
+        ),
         (status = 500, description = "Some internal error")
     )
 )]
-#[tracing::instrument(name = "Get songs query", skip_all)]
+#[tracing::instrument(name = "Get songs post request", skip_all)]
 async fn get_songs(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
-    Query(params): Query<GetSongsListRequest>,
+    Json(params): Json<GetSongsListRequest>,
 ) -> Result<Json<Vec<GetSongsListResponse>>, ResponseError> {
     params.validate(&())?;
 
