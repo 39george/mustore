@@ -1,33 +1,47 @@
 use garde::Validate;
-use serde::Deserialize;
 
 use crate::domain::music_parameters::MusicKey;
 use crate::domain::music_parameters::Sex;
 use crate::domain::music_parameters::SortBy;
 use crate::domain::*;
 
-#[derive(Deserialize, Debug, Validate, utoipa::ToSchema)]
+use serde::Deserialize;
+
+#[derive(Deserialize, Debug, Validate, utoipa::ToSchema, utoipa::IntoParams)]
+#[into_params(parameter_in = Query)]
 #[garde(allow_unvalidated)]
 pub struct GetSongsListRequest {
+    /// Filter by sex
     pub sex: Option<Sex>,
-    #[garde(inner(custom(validate_tempo_bounds)))]
-    pub tempo: Option<Vec<i16>>,
-    pub key: Option<Vec<MusicKey>>,
-    #[garde(inner(inner(
+    /// Filter by tempo range
+    #[serde(default)]
+    #[garde(custom(validate_tempo_bounds))]
+    pub tempo: Vec<i16>,
+    /// Filter by music key
+    #[serde(default)]
+    pub key: Vec<MusicKey>,
+    /// Filter by genres
+    #[serde(default)]
+    #[garde(inner(
         length(min=MOOD_MIN_LEN, max=MOOD_MAX_LEN), 
         custom(forbidden_characters),
         custom(contains_no_control_characters)
-    )))]
-    pub genres: Option<Vec<String>>,
-    #[garde(inner(inner(
+    ))]
+    pub genres: Vec<String>,
+    /// Filter by moods (vibes)
+    #[serde(default)]
+    #[garde(inner(
         length(min=MOOD_MIN_LEN, max=MOOD_MAX_LEN), 
         custom(forbidden_characters),
         custom(contains_no_control_characters)
-    )))]
-    pub vibes: Option<Vec<String>>,
+    ))]
+    pub vibes: Vec<String>,
+    /// Set sorting strategy
     pub sort_by: SortBy,
     #[garde(range(min = 1, max = 50))]
+    /// Amount of songs
     pub amount: i64,
+    /// Songs list offset
     pub offset: i64,
 }
 

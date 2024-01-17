@@ -25,7 +25,7 @@ SELECT name from genres ORDER BY name;
 --! get_moods_list
 SELECT name from moods ORDER BY name;
 
---! get_songs (sex?, tempo?, key?, genre?, mood?, user_id?) : GetSongsListResponse (is_user_liked?)
+--! get_songs (sex?, tempo, key, genre, mood, user_id?) : GetSongsListResponse (is_user_liked?)
 SELECT 
     s.song_id,
     s.created_at,
@@ -40,12 +40,12 @@ SELECT
 FROM available_songs s
 LEFT JOIN likes l ON s.song_id = l.songs_id AND l.users_id = :user_id
 WHERE
-    (:sex::varchar(6) IS NULL OR s.sex = :sex::varchar(6))
-AND ((:tempo)::smallint[] IS NULL OR (:tempo)::smallint[] IS NOT NULL
-    AND s.tempo BETWEEN ((:tempo)::smallint[])[1] AND ((:tempo)::smallint[])[2])
-AND ((:key)::musickey[] IS NULL OR s.key = ANY((:key)::musickey[]))
-AND ((:genre)::text[] IS NULL OR s.primary_genre::text = ANY((:genre)::text[]))
-AND ((:mood)::text[] IS NULL OR s.vibes::text[] && (:mood)::text[])
+    ((:sex)::varchar(6) IS NULL OR s.sex = (:sex)::varchar(6))
+AND (array_length((:tempo)::smallint[], 1) IS NULL OR
+    s.tempo BETWEEN ((:tempo)::smallint[])[1] AND ((:tempo)::smallint[])[2])
+AND (array_length((:key)::musickey[], 1) IS NULL OR s.key = ANY((:key)::musickey[]))
+AND (array_length((:genre)::text[], 1) IS NULL OR s.primary_genre::text = ANY((:genre)::text[]))
+AND (array_length((:mood)::text[], 1) IS NULL OR s.vibes::text[] && (:mood)::text[])
 GROUP BY s.song_id, s.created_at, s.cover_url, s.name, s.author, s.likes, s.listenings, s.relevance_score, s.price
 ORDER BY
     CASE WHEN :sort_by = 'top_wished' THEN s.likes END DESC NULLS LAST,

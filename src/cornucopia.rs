@@ -791,7 +791,7 @@ RefreshAvailableSongsStmt { pub async fn bind < 'a, C : GenericClient, >
     let stmt = self.0.prepare(client) .await ? ;
     client.execute(stmt, & []) .await
 } }}pub mod open_access
-{ use futures::{{StreamExt, TryStreamExt}};use futures; use cornucopia_async::GenericClient;#[derive( Debug)] pub struct GetSongsParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::ArraySql<Item = i16>,T3 : cornucopia_async::ArraySql<Item = super::super::types::public::Musickey>,T4 : cornucopia_async::StringSql,T5 : cornucopia_async::ArraySql<Item = T4>,T6 : cornucopia_async::StringSql,T7 : cornucopia_async::ArraySql<Item = T6>,T8 : cornucopia_async::StringSql,> { pub user_id : Option<i32>,pub sex : Option<T1>,pub tempo : Option<T2>,pub key : Option<T3>,pub genre : Option<T5>,pub mood : Option<T7>,pub sort_by : T8,pub offset : i64,pub amount : i64,}#[derive(Clone,Copy, Debug)] pub struct GetNewSongsParams < > { pub user_id : Option<i32>,pub amount : i64,}#[derive(Clone,Copy, Debug)] pub struct GetRecommendedSongsParams < > { pub user_id : Option<i32>,pub amount : i64,}#[derive(serde::Serialize, Debug, Clone, PartialEq, )] pub struct GetStats
+{ use futures::{{StreamExt, TryStreamExt}};use futures; use cornucopia_async::GenericClient;#[derive( Debug)] pub struct GetSongsParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::ArraySql<Item = i16>,T3 : cornucopia_async::ArraySql<Item = super::super::types::public::Musickey>,T4 : cornucopia_async::StringSql,T5 : cornucopia_async::ArraySql<Item = T4>,T6 : cornucopia_async::StringSql,T7 : cornucopia_async::ArraySql<Item = T6>,T8 : cornucopia_async::StringSql,> { pub user_id : Option<i32>,pub sex : Option<T1>,pub tempo : T2,pub key : T3,pub genre : T5,pub mood : T7,pub sort_by : T8,pub offset : i64,pub amount : i64,}#[derive(Clone,Copy, Debug)] pub struct GetNewSongsParams < > { pub user_id : Option<i32>,pub amount : i64,}#[derive(Clone,Copy, Debug)] pub struct GetRecommendedSongsParams < > { pub user_id : Option<i32>,pub amount : i64,}#[derive(serde::Serialize, Debug, Clone, PartialEq, )] pub struct GetStats
 { pub table_name : String,pub count : i64,}pub struct GetStatsBorrowed < 'a >
 { pub table_name : &'a str,pub count : i64,} impl < 'a > From < GetStatsBorrowed <
 'a >> for GetStats
@@ -1090,12 +1090,12 @@ String, 0 >
 FROM available_songs s
 LEFT JOIN likes l ON s.song_id = l.songs_id AND l.users_id = $1
 WHERE
-    ($2::varchar(6) IS NULL OR s.sex = $2::varchar(6))
-AND (($3)::smallint[] IS NULL OR ($3)::smallint[] IS NOT NULL
-    AND s.tempo BETWEEN (($3)::smallint[])[1] AND (($3)::smallint[])[2])
-AND (($4)::musickey[] IS NULL OR s.key = ANY(($4)::musickey[]))
-AND (($5)::text[] IS NULL OR s.primary_genre::text = ANY(($5)::text[]))
-AND (($6)::text[] IS NULL OR s.vibes::text[] && ($6)::text[])
+    (($2)::varchar(6) IS NULL OR s.sex = ($2)::varchar(6))
+AND (array_length(($3)::smallint[], 1) IS NULL OR
+    s.tempo BETWEEN (($3)::smallint[])[1] AND (($3)::smallint[])[2])
+AND (array_length(($4)::musickey[], 1) IS NULL OR s.key = ANY(($4)::musickey[]))
+AND (array_length(($5)::text[], 1) IS NULL OR s.primary_genre::text = ANY(($5)::text[]))
+AND (array_length(($6)::text[], 1) IS NULL OR s.vibes::text[] && ($6)::text[])
 GROUP BY s.song_id, s.created_at, s.cover_url, s.name, s.author, s.likes, s.listenings, s.relevance_score, s.price
 ORDER BY
     CASE WHEN $7 = 'top_wished' THEN s.likes END DESC NULLS LAST,
@@ -1110,7 +1110,7 @@ LIMIT $9")) } pub
 struct GetSongsStmt(cornucopia_async :: private :: Stmt) ; impl
 GetSongsStmt { pub fn bind < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,T2 : cornucopia_async::ArraySql<Item = i16>,T3 : cornucopia_async::ArraySql<Item = super::super::types::public::Musickey>,T4 : cornucopia_async::StringSql,T5 : cornucopia_async::ArraySql<Item = T4>,T6 : cornucopia_async::StringSql,T7 : cornucopia_async::ArraySql<Item = T6>,T8 : cornucopia_async::StringSql,>
 (& 'a mut self, client : & 'a  C,
-user_id : & 'a Option<i32>,sex : & 'a Option<T1>,tempo : & 'a Option<T2>,key : & 'a Option<T3>,genre : & 'a Option<T5>,mood : & 'a Option<T7>,sort_by : & 'a T8,offset : & 'a i64,amount : & 'a i64,) -> GetSongsListResponseQuery < 'a, C,
+user_id : & 'a Option<i32>,sex : & 'a Option<T1>,tempo : & 'a T2,key : & 'a T3,genre : & 'a T5,mood : & 'a T7,sort_by : & 'a T8,offset : & 'a i64,amount : & 'a i64,) -> GetSongsListResponseQuery < 'a, C,
 GetSongsListResponse, 9 >
 {
     GetSongsListResponseQuery
