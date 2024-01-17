@@ -69,7 +69,7 @@ const MainContentProducts: FC = () => {
   const last_scroll_direction = useRef<ScrollDirection>("down");
   const last_offset = useRef(0);
   const [nav_bar_height, set_nav_bar_height] = useState(83);
-  const [left_bar_height, set_left_bar_height] = useState(0);
+  // const [left_bar_height, set_left_bar_height] = useState(0);
   const scroll_consts = useRef<ScrollConsts>({
     height_diff_viewport_main_content: 0,
     height_diff_viewport_left_bar: 0,
@@ -151,7 +151,7 @@ const MainContentProducts: FC = () => {
     };
   }, []);
 
-  // Check if a check object has any `true` value
+  // Check if a checked object has any `true` value
   const no_true_values = (obj: CheckedItems) => {
     return Object.values(obj).every((value) => value === false);
   };
@@ -248,17 +248,17 @@ const MainContentProducts: FC = () => {
   }, []);
 
   // Get left bar height
-  useEffect(() => {
-    if (scroll_consts.current.left_bar) {
-      set_left_bar_height(scroll_consts.current.left_bar.offsetHeight);
-    }
-  }, [
-    scroll_consts.current.left_bar,
-    scroll_consts.current.left_bar?.offsetHeight,
-    checked_genres,
-    checked_moods,
-    checked_music_key,
-  ]);
+  // useEffect(() => {
+  //   if (scroll_consts.current.left_bar) {
+  //     set_left_bar_height(scroll_consts.current.left_bar.offsetHeight);
+  //   }
+  // }, [
+  //   scroll_consts.current.left_bar,
+  //   scroll_consts.current.left_bar?.offsetHeight,
+  // checked_genres,
+  // checked_moods,
+  // checked_music_key,
+  // ]);
 
   // Handle scroll and change left_bar position
   useEffect(() => {
@@ -280,7 +280,12 @@ const MainContentProducts: FC = () => {
     handle_resize();
 
     return () => window.removeEventListener("resize", handle_resize);
-  }, [scroll_consts.current.left_bar?.offsetHeight]);
+  }, [
+    scroll_consts.current.left_bar?.offsetHeight,
+    checked_genres,
+    checked_moods,
+    checked_music_key,
+  ]);
 
   const set_left_bar_position = () => {
     // Check for null
@@ -325,12 +330,12 @@ const MainContentProducts: FC = () => {
       return dist_from_top_viewport_to_left_bar >= nav_bar_height + 32;
     };
 
-    // Check scroll direction changing
+    // Check scroll direction changing and set offset for left bar height
     if (scroll_direction !== last_scroll_direction.current) {
-      last_offset.current = Math.floor(
+      last_offset.current =
         dist_from_top_viewport_to_main_content -
-          dist_from_top_viewport_to_left_bar
-      );
+        dist_from_top_viewport_to_left_bar;
+
       last_scroll_direction.current = scroll_direction;
     }
 
@@ -369,6 +374,9 @@ const MainContentProducts: FC = () => {
           left_bar_state.current = "absolute_offset";
         }
       }
+    }
+
+    if (left_bar_state.current === "sticky_bottom") {
     }
 
     if (left_bar_prev_state.current !== left_bar_state.current) {
@@ -431,13 +439,12 @@ const MainContentProducts: FC = () => {
 
     handle_resize();
 
-    // window.addEventListener("resize", handle_resize);
-    window.addEventListener("scroll", maybe_set_left_bar_position);
+    window.addEventListener("resize", handle_resize);
     return () => {
       window.removeEventListener("resize", handle_resize);
       window.removeEventListener("scroll", maybe_set_left_bar_position);
     };
-  }, []);
+  }, [scroll_consts.current.left_bar?.offsetHeight]);
 
   // Check the viewport width to change nav bar height
   useEffect(() => {
@@ -478,9 +485,9 @@ const MainContentProducts: FC = () => {
       <div
         ref={wrapper_ref}
         className={styles.left_bar_wrapper}
-        style={{
-          height: `${is_small_screen ? "fit-content" : `${left_bar_height}px`}`,
-        }}
+        // style={{
+        //   height: `${is_small_screen ? "fit-content" : `${left_bar_height}px`}`,
+        // }}
       >
         <div
           ref={left_bar_ref}
@@ -641,12 +648,13 @@ const MainContentProducts: FC = () => {
                       placeholder="Поиск"
                       value={search_terms.genres}
                       onClick={(e) => e.stopPropagation()}
-                      onChange={(e) =>
+                      onChange={(e) => {
                         set_search_terms((prev) => ({
                           ...prev,
                           genres: e.target.value,
-                        }))
-                      }
+                        }));
+                        set_left_bar_position();
+                      }}
                     />
                   </form>
                   {is_small_screen && (
@@ -662,6 +670,7 @@ const MainContentProducts: FC = () => {
                         <li
                           key={index}
                           className={styles.li_item}
+                          onClick={set_left_bar_position}
                         >
                           <label
                             htmlFor={genre}
@@ -744,6 +753,7 @@ const MainContentProducts: FC = () => {
                       <li
                         key={index}
                         className={styles.li_item}
+                        onClick={set_left_bar_position}
                       >
                         <label
                           htmlFor={key}
@@ -812,12 +822,13 @@ const MainContentProducts: FC = () => {
                       placeholder="Поиск"
                       value={search_terms.moods}
                       onClick={(e) => e.stopPropagation()}
-                      onChange={(e) =>
+                      onChange={(e) => {
                         set_search_terms((prev) => ({
                           ...prev,
                           moods: e.target.value,
-                        }))
-                      }
+                        }));
+                        set_left_bar_position();
+                      }}
                     />
                   </form>
                   {is_small_screen && (
@@ -833,6 +844,7 @@ const MainContentProducts: FC = () => {
                         <li
                           key={index}
                           className={styles.li_item}
+                          onClick={set_left_bar_position}
                         >
                           <label
                             htmlFor={mood}

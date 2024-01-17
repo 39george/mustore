@@ -51,11 +51,9 @@ const useGenresMoodsApi = (endpoint: string) => {
               );
             }
           } else {
-            set_error("Error in setting up the request.");
             console.error("API Error: Reqest setup error:", error.message);
           }
         } else {
-          set_error("An unexpected error occured.");
           console.error("Non-Axios:", error);
         }
       }
@@ -71,9 +69,10 @@ const useGenresMoodsApi = (endpoint: string) => {
           break;
         case 500:
           set_error("Что-то не так с нашим сервером, мы уже работаем над этим");
+          console.error("Server responded with error: ", error.message);
           break;
         default:
-          set_error("An unexpected error occured. Please, try again later.");
+          console.error("An unexpected error occured: ", error.message);
           break;
       }
     }
