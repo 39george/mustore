@@ -227,7 +227,7 @@ a {
   right: 0;
 
   display: none;
-  padding: 5rem 0 0.75rem;
+  padding: 3rem 0 0.75rem;
 
   width: 15rem;
   height: 100vh;
@@ -307,8 +307,6 @@ a {
     margin-left: 1rem;
     margin-top: 0.875rem;
 
-    font-size: 0.875rem;
-
     li {
       a {
         color: $main_bright;
@@ -353,7 +351,7 @@ a {
   transform: translateX(-50%);
 
   width: 100%;
-  padding: 0 1rem;
+  padding: 0.5rem 1rem 0;
 }
 
 .copyright {
@@ -391,5 +389,15 @@ a {
 
   .sidebar_visible {
     display: block;
+  }
+}
+
+@media (max-height: 440px) {
+  .mobile_sidebar {
+    padding-bottom: 0;
+  }
+
+  .sidebar_content {
+    height: 59%;
   }
 }

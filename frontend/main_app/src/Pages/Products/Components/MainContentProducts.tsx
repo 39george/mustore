@@ -92,7 +92,7 @@ const MainContentProducts: FC = () => {
   });
   // Data consts
   const { data: genres, error: genres_error } = useGenresMoodsApi("genres");
-  const { data: moods, error: moods_error } = useGenresMoodsApi("tags");
+  const { data: moods, error: moods_error } = useGenresMoodsApi("moods");
   const [filtered_results, set_filtered_results] = useState<FilteredResults>({
     filtered_genres: [],
     filtered_moods: [],

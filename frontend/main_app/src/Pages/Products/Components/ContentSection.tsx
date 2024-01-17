@@ -3,7 +3,7 @@ import underline_red from "../../../assets/svg/underline_red.svg";
 import underline_coral from "../../../assets/svg/underline_coral.svg";
 import underline_lilac from "../../../assets/svg/underline_lilac.svg";
 import underline_green from "../../../assets/svg/underline_green.svg";
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import Carousel from "./UI/Carousel";
 import { carousel_items } from "./UI/content_dummies";
 import MainContentProducts from "./MainContentProducts";
@@ -31,6 +31,7 @@ const ContentSection: FC<ContentSectionProps> = ({ section_type }) => {
     link_2: `${styles.pop_up_item}`,
     link_3: `${styles.pop_up_item}`,
   });
+  const section_name_ref = useRef<HTMLDivElement>(null);
 
   let section_props: SectionProps = {
     section_name: section_type,
@@ -113,6 +114,26 @@ const ContentSection: FC<ContentSectionProps> = ({ section_type }) => {
     };
   }, [pop_up_active]);
 
+  useEffect(() => {
+    const handle_click_outside_section_name = (e: MouseEvent) => {
+      if (
+        section_name_ref.current &&
+        !section_name_ref.current.contains(e.target as Node)
+      ) {
+        set_pop_up_active(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handle_click_outside_section_name);
+
+    return () => {
+      document.removeEventListener(
+        "mousedown",
+        handle_click_outside_section_name
+      );
+    };
+  }, []);
+
   return (
     <section className={styles.products_section}>
       <div className={styles.header}>
@@ -120,6 +141,7 @@ const ContentSection: FC<ContentSectionProps> = ({ section_type }) => {
         <div className={styles.name_and_links}>
           <div
             className={styles.section_name}
+            ref={section_name_ref}
             onClick={() => set_pop_up_active(!pop_up_active)}
           >
             {section_props.section_name}

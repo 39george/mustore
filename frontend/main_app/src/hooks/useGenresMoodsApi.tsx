@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { API_URL } from "../config";
 import axios, { AxiosError } from "axios";
 
-const MAX_RETRIES = 3;
+const MAX_RETRIES = 5;
 const RETRY_DELAY_MS = 1000;
 
 type GenreOrMood = string[];
@@ -67,10 +67,10 @@ const useGenresMoodsApi = (endpoint: string) => {
     if (error.response) {
       switch (error.response.status) {
         case 400:
-          set_error("Что-то не так с нашим сервером, мы уже работаем над этим");
+          console.error("Bad request.", error.message);
           break;
         case 500:
-          set_error("Internal server error. Please try again later.");
+          set_error("Что-то не так с нашим сервером, мы уже работаем над этим");
           break;
         default:
           set_error("An unexpected error occured. Please, try again later.");
