@@ -109,7 +109,8 @@ pub async fn stats(
         ("what" = String, Path, description = "Which values would you get")
     ),
     responses(
-        (status = 200, description = "Got values successfully", body = [String], content_type = "application/json",
+        (status = 200, description = "Got values successfully",
+            body = [String], content_type = "application/json",
             example = json!(["genre1", "genre2", "genre3"])
         ),
         (status = 400, description = "Bad request"),
@@ -155,7 +156,10 @@ async fn get_values_list(
         GetSongsListRequest
     ),
     responses(
-        (status = 200, description = "Got songs successfully", body = [GetSongsListResponse], content_type = "application/json"),
+        (status = 200, description = "Got songs successfully",
+            body = [GetSongsListResponse],
+            content_type = "application/json"
+        ),
         (status = 400, description = "Bad input error"),
         (status = 500, description = "Some internal error")
     )
