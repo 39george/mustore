@@ -10,6 +10,7 @@ interface ClassNames {
 }
 
 const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
+  const [is_mobile, set_is_mobile] = useState(window.innerWidth <= 1024);
   const [current_index, set_current_index] = useState(0);
   const [container_width, set_container_widht] = useState(0);
   const [items_per_slide, set_items_per_slide] = useState(1);
@@ -42,6 +43,8 @@ const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
     return config;
   }, [carousel_type, items_per_slide, carousel_items.length]);
   const [is_next_hovered, set_is_next_hovered] = useState(false);
+  const touch_start_x = useRef<number | null>(null);
+  const is_function_called = useRef(false);
   const carousel_ref = useRef<HTMLDivElement>(null);
   const class_names = useMemo<ClassNames>(() => {
     const base_class_names: ClassNames = {
@@ -79,6 +82,7 @@ const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
 
     const handle_resize = () => {
       update_container_width();
+      set_is_mobile(window.innerWidth <= 1024);
     };
 
     window.addEventListener("resize", handle_resize);
@@ -127,6 +131,64 @@ const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
     return -translation;
   };
 
+  console.log(carousel_ref.current?.className);
+
+  // Swipe mobile logic
+  useEffect(() => {
+    const handle_touch_start = (e: globalThis.TouchEvent) => {
+      if (carousel_ref.current?.contains(e.target as Node)) {
+        touch_start_x.current = e.touches[0].clientX;
+      }
+    };
+
+    const handle_touch_move = (e: globalThis.TouchEvent) => {
+      if (carousel_ref.current?.contains(e.target as Node)) {
+        if (touch_start_x.current === null) {
+          return;
+        }
+
+        const touch_end_x = e.touches[0].clientX;
+        const touch_distance = touch_end_x - touch_start_x.current;
+
+        if (touch_distance > 80) {
+          if (!is_function_called.current && current_index !== 0) {
+            handle_prev();
+            is_function_called.current = true;
+          }
+        } else if (touch_distance < -80) {
+          if (
+            !is_function_called.current &&
+            current_index !== config.MAX_INDEX
+          ) {
+            handle_next();
+            is_function_called.current = true;
+          }
+        }
+
+        if (Math.abs(touch_distance) > 10) {
+          e.preventDefault();
+        }
+      }
+    };
+
+    const handle_touch_end = () => {
+      touch_start_x.current = null;
+      is_function_called.current = false;
+    };
+
+    document.addEventListener("touchstart", handle_touch_start);
+    document.addEventListener("touchmove", handle_touch_move, {
+      passive: false,
+    });
+    document.addEventListener("touchend", handle_touch_end);
+
+    return () => {
+      document.removeEventListener("touchstart", handle_touch_start);
+      document.removeEventListener("touchmove", handle_touch_move);
+      document.removeEventListener("touchend", handle_touch_end);
+    };
+  }, [items_per_slide, current_index, config.MAX_INDEX]);
+
   // Rendering component
   return (
     <div
@@ -144,7 +206,11 @@ const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
       )}
       <div
         className={styles.wrapper}
-        style={{ transform: `${is_next_hovered ? "translateX(-20px)" : ""}` }}
+        style={{
+          transform: `${
+            is_next_hovered && !is_mobile ? "translateX(-20px)" : ""
+          }`,
+        }}
       >
         <div
           className={class_names.carousel_inner}

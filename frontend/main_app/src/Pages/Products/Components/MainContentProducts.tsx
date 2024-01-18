@@ -2,7 +2,7 @@ import { IoSearch } from "react-icons/io5";
 import styles from "./MainContentProducts.module.scss";
 import { FC, useEffect, useRef, useState } from "react";
 import { GoChevronDown } from "react-icons/go";
-import { music_keys } from "../helpers";
+import { music_keys } from "../music_keys";
 import useGenresMoodsApi from "../../../hooks/useGenresMoodsApi";
 import useCheckboxState from "../../../hooks/useCheckboxState";
 import { CheckedItems } from "../../../types/types";

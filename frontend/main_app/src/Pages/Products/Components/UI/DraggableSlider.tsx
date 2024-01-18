@@ -126,6 +126,7 @@ const DraggableSlider: FC = () => {
 
   const handle_touch_move = useCallback(
     (e: globalThis.TouchEvent) => {
+      e.preventDefault();
       if (dragging) {
         const touch = e.touches[0];
         position_to_value(touch.clientX, active_knob);
@@ -196,17 +197,18 @@ const DraggableSlider: FC = () => {
   useEffect(() => {
     if (dragging) {
       document.addEventListener("mousemove", handle_mouse_move);
-      document.addEventListener("touchmove", handle_touch_move);
+      document.addEventListener("touchmove", handle_touch_move, {
+        passive: false,
+      });
       document.addEventListener("mouseup", stop_drag);
       document.addEventListener("touchend", stop_drag);
-
-      return () => {
-        document.removeEventListener("mousemove", handle_mouse_move);
-        document.removeEventListener("touchmove", handle_touch_move);
-        document.removeEventListener("mouseup", stop_drag);
-        document.removeEventListener("touchend", stop_drag);
-      };
     }
+    return () => {
+      document.removeEventListener("mousemove", handle_mouse_move);
+      document.removeEventListener("touchmove", handle_touch_move);
+      document.removeEventListener("mouseup", stop_drag);
+      document.removeEventListener("touchend", stop_drag);
+    };
   }, [dragging, handle_mouse_move, handle_touch_move]);
 
   return (
