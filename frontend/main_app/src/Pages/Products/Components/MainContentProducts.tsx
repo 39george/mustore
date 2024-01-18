@@ -69,7 +69,6 @@ const MainContentProducts: FC = () => {
   const last_scroll_direction = useRef<ScrollDirection>("down");
   const last_offset = useRef(0);
   const [nav_bar_height, set_nav_bar_height] = useState(83);
-  // const [left_bar_height, set_left_bar_height] = useState(0);
   const scroll_consts = useRef<ScrollConsts>({
     height_diff_viewport_main_content: 0,
     height_diff_viewport_left_bar: 0,
@@ -247,39 +246,18 @@ const MainContentProducts: FC = () => {
     set_is_iphone(/iPhone/.test(navigator.userAgent));
   }, []);
 
-  // Get left bar height
-  // useEffect(() => {
-  //   if (scroll_consts.current.left_bar) {
-  //     set_left_bar_height(scroll_consts.current.left_bar.offsetHeight);
-  //   }
-  // }, [
-  //   scroll_consts.current.left_bar,
-  //   scroll_consts.current.left_bar?.offsetHeight,
-  // checked_genres,
-  // checked_moods,
-  // checked_music_key,
-  // ]);
-
   // Handle scroll and change left_bar position
   useEffect(() => {
-    const handle_resize = () => {
-      if (main_section_ref.current && left_bar_ref.current) {
-        scroll_consts.current = {
-          height_diff_viewport_main_content:
-            window.innerHeight - main_section_ref.current.offsetHeight,
-          height_diff_viewport_left_bar:
-            window.innerHeight - left_bar_ref.current.offsetHeight,
-          main_content: main_section_ref.current,
-          left_bar: left_bar_ref.current,
-        };
-      }
-    };
-
-    window.addEventListener("resize", handle_resize);
-
-    handle_resize();
-
-    return () => window.removeEventListener("resize", handle_resize);
+    if (main_section_ref.current && left_bar_ref.current) {
+      scroll_consts.current = {
+        height_diff_viewport_main_content:
+          window.innerHeight - main_section_ref.current.offsetHeight,
+        height_diff_viewport_left_bar:
+          window.innerHeight - left_bar_ref.current.offsetHeight,
+        main_content: main_section_ref.current,
+        left_bar: left_bar_ref.current,
+      };
+    }
   }, [
     scroll_consts.current.left_bar?.offsetHeight,
     checked_genres,
@@ -297,11 +275,13 @@ const MainContentProducts: FC = () => {
     }
 
     // Variables declaration
-    const dist_from_top_viewport_to_main_content =
-      scroll_consts.current.main_content.getBoundingClientRect().top;
+    const dist_from_top_viewport_to_main_content = Math.round(
+      scroll_consts.current.main_content.getBoundingClientRect().top
+    );
 
-    const dist_from_top_viewport_to_left_bar =
-      scroll_consts.current.left_bar.getBoundingClientRect().top;
+    const dist_from_top_viewport_to_left_bar = Math.round(
+      scroll_consts.current.left_bar.getBoundingClientRect().top
+    );
 
     const current_scroll = window.scrollY;
 
@@ -374,9 +354,6 @@ const MainContentProducts: FC = () => {
           left_bar_state.current = "absolute_offset";
         }
       }
-    }
-
-    if (left_bar_state.current === "sticky_bottom") {
     }
 
     if (left_bar_prev_state.current !== left_bar_state.current) {
@@ -468,26 +445,9 @@ const MainContentProducts: FC = () => {
       ref={main_section_ref}
       className={styles.main_seciton}
     >
-      {/* <div
-        style={{
-          position: "fixed",
-          left: "0",
-          top: "100px",
-          zIndex: "3000",
-          fontFamily: "JetBrains Mono",
-          backgroundColor: "lightpink",
-        }}
-      >
-        debug
-        <div>left bar state {left_bar_state.current}</div>
-        <div>left bar height {left_bar_height}</div>
-      </div> */}
       <div
         ref={wrapper_ref}
         className={styles.left_bar_wrapper}
-        // style={{
-        //   height: `${is_small_screen ? "fit-content" : `${left_bar_height}px`}`,
-        // }}
       >
         <div
           ref={left_bar_ref}
