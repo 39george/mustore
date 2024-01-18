@@ -131,8 +131,6 @@ const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
     return -translation;
   };
 
-  console.log(carousel_ref.current?.className);
-
   // Swipe mobile logic
   useEffect(() => {
     const handle_touch_start = (e: globalThis.TouchEvent) => {

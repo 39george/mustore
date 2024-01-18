@@ -136,20 +136,6 @@ const MainContentProducts: FC = () => {
     }));
   };
 
-  // Set small screen to `true` if viewport width <= 768
-  useEffect(() => {
-    const handle_resize = () => {
-      set_is_small_screen(window.innerWidth <= 768);
-    };
-
-    handle_resize();
-
-    window.addEventListener("resize", handle_resize);
-    return () => {
-      window.removeEventListener("resize", handle_resize);
-    };
-  }, []);
-
   // Check if a checked object has any `true` value
   const no_true_values = (obj: CheckedItems) => {
     return Object.values(obj).every((value) => value === false);
@@ -246,25 +232,7 @@ const MainContentProducts: FC = () => {
     set_is_iphone(/iPhone/.test(navigator.userAgent));
   }, []);
 
-  // Handle scroll and change left_bar position
-  useEffect(() => {
-    if (main_section_ref.current && left_bar_ref.current) {
-      scroll_consts.current = {
-        height_diff_viewport_main_content:
-          window.innerHeight - main_section_ref.current.offsetHeight,
-        height_diff_viewport_left_bar:
-          window.innerHeight - left_bar_ref.current.offsetHeight,
-        main_content: main_section_ref.current,
-        left_bar: left_bar_ref.current,
-      };
-    }
-  }, [
-    scroll_consts.current.left_bar?.offsetHeight,
-    checked_genres,
-    checked_moods,
-    checked_music_key,
-  ]);
-
+  // Setting nav bar position logic
   const set_left_bar_position = () => {
     // Check for null
     if (
@@ -399,6 +367,7 @@ const MainContentProducts: FC = () => {
     }
   };
 
+  // Handling all resize events
   useEffect(() => {
     const maybe_set_left_bar_position = () => {
       if (window.innerWidth > 768) {
@@ -407,9 +376,33 @@ const MainContentProducts: FC = () => {
     };
 
     const handle_resize = () => {
+      // Set new distances for left bar and main content
+      if (main_section_ref.current && left_bar_ref.current) {
+        scroll_consts.current = {
+          height_diff_viewport_main_content:
+            window.innerHeight - main_section_ref.current.offsetHeight,
+          height_diff_viewport_left_bar:
+            window.innerHeight - left_bar_ref.current.offsetHeight,
+          main_content: main_section_ref.current,
+          left_bar: left_bar_ref.current,
+        };
+      }
+
+      // Set new nav bar height
+      if (window.innerWidth <= 1010) {
+        set_nav_bar_height(70);
+      } else {
+        set_nav_bar_height(83);
+      }
+
+      // Check if small screen
+      set_is_small_screen(window.innerWidth <= 768);
+
+      // Add / remove event listener "scroll"
       if (window.innerWidth > 768) {
         window.addEventListener("scroll", maybe_set_left_bar_position);
       } else {
+        console.log("here");
         window.removeEventListener("scroll", maybe_set_left_bar_position);
       }
     };
@@ -421,24 +414,12 @@ const MainContentProducts: FC = () => {
       window.removeEventListener("resize", handle_resize);
       window.removeEventListener("scroll", maybe_set_left_bar_position);
     };
-  }, [scroll_consts.current.left_bar?.offsetHeight]);
-
-  // Check the viewport width to change nav bar height
-  useEffect(() => {
-    const change_nav_bar_height = () => {
-      if (window.innerWidth <= 1010) {
-        set_nav_bar_height(70);
-      } else {
-        set_nav_bar_height(83);
-      }
-    };
-
-    window.addEventListener("resize", change_nav_bar_height);
-
-    return () => {
-      window.removeEventListener("resize", change_nav_bar_height);
-    };
-  }, []);
+  }, [
+    scroll_consts.current.left_bar?.offsetHeight,
+    checked_genres,
+    checked_music_key,
+    checked_moods,
+  ]);
 
   return (
     <div
