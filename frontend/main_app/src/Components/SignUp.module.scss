@@ -2,6 +2,8 @@
 .sign_up_window {
   position: fixed;
 
+  display: flex;
+
   width: 100vw;
   height: 100vh;
 
@@ -10,7 +12,164 @@
   z-index: 999;
 }
 
-.close_icon {
-  font-size: 2.5rem;
+.log_in_section {
+  display: flex;
+  justify-content: center;
+  width: 40%;
+
+  border-radius: 0 3.375rem 3.375rem 0;
+  background-color: $main_dark;
+}
+
+.log_in_content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  margin-top: 35vh;
+}
+
+.p_log_in {
+  font-weight: 600;
+  color: $main_bright;
+}
+
+.button_log_in {
+  margin-top: 3rem;
+  padding: 0.625rem 2rem;
+
+  font-family: "Raleway", sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+
+  border: none;
+  border-radius: 0.25rem;
+  color: $main_bright;
+  background: linear-gradient(#7764df, #6b59d0);
+
   cursor: pointer;
+  filter: brightness(100%);
+  transition: filter 0.2s ease-out;
+
+  &:hover {
+    filter: brightness(110%);
+  }
+}
+
+.sign_up_section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 60%;
+}
+
+.sign_up_content {
+  width: 80%;
+}
+
+.p_join_us {
+  margin-bottom: 4.5rem;
+
+  font-family: "Geologica", sans-serif;
+  font-weight: 300;
+  text-align: center;
+}
+
+.title {
+  width: fit-content;
+
+  margin: 0 auto 1em;
+
+  font-family: "Lexend", sans-serif;
+  font-size: 2.5rem;
+  letter-spacing: 0.4rem;
+  text-align: center;
+
+  span {
+    font-family: "Inter", sans-serif;
+    color: $accent_red;
+    letter-spacing: 0.2em;
+  }
+
+  br {
+    display: none;
+  }
+}
+
+.tagline {
+  max-width: 30rem;
+
+  margin: 0 auto 4.5rem;
+
+  font-size: 1rem;
+  font-family: "Geologica", sans-serif;
+  font-weight: 100;
+  text-align: center;
+
+  span {
+    font-weight: 300;
+    color: $accent_red;
+  }
+}
+
+.close_icon {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+
+  width: 2.5rem;
+  height: 2.5rem;
+  cursor: pointer;
+}
+
+.sign_up_form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  input {
+    margin-bottom: 1rem;
+    padding: 0.625rem 0.75rem;
+
+    min-width: 12.75rem;
+
+    font-family: "Raleway", sans-serif;
+
+    border: none;
+    border: 1px solid rgba($color: $main_dark, $alpha: 0.5);
+    border-radius: 0.25rem;
+    background-color: $main_bright;
+
+    &:focus {
+      outline: 1px solid $main_dark;
+    }
+  }
+
+  button {
+    min-width: 12.75rem;
+
+    margin-top: 1.75rem;
+    padding: 0.625rem 2.25rem;
+
+    font-family: "Raleway", sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+
+    border: none;
+    border-radius: 0.25rem;
+    // border: 1px solid $main_dark;
+    color: $main_bright;
+    background-color: $main_dark;
+
+    cursor: pointer;
+    filter: brightness(100%);
+    transition: 0.2s ease-out;
+
+    &:hover {
+      filter: brightness(110%);
+      background-color: #292826;
+    }
+  }
 }
