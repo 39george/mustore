@@ -77,6 +77,7 @@ const MainContentProducts: FC = () => {
   });
   const left_bar_state = useRef<LeftBarStates>("absolute_top");
   const left_bar_prev_state = useRef<LeftBarStates>("absolute_top");
+  const previous_dist_from_top_viewport_to_left_bar = useRef(0);
   // Consts for different screens styles
   const [is_small_screen, set_is_small_screen] = useState(
     window.innerWidth <= 768
@@ -247,7 +248,7 @@ const MainContentProducts: FC = () => {
       scroll_consts.current.main_content.getBoundingClientRect().top
     );
 
-    const dist_from_top_viewport_to_left_bar = Math.round(
+    let dist_from_top_viewport_to_left_bar = Math.round(
       scroll_consts.current.left_bar.getBoundingClientRect().top
     );
 
@@ -267,12 +268,25 @@ const MainContentProducts: FC = () => {
       return dist_from_top_viewport_to_main_content >= nav_bar_height;
     };
 
+    // console.log("dist", dist_from_top_viewport_to_left_bar);
+    // console.log("prev", previous_dist_from_top_viewport_to_left_bar.current);
     const left_bar_fully_scrolled_to_bottom = () => {
+      let difference =
+        dist_from_top_viewport_to_left_bar -
+        previous_dist_from_top_viewport_to_left_bar.current;
+      if (
+        dist_from_top_viewport_to_left_bar + difference <=
+        scroll_consts.current.height_diff_viewport_left_bar
+      ) {
+        return true;
+      }
       return (
         dist_from_top_viewport_to_left_bar <=
         scroll_consts.current.height_diff_viewport_left_bar
       );
     };
+
+    // console.log(left_bar_fully_scrolled_to_bottom());
 
     const left_bar_fully_scrolled_to_top = () => {
       return dist_from_top_viewport_to_left_bar >= nav_bar_height + 32;
@@ -365,6 +379,8 @@ const MainContentProducts: FC = () => {
 
       left_bar_prev_state.current = left_bar_state.current;
     }
+    previous_dist_from_top_viewport_to_left_bar.current =
+      dist_from_top_viewport_to_left_bar;
   };
 
   // Handling all resize events
@@ -402,7 +418,6 @@ const MainContentProducts: FC = () => {
       if (window.innerWidth > 768) {
         window.addEventListener("scroll", maybe_set_left_bar_position);
       } else {
-        console.log("here");
         window.removeEventListener("scroll", maybe_set_left_bar_position);
       }
     };

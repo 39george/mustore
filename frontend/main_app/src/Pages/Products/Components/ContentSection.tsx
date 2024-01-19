@@ -24,8 +24,13 @@ interface PopUpItem {
 }
 
 const ContentSection: FC<ContentSectionProps> = ({ section_type }) => {
+  const [is_small_screen, set_is_small_screen] = useState(
+    window.innerWidth <= 1024
+  );
   const [pop_up_active, set_pop_up_active] = useState(false);
   const [pop_up_style, set_pop_up_style] = useState<React.CSSProperties>({});
+  const [is_section_name_hovered, set_is_section_name_hovered] =
+    useState(false);
   const [links_class_names, set_links_class_names] = useState({
     link_1: `${styles.pop_up_item}`,
     link_2: `${styles.pop_up_item}`,
@@ -82,29 +87,55 @@ const ContentSection: FC<ContentSectionProps> = ({ section_type }) => {
   }
 
   useEffect(() => {
-    if (pop_up_active) {
-      set_links_class_names({
-        link_1: `${styles.pop_up_item} ${styles.item_1}`,
-        link_2: `${styles.pop_up_item} ${styles.item_2}`,
-        link_3: `${styles.pop_up_item} ${styles.item_3}`,
-      });
+    if (is_small_screen) {
+      if (pop_up_active) {
+        set_links_class_names({
+          link_1: `${styles.pop_up_item} ${styles.item_1}`,
+          link_2: `${styles.pop_up_item} ${styles.item_2}`,
+          link_3: `${styles.pop_up_item} ${styles.item_3}`,
+        });
+      } else {
+        set_links_class_names({
+          link_1: `${styles.pop_up_item} ${styles.item_hidden}`,
+          link_2: `${styles.pop_up_item} ${styles.item_hidden}`,
+          link_3: `${styles.pop_up_item} ${styles.item_hidden}`,
+        });
+      }
     } else {
-      set_links_class_names({
-        link_1: `${styles.pop_up_item} ${styles.item_hidden}`,
-        link_2: `${styles.pop_up_item} ${styles.item_hidden}`,
-        link_3: `${styles.pop_up_item} ${styles.item_hidden}`,
-      });
+      if (is_section_name_hovered) {
+        set_links_class_names({
+          link_1: `${styles.pop_up_item} ${styles.item_1}`,
+          link_2: `${styles.pop_up_item} ${styles.item_2}`,
+          link_3: `${styles.pop_up_item} ${styles.item_3}`,
+        });
+      } else {
+        set_links_class_names({
+          link_1: `${styles.pop_up_item} ${styles.item_hidden}`,
+          link_2: `${styles.pop_up_item} ${styles.item_hidden}`,
+          link_3: `${styles.pop_up_item} ${styles.item_hidden}`,
+        });
+      }
     }
-  }, [pop_up_active]);
+  }, [pop_up_active, is_section_name_hovered]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
-    if (!pop_up_active) {
-      timer = setTimeout(() => {
-        set_pop_up_style({ display: "none" });
-      }, 200);
+    if (is_small_screen) {
+      if (!pop_up_active) {
+        timer = setTimeout(() => {
+          set_pop_up_style({ display: "none" });
+        }, 200);
+      } else {
+        set_pop_up_style({ display: "flex" });
+      }
     } else {
-      set_pop_up_style({ display: "flex" });
+      if (!is_section_name_hovered) {
+        timer = setTimeout(() => {
+          set_pop_up_style({ display: "none" });
+        }, 200);
+      } else {
+        set_pop_up_style({ display: "flex" });
+      }
     }
 
     return () => {
@@ -112,7 +143,7 @@ const ContentSection: FC<ContentSectionProps> = ({ section_type }) => {
         clearTimeout(timer);
       }
     };
-  }, [pop_up_active]);
+  }, [pop_up_active, is_section_name_hovered]);
 
   useEffect(() => {
     const handle_click_outside_section_name = (e: MouseEvent) => {
@@ -134,15 +165,52 @@ const ContentSection: FC<ContentSectionProps> = ({ section_type }) => {
     };
   }, []);
 
+  const handle_section_name_click = () => {
+    if (!is_small_screen) {
+      return;
+    }
+    set_pop_up_active(!pop_up_active);
+  };
+
+  const handle_mouse_enter = () => {
+    if (is_small_screen) {
+      return;
+    }
+    set_is_section_name_hovered(true);
+  };
+
+  const handle_mouse_leave = () => {
+    if (is_small_screen) {
+      return;
+    }
+    set_is_section_name_hovered(false);
+  };
+
+  useEffect(() => {
+    const handle_resize = () => {
+      set_is_small_screen(window.innerWidth <= 1024);
+    };
+
+    window.addEventListener("resize", handle_resize);
+
+    return () => {
+      window.removeEventListener("resize", handle_resize);
+    };
+  }, []);
+
   return (
     <section className={styles.products_section}>
       <div className={styles.header}>
         <h1 className={styles.h1}>Библиотека</h1>
-        <div className={styles.name_and_links}>
+        <div
+          className={styles.name_and_links}
+          onMouseLeave={handle_mouse_leave}
+        >
           <div
             className={styles.section_name}
             ref={section_name_ref}
-            onClick={() => set_pop_up_active(!pop_up_active)}
+            onClick={handle_section_name_click}
+            onMouseEnter={handle_mouse_enter}
           >
             {section_props.section_name}
             <img

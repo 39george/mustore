@@ -58,7 +58,7 @@
   position: relative;
 
   margin-left: 0.75rem;
-  padding-bottom: 0.25rem;
+  padding-bottom: 0.5rem;
 
   font-size: 2rem;
   font-weight: 600;
@@ -69,7 +69,7 @@
   .underline {
     position: absolute;
     left: -0.5rem;
-    bottom: -0.5rem;
+    bottom: -0.3rem;
     cursor: default;
   }
 }
@@ -159,6 +159,16 @@
 @media (max-width: 1200px) {
   .products_section {
     max-width: 60rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .section_name {
+    padding-bottom: 0.25rem;
+
+    .underline {
+      bottom: -0.5rem;
+    }
   }
 }
 

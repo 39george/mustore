@@ -163,9 +163,9 @@ const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
           }
         }
 
-        if (Math.abs(touch_distance) > 10) {
-          e.preventDefault();
-        }
+        // if (Math.abs(touch_distance) > 40) {
+        //   e.preventDefault();
+        // }
       }
     };
 
@@ -174,11 +174,13 @@ const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
       is_function_called.current = false;
     };
 
-    document.addEventListener("touchstart", handle_touch_start);
-    document.addEventListener("touchmove", handle_touch_move, {
-      passive: false,
-    });
-    document.addEventListener("touchend", handle_touch_end);
+    if (window.innerWidth <= 1024) {
+      document.addEventListener("touchstart", handle_touch_start);
+      document.addEventListener("touchmove", handle_touch_move, {
+        passive: false,
+      });
+      document.addEventListener("touchend", handle_touch_end);
+    }
 
     return () => {
       document.removeEventListener("touchstart", handle_touch_start);
