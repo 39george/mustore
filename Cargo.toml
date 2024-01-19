@@ -14,7 +14,7 @@ deadpool = "0.10.0"
 deadpool-postgres = "0.12.1"
 refinery = { version = "0.8.11", features = ["tokio-postgres"] }
 cornucopia_async = { git = "https://github.com/cornucopia-rs/cornucopia", rev = "d1229ae" }
-fred = "7.1.0"
+fred = "7.1.2"
 
 # Web-related dependencies
 axum = { version = "0.7.4", features = ["macros", "tracing"] }
@@ -34,6 +34,7 @@ reqwest = { version = "0.11.23", default-features = false, features = [
 ] }
 tower = { version = "0.4.13", features = ["timeout"] }
 tower-http = { version = "0.5.0", features = ["trace", "cors"] }
+http-body-util = "0.1.0"
 aws-config = "1.1.1"
 aws-sdk-s3 = "1.11.0"
 
