@@ -474,7 +474,7 @@ const MainContentProducts: FC = () => {
           <div className={styles.search_and_sort}>
             <div className={`${styles.block} ${styles.search_block}`}>
               <input
-                type="text"
+                type="search"
                 name="search"
                 className={styles.global_search}
                 placeholder="Поиск по названию, автору..."
@@ -612,7 +612,7 @@ const MainContentProducts: FC = () => {
                     onSubmit={(e) => e.preventDefault()}
                   >
                     <input
-                      type="text"
+                      type="search"
                       name="search"
                       placeholder="Поиск"
                       value={search_terms.genres}
@@ -786,7 +786,7 @@ const MainContentProducts: FC = () => {
                     onSubmit={(e) => e.preventDefault()}
                   >
                     <input
-                      type="text"
+                      type="search"
                       name="search"
                       placeholder="Поиск"
                       value={search_terms.moods}

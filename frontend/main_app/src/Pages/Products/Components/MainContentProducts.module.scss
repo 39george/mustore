@@ -197,13 +197,15 @@
 }
 
 .global_search {
-  width: 100%;
+  width: 90%;
 
   font-family: "Raleway", sans-serif;
   font-size: 0.875rem;
 
   border: none;
   border-bottom: 1px solid transparent;
+
+  text-overflow: ellipsis;
 
   &::placeholder {
     color: rgba($color: $main_dark, $alpha: 0.6);
@@ -257,8 +259,10 @@
   justify-content: flex-end;
   align-items: center;
 
+  // outline: 2px solid red;
+
   input {
-    width: 30%;
+    width: 37%;
 
     font-family: "Raleway", sans-serif;
     font-size: 0.875rem;

@@ -12,13 +12,13 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route
+          path="signup"
+          element={<SignUp />}
+        />
+        <Route
           path="/"
           element={<MainLayout />}
         >
-          <Route
-            path="signup"
-            element={<SignUp />}
-          />
           <Route
             path="/"
             element={<HomePage />}
@@ -61,6 +61,7 @@ function App() {
                   Services page
                 </h1>
                 <div style={{ height: "100vh" }}></div>
+                <Footer />
               </div>
             }
           />
@@ -72,6 +73,7 @@ function App() {
                   Help page
                 </h1>
                 <div style={{ height: "100vh" }}></div>
+                <Footer />
               </div>
             }
           />
@@ -83,6 +85,7 @@ function App() {
                   About page
                 </h1>
                 <div style={{ height: "100vh" }}></div>
+                <Footer />
               </div>
             }
           />
@@ -94,12 +97,12 @@ function App() {
                   Page not found
                 </h1>
                 <div style={{ height: "100vh" }}></div>
+                <Footer />
               </div>
             }
           />
         </Route>
       </Routes>
-      <Footer />
     </BrowserRouter>
   );
 }

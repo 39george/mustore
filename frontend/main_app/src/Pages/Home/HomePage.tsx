@@ -10,6 +10,7 @@ import {
   ActiveSection,
   set_active_section,
 } from "../../state/active_section_slice";
+import Footer from "../Footer";
 
 interface HomePageRefs {
   hero_ref: React.RefObject<HTMLDivElement>;
@@ -156,6 +157,7 @@ const HomePage: FC = () => {
       >
         <AuthorsReviews />
       </div>
+      <Footer />
     </>
   );
 };
