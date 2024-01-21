@@ -6,7 +6,8 @@ import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import zxcvbn from "zxcvbn";
 import { RootState } from "../state/store";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaEye } from "react-icons/fa";
+import { TbEyeClosed } from "react-icons/tb";
 import { FaTriangleExclamation } from "react-icons/fa6";
 import { GoCheckCircleFill } from "react-icons/go";
 
@@ -34,6 +35,24 @@ interface EmailInputInfo {
   message?: string;
 }
 
+type PasswordStatus =
+  | ""
+  | "пароль не должен содержать пробелов"
+  | "очень слабый"
+  | "слабый"
+  | "предсказуемый"
+  | "ненадежный"
+  | "надежный";
+
+const colors = {
+  warning: "#EF0606",
+  neutral: "#d9d9d9",
+  password_too_weak: "#700000",
+  password_middle: "#fe8c49",
+  password_unreliable: "#E6A600",
+  success: "#599c00",
+};
+
 const SignUp: FC = () => {
   const navigate = useNavigate();
   const previous_path = useSelector<RootState, string>(
@@ -53,13 +72,29 @@ const SignUp: FC = () => {
     password: false,
     confirm_password: false,
   });
+  const [password_status, set_password_status] = useState<PasswordStatus>("");
   const [email_input_info, set_email_input_info] = useState<EmailInputInfo>({});
-  const [email_validation_class_name, set_email_validation_class_name] =
-    useState("");
   const email_schema = z.string().email();
+  const [password_status_bar_colors, set_password_status_bar_colors] = useState(
+    {
+      bar_1: colors.neutral,
+      bar_2: colors.neutral,
+      bar_3: colors.neutral,
+      bar_4: colors.neutral,
+      bar_5: colors.neutral,
+    }
+  );
+  const [password_status_color, set_password_status_color] = useState("");
+  const [input_validity, set_input_validity] = useState({
+    username: false,
+    email: false,
+    password: false,
+    account_type: false,
+  });
 
   const handle_change = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    console.log(e.target);
     set_form_data((prev_state) => ({
       ...prev_state,
       [name]: value,
@@ -81,26 +116,97 @@ const SignUp: FC = () => {
           success: true,
           message: "корректный email",
         });
+        set_input_validity((prev) => ({
+          ...prev,
+          email: true,
+        }));
       } else {
         set_email_input_info({
           success: false,
           message: "некорректный email",
         });
+        set_input_validity((prev) => ({
+          ...prev,
+          email: false,
+        }));
       }
     }
   }, [form_data.email]);
 
+  // Checking password strenght
   useEffect(() => {
-    if (form_data.email !== "") {
-      if (email_input_info.success === true) {
-        set_email_validation_class_name(`${styles.sign_up_input_success}`);
-      } else if (email_input_info.success === false) {
-        set_email_validation_class_name(`${styles.sign_up_input_warning}`);
+    if (form_data.password !== "") {
+      if (form_data.password.includes(" ")) {
+        set_password_status("пароль не должен содержать пробелов");
+        set_password_status_color(colors.warning);
+      } else {
+        let user_inputs: string[] = [];
+        user_inputs.push(form_data.username);
+        user_inputs.push(form_data.email);
+
+        const password_strenght_info = zxcvbn(form_data.password, user_inputs);
+        switch (password_strenght_info.score) {
+          case 0:
+            set_password_status("очень слабый");
+            set_password_status_color(colors.password_too_weak);
+            set_password_status_bar_colors({
+              bar_1: colors.password_too_weak,
+              bar_2: colors.neutral,
+              bar_3: colors.neutral,
+              bar_4: colors.neutral,
+              bar_5: colors.neutral,
+            });
+            break;
+          case 1:
+            set_password_status("слабый");
+            set_password_status_color(colors.warning);
+            set_password_status_bar_colors({
+              bar_1: colors.warning,
+              bar_2: colors.warning,
+              bar_3: colors.neutral,
+              bar_4: colors.neutral,
+              bar_5: colors.neutral,
+            });
+            break;
+          case 2:
+            set_password_status("предсказуемый");
+            set_password_status_color(colors.password_middle);
+            set_password_status_bar_colors({
+              bar_1: colors.password_middle,
+              bar_2: colors.password_middle,
+              bar_3: colors.password_middle,
+              bar_4: colors.neutral,
+              bar_5: colors.neutral,
+            });
+            break;
+          case 3:
+            set_password_status("ненадежный");
+            set_password_status_color(colors.password_unreliable);
+            set_password_status_bar_colors({
+              bar_1: colors.password_unreliable,
+              bar_2: colors.password_unreliable,
+              bar_3: colors.password_unreliable,
+              bar_4: colors.password_unreliable,
+              bar_5: colors.neutral,
+            });
+            break;
+          case 4:
+            set_password_status("надежный");
+            set_password_status_color(colors.success);
+            set_password_status_bar_colors({
+              bar_1: colors.success,
+              bar_2: colors.success,
+              bar_3: colors.success,
+              bar_4: colors.success,
+              bar_5: colors.success,
+            });
+            break;
+        }
       }
     } else {
-      set_email_validation_class_name("");
+      set_password_status("");
     }
-  }, [email_input_info, form_data.email]);
+  }, [form_data.password]);
 
   // Handling returning to the previous page
   const handle_close = () => {
@@ -189,7 +295,16 @@ const SignUp: FC = () => {
                   name="email"
                   onChange={handle_change}
                   placeholder="Email"
-                  className={`${styles.sign_up_input} ${email_validation_class_name}`}
+                  className={styles.sign_up_input}
+                  style={{
+                    border: `${
+                      form_data.email !== ""
+                        ? email_input_info.success
+                          ? `1px solid ${colors.success}`
+                          : `1px solid ${colors.warning}`
+                        : ""
+                    }`,
+                  }}
                   required
                 />
               </div>
@@ -222,15 +337,82 @@ const SignUp: FC = () => {
                   onChange={handle_change}
                   placeholder="Пароль"
                   className={styles.sign_up_input}
+                  style={{
+                    border: `${
+                      password_status !== ""
+                        ? `1px solid ${password_status_color}`
+                        : ""
+                    }`,
+                  }}
                   required
                 />
                 <div
                   className={styles.eye_icon}
                   onClick={() => on_eye_click("password")}
                 >
-                  {!is_password_visible.password ? <FaEye /> : <FaEyeSlash />}
+                  {is_password_visible.password ? <FaEye /> : <TbEyeClosed />}
                 </div>
               </div>
+              {password_status !== "" && (
+                <>
+                  <div className={styles.input_info}>
+                    <div>
+                      {password_status === "надежный" ? (
+                        <GoCheckCircleFill
+                          className={styles.success_icon}
+                          style={{ color: `${password_status_color}` }}
+                        />
+                      ) : (
+                        <FaTriangleExclamation
+                          className={styles.warning_icon}
+                          style={{ color: `${password_status_color}` }}
+                        />
+                      )}
+                    </div>
+                    <p
+                      className={styles.info_message}
+                      style={{ color: `${password_status_color}` }}
+                    >
+                      {password_status}
+                    </p>
+                  </div>
+                  {password_status !==
+                    "пароль не должен содержать пробелов" && (
+                    <div className={styles.password_status_bar}>
+                      <div
+                        className={styles.bar}
+                        style={{
+                          backgroundColor: `${password_status_bar_colors.bar_1}`,
+                        }}
+                      ></div>
+                      <div
+                        className={styles.bar}
+                        style={{
+                          backgroundColor: `${password_status_bar_colors.bar_2}`,
+                        }}
+                      ></div>
+                      <div
+                        className={styles.bar}
+                        style={{
+                          backgroundColor: `${password_status_bar_colors.bar_3}`,
+                        }}
+                      ></div>
+                      <div
+                        className={styles.bar}
+                        style={{
+                          backgroundColor: `${password_status_bar_colors.bar_4}`,
+                        }}
+                      ></div>
+                      <div
+                        className={styles.bar}
+                        style={{
+                          backgroundColor: `${password_status_bar_colors.bar_5}`,
+                        }}
+                      ></div>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
             <div className={styles.input_block}>
               <div className={styles.input_container}>
@@ -246,14 +428,28 @@ const SignUp: FC = () => {
                   className={styles.eye_icon}
                   onClick={() => on_eye_click("confirm_password")}
                 >
-                  {!is_password_visible.confirm_password ? (
+                  {is_password_visible.confirm_password ? (
                     <FaEye />
                   ) : (
-                    <FaEyeSlash />
+                    <TbEyeClosed />
                   )}
                 </div>
               </div>
             </div>
+            {/* <div className={styles.input_block}>
+              <div
+                className={`${styles.input_container} ${styles.account_types}`}
+              >
+                <div className={styles.account_type_header}>
+                  <p className={styles.account_type_p}>Выберите тип аккаунта</p>
+                  <GoChevronDown className={styles.chevron_icon} />
+                </div>
+                <div className={styles.account_types_container}>
+                  <p className={styles.account_type}>Автор</p>
+                  <p className={styles.account_type}>Покупатель</p>
+                </div>
+              </div>
+            </div> */}
             <button type="submit">Присоединиться</button>
           </form>
         </div>
