@@ -2,8 +2,10 @@ import { useCallback, useEffect, useState } from "react";
 import { API_URL } from "../config";
 import axios, { AxiosError } from "axios";
 
-const MAX_RETRIES = 5;
-const RETRY_DELAY_MS = 1000;
+// const MAX_RETRIES = 5;
+// const RETRY_DELAY_MS = 1000;
+const MAX_RETRIES = 1;
+const RETRY_DELAY_MS = 100;
 
 type GenreOrMood = string[];
 

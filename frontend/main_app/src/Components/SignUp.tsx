@@ -1,7 +1,14 @@
 import styles from "./SignUp.module.scss";
 import { FC, FormEvent, useEffect, useState } from "react";
 import { HiMiniXMark } from "react-icons/hi2";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { z } from "zod";
+import zxcvbn from "zxcvbn";
+import { RootState } from "../state/store";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaTriangleExclamation } from "react-icons/fa6";
+import { GoCheckCircleFill } from "react-icons/go";
 
 interface FromData {
   username: string;
@@ -10,17 +17,46 @@ interface FromData {
   confirm_password: string;
 }
 
+type InputName = "password" | "confirm_password";
+
+type InputNames = {
+  [key in InputName]: boolean;
+};
+
+type InputType = "text" | "password";
+
+type InputTypes = {
+  [key in InputName]: InputType;
+};
+
+interface EmailInputInfo {
+  success?: boolean;
+  message?: string;
+}
+
 const SignUp: FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-
-  const [previous_location, set_previous_location] = useState(null);
+  const previous_path = useSelector<RootState, string>(
+    (state) => state.previous_path.previous_path
+  );
   const [form_data, set_form_data] = useState<FromData>({
     username: "",
     email: "",
     password: "",
     confirm_password: "",
   });
+  const [input_type, set_input_type] = useState<InputTypes>({
+    password: "password",
+    confirm_password: "password",
+  });
+  const [is_password_visible, set_is_password_visible] = useState<InputNames>({
+    password: false,
+    confirm_password: false,
+  });
+  const [email_input_info, set_email_input_info] = useState<EmailInputInfo>({});
+  const [email_validation_class_name, set_email_validation_class_name] =
+    useState("");
+  const email_schema = z.string().email();
 
   const handle_change = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -36,20 +72,76 @@ const SignUp: FC = () => {
     console.log(form_data);
   };
 
+  // Checking email validity
   useEffect(() => {
-    if (location.state && location.state.from) {
-      set_previous_location(location.state.from);
+    if (form_data.email !== "") {
+      const validation_info = email_schema.safeParse(form_data.email);
+      if (validation_info.success) {
+        set_email_input_info({
+          success: true,
+          message: "корректный email",
+        });
+      } else {
+        set_email_input_info({
+          success: false,
+          message: "некорректный email",
+        });
+      }
     }
-  }, [location.state]);
+  }, [form_data.email]);
 
-  const handle_close = () => {
-    if (previous_location) {
-      navigate(previous_location);
+  useEffect(() => {
+    if (form_data.email !== "") {
+      if (email_input_info.success === true) {
+        set_email_validation_class_name(`${styles.sign_up_input_success}`);
+      } else if (email_input_info.success === false) {
+        set_email_validation_class_name(`${styles.sign_up_input_warning}`);
+      }
     } else {
-      navigate("/");
+      set_email_validation_class_name("");
     }
+  }, [email_input_info, form_data.email]);
+
+  // Handling returning to the previous page
+  const handle_close = () => {
+    navigate(previous_path);
   };
 
+  // Handling click on the eye icon
+  const on_eye_click = (input_name: InputName) => {
+    set_is_password_visible((prev) => ({
+      ...prev,
+      [input_name]: !prev[input_name],
+    }));
+  };
+
+  useEffect(() => {
+    if (is_password_visible.password) {
+      set_input_type((prev) => ({
+        ...prev,
+        password: "text",
+      }));
+    } else {
+      set_input_type((prev) => ({
+        ...prev,
+        password: "password",
+      }));
+    }
+
+    if (is_password_visible.confirm_password) {
+      set_input_type((prev) => ({
+        ...prev,
+        confirm_password: "text",
+      }));
+    } else {
+      set_input_type((prev) => ({
+        ...prev,
+        confirm_password: "password",
+      }));
+    }
+  }, [is_password_visible.password, is_password_visible.confirm_password]);
+
+  // Rendering component
   return (
     <div className={styles.sign_up_window}>
       <HiMiniXMark
@@ -78,42 +170,90 @@ const SignUp: FC = () => {
             onSubmit={handle_submit}
             className={styles.sign_up_form}
           >
-            <input
-              type="text"
-              name="username"
-              value={form_data.username}
-              onChange={handle_change}
-              placeholder="Имя пользователя"
-              className={styles.sign_up_input}
-              required
-            />
-            <input
-              type="text"
-              name="email"
-              value={form_data.email}
-              onChange={handle_change}
-              placeholder="Email"
-              className={styles.sign_up_input}
-              required
-            />
-            <input
-              type="password"
-              name="password"
-              value={form_data.password}
-              onChange={handle_change}
-              placeholder="Пароль"
-              className={styles.sign_up_input}
-              required
-            />
-            <input
-              type="password"
-              name="confirm_password"
-              value={form_data.confirm_password}
-              onChange={handle_change}
-              placeholder="Подтвердите пароль"
-              className={styles.sign_up_input}
-              required
-            />
+            <div className={styles.input_block}>
+              <div className={styles.input_container}>
+                <input
+                  type="text"
+                  name="username"
+                  placeholder="Имя пользователя"
+                  onChange={handle_change}
+                  className={styles.sign_up_input}
+                  required
+                />
+              </div>
+            </div>
+            <div className={styles.input_block}>
+              <div className={styles.input_container}>
+                <input
+                  type="text"
+                  name="email"
+                  onChange={handle_change}
+                  placeholder="Email"
+                  className={`${styles.sign_up_input} ${email_validation_class_name}`}
+                  required
+                />
+              </div>
+              {form_data.email !== "" && (
+                <div className={styles.input_info}>
+                  <div>
+                    {email_input_info.success ? (
+                      <GoCheckCircleFill className={styles.success_icon} />
+                    ) : (
+                      <FaTriangleExclamation className={styles.warning_icon} />
+                    )}
+                  </div>
+                  <p
+                    className={`${styles.info_message} ${
+                      email_input_info.success
+                        ? styles.info_success
+                        : styles.info_warning
+                    }`}
+                  >
+                    {email_input_info.message}
+                  </p>
+                </div>
+              )}
+            </div>
+            <div className={styles.input_block}>
+              <div className={styles.input_container}>
+                <input
+                  type={input_type.password}
+                  name="password"
+                  onChange={handle_change}
+                  placeholder="Пароль"
+                  className={styles.sign_up_input}
+                  required
+                />
+                <div
+                  className={styles.eye_icon}
+                  onClick={() => on_eye_click("password")}
+                >
+                  {!is_password_visible.password ? <FaEye /> : <FaEyeSlash />}
+                </div>
+              </div>
+            </div>
+            <div className={styles.input_block}>
+              <div className={styles.input_container}>
+                <input
+                  type={input_type.confirm_password}
+                  name="confirm_password"
+                  onChange={handle_change}
+                  placeholder="Подтвердите пароль"
+                  className={styles.sign_up_input}
+                  required
+                />
+                <div
+                  className={styles.eye_icon}
+                  onClick={() => on_eye_click("confirm_password")}
+                >
+                  {!is_password_visible.confirm_password ? (
+                    <FaEye />
+                  ) : (
+                    <FaEyeSlash />
+                  )}
+                </div>
+              </div>
+            </div>
             <button type="submit">Присоединиться</button>
           </form>
         </div>

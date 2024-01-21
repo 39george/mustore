@@ -248,7 +248,7 @@ const MainContentProducts: FC = () => {
       scroll_consts.current.main_content.getBoundingClientRect().top
     );
 
-    let dist_from_top_viewport_to_left_bar = Math.round(
+    const dist_from_top_viewport_to_left_bar = Math.round(
       scroll_consts.current.left_bar.getBoundingClientRect().top
     );
 
@@ -285,8 +285,6 @@ const MainContentProducts: FC = () => {
         scroll_consts.current.height_diff_viewport_left_bar
       );
     };
-
-    // console.log(left_bar_fully_scrolled_to_bottom());
 
     const left_bar_fully_scrolled_to_top = () => {
       return dist_from_top_viewport_to_left_bar >= nav_bar_height + 32;
@@ -435,6 +433,21 @@ const MainContentProducts: FC = () => {
     checked_music_key,
     checked_moods,
   ]);
+
+  useEffect(() => {
+    if (left_bar_ref.current) {
+      const rect = left_bar_ref.current.getBoundingClientRect();
+      if (
+        rect.top >= 0 &&
+        rect.left >= 0 &&
+        rect.bottom <=
+          (window.innerHeight || document.documentElement.clientHeight) &&
+        rect.right <=
+          (window.innerWidth || document.documentElement.clientWidth)
+      ) {
+      }
+    }
+  }, [left_bar_ref.current]);
 
   return (
     <div

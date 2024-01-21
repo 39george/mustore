@@ -1,5 +1,5 @@
 import styles from "./Menu.module.scss";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { GoChevronDown } from "react-icons/go";
 import { FaYoutube, FaVk, FaTelegram } from "react-icons/fa6";
 import { BsInstagram } from "react-icons/bs";
@@ -10,12 +10,13 @@ import logo from "../assets/svg/logo.svg";
 import logo_bright from "../assets/svg/logo_bright.svg";
 import { LinkName, ToggledLinks } from "../types/types";
 import usePageNavigation from "../hooks/usePageNavigation";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   ActiveSection,
   select_active_section,
 } from "../state/active_section_slice";
 import { RootState } from "../state/store";
+import { set_previous_path } from "../state/previous_path_slice";
 
 const Menu: FC = () => {
   const [link_toggled, set_link_toggled] = useState<ToggledLinks>({
@@ -33,6 +34,8 @@ const Menu: FC = () => {
     `${styles.nav_bar}`
   );
   const [is_nav_dark, set_is_nav_dark] = useState(false);
+  const location = useLocation();
+  const dispatch = useDispatch();
 
   // Define class names based on the intersecting section
   useEffect(() => {
@@ -109,6 +112,11 @@ const Menu: FC = () => {
 
   // Handle navigation
   const handle_page_navigation = usePageNavigation();
+
+  // Handle signup click
+  const handle_signup_click = (path: string) => {
+    dispatch(set_previous_path(path));
+  };
 
   return (
     <nav className={nav_bar_class_names}>
@@ -319,6 +327,7 @@ const Menu: FC = () => {
         <NavLink
           to="signup"
           className={styles.log}
+          onClick={() => handle_signup_click(location.pathname)}
         >
           создать аккаунт
         </NavLink>

@@ -98,7 +98,7 @@
 }
 
 .tagline {
-  max-width: 30rem;
+  max-width: 31rem;
 
   margin: 0 auto 4.5rem;
 
@@ -128,29 +128,14 @@
   flex-direction: column;
   align-items: center;
 
-  input {
-    margin-bottom: 1rem;
-    padding: 0.625rem 0.75rem;
-
-    min-width: 12.75rem;
-
-    font-family: "Raleway", sans-serif;
-
-    border: none;
-    border: 1px solid rgba($color: $main_dark, $alpha: 0.5);
-    border-radius: 0.25rem;
-    background-color: $main_bright;
-
-    &:focus {
-      outline: 1px solid $main_dark;
-    }
-  }
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 
   button {
-    min-width: 12.75rem;
+    min-width: 15rem;
 
     margin-top: 1.75rem;
-    padding: 0.625rem 2.25rem;
+    padding: 1em 2.25rem;
 
     font-family: "Raleway", sans-serif;
     font-size: 0.875rem;
@@ -159,7 +144,6 @@
 
     border: none;
     border-radius: 0.25rem;
-    // border: 1px solid $main_dark;
     color: $main_bright;
     background-color: $main_dark;
 
@@ -167,9 +151,97 @@
     filter: brightness(100%);
     transition: 0.2s ease-out;
 
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
     &:hover {
       filter: brightness(110%);
       background-color: #292826;
     }
   }
+}
+
+.input_block {
+  margin-bottom: 1rem;
+}
+
+.input_container {
+  position: relative;
+  min-width: 15rem;
+}
+
+.sign_up_input {
+  width: 100%;
+
+  padding: 0.625rem 1.75rem 0.625rem 0.75rem;
+
+  border: none;
+  border: 1px solid rgba($color: $main_dark, $alpha: 0.5);
+  border-radius: 0.25rem;
+  color: $main_dark;
+  background-color: $main_bright;
+
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  &:focus {
+    outline: none;
+    border: 1px solid $main_dark;
+  }
+}
+
+.sign_up_input_success {
+  border: 1px solid $success !important;
+}
+
+.sign_up_input_warning {
+  border: 1px solid $accent_red !important;
+}
+
+.eye_icon {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 0.625rem;
+
+  width: 1rem;
+  height: 1rem;
+
+  color: rgba($color: $main_dark, $alpha: 0.5);
+  cursor: pointer;
+}
+
+.input_info {
+  display: flex;
+  align-items: center;
+  margin-top: 0.25rem;
+  margin-left: 0.75rem;
+}
+
+.warning_icon {
+  width: 0.75rem;
+  height: 0.75rem;
+  color: $accent_red;
+}
+
+.success_icon {
+  width: 0.75rem;
+  height: 0.75rem;
+  color: $success;
+}
+
+.info_message {
+  margin-left: 0.25rem;
+  font-size: 0.75rem;
+  letter-spacing: 0;
+}
+
+.info_success {
+  color: $success;
+}
+
+.info_warning {
+  color: $accent_red;
 }
