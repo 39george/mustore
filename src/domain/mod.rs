@@ -38,7 +38,7 @@ pub const MAX_LYRIC_COUNT: usize = 5;
 
 pub const MAX_ATTACHMENTS_COUNT: usize = 10;
 
-pub fn forbidden_characters(input: &str, ctx: &()) -> garde::Result {
+pub fn forbidden_characters(input: &str, _: &()) -> garde::Result {
     if input.chars().any(|g| FORBIDDEN_CHARS.contains(&g)) {
         Err(garde::Error::new("String contains forbidden chars"))
     } else {
@@ -46,7 +46,7 @@ pub fn forbidden_characters(input: &str, ctx: &()) -> garde::Result {
     }
 }
 
-pub fn contains_no_control_characters(s: &str, ctx: &()) -> garde::Result {
+pub fn contains_no_control_characters(s: &str, _: &()) -> garde::Result {
     if s.chars().any(|c| c.is_control()) {
         Err(garde::Error::new("String contains control characters"))
     } else {
