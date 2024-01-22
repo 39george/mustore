@@ -1,10 +1,12 @@
 use garde::Validate;
 use serde::Deserialize;
 use serde::Serialize;
+use utoipa::IntoParams;
+use utoipa::ToSchema;
 
 use crate::domain::*;
 
-#[derive(Deserialize, Debug, Validate)]
+#[derive(Deserialize, Debug, Validate, ToSchema, IntoParams)]
 pub struct UploadFileRequest {
     #[garde(skip)]
     pub media_type: mediatype::MediaTypeBuf,
@@ -13,6 +15,7 @@ pub struct UploadFileRequest {
         custom(forbidden_characters),
         custom(contains_no_control_characters)
     )]
+    #[schema(min_length = 2, max_length = 50, pattern = r#"[^/()"<>\\{};:]*"#)]
     pub file_name: String,
 }
 
