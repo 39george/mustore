@@ -924,27 +924,27 @@ where C : GenericClient
         res.map(| row | (self.mapper) ((self.extractor) (& row)))) .into_stream() ;
         Ok(it)
     }
-}#[derive(serde::Serialize, Debug, Clone, PartialEq, )] pub struct GetNewSongs
-{ pub song_id : i32,pub created_at : time::OffsetDateTime,pub cover_url : String,pub name : String,pub author : String,pub likes : i64,pub price : rust_decimal::Decimal,pub is_user_liked : Option<bool>,}pub struct GetNewSongsBorrowed < 'a >
-{ pub song_id : i32,pub created_at : time::OffsetDateTime,pub cover_url : &'a str,pub name : &'a str,pub author : &'a str,pub likes : i64,pub price : rust_decimal::Decimal,pub is_user_liked : Option<bool>,} impl < 'a > From < GetNewSongsBorrowed <
-'a >> for GetNewSongs
+}#[derive(serde::Serialize, Debug, Clone, PartialEq, )] pub struct GetNewSongsResponse
+{ pub song_id : i32,pub created_at : time::OffsetDateTime,pub cover_url : String,pub name : String,pub author : String,pub likes : i64,pub price : rust_decimal::Decimal,pub is_user_liked : Option<bool>,}pub struct GetNewSongsResponseBorrowed < 'a >
+{ pub song_id : i32,pub created_at : time::OffsetDateTime,pub cover_url : &'a str,pub name : &'a str,pub author : &'a str,pub likes : i64,pub price : rust_decimal::Decimal,pub is_user_liked : Option<bool>,} impl < 'a > From < GetNewSongsResponseBorrowed <
+'a >> for GetNewSongsResponse
 {
     fn
-    from(GetNewSongsBorrowed { song_id,created_at,cover_url,name,author,likes,price,is_user_liked,} : GetNewSongsBorrowed < 'a >)
+    from(GetNewSongsResponseBorrowed { song_id,created_at,cover_url,name,author,likes,price,is_user_liked,} : GetNewSongsResponseBorrowed < 'a >)
     -> Self { Self { song_id,created_at,cover_url: cover_url.into(),name: name.into(),author: author.into(),likes,price,is_user_liked,} }
-}pub struct GetNewSongsQuery < 'a, C : GenericClient, T, const N : usize >
+}pub struct GetNewSongsResponseQuery < 'a, C : GenericClient, T, const N : usize >
 {
     client : & 'a  C, params :
     [& 'a (dyn postgres_types :: ToSql + Sync) ; N], stmt : & 'a mut cornucopia_async
-    :: private :: Stmt, extractor : fn(& tokio_postgres :: Row) -> GetNewSongsBorrowed,
-    mapper : fn(GetNewSongsBorrowed) -> T,
-} impl < 'a, C, T : 'a, const N : usize > GetNewSongsQuery < 'a, C, T, N >
+    :: private :: Stmt, extractor : fn(& tokio_postgres :: Row) -> GetNewSongsResponseBorrowed,
+    mapper : fn(GetNewSongsResponseBorrowed) -> T,
+} impl < 'a, C, T : 'a, const N : usize > GetNewSongsResponseQuery < 'a, C, T, N >
 where C : GenericClient
 {
-    pub fn map < R > (self, mapper : fn(GetNewSongsBorrowed) -> R) -> GetNewSongsQuery
+    pub fn map < R > (self, mapper : fn(GetNewSongsResponseBorrowed) -> R) -> GetNewSongsResponseQuery
     < 'a, C, R, N >
     {
-        GetNewSongsQuery
+        GetNewSongsResponseQuery
         {
             client : self.client, params : self.params, stmt : self.stmt,
             extractor : self.extractor, mapper,
@@ -971,27 +971,27 @@ where C : GenericClient
         res.map(| row | (self.mapper) ((self.extractor) (& row)))) .into_stream() ;
         Ok(it)
     }
-}#[derive(serde::Serialize, Debug, Clone, PartialEq, )] pub struct GetRecommendedSongs
-{ pub song_id : i32,pub created_at : time::OffsetDateTime,pub cover_url : String,pub name : String,pub author : String,pub likes : i64,pub price : rust_decimal::Decimal,pub is_user_liked : Option<bool>,}pub struct GetRecommendedSongsBorrowed < 'a >
-{ pub song_id : i32,pub created_at : time::OffsetDateTime,pub cover_url : &'a str,pub name : &'a str,pub author : &'a str,pub likes : i64,pub price : rust_decimal::Decimal,pub is_user_liked : Option<bool>,} impl < 'a > From < GetRecommendedSongsBorrowed <
-'a >> for GetRecommendedSongs
+}#[derive(serde::Serialize, Debug, Clone, PartialEq, )] pub struct GetRecommendedSongsResponse
+{ pub song_id : i32,pub created_at : time::OffsetDateTime,pub cover_url : String,pub name : String,pub author : String,pub likes : i64,pub price : rust_decimal::Decimal,pub is_user_liked : Option<bool>,}pub struct GetRecommendedSongsResponseBorrowed < 'a >
+{ pub song_id : i32,pub created_at : time::OffsetDateTime,pub cover_url : &'a str,pub name : &'a str,pub author : &'a str,pub likes : i64,pub price : rust_decimal::Decimal,pub is_user_liked : Option<bool>,} impl < 'a > From < GetRecommendedSongsResponseBorrowed <
+'a >> for GetRecommendedSongsResponse
 {
     fn
-    from(GetRecommendedSongsBorrowed { song_id,created_at,cover_url,name,author,likes,price,is_user_liked,} : GetRecommendedSongsBorrowed < 'a >)
+    from(GetRecommendedSongsResponseBorrowed { song_id,created_at,cover_url,name,author,likes,price,is_user_liked,} : GetRecommendedSongsResponseBorrowed < 'a >)
     -> Self { Self { song_id,created_at,cover_url: cover_url.into(),name: name.into(),author: author.into(),likes,price,is_user_liked,} }
-}pub struct GetRecommendedSongsQuery < 'a, C : GenericClient, T, const N : usize >
+}pub struct GetRecommendedSongsResponseQuery < 'a, C : GenericClient, T, const N : usize >
 {
     client : & 'a  C, params :
     [& 'a (dyn postgres_types :: ToSql + Sync) ; N], stmt : & 'a mut cornucopia_async
-    :: private :: Stmt, extractor : fn(& tokio_postgres :: Row) -> GetRecommendedSongsBorrowed,
-    mapper : fn(GetRecommendedSongsBorrowed) -> T,
-} impl < 'a, C, T : 'a, const N : usize > GetRecommendedSongsQuery < 'a, C, T, N >
+    :: private :: Stmt, extractor : fn(& tokio_postgres :: Row) -> GetRecommendedSongsResponseBorrowed,
+    mapper : fn(GetRecommendedSongsResponseBorrowed) -> T,
+} impl < 'a, C, T : 'a, const N : usize > GetRecommendedSongsResponseQuery < 'a, C, T, N >
 where C : GenericClient
 {
-    pub fn map < R > (self, mapper : fn(GetRecommendedSongsBorrowed) -> R) -> GetRecommendedSongsQuery
+    pub fn map < R > (self, mapper : fn(GetRecommendedSongsResponseBorrowed) -> R) -> GetRecommendedSongsResponseQuery
     < 'a, C, R, N >
     {
-        GetRecommendedSongsQuery
+        GetRecommendedSongsResponseQuery
         {
             client : self.client, params : self.params, stmt : self.stmt,
             extractor : self.extractor, mapper,
@@ -1146,22 +1146,22 @@ LIMIT $2")) } pub
 struct GetNewSongsStmt(cornucopia_async :: private :: Stmt) ; impl
 GetNewSongsStmt { pub fn bind < 'a, C : GenericClient, >
 (& 'a mut self, client : & 'a  C,
-user_id : & 'a Option<i32>,amount : & 'a i64,) -> GetNewSongsQuery < 'a, C,
-GetNewSongs, 2 >
+user_id : & 'a Option<i32>,amount : & 'a i64,) -> GetNewSongsResponseQuery < 'a, C,
+GetNewSongsResponse, 2 >
 {
-    GetNewSongsQuery
+    GetNewSongsResponseQuery
     {
         client, params : [user_id,amount,], stmt : & mut self.0, extractor :
-        | row | { GetNewSongsBorrowed { song_id : row.get(0),created_at : row.get(1),cover_url : row.get(2),name : row.get(3),author : row.get(4),likes : row.get(5),price : row.get(6),is_user_liked : row.get(7),} }, mapper : | it | { <GetNewSongs>::from(it) },
+        | row | { GetNewSongsResponseBorrowed { song_id : row.get(0),created_at : row.get(1),cover_url : row.get(2),name : row.get(3),author : row.get(4),likes : row.get(5),price : row.get(6),is_user_liked : row.get(7),} }, mapper : | it | { <GetNewSongsResponse>::from(it) },
     }
 } }impl < 'a, C : GenericClient, > cornucopia_async ::
-Params < 'a, GetNewSongsParams < >, GetNewSongsQuery < 'a,
-C, GetNewSongs, 2 >, C > for GetNewSongsStmt
+Params < 'a, GetNewSongsParams < >, GetNewSongsResponseQuery < 'a,
+C, GetNewSongsResponse, 2 >, C > for GetNewSongsStmt
 {
     fn
     params(& 'a mut self, client : & 'a  C, params : & 'a
-    GetNewSongsParams < >) -> GetNewSongsQuery < 'a, C,
-    GetNewSongs, 2 >
+    GetNewSongsParams < >) -> GetNewSongsResponseQuery < 'a, C,
+    GetNewSongsResponse, 2 >
     { self.bind(client, & params.user_id,& params.amount,) }
 }pub fn get_recommended_songs() -> GetRecommendedSongsStmt
 { GetRecommendedSongsStmt(cornucopia_async :: private :: Stmt :: new("SELECT 
@@ -1191,22 +1191,22 @@ LIMIT $2")) } pub
 struct GetRecommendedSongsStmt(cornucopia_async :: private :: Stmt) ; impl
 GetRecommendedSongsStmt { pub fn bind < 'a, C : GenericClient, >
 (& 'a mut self, client : & 'a  C,
-user_id : & 'a Option<i32>,amount : & 'a i64,) -> GetRecommendedSongsQuery < 'a, C,
-GetRecommendedSongs, 2 >
+user_id : & 'a Option<i32>,amount : & 'a i64,) -> GetRecommendedSongsResponseQuery < 'a, C,
+GetRecommendedSongsResponse, 2 >
 {
-    GetRecommendedSongsQuery
+    GetRecommendedSongsResponseQuery
     {
         client, params : [user_id,amount,], stmt : & mut self.0, extractor :
-        | row | { GetRecommendedSongsBorrowed { song_id : row.get(0),created_at : row.get(1),cover_url : row.get(2),name : row.get(3),author : row.get(4),likes : row.get(5),price : row.get(6),is_user_liked : row.get(7),} }, mapper : | it | { <GetRecommendedSongs>::from(it) },
+        | row | { GetRecommendedSongsResponseBorrowed { song_id : row.get(0),created_at : row.get(1),cover_url : row.get(2),name : row.get(3),author : row.get(4),likes : row.get(5),price : row.get(6),is_user_liked : row.get(7),} }, mapper : | it | { <GetRecommendedSongsResponse>::from(it) },
     }
 } }impl < 'a, C : GenericClient, > cornucopia_async ::
-Params < 'a, GetRecommendedSongsParams < >, GetRecommendedSongsQuery < 'a,
-C, GetRecommendedSongs, 2 >, C > for GetRecommendedSongsStmt
+Params < 'a, GetRecommendedSongsParams < >, GetRecommendedSongsResponseQuery < 'a,
+C, GetRecommendedSongsResponse, 2 >, C > for GetRecommendedSongsStmt
 {
     fn
     params(& 'a mut self, client : & 'a  C, params : & 'a
-    GetRecommendedSongsParams < >) -> GetRecommendedSongsQuery < 'a, C,
-    GetRecommendedSongs, 2 >
+    GetRecommendedSongsParams < >) -> GetRecommendedSongsResponseQuery < 'a, C,
+    GetRecommendedSongsResponse, 2 >
     { self.bind(client, & params.user_id,& params.amount,) }
 }}pub mod tests
 { use futures::{{StreamExt, TryStreamExt}};use futures; use cornucopia_async::GenericClient;#[derive(serde::Serialize, Debug, Clone, PartialEq, )] pub struct SelectUserDataWithAvatarKey
@@ -2132,7 +2132,20 @@ C, i32, 2 >, C > for CheckIfUserExistsAlreadyStmt
     CheckIfUserExistsAlreadyParams < T1,T2,>) -> I32Query < 'a, C,
     i32, 2 >
     { self.bind(client, & params.email,& params.username,) }
-}pub fn insert_new_user_settings() -> InsertNewUserSettingsStmt
+}pub fn check_if_username_occupied() -> CheckIfUsernameOccupiedStmt
+{ CheckIfUsernameOccupiedStmt(cornucopia_async :: private :: Stmt :: new("SELECT id FROM users WHERE username = $1")) } pub
+struct CheckIfUsernameOccupiedStmt(cornucopia_async :: private :: Stmt) ; impl
+CheckIfUsernameOccupiedStmt { pub fn bind < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,>
+(& 'a mut self, client : & 'a  C,
+username : & 'a T1,) -> I32Query < 'a, C,
+i32, 1 >
+{
+    I32Query
+    {
+        client, params : [username,], stmt : & mut self.0, extractor :
+        | row | { row.get(0) }, mapper : | it | { it },
+    }
+} }pub fn insert_new_user_settings() -> InsertNewUserSettingsStmt
 { InsertNewUserSettingsStmt(cornucopia_async :: private :: Stmt :: new("INSERT INTO user_settings DEFAULT VALUES returning id")) } pub
 struct InsertNewUserSettingsStmt(cornucopia_async :: private :: Stmt) ; impl
 InsertNewUserSettingsStmt { pub fn bind < 'a, C : GenericClient, >
