@@ -29,6 +29,7 @@ use crate::config::RedisSettings;
 use crate::config::Settings;
 use crate::email_client::EmailClient;
 use crate::email_client::EmailDeliveryService;
+use crate::routes::development;
 use crate::routes::health_check::health_check;
 use crate::routes::open::open_router;
 use crate::routes::protected::protected_router;
@@ -202,7 +203,7 @@ impl Application {
                 routing::get(auth::confirm_account::confirm),
             )
             .with_state(app_state.clone())
-            .merge(auth::login::login_router(app_state))
+            .merge(auth::login::login_router(app_state.clone()))
             .layer(crate::middleware::map_response::BadRequestIntoJsonLayer)
             .layer(auth_service);
 
@@ -230,14 +231,13 @@ impl Application {
                     "http://127.0.0.1:5173".parse().unwrap(),
                     "http://localhost:5173".parse().unwrap(),
                 ];
-                let cors = CorsLayer::new()
-                    // allow requests from any origin
-                    .allow_origin(origins);
+                let cors = CorsLayer::new().allow_origin(origins);
                 app = app.layer(cors);
                 app = app.merge(
                     SwaggerUi::new("/swagger-ui")
                         .url("/api-docs/openapi.json", ApiDoc::openapi()),
                 );
+                app = app.nest("/api", development::user_router());
             }
         }
 
