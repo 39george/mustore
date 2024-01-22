@@ -175,7 +175,9 @@ impl<'a> PresignedPostDataBuilder<'a> {
             &x_amz_credential,
             &iso8601_date,
             self.min_obj_length.unwrap_or(0),
-            self.max_obj_length.unwrap_or(MAX_DEFAULT_SIZE_MB).mb(),
+            self.max_obj_length
+                .unwrap_or(MAX_DEFAULT_SIZE_MB)
+                .mb_to_bytes(),
         )?;
 
         let signing_key = get_signing_key(
@@ -309,7 +311,7 @@ mod tests {
         .with_mime(mediatype::media_type!(IMAGE / PNG))
         .with_date(OffsetDateTime::UNIX_EPOCH)
         .with_expiration(time::Duration::minutes(10))
-        .with_content_length_range(0, 5.mb())
+        .with_content_length_range(0, 5.mb_to_bytes())
         .build()
         .expect("Failed to build presigned post form");
 
