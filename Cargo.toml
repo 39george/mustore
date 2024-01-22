@@ -87,7 +87,7 @@ tracing-opentelemetry = "0.22.0"
 opentelemetry-jaeger = "0.20.0"
 
 # Documentation
-utoipa = { version = "4.2.0", features = ["axum_extras", "time", "decimal"] }
+utoipa = { version = "4.2.0", features = ["axum_extras", "time", "decimal", "uuid"] }
 utoipa-swagger-ui = { version = "6.0.0", features = ["axum"] }
 
 [dev-dependencies]
