@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::collections::HashSet;
 
 use anyhow::Context;
 use axum::extract::Query;
@@ -7,6 +8,7 @@ use axum::routing;
 use axum::Json;
 use axum::Router;
 use axum_login::permission_required;
+use axum_login::AuthzBackend;
 use fred::clients::RedisPool;
 use fred::interfaces::KeysInterface;
 use fred::prelude::RedisResult;
@@ -21,6 +23,7 @@ use time::OffsetDateTime;
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
 use crate::auth::users::AuthSession;
+use crate::auth::users::Permission;
 use crate::cornucopia::queries::user_access;
 use crate::cornucopia::queries::user_access::GetConversationsEntries;
 use crate::domain::requests::user_access::CreateConversationRequest;
@@ -31,13 +34,14 @@ use crate::domain::requests::user_access::UploadFileRequest;
 use crate::domain::responses::user_access::ConversationDataResponse;
 use crate::routes::ResponseError;
 use crate::service_providers::object_storage::presigned_post_form::PresignedPostData;
+use crate::startup::api_doc::BadRequestResponse;
 use crate::startup::AppState;
 
 // ───── Types ────────────────────────────────────────────────────────────── //
 
 // Define the static variable MAX_SIZES for acceptable media types.
 lazy_static::lazy_static! {
-    static ref MAX_SIZES: HashMap<MediaTypeBuf, u64> = {
+    pub static ref MAX_SIZES: HashMap<MediaTypeBuf, u64> = {
         let mut m = HashMap::new();
         m.insert(media_type!(IMAGE/PNG).into(), crate::MAX_IMAGE_SIZE_MB);
         m.insert(media_type!(IMAGE/JPEG).into(), crate::MAX_IMAGE_SIZE_MB);
@@ -59,20 +63,83 @@ lazy_static::lazy_static! {
 pub fn user_router() -> Router<AppState> {
     Router::new()
         .route("/health_check", routing::get(health_check))
-        .route("/req_upload_form", routing::get(request_obj_storage_upload))
+        .route("/upload_form", routing::get(request_obj_storage_upload))
         .route("/conversations", routing::get(get_conversations))
         .route("/conversation_id", routing::get(get_conversation_id))
         .route("/new_conversation", routing::post(create_new_conversation))
         .route("/send_message", routing::post(send_message))
         .route("/list_conversation", routing::get(list_conversation))
+        .route("/permissions", routing::get(user_permissions))
         .layer(permission_required!(crate::auth::users::Backend, "user"))
 }
 
+/// Check access to user's endpoint.
+#[utoipa::path(
+    get,
+    path = "/api/protected/user/health_check",
+    responses(
+        (status = 200, description = "Accessed to protected health check"),
+        (status = 403, description = "Forbidden")
+    ),
+    security(
+     ("api_key" = [])
+    ),
+    tag = "health_checks"
+)]
 #[tracing::instrument(name = "User's health check", skip_all)]
 async fn health_check() -> StatusCode {
     StatusCode::OK
 }
 
+/// Get list of user permissions.
+#[utoipa::path(
+    get,
+    path = "/api/protected/user/permissions",
+    responses(
+        (status = 200, response = Permission ),
+        (status = 403, description = "Forbidden")
+    ),
+    security(
+     ("api_key" = [])
+    ),
+    tag = "protected.users"
+)]
+#[tracing::instrument(name = "Get list of user permissions", skip_all)]
+async fn user_permissions(
+    auth_session: AuthSession,
+) -> Result<Json<HashSet<Permission>>, ResponseError> {
+    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
+        anyhow::anyhow!("No such user in AuthSession!"),
+    ))?;
+    let all_permissions =
+        auth_session.backend.get_all_permissions(&user).await?;
+    Ok(Json(all_permissions))
+}
+
+/// Get presigned post form to upload a file to the object storage.
+#[utoipa::path(
+    get,
+    path = "/api/protected/user/upload_form",
+    params(
+        UploadFileRequest
+    ),
+    responses(
+        (status = 200, response = PresignedPostData),
+        (status = 400, response = BadRequestResponse),
+        (
+            status = 415,
+            description = "Server will not generate presigned post form for provided media type",
+            content_type = "application/json",
+            body = String,
+            example = json!({"AllowedFormats": ["application/zip", "audio/wav", "video/mp4"]})
+        ),
+        (status = 403, description = "Forbidden")
+    ),
+    security(
+     ("api_key" = [])
+    ),
+    tag = "protected.users"
+)]
 #[tracing::instrument(
     name = "Request post form data for obj store upload.",
     skip_all
@@ -96,7 +163,7 @@ async fn request_obj_storage_upload(
         Some(&max_size) => max_size,
         None => {
             tracing::warn!("Wrong media type: {}", params.media_type);
-            return Err(ResponseError::NotAcceptableError);
+            return Err(ResponseError::UnsupportedMediaTypeError);
         }
     };
 

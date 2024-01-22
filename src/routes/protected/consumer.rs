@@ -2,7 +2,6 @@ use anyhow::Context;
 use axum::extract::State;
 use axum::routing;
 use axum::Form;
-use axum::Json;
 use axum::Router;
 use axum_login::permission_required;
 use http::StatusCode;
@@ -26,16 +25,30 @@ pub fn consumer_router() -> Router<AppState> {
         ))
 }
 
+/// Check access to consumer's endpoint.
+#[utoipa::path(
+        get,
+        path = "/api/protected/consumer/health_check",
+        responses(
+            (status = 200, description = "Accessed to protected health check"),
+            (status = 403, description = "Forbidden")
+        ),
+        security(
+         ("api_key" = [])
+        ),
+        tag = "health_checks"
+)]
 #[tracing::instrument(name = "Consumer's health check", skip_all)]
 async fn health_check() -> StatusCode {
     StatusCode::OK
 }
 
+// TODO: implement function
 #[tracing::instrument(name = "Accept offer", skip_all)]
 async fn accept_offer(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
-    Form(AcceptOffer { offer_id }): Form<AcceptOffer>,
+    Form(AcceptOffer { offer_id: _ }): Form<AcceptOffer>,
 ) -> Result<StatusCode, ResponseError> {
     let _user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
@@ -45,7 +58,7 @@ async fn accept_offer(
     // We should check that user is participant of conversation
     // where that offer was posted.
 
-    let db_client = app_state
+    let _db_client = app_state
         .pg_pool
         .get()
         .await

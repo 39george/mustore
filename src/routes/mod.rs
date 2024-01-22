@@ -3,13 +3,15 @@ use axum::response::IntoResponse;
 use axum::response::Response;
 use http::StatusCode;
 
+use crate::auth::AuthError;
 use crate::error_chain_fmt;
+use crate::routes::protected::user::MAX_SIZES;
 
 pub mod health_check;
 pub mod open;
 pub mod protected;
 
-#[derive(thiserror::Error, utoipa::ToSchema)]
+#[derive(thiserror::Error)]
 pub enum ResponseError {
     #[error(transparent)]
     UnexpectedError(#[from] anyhow::Error),
@@ -20,11 +22,13 @@ pub enum ResponseError {
     #[error("Validation failed")]
     ValidationError(#[from] garde::Report),
     #[error("Can't process that input")]
-    NotAcceptableError,
+    UnsupportedMediaTypeError,
     #[error("No such user")]
     UnauthorizedError(#[source] anyhow::Error),
     #[error("Too many uploads for that user")]
     TooManyUploadsError,
+    #[error("Authentication error")]
+    AuthError(#[from] AuthError),
 }
 
 impl std::fmt::Debug for ResponseError {
@@ -43,25 +47,35 @@ impl IntoResponse for ResponseError {
             ResponseError::InternalError(_) => {
                 StatusCode::INTERNAL_SERVER_ERROR.into_response()
             }
-            ResponseError::BadRequest(_) => {
-                StatusCode::BAD_REQUEST.into_response()
-            }
+            ResponseError::BadRequest(e) => Response::builder()
+                .status(StatusCode::BAD_REQUEST)
+                .body(Body::from(e.to_string()))
+                .unwrap_or(StatusCode::BAD_REQUEST.into_response()),
             ResponseError::UnauthorizedError(_) => {
                 StatusCode::UNAUTHORIZED.into_response()
             }
-            ResponseError::NotAcceptableError => {
-                StatusCode::NOT_ACCEPTABLE.into_response()
-            }
+            ResponseError::UnsupportedMediaTypeError => Response::builder()
+                .status(StatusCode::UNSUPPORTED_MEDIA_TYPE)
+                .header("Content-Type", "application/json")
+                .body(Body::from(format!(
+                    "{{\"allowed_mediatypes\":{}}}",
+                    serde_json::to_string(
+                        &MAX_SIZES
+                            .keys()
+                            .map(|media| media.as_str())
+                            .collect::<Vec<&str>>(),
+                    )
+                    .unwrap(),
+                )))
+                .unwrap_or(StatusCode::UNSUPPORTED_MEDIA_TYPE.into_response()),
             ResponseError::TooManyUploadsError => {
                 StatusCode::TOO_MANY_REQUESTS.into_response()
             }
             ResponseError::ValidationError(e) => Response::builder()
-                .status(StatusCode::EXPECTATION_FAILED)
-                .header("Content-Type", "application/json")
-                .body(Body::from(
-                    serde_json::json!({"Caused by": e.to_string()}).to_string(),
-                ))
-                .unwrap_or(StatusCode::EXPECTATION_FAILED.into_response()),
+                .status(StatusCode::BAD_REQUEST)
+                .body(Body::from(e.to_string()))
+                .unwrap_or(StatusCode::BAD_REQUEST.into_response()),
+            ResponseError::AuthError(e) => e.into_response(),
         }
     }
 }

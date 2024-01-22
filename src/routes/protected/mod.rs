@@ -13,10 +13,10 @@ use crate::startup::AppState;
 
 // ───── Submodules ───────────────────────────────────────────────────────── //
 
-mod admin;
-mod consumer;
-mod creator;
-mod user;
+pub mod admin;
+pub mod consumer;
+pub mod creator;
+pub mod user;
 
 // ───── Body ─────────────────────────────────────────────────────────────── //
 
@@ -30,6 +30,19 @@ pub fn protected_router() -> Router<AppState> {
         .nest("/admin", admin_router())
 }
 
+/// Check access to top-level protected endpoint.
+#[utoipa::path(
+        get,
+        path = "/api/protected/health_check",
+        responses(
+            (status = 200, description = "Accessed to protected health check"),
+            (status = 403, description = "Forbidden")
+        ),
+        security(
+         ("api_key" = [])
+        ),
+        tag = "health_checks"
+)]
 #[tracing::instrument(name = "Protected health check", skip_all)]
 async fn health_check() -> StatusCode {
     StatusCode::OK

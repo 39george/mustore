@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use anyhow::Context;
 use axum::extract::Path;
 use axum::extract::Query;
@@ -8,60 +6,23 @@ use axum::routing;
 use axum::Json;
 use axum::Router;
 use garde::Validate;
-use serde::Deserialize;
-use serde::Serialize;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
 use crate::auth::users::AuthSession;
 use crate::cornucopia::queries::open_access;
-use crate::cornucopia::queries::open_access::GetNewSongs;
-use crate::cornucopia::queries::open_access::GetRecommendedSongs;
+use crate::cornucopia::queries::open_access::GetNewSongsResponse;
+use crate::cornucopia::queries::open_access::GetRecommendedSongsResponse;
 use crate::cornucopia::queries::open_access::GetSongsListResponse;
 use crate::domain::requests::open_access::GetSongsListRequest;
+use crate::domain::requests::open_access::SongsAmount;
+use crate::domain::requests::open_access::Stats;
 use crate::startup::AppState;
 
+use crate::startup::api_doc::BadRequestResponse;
+use crate::startup::api_doc::InternalErrorResponse;
+
 use super::ResponseError;
-
-// ───── Types ────────────────────────────────────────────────────────────── //
-
-#[derive(Debug, Deserialize, Serialize, utoipa::ToSchema)]
-pub struct Stats {
-    #[schema(example = "55")]
-    beats: u32,
-    #[schema(example = "12")]
-    songs: u32,
-    #[schema(example = "77")]
-    lyrics: u32,
-    #[schema(example = "71")]
-    covers: u32,
-}
-
-impl TryFrom<Vec<open_access::GetStats>> for Stats {
-    type Error = anyhow::Error;
-    fn try_from(
-        value: Vec<open_access::GetStats>,
-    ) -> Result<Self, Self::Error> {
-        let hash_map: HashMap<String, u32> = value
-            .into_iter()
-            .map(|v| (v.table_name, v.count as u32))
-            .collect();
-        Ok(Stats {
-            beats: *hash_map
-                .get("beats")
-                .context("Failed to get beats count")?,
-            songs: *hash_map
-                .get("songs")
-                .context("Failed to get songs count")?,
-            lyrics: *hash_map
-                .get("lyrics")
-                .context("Failed to get lyrics count")?,
-            covers: *hash_map
-                .get("covers")
-                .context("Failed to get covers count")?,
-        })
-    }
-}
 
 // ───── Handlers ─────────────────────────────────────────────────────────── //
 
@@ -74,12 +35,13 @@ pub fn open_router() -> Router<AppState> {
         .route("/recommended_songs", routing::get(get_recommended_songs))
 }
 
+/// Request count of all main types contents
 #[utoipa::path(
     get,
     path = "/api/open/stats",
     responses(
         (status = 200, description = "Got stats successfully", body = Stats),
-        (status = 500, description = "Some internal error")
+        (status = 500, response = InternalErrorResponse)
     )
 )]
 #[tracing::instrument(name = "Get products counts (stats)", skip_all)]
@@ -101,20 +63,23 @@ pub async fn stats(
     Ok(Json::from(stats))
 }
 
-/// Returns a json array with genres or moods
+/// Retrieve a json array with genres or moods
 #[utoipa::path(
     get,
     path = "/api/open/{what}",
     params(
-        ("what" = String, Path, description = "Which values would you get")
+        ("what" = String, Path,
+            description = "Which values would you get, can be 'genres', or 'moods'",
+            example = "genres"
+        )
     ),
     responses(
         (status = 200, description = "Got values successfully",
             body = [String], content_type = "application/json",
-            example = json!(["genre1", "genre2", "genre3"])
+            example = json!(["classic", "pop", "folk"])
         ),
-        (status = 400, description = "Bad request"),
-        (status = 500, description = "Some internal error")
+        (status = 400, response = BadRequestResponse),
+        (status = 500, response = InternalErrorResponse)
     )
 )]
 #[tracing::instrument(name = "Get values list", skip(app_state))]
@@ -144,11 +109,12 @@ async fn get_values_list(
                 .context("Failed to get genres list from pg")?,
         )),
         _ => Err(ResponseError::BadRequest(anyhow::anyhow!(
-            "Can't send values of {path}!"
+            "Can't send values of {path}! Only 'genres' and 'moods' available!"
         ))),
     }
 }
 
+/// Retrieve filtered list of songs
 #[utoipa::path(
     get,
     path = "/api/open/songs",
@@ -160,11 +126,11 @@ async fn get_values_list(
             body = [GetSongsListResponse],
             content_type = "application/json"
         ),
-        (status = 400, description = "Bad input error"),
-        (status = 500, description = "Some internal error")
+        (status = 400, response = BadRequestResponse),
+        (status = 500, response = InternalErrorResponse)
     )
 )]
-#[tracing::instrument(name = "Get songs post request", skip_all)]
+#[tracing::instrument(name = "Get songs request", skip_all)]
 async fn get_songs(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
@@ -205,18 +171,32 @@ async fn get_songs(
     Ok(Json(songs))
 }
 
-#[tracing::instrument(name = "Get new songs query", skip(app_state))]
+/// Retrieve certain amount of new songs
+#[utoipa::path(
+    get,
+    path = "/api/open/new_songs",
+    params(
+        SongsAmount
+    ),
+    responses(
+        (status = 200, description = "Got songs successfully",
+            body = [GetNewSongsResponse],
+            content_type = "application/json"
+        ),
+        (status = 400, response = BadRequestResponse),
+        (status = 500, response = InternalErrorResponse)
+    )
+)]
+#[tracing::instrument(
+    name = "Get new songs request",
+    skip(auth_session, app_state)
+)]
 async fn get_new_songs(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
-    Query(amount): Query<i64>,
-) -> Result<Json<Vec<GetNewSongs>>, ResponseError> {
-    if amount > 50 || amount < 1 {
-        return Err(ResponseError::BadRequest(anyhow::anyhow!(
-            "Amount of tracks should be between 1 and 50, requested: {}",
-            amount
-        )));
-    }
+    Query(amount): Query<SongsAmount>,
+) -> Result<Json<Vec<GetNewSongsResponse>>, ResponseError> {
+    amount.validate(&())?;
 
     let user_id = auth_session.user.map(|u| u.id);
 
@@ -227,7 +207,7 @@ async fn get_new_songs(
         .context("Failed to get pool from pg")?;
 
     let songs = open_access::get_new_songs()
-        .bind(&pg_pool, &user_id, &amount)
+        .bind(&pg_pool, &user_id, &amount.amount)
         .all()
         .await
         .context("Failed to fetch songs data from pg")?;
@@ -235,18 +215,32 @@ async fn get_new_songs(
     Ok(Json(songs))
 }
 
-#[tracing::instrument(name = "Get recommended songs query", skip(app_state))]
+/// Retrieve certain amount of recommended songs
+#[utoipa::path(
+    get,
+    path = "/api/open/recommended_songs",
+    params(
+        SongsAmount
+    ),
+    responses(
+        (status = 200, description = "Got songs successfully",
+            body = [GetRecommendedSongsResponse],
+            content_type = "application/json"
+        ),
+        (status = 400, response = BadRequestResponse),
+        (status = 500, response = InternalErrorResponse)
+    )
+)]
+#[tracing::instrument(
+    name = "Get recommended songs request",
+    skip(app_state, auth_session)
+)]
 async fn get_recommended_songs(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
-    Query(amount): Query<i64>,
-) -> Result<Json<Vec<GetRecommendedSongs>>, ResponseError> {
-    if amount > 50 || amount < 1 {
-        return Err(ResponseError::BadRequest(anyhow::anyhow!(
-            "Amount of tracks should be between 1 and 50, requested: {}",
-            amount
-        )));
-    }
+    Query(amount): Query<SongsAmount>,
+) -> Result<Json<Vec<GetRecommendedSongsResponse>>, ResponseError> {
+    amount.validate(&())?;
 
     let user_id = auth_session.user.map(|u| u.id);
 
@@ -257,7 +251,7 @@ async fn get_recommended_songs(
         .context("Failed to get pool from pg")?;
 
     let songs = open_access::get_recommended_songs()
-        .bind(&pg_pool, &user_id, &amount)
+        .bind(&pg_pool, &user_id, &amount.amount)
         .all()
         .await
         .context("Failed to fetch songs data from pg")?;
