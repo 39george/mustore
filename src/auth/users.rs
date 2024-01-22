@@ -7,6 +7,7 @@ use axum_login::{AuthUser, AuthnBackend, AuthzBackend, UserId};
 use deadpool_postgres::Pool;
 use secrecy::{ExposeSecret, Secret};
 use serde::{Deserialize, Serialize};
+use utoipa::ToResponse;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
@@ -110,6 +111,7 @@ impl AuthnBackend for Backend {
         let expected_password_hash = if let Ok(ref user) = user {
             user.password_hash.clone()
         } else {
+            tracing::warn!("Given username is not presented at the db");
             // We do it to prevent hacking by hash time
             Secret::new(
                 "$argon2id$v=19$m=15000,t=2,p=1$\
@@ -118,7 +120,7 @@ impl AuthnBackend for Backend {
                     .to_string(),
             )
         };
-        spawn_blocking_with_tracing(move || {
+        let result = spawn_blocking_with_tracing(move || {
             verify_password_hash(
                 expected_password_hash,
                 provided_password,
@@ -127,8 +129,12 @@ impl AuthnBackend for Backend {
         })
         .await
         .context("Invalid password.")
-        .map_err(AuthError::UnexpectedError)??;
-        Ok(Some(user?))
+        .map_err(AuthError::InvalidCredentialsError);
+        // Check that user exists
+        let user = user?;
+        // Validate password
+        let _ = result??;
+        Ok(Some(user))
     }
 
     async fn get_user(
@@ -177,9 +183,10 @@ async fn get_user_data(
         _ => unreachable!(),
     };
 
-    let (id, username, password_hash) = data.ok_or(
-        AuthError::UnexpectedError(anyhow::anyhow!("No data for user in db")),
-    )?;
+    let (id, username, password_hash) =
+        data.ok_or(AuthError::InvalidCredentialsError(anyhow::anyhow!(
+            "No data for user in db"
+        )))?;
 
     Ok(User {
         id,
@@ -207,7 +214,18 @@ fn verify_password_hash(
         .map_err(AuthError::InvalidCredentialsError)
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Serialize, Debug, Clone, Eq, PartialEq, Hash, ToResponse)]
+#[response(
+    description = "Found permissions list for user",
+    example = json!([
+        {
+            "name": "user"
+        },
+        {
+            "name": "creator"
+        }
+    ])
+)]
 pub struct Permission {
     pub name: String,
 }
