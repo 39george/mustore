@@ -9,19 +9,25 @@ pub struct UserPassword(Secret<String>);
 impl UserPassword {
     /// Returns an instance of `UserName` if the input satisfies
     /// our validation constraints on subscriber names.
+    ///
+    /// # Parameters:
+    ///
+    /// - *input*: user password.
+    /// - *user_inputs*: slice with other user input data, for example,
+    /// user email, and username.
     pub fn parse(
         input: &str,
         user_inputs: &[&str],
     ) -> Result<UserPassword, anyhow::Error> {
         let is_empty_or_whitespace = input.trim().is_empty();
         let is_too_long = input.chars().count() > 32;
-        let is_too_short = input.chars().count() < 8;
+        let is_too_short = input.chars().count() < 11;
 
-        let forbidden_characters =
-            ['/', '"', '<', '>', '\\', '{', '}', ';', ':'];
+        // let forbidden_characters =
+        //     ['/', '"', '<', '>', '\\', '{', '}', ';', ':'];
 
-        let contains_forbidden_chars =
-            input.chars().any(|g| forbidden_characters.contains(&g));
+        // let contains_forbidden_chars =
+        //     input.chars().any(|g| forbidden_characters.contains(&g));
 
         if is_empty_or_whitespace {
             Err(anyhow::anyhow!("String is emtpy"))
@@ -31,8 +37,8 @@ impl UserPassword {
             Err(anyhow::anyhow!(
                 "Password is too short, should be longer than 7 symbols"
             ))
-        } else if contains_forbidden_chars {
-            Err(anyhow::anyhow!("String contains forbidden chars"))
+        // } else if contains_forbidden_chars {
+        //     Err(anyhow::anyhow!("String contains forbidden chars"))
         } else {
             let entropy = zxcvbn::zxcvbn(input, user_inputs)
                 .context("Failed to compute password entropy")?;
