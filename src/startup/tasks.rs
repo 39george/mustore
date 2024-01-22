@@ -2,7 +2,6 @@ use std::sync::Arc;
 
 use deadpool_postgres::Client;
 use fred::clients::RedisClient;
-use fred::interfaces::HashesInterface;
 use fred::interfaces::KeysInterface;
 use fred::types::Scanner;
 use futures::TryStreamExt;

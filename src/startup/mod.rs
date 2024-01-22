@@ -38,7 +38,7 @@ use self::api_doc::ApiDoc;
 
 // ───── Submodules ───────────────────────────────────────────────────────── //
 
-mod api_doc;
+pub mod api_doc;
 pub mod db_migration;
 mod tasks;
 
@@ -164,13 +164,24 @@ impl Application {
             argon2_obj,
         };
 
+        // Set 'secure' attribute for cookies
+        let with_secure = if let Ok(e) = std::env::var("ENVIRONMENT") {
+            if e.eq("development") {
+                false
+            } else {
+                true
+            }
+        } else {
+            true
+        };
+
         // This uses `tower-sessions` to establish a layer that will provide the session
         // as a request extension.
         let session_store =
             axum_login::tower_sessions::RedisStore::new(redis_client);
         let session_layer =
             axum_login::tower_sessions::SessionManagerLayer::new(session_store)
-                .with_secure(true)
+                .with_secure(with_secure)
                 .with_expiry(axum_login::tower_sessions::Expiry::OnInactivity(
                     Duration::days(1),
                 ));
@@ -190,8 +201,9 @@ impl Application {
                 "/api/confirm_user_account",
                 routing::get(auth::confirm_account::confirm),
             )
-            .with_state(app_state)
-            .merge(auth::login::login_router())
+            .with_state(app_state.clone())
+            .merge(auth::login::login_router(app_state))
+            .layer(crate::middleware::map_response::BadRequestIntoJsonLayer)
             .layer(auth_service);
 
         if let Ok(_) = std::env::var("TEST_TRACING") {
