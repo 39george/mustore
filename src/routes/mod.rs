@@ -7,6 +7,7 @@ use crate::auth::AuthError;
 use crate::error_chain_fmt;
 use crate::routes::protected::user::MAX_SIZES;
 
+pub mod development;
 pub mod health_check;
 pub mod open;
 pub mod protected;
