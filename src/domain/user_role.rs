@@ -1,7 +1,9 @@
 use serde::Deserialize;
 use serde::Serialize;
+use utoipa::ToSchema;
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
+/// Creator or Consumer.
+#[derive(Clone, Serialize, Deserialize, Debug, ToSchema)]
 pub enum UserRole {
     #[serde(rename = "creator")]
     Creator,
