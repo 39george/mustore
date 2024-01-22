@@ -36,6 +36,7 @@ use crate::routes::ResponseError;
 use crate::service_providers::object_storage::presigned_post_form::PresignedPostData;
 use crate::startup::api_doc::BadRequestResponse;
 use crate::startup::AppState;
+use crate::types::data_size::DataSizes;
 
 // ───── Types ────────────────────────────────────────────────────────────── //
 
@@ -43,16 +44,16 @@ use crate::startup::AppState;
 lazy_static::lazy_static! {
     pub static ref MAX_SIZES: HashMap<MediaTypeBuf, u64> = {
         let mut m = HashMap::new();
-        m.insert(media_type!(IMAGE/PNG).into(), crate::MAX_IMAGE_SIZE_MB);
-        m.insert(media_type!(IMAGE/JPEG).into(), crate::MAX_IMAGE_SIZE_MB);
-        m.insert(media_type!(AUDIO/WAV).into(), crate::MAX_WAV_SIZE_MB);
-        m.insert(media_type!(AUDIO/MPEG).into(), crate::MAX_MP3_SIZE_MB);
-        m.insert(media_type!(APPLICATION/ZIP).into(), crate::MAX_MULTITRACK_SIZE_GB);
-        m.insert(media_type!(VIDEO/MP4).into(), crate::MAX_VIDEO_SIZE_MB);
-        m.insert(media_type!(APPLICATION/PDF).into(), crate::MAX_DOCUMENT_SIZE_MB);
+        m.insert(media_type!(IMAGE/PNG).into(), crate::MAX_IMAGE_SIZE_MB.mb());
+        m.insert(media_type!(IMAGE/JPEG).into(), crate::MAX_IMAGE_SIZE_MB.mb());
+        m.insert(media_type!(AUDIO/WAV).into(), crate::MAX_WAV_SIZE_MB.mb());
+        m.insert(media_type!(AUDIO/MPEG).into(), crate::MAX_MP3_SIZE_MB.mb());
+        m.insert(media_type!(APPLICATION/ZIP).into(), crate::MAX_MULTITRACK_SIZE_GB.gb());
+        m.insert(media_type!(VIDEO/MP4).into(), crate::MAX_VIDEO_SIZE_MB.mb());
+        m.insert(media_type!(APPLICATION/PDF).into(), crate::MAX_DOCUMENT_SIZE_MB.mb());
         m.insert(
             media_type!(APPLICATION/vnd::OPENXMLFORMATS_OFFICEDOCUMENT_WORDPROCESSINGML_DOCUMENT).into(),
-            crate::MAX_DOCUMENT_SIZE_MB,
+            crate::MAX_DOCUMENT_SIZE_MB.mb(),
         );
         m
     };
