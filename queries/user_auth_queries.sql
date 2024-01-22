@@ -37,6 +37,9 @@ WHERE token = :token;
 SELECT id FROM users
 WHERE email = :email OR username = :username;
 
+--! check_if_username_occupied
+SELECT id FROM users WHERE username = :username;
+
 --! insert_new_user_settings
 INSERT INTO user_settings DEFAULT VALUES returning id;
 
