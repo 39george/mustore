@@ -240,7 +240,7 @@ impl TestApp {
     ) -> (reqwest::Response, String) {
         let response = client_with_cookies
             .get(format!(
-                "{}/api/protected/user/req_upload_form?media_type={}&file_name={}",
+                "{}/api/protected/user/upload_form?media_type={}&file_name={}",
                 self.address, media_type, name
             ))
             .send()

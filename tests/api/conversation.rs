@@ -4,9 +4,7 @@ use crate::helpers::{TestApp, TestUser};
 use mustore::{
     config::Settings,
     domain::{
-        requests::{
-            creator_access::CreateOfferRequest, user_access::SendMessageRequest,
-        },
+        requests::user_access::SendMessageRequest,
         responses::user_access::ConversationDataResponse,
     },
 };
