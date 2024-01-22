@@ -15,7 +15,7 @@ use fred::interfaces::RedisResult;
 use http::StatusCode;
 use secrecy::{ExposeSecret, Secret};
 use serde::Deserialize;
-use serde::Serialize;
+use utoipa::ToSchema;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
@@ -28,22 +28,53 @@ use crate::domain::user_name::UserName;
 use crate::domain::user_password::UserPassword;
 use crate::domain::user_role::UserRole;
 use crate::email_client::EmailClient;
+use crate::startup::api_doc::BadRequestResponse;
+use crate::startup::api_doc::InternalErrorResponse;
 use crate::startup::AppState;
 use crate::telemetry::spawn_blocking_with_tracing;
 
 // ───── Types ────────────────────────────────────────────────────────────── //
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Deserialize, Debug, ToSchema)]
 pub struct UserSignupData {
+    /// This is username.
+    #[schema(
+        min_length = 3,
+        max_length = 256,
+        pattern = r#"[^/()"<>\\{};:]*"#
+    )]
     username: String,
+    /// This is password, complexity entropy should be not less than 4 (zxcvbn).
+    #[schema(min_length = 11, max_length = 32, format = Password)]
     password: String,
+    /// Should be a valid email.
+    #[schema(format = "email")]
     email: String,
     user_role: Option<UserRole>,
+    /// If user is admin, a valid admin token should be provided.
+    /// User should have only a role, or only an admin token, not both!
     admin_token: Option<uuid::Uuid>,
 }
 
 // ───── Handlers ─────────────────────────────────────────────────────────── //
 
+/// Create a new user account
+///
+/// All lines of the doc comment will be included to operation description.
+#[utoipa::path(
+    post,
+    path = "/api/signup",
+    request_body(
+        content = UserSignupData,
+        content_type = "application/x-www-form-urlencoded",
+    ),
+    responses(
+        (status = 201, description = "Account created"),
+        (status = 400, response = BadRequestResponse),
+        (status = 500, response = InternalErrorResponse)
+    ),
+    tag = "open"
+)]
 #[tracing::instrument(name = "Signup attempt", skip_all)]
 pub async fn signup(
     State(app_state): State<AppState>,
@@ -58,17 +89,18 @@ pub async fn signup(
     if user_role.is_some() && admin_token.is_some()
         || user_role.is_none() && admin_token.is_none()
     {
-        return Err(AuthError::SignupFailed(anyhow::anyhow!(
+        return Err(AuthError::ValidationError(anyhow::anyhow!(
             "User should have only role, or only admin token!"
         )));
     }
 
     let username =
-        UserName::parse(&username).map_err(AuthError::SignupFailed)?;
-    let email = UserEmail::parse(&email).map_err(AuthError::SignupFailed)?;
+        UserName::parse(&username).map_err(AuthError::ValidationError)?;
+    let email = UserEmail::parse(&email).map_err(AuthError::ValidationError)?;
     let password =
         UserPassword::parse(&password, &[username.as_ref(), email.as_ref()])
-            .map_err(AuthError::SignupFailed)?;
+            .map_err(AuthError::ValidationError)?;
+
     let password_hash = spawn_blocking_with_tracing(move || {
         hash_password(password.as_ref(), app_state.argon2_obj)
     })
@@ -84,7 +116,7 @@ pub async fn signup(
         .map_err(AuthError::InternalError)?;
 
     let if_id_exists = user_auth_queries::check_if_user_exists_already()
-        .bind(&pg_client, &username.as_ref(), &email.as_ref())
+        .bind(&pg_client, &email.as_ref(), &username.as_ref())
         .opt()
         .await
         .context("Failed to get user data from db")
