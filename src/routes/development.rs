@@ -33,7 +33,8 @@ pub struct InputWithFiles {
 pub fn user_router() -> Router {
     Router::new().route(
         "/upload",
-        routing::post(upload_file).layer(DefaultBodyLimit::max(5.gb())),
+        routing::post(upload_file)
+            .layer(DefaultBodyLimit::max(5.gb_to_bytes())),
     )
 }
 
