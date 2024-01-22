@@ -7,6 +7,7 @@ use utoipa::{
 };
 
 use crate::auth::{self, users::Permission};
+use crate::routes::development;
 use crate::routes::open;
 use crate::routes::protected;
 
@@ -154,7 +155,8 @@ impl Modify for ServerAddon {
         protected::consumer::health_check,
         protected::admin::health_check,
         protected::user::user_permissions,
-        protected::user::request_obj_storage_upload
+        protected::user::request_obj_storage_upload,
+        development::upload_file
         ),
         components(
             schemas(
@@ -168,6 +170,7 @@ impl Modify for ServerAddon {
                 crate::auth::signup::UserSignupData,
                 crate::auth::login::Credentials,
                 crate::auth::login::Username,
+                crate::routes::development::InputWithFiles,
                 GetSongsListResponse,
                 GetNewSongsResponse,
                 GetRecommendedSongsResponse,
@@ -193,7 +196,8 @@ impl Modify for ServerAddon {
             (name = "protected.users", description = "Protected routes for all users"),
             (name = "protected.creators", description = "Protected routes for creators"),
             (name = "protected.consumers", description = "Protected routes for consumers"),
-            (name = "protected.admins", description = "Protected routes for admins")
+            (name = "protected.admins", description = "Protected routes for admins"),
+            (name = "development", description = "Routes available only in development mode")
         ),
         info(
             title = "HarmonySphere - OpenAPI 3.0",
