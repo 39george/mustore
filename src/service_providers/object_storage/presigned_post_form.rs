@@ -29,7 +29,30 @@ impl std::fmt::Debug for Error {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(
+    Serialize, Deserialize, Debug, utoipa::ToSchema, utoipa::ToResponse,
+)]
+#[response(
+    description = "Presigned post form data",
+    content_type = "application/json",
+    example = json!(
+        {
+            "url": "http://minio.orb.local:9000/mustore-data",
+            "fields": {
+            "policy": "... long policy ...",
+            "key": "abc123-d3090bb8-493b-4837-80fc-cc2deeae3705-image.png",
+            "Content-Disposition": "attachment; filename=\"abc123-d3090bb8-493b-4837-80fc-cc2deeae3705-image.png\"",
+            "acl": "private",
+            "success_action_status": "200",
+            "X-Amz-Date": "20240121T211735Z",
+            "Content-Type": "image/png",
+            "X-Amz-Algorithm": "AWS4-HMAC-SHA256",
+            "X-Amz-Signature": "4b08ff30d6f18e95ebe6b797831304c8ab750d7cb98875daeebc2005fb205312",
+            "X-Amz-Credential": "minioadmin/20240121/ru-central1/s3/aws4_request"
+            }
+        }
+    )
+)]
 pub struct PresignedPostData {
     pub url: String,
     pub fields: HashMap<String, String>,
