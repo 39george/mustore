@@ -61,7 +61,7 @@ async fn song_submit_success() {
             secondary_genre: None,
             tempo: 100,
             duration: 30,
-            key: mustore::domain::music_parameters::MusicKey::a_major,
+            music_key: mustore::domain::music_parameters::MusicKey::a_major,
         },
         lyric: "this is song's lyric. Is it long enough or not?".into(),
         sex: mustore::domain::music_parameters::Sex::Female,
@@ -108,7 +108,7 @@ async fn song_submit_without_files_fails() {
             secondary_genre: None,
             tempo: 100,
             duration: 30,
-            key: mustore::domain::music_parameters::MusicKey::a_major,
+            music_key: mustore::domain::music_parameters::MusicKey::a_major,
         },
         lyric: "this is song's lyric. Is it long enough or not?".into(),
         sex: mustore::domain::music_parameters::Sex::Female,
@@ -174,7 +174,7 @@ async fn beat_submit_success() {
             secondary_genre: None,
             tempo: 100,
             duration: 30,
-            key: mustore::domain::music_parameters::MusicKey::a_major,
+            music_key: mustore::domain::music_parameters::MusicKey::a_major,
         },
     };
 
