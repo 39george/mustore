@@ -8,6 +8,7 @@ use deadpool_postgres::ManagerConfig;
 use deadpool_postgres::Pool;
 use fred::clients::RedisClient;
 use fred::clients::RedisPool;
+use fred::types::ReconnectPolicy;
 use fred::types::RedisConfig;
 use secrecy::ExposeSecret;
 use time::Duration;
@@ -83,13 +84,12 @@ impl Application {
             .expect("Failed to get pg client for scheduler");
         let redis_pool =
             get_redis_connection_pool(&configuration.redis).await?;
+        let redis_pool_tower_sessions =
+            get_redis_connection_pool(&configuration.redis).await?;
 
         let redis_client = redis_pool.next().clone_new();
-        let redis_client2 = redis_pool.next().clone_new();
         fred::interfaces::ClientLike::connect(&redis_client);
-        fred::interfaces::ClientLike::connect(&redis_client2);
         fred::interfaces::ClientLike::wait_for_connect(&redis_client).await?;
-        fred::interfaces::ClientLike::wait_for_connect(&redis_client2).await?;
 
         let object_storage =
             ObjectStorage::new(configuration.object_storage).await;
@@ -111,14 +111,14 @@ impl Application {
             listener,
             pg_pool,
             redis_pool,
-            redis_client,
+            redis_pool_tower_sessions,
             object_storage,
             email_client,
         );
 
         tokio::spawn(async {
             if let Err(e) =
-                run_scheduler(pg_client, redis_client2, object_storage2).await
+                run_scheduler(pg_client, redis_client, object_storage2).await
             {
                 tracing::error!("Scheduler failed with: {e}");
             }
@@ -143,7 +143,7 @@ impl Application {
         listener: TcpListener,
         pg_pool: Pool,
         redis_pool: RedisPool,
-        redis_client: RedisClient,
+        redis_pool_tower_sessions: RedisPool,
         object_storage: ObjectStorage,
         email_client: EmailClient,
     ) -> Serve<Router, Router> {
@@ -178,8 +178,9 @@ impl Application {
 
         // This uses `tower-sessions` to establish a layer that will provide the session
         // as a request extension.
-        let session_store =
-            axum_login::tower_sessions::RedisStore::new(redis_client);
+        let session_store = tower_sessions_redis_store::RedisStore::new(
+            redis_pool_tower_sessions,
+        );
         let session_layer =
             axum_login::tower_sessions::SessionManagerLayer::new(session_store)
                 .with_secure(with_secure)
@@ -237,7 +238,7 @@ impl Application {
                     SwaggerUi::new("/swagger-ui")
                         .url("/api-docs/openapi.json", ApiDoc::openapi()),
                 );
-                app = app.nest("/api", development::user_router());
+                app = app.nest("/api", development::user_router(app_state));
             }
         }
 
@@ -294,6 +295,7 @@ pub async fn get_redis_connection_pool(
     .unwrap();
     let redis_pool = fred::types::Builder::default_centralized()
         .set_config(redis_config)
+        .set_policy(ReconnectPolicy::default())
         .build_pool(5)
         .expect("Failed to build redis connections pool");
     fred::interfaces::ClientLike::connect(&redis_pool);
