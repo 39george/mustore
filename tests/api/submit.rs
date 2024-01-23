@@ -123,7 +123,7 @@ async fn song_submit_without_files_fails() {
         .send()
         .await
         .unwrap();
-    assert_eq!(response.status().as_u16(), 417);
+    assert_eq!(response.status().as_u16(), 400);
 }
 
 #[tokio::test]
