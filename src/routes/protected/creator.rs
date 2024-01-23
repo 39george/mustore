@@ -46,7 +46,7 @@ impl IntoResponse for CreatorResponseError {
             CreatorResponseError::ResponseError(e) => e.into_response(),
             CreatorResponseError::NoUploadInfoInCacheError(_) => {
                 tracing::error!("{:?}", self);
-                StatusCode::EXPECTATION_FAILED.into_response()
+                StatusCode::BAD_REQUEST.into_response()
             }
         }
     }
