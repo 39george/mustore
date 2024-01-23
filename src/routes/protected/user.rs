@@ -32,6 +32,7 @@ use crate::domain::requests::user_access::ListConversationRequest;
 use crate::domain::requests::user_access::SendMessageRequest;
 use crate::domain::requests::user_access::UploadFileRequest;
 use crate::domain::responses::user_access::ConversationDataResponse;
+use crate::domain::upload_request::UploadRequest;
 use crate::routes::ResponseError;
 use crate::service_providers::object_storage::presigned_post_form::PresignedPostData;
 use crate::startup::api_doc::BadRequestResponse;
@@ -169,7 +170,7 @@ async fn request_obj_storage_upload(
     };
 
     let object_key = format!(
-        "{}-{}-{}",
+        "upload/{}-{}-{}",
         user.username,
         uuid::Uuid::new_v4(),
         params.file_name
@@ -396,12 +397,12 @@ async fn store_upload_request_data(
     object_key: &str,
     user_id: i32,
 ) -> RedisResult<()> {
-    let user_id = user_id.to_string();
     let created_at = OffsetDateTime::now_utc()
         .format(&crate::DEFAULT_TIME_FORMAT)
         .unwrap();
-    let key = format!("upload_request:{}:{}", user_id, object_key);
-    con.set(&key, &created_at, None, None, false).await?;
+    let upload_request = UploadRequest::new(user_id, object_key);
+    con.set(&upload_request.to_string(), &created_at, None, None, false)
+        .await?;
     Ok(())
 }
 
@@ -439,12 +440,12 @@ async fn remove_attachments_data_from_redis(
     user_id: i32,
 ) -> RedisResult<()> {
     for obj_key in keys.iter() {
-        let key = format!("upload_request:{}:{}", user_id, obj_key);
+        let upload_request = UploadRequest::new(user_id, obj_key).to_string();
 
         // Check that there are such upload is
-        let _created_at: String = con.get(&key).await?;
+        let _created_at: String = con.get(&upload_request).await?;
 
-        con.del(&key).await?;
+        con.del(&upload_request).await?;
     }
     Ok(())
 }
