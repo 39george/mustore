@@ -150,7 +150,7 @@ impl<'a> PresignedPostDataBuilder<'a> {
 
     pub fn build(self) -> Result<PresignedPostData, Error> {
         let date = self.date.unwrap_or(OffsetDateTime::now_utc());
-        let expiration = date + self.expiration.unwrap_or(Duration::HOUR);
+        let expiration = date + self.expiration.unwrap_or(Duration::MINUTE);
         let service_name = self.service_name.unwrap_or("s3");
         let mime = self
             .mime
