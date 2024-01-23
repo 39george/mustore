@@ -4,8 +4,9 @@ use std::collections::HashMap;
 use time::OffsetDateTime;
 
 use crate::{
-    cornucopia::queries::user_access::ListConversationById, error_chain_fmt,
-    service_providers::object_storage::ObjectStorage,
+    cornucopia::queries::user_access::ListConversationById,
+    error_chain_fmt,
+    service_providers::object_storage::{ObjectStorage, ObjectStorageError},
 };
 
 trait UnpackOption {
@@ -103,6 +104,8 @@ pub struct ConversationDataResponse {
 
 #[derive(thiserror::Error)]
 pub enum ConversationDataError {
+    #[error(transparent)]
+    ObjectStorageError(#[from] ObjectStorageError),
     #[error(transparent)]
     UnexpectedError(#[from] anyhow::Error),
     #[error("No related data presented")]
