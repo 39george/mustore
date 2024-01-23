@@ -81,7 +81,10 @@ pub async fn confirm(
 
     // Upload identicon to the object storage
     let avatar_key = format!("{}-avatar.png", &user_candidate_data.username);
-    app_state.object_storage.put(&avatar_key, identicon).await?;
+    app_state
+        .object_storage
+        .put(&avatar_key, identicon, mediatype::media_type!(IMAGE / PNG))
+        .await?;
 
     let user_id = match user_auth_queries::insert_new_user()
         .bind(

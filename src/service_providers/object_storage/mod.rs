@@ -85,16 +85,18 @@ impl ObjectStorage {
     ///
     /// This method takes a file name and bytes, uploads them to the configured bucket, and
     /// returns the URI of the newly uploaded object.
-    pub async fn put(
+    pub async fn put<'a>(
         &self,
         key: &str,
         bytes: Vec<u8>,
+        mediatype: mediatype::MediaType<'a>,
     ) -> Result<(), anyhow::Error> {
         let _put_response = self
             .client
             .put_object()
             .bucket(&self.settings.bucket_name)
             .key(key)
+            .content_encoding(mediatype.to_string())
             .body(
                 ByteStream::try_from(SdkBody::from(bytes))
                     .context("Failed to create ByteStream from bytes")?,
