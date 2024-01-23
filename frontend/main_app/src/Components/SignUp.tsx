@@ -1,11 +1,10 @@
 import styles from "./SignUp.module.scss";
-import { FC, FormEvent, useEffect, useState } from "react";
+import { FC, FormEvent, useEffect, useRef, useState } from "react";
 import { HiMiniXMark } from "react-icons/hi2";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import zxcvbn from "zxcvbn";
-import Filter from "bad-words";
 import { API_URL } from "../config";
 import { RootState } from "../state/store";
 import { FaEye } from "react-icons/fa";
@@ -38,9 +37,14 @@ type UsernameStatus =
   | "имя должно иметь не менее 3 символов"
   | "имя не должно иметь более 256 символов"
   | "это имя уже занято"
-  | "имя не соответствует правилам платформы"
   | "имя содержит запрещенный символ"
   | "имя свободно";
+
+type UsernameCheckProgress = "" | "unacceptable" | "pending" | "approved";
+
+interface UsernameExistence {
+  exists: boolean;
+}
 
 interface EmailInputInfo {
   success?: boolean;
@@ -65,11 +69,14 @@ interface ConfirmPasswordInfo {
 const colors = {
   warning: "#EF0606",
   neutral: "#d9d9d9",
+  neutral_outline: "#868381",
   password_too_weak: "#700000",
   password_middle: "#fe8c49",
   password_unreliable: "#E6A600",
   success: "#599c00",
 };
+
+const forbidden_symbols = /^[^\/\(\)"<>\{\}^\\;:\s*]*$/;
 
 const SignUp: FC = () => {
   const navigate = useNavigate();
@@ -87,6 +94,11 @@ const SignUp: FC = () => {
     confirm_password: "password",
   });
   const [username_status, set_username_status] = useState<UsernameStatus>("");
+  const [username_check_porgress, set_username_check_progress] =
+    useState<UsernameCheckProgress>("");
+  const ref_username_check_progress = useRef<UsernameCheckProgress>("");
+  const [username_border_color, set_username_border_color] =
+    useState<string>("");
   const [email_input_info, set_email_input_info] = useState<EmailInputInfo>({});
   const email_schema = z.string().email();
   const [is_password_visible, set_is_password_visible] = useState<InputNames>({
@@ -131,41 +143,106 @@ const SignUp: FC = () => {
 
   // Checking username validity
   useEffect(() => {
-    const profanity_filter = new Filter();
+    let timer: NodeJS.Timeout | undefined;
 
     if (form_data.username !== "") {
-      if (form_data.username.length < 3) {
-        set_username_status("имя должно иметь не менее 3 символов");
-      } else if (form_data.username.length > 256) {
-        set_username_status("имя не должно иметь более 256 символов");
-      } else if (profanity_filter.isProfane(form_data.username)) {
-        set_username_status("имя не соответствует правилам платформы");
-      } else if (form_data.username.includes(" ")) {
-        set_username_status("имя содержит запрещенный символ");
-      } else if (form_data.username === "user1") {
-        set_username_status("это имя уже занято");
+      if (timer) {
+        clearTimeout(timer);
+      }
+      const is_data_correct = check_username_correctness(form_data.username);
+
+      if (is_data_correct) {
+        set_username_check_progress("pending");
+        ref_username_check_progress.current = "pending";
+        timer = setTimeout(() => {
+          const check_existence = async () => {
+            const username_exists = await check_is_username_exists(
+              form_data.username
+            );
+
+            if (ref_username_check_progress.current !== "pending") {
+              return;
+            }
+
+            if (username_exists) {
+              set_username_status("это имя уже занято");
+              set_username_check_progress("unacceptable");
+              ref_username_check_progress.current = "unacceptable";
+            } else {
+              set_username_status("имя свободно");
+              set_username_check_progress("approved");
+              ref_username_check_progress.current = "approved";
+            }
+          };
+
+          check_existence();
+        }, 500);
       } else {
-        set_username_status("имя свободно");
+        set_username_check_progress("unacceptable");
+        ref_username_check_progress.current = "unacceptable";
       }
     } else {
+      if (timer) {
+        clearTimeout(timer);
+      }
       set_username_status("");
+      set_username_check_progress("");
     }
+
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
   }, [form_data.username]);
 
-  // useEffect(() => {
-  //   const is_username_exists = async (username: string) => {
-  //     try {
-  //       const response = await axios.get(
-  //         `${API_URL}/open/username_status?username=${username}`
-  //       );
-  //       console.log(response);
-  //     } catch (error) {
-  //       console.error(error);
-  //     }
-  //   };
+  const check_username_correctness = (username: string) => {
+    if (!forbidden_symbols.test(username)) {
+      set_username_status("имя содержит запрещенный символ");
+      return false;
+    }
+    if (username.length < 3) {
+      set_username_status("имя должно иметь не менее 3 символов");
+      return false;
+    }
+    if (username.length > 256) {
+      set_username_status("имя не должно иметь более 256 символов");
+      return false;
+    }
+    if (!forbidden_symbols.test(username)) {
+      set_username_status("имя содержит запрещенный символ");
+      return false;
+    }
+    return true;
+  };
 
-  //   is_username_exists("user1");
-  // }, []);
+  const check_is_username_exists = async (username: string) => {
+    try {
+      const response = await axios.get<UsernameExistence>(
+        `${API_URL}/username_status?username=${username}`
+      );
+      return response.data.exists;
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    switch (username_check_porgress) {
+      case "":
+        set_username_border_color("");
+        break;
+      case "unacceptable":
+        set_username_border_color(`1px solid ${colors.warning}`);
+        break;
+      case "pending":
+        set_username_border_color("");
+        break;
+      case "approved":
+        set_username_border_color(`1px solid ${colors.success}`);
+        break;
+    }
+  }, [username_check_porgress]);
 
   // Checking email validity
   useEffect(() => {
@@ -273,6 +350,7 @@ const SignUp: FC = () => {
       }
     } else {
       set_password_status("");
+      set_input_disabled(true);
     }
   }, [form_data.password]);
 
@@ -291,12 +369,14 @@ const SignUp: FC = () => {
         });
       }
     }
-  }, [form_data.confirm_password]);
+  }, [form_data.confirm_password, form_data.password]);
 
   // Handling click on the eye icon
   const on_eye_click = (input_name: InputName) => {
-    if (input_disabled) {
-      return;
+    if (input_name === "confirm_password") {
+      if (input_disabled) {
+        return;
+      }
     }
     set_is_password_visible((prev) => ({
       ...prev,
@@ -353,7 +433,7 @@ const SignUp: FC = () => {
           <p className={styles.p_join_us}>присоединяйтесь к сообществу</p>
           <h1 className={styles.title}>
             HARMONY<span>.</span>
-            <br />
+            {/* <br /> */}
             SPHERE
           </h1>
           <h2 className={styles.tagline}>
@@ -373,37 +453,37 @@ const SignUp: FC = () => {
                   onChange={handle_change}
                   className={styles.sign_up_input}
                   style={{
-                    border: `${
-                      form_data.username !== ""
-                        ? username_status === "имя свободно"
-                          ? `1px solid ${colors.success}`
-                          : `1px solid ${colors.warning}`
-                        : ""
-                    }`,
+                    border: `${username_border_color}`,
                   }}
                   required
                 />
               </div>
-              {form_data.username !== "" && (
-                <div className={styles.input_info}>
-                  <div>
-                    {username_status === "имя свободно" ? (
-                      <GoCheckCircleFill className={styles.success_icon} />
-                    ) : (
-                      <FaTriangleExclamation className={styles.warning_icon} />
-                    )}
-                  </div>
-                  <p
-                    className={`${styles.info_message} ${
-                      username_status === "имя свободно"
-                        ? styles.info_success
-                        : styles.info_warning
-                    }`}
-                  >
-                    {username_status}
-                  </p>
-                </div>
+              {username_check_porgress === "pending" && (
+                <div className={styles.loader}></div>
               )}
+              {form_data.username !== "" &&
+                username_check_porgress !== "pending" && (
+                  <div className={styles.input_info}>
+                    <div>
+                      {username_check_porgress === "approved" ? (
+                        <GoCheckCircleFill className={styles.success_icon} />
+                      ) : (
+                        <FaTriangleExclamation
+                          className={styles.warning_icon}
+                        />
+                      )}
+                    </div>
+                    <p
+                      className={`${styles.info_message} ${
+                        username_check_porgress === "approved"
+                          ? styles.info_success
+                          : styles.info_warning
+                      }`}
+                    >
+                      {username_status}
+                    </p>
+                  </div>
+                )}
             </div>
             <div className={styles.input_block}>
               <div className={styles.input_container}>
@@ -532,7 +612,10 @@ const SignUp: FC = () => {
                 </>
               )}
             </div>
-            <div className={styles.input_block}>
+            <div
+              className={styles.input_block}
+              style={{ opacity: `${input_disabled ? "0.5" : "1"}` }}
+            >
               <div className={styles.input_container}>
                 <input
                   type={input_type.confirm_password}
@@ -541,9 +624,6 @@ const SignUp: FC = () => {
                   placeholder="Подтвердите пароль"
                   className={styles.sign_up_input}
                   style={{
-                    backgroundColor: `${
-                      input_disabled ? "#dfdfdf" : "#fffcfa"
-                    }`,
                     border: `${
                       form_data.confirm_password !== ""
                         ? confirm_password_info.success
