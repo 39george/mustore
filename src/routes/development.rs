@@ -1,17 +1,23 @@
 use anyhow::Context;
 use axum::extract::DefaultBodyLimit;
 use axum::extract::Multipart;
+use axum::extract::Query;
 use axum::extract::State;
 use axum::routing;
-use axum::Json;
 use axum::Router;
+use fred::interfaces::KeysInterface;
+use fred::interfaces::ServerInterface;
+use fred::types::Scanner;
+use futures::TryStreamExt;
 use http::StatusCode;
 use reqwest::multipart::Form;
 use reqwest::multipart::Part;
 use serde::Deserialize;
+use utoipa::IntoParams;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
+use crate::domain::upload_request::UploadRequest;
 use crate::service_providers::object_storage::presigned_post_form::PresignedPostData;
 use crate::startup::AppState;
 use crate::types::data_size::DataSizes;
@@ -29,13 +35,22 @@ pub struct InputWithFiles {
     presigned_post_form: PresignedPostData,
 }
 
+#[derive(Deserialize, IntoParams)]
+pub struct DbNumber {
+    /// Number of redis database
+    number: u8,
+}
+
 // ───── Handlers ─────────────────────────────────────────────────────────── //
-pub fn user_router() -> Router {
-    Router::new().route(
-        "/upload",
-        routing::post(upload_file)
-            .layer(DefaultBodyLimit::max(5.gb_to_bytes())),
-    )
+pub fn user_router(state: AppState) -> Router {
+    Router::new()
+        .route(
+            "/upload",
+            routing::post(upload_file)
+                .layer(DefaultBodyLimit::max(5.gb_to_bytes())),
+        )
+        .route("/cleanup", routing::post(cleanup))
+        .with_state(state)
 }
 
 /// Upload a file using presigned post form.
@@ -53,11 +68,9 @@ pub fn user_router() -> Router {
             description = "Successfull uploaded file"
         ),
         (status = 500, description = "Some internall error"),
-        (status = 403, description = "Forbidden")
     ),
     tag = "development"
 )]
-#[axum::debug_handler]
 #[tracing::instrument(name = "Upload file to object storage", skip_all)]
 async fn upload_file(
     mut multipart: Multipart,
@@ -105,4 +118,62 @@ async fn upload_file(
         .await
         .context("Failed to get text from response")?;
     Ok((status, text))
+}
+
+/// Clear redis uploads, and object storage hanging uploads.
+#[utoipa::path(
+    post,
+    path = "/api/cleanup",
+    params(
+        DbNumber
+    ),
+    responses(
+        (status = 200, description = "Successfull cleanup"),
+        (status = 500, description = "Some internall error"),
+    ),
+    tag = "development"
+)]
+#[tracing::instrument(name = "Cleanup redis && s3", skip_all)]
+async fn cleanup(
+    Query(DbNumber { number }): Query<DbNumber>,
+    State(app_state): State<AppState>,
+) -> Result<StatusCode, ResponseError> {
+    let client = app_state.redis_pool.next();
+    client.select(number).await.context("Failed to select db")?;
+    let obj_storage = app_state.object_storage;
+    let pattern = "upload_request*";
+    let mut scan = client.scan(pattern, None, None);
+    while let Ok(Some(mut page)) = scan.try_next().await {
+        if let Some(keys) = page.take_results() {
+            for key in keys.into_iter() {
+                match client.del::<u32, &fred::types::RedisKey>(&key).await {
+                    Ok(count) => {
+                        tracing::info!("{:?} is deleted", key);
+                        if count != 1 {
+                            tracing::error!("Strange deletion result, should be 1, but got {count}");
+                        }
+                    }
+                    Err(e) => {
+                        tracing::error!("Failed to delete key from redis: {e}");
+                        continue;
+                    }
+                }
+                if let Some(upload_request_key) = key.into_string() {
+                    let object_key = upload_request_key
+                        .parse::<UploadRequest>()
+                        .context("Failed to parse upload request key")?
+                        .object_key;
+                    match obj_storage.delete_object_by_key(&object_key).await {
+                                        Ok(()) => tracing::info!("Object with key {object_key} is successfully deleted from obj storage"),
+                                        Err(e) => tracing::warn!("Failed to delete object with key {object_key} from object storage: {e}"),
+                                    }
+                }
+            }
+        }
+        if let Err(e) = page.next() {
+            tracing::error!("Failed to get next page: {e}");
+            break;
+        }
+    }
+    Ok(StatusCode::OK)
 }
