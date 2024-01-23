@@ -13,7 +13,6 @@ use crate::domain::*;
 pub struct ObjKey(
     #[garde(
         length(min = OBJ_KEY_MIN_LEN, max = OBJ_KEY_MAX_LEN),
-        custom(forbidden_characters),
         custom(contains_no_control_characters)
     )]
     String,
@@ -112,7 +111,7 @@ pub struct MusicProduct {
     #[garde(range(min = MIN_AUDIO_DURATION_SEC, max = MAX_AUDIO_DURATION_SEC))]
     pub duration: i16,
     #[garde(skip)]
-    pub key: MusicKey,
+    pub music_key: MusicKey,
 }
 
 #[derive(Serialize, Deserialize, Debug, Validate)]
