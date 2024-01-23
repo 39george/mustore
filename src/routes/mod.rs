@@ -6,6 +6,7 @@ use http::StatusCode;
 use crate::auth::AuthError;
 use crate::error_chain_fmt;
 use crate::routes::protected::user::MAX_SIZES;
+use crate::service_providers::object_storage::ObjectStorageError;
 
 pub mod development;
 pub mod health_check;
@@ -14,6 +15,8 @@ pub mod protected;
 
 #[derive(thiserror::Error)]
 pub enum ResponseError {
+    #[error(transparent)]
+    ObjectStorageError(#[from] ObjectStorageError),
     #[error(transparent)]
     UnexpectedError(#[from] anyhow::Error),
     #[error("Internal error")]
@@ -42,7 +45,8 @@ impl IntoResponse for ResponseError {
     fn into_response(self) -> Response {
         tracing::error!("{:?}", self);
         match self {
-            ResponseError::UnexpectedError(_) => {
+            ResponseError::UnexpectedError(_)
+            | ResponseError::ObjectStorageError(_) => {
                 StatusCode::INTERNAL_SERVER_ERROR.into_response()
             }
             ResponseError::InternalError(_) => {

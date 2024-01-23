@@ -6,16 +6,35 @@ use std::time::Duration;
 use anyhow::Context;
 use aws_config::{BehaviorVersion, Region};
 use aws_sdk_s3::config::Credentials;
+use aws_sdk_s3::operation::head_object::HeadObjectOutput;
 use aws_sdk_s3::presigning::PresigningConfig;
 use aws_sdk_s3::primitives::ByteStream;
 use aws_sdk_s3::primitives::SdkBody;
 use aws_sdk_s3::Client;
 use secrecy::ExposeSecret;
 
-use self::presigned_post_form::PresignedPostData;
 use crate::config::ObjectStorageSettings;
+use crate::error_chain_fmt;
+
+use self::presigned_post_form::PresignedPostData;
 
 pub mod presigned_post_form;
+
+#[derive(thiserror::Error)]
+pub enum ObjectStorageError {
+    #[error(transparent)]
+    SdkError(#[from] anyhow::Error),
+    #[error(transparent)]
+    PresignedPostFormError(#[from] presigned_post_form::Error),
+    #[error("Key is wrong: {0}")]
+    BadObjectKeyError(String),
+}
+
+impl std::fmt::Debug for ObjectStorageError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        error_chain_fmt(self, f)
+    }
+}
 
 /// Handle to work with object storage.
 /// Client internally uses Arc, so clone is ok.
@@ -81,7 +100,7 @@ impl ObjectStorage {
         }
     }
 
-    /// Uploads a file to Yandex Object Storage.
+    /// Uploads a file to Object Storage.
     ///
     /// This method takes a file name and bytes, uploads them to the configured bucket, and
     /// returns the URI of the newly uploaded object.
@@ -90,7 +109,7 @@ impl ObjectStorage {
         key: &str,
         bytes: Vec<u8>,
         mediatype: mediatype::MediaType<'a>,
-    ) -> Result<(), anyhow::Error> {
+    ) -> Result<(), ObjectStorageError> {
         let _put_response = self
             .client
             .put_object()
@@ -108,6 +127,58 @@ impl ObjectStorage {
         Ok(())
     }
 
+    /// Moves a file to `received` folder from 'upload', returns a new key.
+    pub async fn receive(
+        &self,
+        key: &str,
+    ) -> Result<String, ObjectStorageError> {
+        let new_key = match key.strip_prefix("upload/") {
+            Some(rest) => format!("received/{}", rest),
+            None => {
+                return Err(ObjectStorageError::BadObjectKeyError(format!(
+                    "Key starts not with 'upload/', cant receive it: {}",
+                    key
+                )));
+            }
+        };
+        let _copy_response = self
+            .client
+            .copy_object()
+            .bucket(&self.settings.bucket_name)
+            .copy_source(format!("{}/{key}", &self.settings.bucket_name))
+            .key(&new_key)
+            .send()
+            .await
+            .context("Failed to copy object to the 'received/' directory")?;
+
+        let _delete_response = self
+            .client
+            .delete_object()
+            .bucket(&self.settings.bucket_name)
+            .key(key)
+            .send()
+            .await
+            .context("Failed to delete old object from 'upload/' directory")?;
+
+        Ok(new_key)
+    }
+
+    /// Retrieves object meta info and returns it.
+    pub async fn get_object_meta(
+        &self,
+        key: &str,
+    ) -> Result<HeadObjectOutput, ObjectStorageError> {
+        let head_response = self
+            .client
+            .head_object()
+            .bucket(&self.settings.bucket_name)
+            .key(key)
+            .send()
+            .await
+            .context("Failed to retrieve object meta by key")?;
+        Ok(head_response)
+    }
+
     /// Generates a pre-signed URL for accessing an object stored in Yandex Object Storage.
     ///
     /// This method creates a pre-signed URL which clients can use to directly access an object in
@@ -116,7 +187,7 @@ impl ObjectStorage {
         &self,
         key: &str,
         expiration: Duration,
-    ) -> Result<String, anyhow::Error> {
+    ) -> Result<String, ObjectStorageError> {
         // Construct a presigning config with the desired expiration time for the link.
         let presigning_config = PresigningConfig::builder()
             .expires_in(expiration)
@@ -129,7 +200,8 @@ impl ObjectStorage {
             .bucket(&self.settings.bucket_name)
             .key(key)
             .presigned(presigning_config)
-            .await?;
+            .await
+            .context("Failed to generate presigned url")?;
 
         Ok(presigned_request.uri().to_string())
     }
@@ -139,7 +211,7 @@ impl ObjectStorage {
         object_key: &str,
         mime: mediatype::MediaTypeBuf,
         max: u64,
-    ) -> Result<PresignedPostData, anyhow::Error> {
+    ) -> Result<PresignedPostData, ObjectStorageError> {
         let form = PresignedPostData::builder(
             &self.settings.secret_access_key.expose_secret(),
             &self.settings.access_key_id.expose_secret(),
@@ -151,19 +223,18 @@ impl ObjectStorage {
         .with_content_length_range(0, max)
         .with_mime(mime.to_ref());
 
-        form.build()
-            .context("Failed to generate presigned post form")
+        Ok(form.build()?)
     }
 
     /// Deletes an object from the bucket specified by the object's URI.
     pub async fn delete_object_by_key(
         &self,
         key: &str,
-    ) -> Result<(), anyhow::Error> {
+    ) -> Result<(), ObjectStorageError> {
         // Make sure something was actually extracted to prevent erroneous deletions
         if key.is_empty() || key == "/" {
-            return Err(anyhow::Error::msg(
-                "Invalid object URI provided for deletion",
+            return Err(ObjectStorageError::BadObjectKeyError(
+                "Invalid object key provided for deletion".to_string(),
             ));
         }
 
