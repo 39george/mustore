@@ -4,6 +4,7 @@ pub mod music_parameters;
 pub mod requests;
 pub mod responses;
 pub mod signup_token;
+pub mod upload_request;
 pub mod user_candidate;
 pub mod user_email;
 pub mod user_name;
