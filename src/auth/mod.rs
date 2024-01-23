@@ -8,6 +8,7 @@ use axum::response::Response;
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
 use crate::error_chain_fmt;
+use crate::service_providers::object_storage::ObjectStorageError;
 
 // ───── Submodules ───────────────────────────────────────────────────────── //
 
@@ -20,6 +21,8 @@ pub mod users;
 
 #[derive(thiserror::Error)]
 pub enum AuthError {
+    #[error(transparent)]
+    ObjectStorageError(#[from] ObjectStorageError),
     #[error("Failed to parse credentials: {0}")]
     ValidationError(#[source] anyhow::Error),
     #[error("Invalid credentials: {0}")]
@@ -48,7 +51,8 @@ impl IntoResponse for AuthError {
                 .status(StatusCode::BAD_REQUEST)
                 .body(Body::from(e.to_string()))
                 .unwrap_or(StatusCode::BAD_REQUEST.into_response()),
-            AuthError::UnexpectedError(_) => {
+            AuthError::UnexpectedError(_)
+            | AuthError::ObjectStorageError(_) => {
                 StatusCode::INTERNAL_SERVER_ERROR.into_response()
             }
             AuthError::InternalError(_) => {
