@@ -20,6 +20,7 @@ use crate::cornucopia::types::public::Objecttype;
 use crate::domain::requests::creator_access::CreateOfferRequest;
 use crate::domain::requests::creator_access::SubmitProductRequest;
 use crate::domain::requests::creator_access::SubmitServiceRequest;
+use crate::domain::upload_request::UploadRequest;
 use crate::error_chain_fmt;
 use crate::routes::ResponseError;
 use crate::startup::AppState;
@@ -93,6 +94,8 @@ async fn submit_product(
 
     req.validate(&()).map_err(ResponseError::ValidationError)?;
 
+    let s3 = app_state.object_storage;
+
     let (product, music_product, lyric, sex) = match req {
         SubmitProductRequest::Beat {
             product,
@@ -129,6 +132,16 @@ async fn submit_product(
     )
     .await?;
 
+    // Check that keys are exist
+    for &key in object_keys.iter() {
+        let meta = s3
+            .get_object_meta(key)
+            .await
+            .map_err(ResponseError::ObjectStorageError)?;
+        // TODO: remove dbg here
+        dbg!(meta);
+    }
+
     let mut db_client = app_state
         .pg_pool
         .get()
@@ -158,7 +171,9 @@ async fn submit_product(
     creator_access::insert_product_cover_object_key()
         .bind(
             &transaction,
-            &product.cover_object_key.as_ref(),
+            &s3.receive(product.cover_object_key.as_ref())
+                .await
+                .map_err(ResponseError::ObjectStorageError)?,
             &product_id,
         )
         .await
@@ -195,7 +210,7 @@ async fn submit_product(
                     &music_product.primary_genre,
                     &music_product.secondary_genre,
                     &music_product.tempo,
-                    &music_product.key.clone().into(),
+                    &music_product.music_key.clone().into(),
                     &music_product.duration,
                 )
                 .one()
@@ -213,7 +228,7 @@ async fn submit_product(
                     &music_product.secondary_genre,
                     &sex.to_string(),
                     &music_product.tempo,
-                    &music_product.key.clone().into(),
+                    &music_product.music_key.clone().into(),
                     &music_product.duration,
                     &lyric.as_ref(),
                 )
@@ -223,6 +238,7 @@ async fn submit_product(
                 .map_err(ResponseError::UnexpectedError)?;
             (None, Some(song_id))
         }
+        // TODO: doc, why this is unreachable
         _ => unreachable!(),
     };
 
@@ -230,7 +246,9 @@ async fn submit_product(
         creator_access::insert_music_product_master_object_key()
             .bind(
                 &transaction,
-                &music_product.master_object_key.as_ref(),
+                &s3.receive(music_product.master_object_key.as_ref())
+                    .await
+                    .map_err(ResponseError::ObjectStorageError)?,
                 &song_id,
                 &beat_id,
             )
@@ -240,7 +258,14 @@ async fn submit_product(
 
         if let Some(ref tagged_key) = music_product.master_tagged_object_key {
             creator_access::insert_music_product_master_tagged_object_key()
-                .bind(&transaction, &tagged_key.as_ref(), &song_id, &beat_id)
+                .bind(
+                    &transaction,
+                    &s3.receive(tagged_key.as_ref())
+                        .await
+                        .map_err(ResponseError::ObjectStorageError)?,
+                    &song_id,
+                    &beat_id,
+                )
                 .await
                 .context("Failed to insert song_master_object_key into pg")
                 .map_err(ResponseError::UnexpectedError)?;
@@ -249,7 +274,9 @@ async fn submit_product(
         creator_access::insert_music_product_multitrack_object_key()
             .bind(
                 &transaction,
-                &music_product.multitrack_object_key.as_ref(),
+                &s3.receive(music_product.multitrack_object_key.as_ref())
+                    .await
+                    .map_err(ResponseError::ObjectStorageError)?,
                 &song_id,
                 &beat_id,
             )
@@ -297,6 +324,8 @@ async fn submit_service(
 
     req.validate(&()).map_err(ResponseError::ValidationError)?;
 
+    let s3 = app_state.object_storage;
+
     let (service, genres) = match &req {
         SubmitServiceRequest::Mixing(ref music_service)
         | SubmitServiceRequest::BeatWriting(ref music_service)
@@ -320,6 +349,16 @@ async fn submit_service(
         user.id,
     )
     .await?;
+
+    // Check that keys are exist
+    for &key in object_keys.iter() {
+        let meta = s3
+            .get_object_meta(key)
+            .await
+            .map_err(ResponseError::ObjectStorageError)?;
+        // TODO: remove dbg here
+        dbg!(meta);
+    }
 
     let mut db_client = app_state
         .pg_pool
@@ -347,6 +386,18 @@ async fn submit_service(
         .context("Failed to insert service data into the pg")
         .map_err(ResponseError::UnexpectedError)?;
 
+    creator_access::insert_service_cover_object_key()
+        .bind(
+            &transaction,
+            &s3.receive(service.cover_object_key.as_ref())
+                .await
+                .map_err(ResponseError::ObjectStorageError)?,
+            &service_id,
+        )
+        .await
+        .context("Failed to insert service cover object key into the pg")
+        .map_err(ResponseError::UnexpectedError)?;
+
     let (mixing_id, beat_writing_id, song_writing_id) = match req {
         SubmitServiceRequest::Mixing(_) => {
             let id = creator_access::insert_mixing()
@@ -357,7 +408,14 @@ async fn submit_service(
                 .map_err(ResponseError::UnexpectedError)?;
             for key in service.credits_object_keys.iter().flatten() {
                 creator_access::insert_mixing_credit_object_key()
-                    .bind(&transaction, &key.as_ref(), &Objecttype::audio, &id)
+                    .bind(
+                        &transaction,
+                        &s3.receive(key.as_ref())
+                            .await
+                            .map_err(ResponseError::ObjectStorageError)?,
+                        &Objecttype::audio,
+                        &id,
+                    )
                     .await
                     .context("Failed to insert mixing credit into the pg")
                     .map_err(ResponseError::UnexpectedError)?;
@@ -373,7 +431,14 @@ async fn submit_service(
                 .map_err(ResponseError::UnexpectedError)?;
             for key in service.credits_object_keys.iter().flatten() {
                 creator_access::insert_song_writing_credit_object_key()
-                    .bind(&transaction, &key.as_ref(), &Objecttype::audio, &id)
+                    .bind(
+                        &transaction,
+                        &s3.receive(key.as_ref())
+                            .await
+                            .map_err(ResponseError::ObjectStorageError)?,
+                        &Objecttype::audio,
+                        &id,
+                    )
                     .await
                     .context("Failed to insert song writing credit into the pg")
                     .map_err(ResponseError::UnexpectedError)?;
@@ -389,7 +454,14 @@ async fn submit_service(
                 .map_err(ResponseError::UnexpectedError)?;
             for key in service.credits_object_keys.iter().flatten() {
                 creator_access::insert_beat_writing_credit_object_key()
-                    .bind(&transaction, &key.as_ref(), &Objecttype::audio, &id)
+                    .bind(
+                        &transaction,
+                        &s3.receive(key.as_ref())
+                            .await
+                            .map_err(ResponseError::ObjectStorageError)?,
+                        &Objecttype::audio,
+                        &id,
+                    )
                     .await
                     .context("Failed to insert beat writing credit into the pg")
                     .map_err(ResponseError::UnexpectedError)?;
@@ -413,7 +485,14 @@ async fn submit_service(
                 .map_err(ResponseError::UnexpectedError)?;
             for key in service.credits_object_keys.iter().flatten() {
                 creator_access::insert_cover_design_credit_object_key()
-                    .bind(&transaction, &key.as_ref(), &Objecttype::image, &id)
+                    .bind(
+                        &transaction,
+                        &s3.receive(key.as_ref())
+                            .await
+                            .map_err(ResponseError::ObjectStorageError)?,
+                        &Objecttype::image,
+                        &id,
+                    )
                     .await
                     .context("Failed to insert cover design credit into the pg")
                     .map_err(ResponseError::UnexpectedError)?;
@@ -500,8 +579,8 @@ async fn verify_upload_request_data_in_redis(
     user_id: i32,
 ) -> RedisResult<()> {
     for obj_key in obj_keys.into_iter() {
-        let key = format!("upload_request:{}:{}", user_id, obj_key);
-        let _created_at: String = con.get(&key).await?;
+        let upload_request = UploadRequest::new(user_id, obj_key);
+        let _created_at: String = con.get(&upload_request.to_string()).await?;
     }
     Ok(())
 }
@@ -516,8 +595,8 @@ async fn delete_upload_request_data_from_redis(
     user_id: i32,
 ) -> RedisResult<()> {
     for obj_key in obj_keys.into_iter() {
-        let key = format!("upload_request:{}:{}", user_id, obj_key);
-        con.del(&key).await?;
+        let upload_request = UploadRequest::new(user_id, obj_key);
+        con.del(&upload_request.to_string()).await?;
     }
     Ok(())
 }
