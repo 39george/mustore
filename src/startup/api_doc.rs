@@ -6,10 +6,13 @@ use utoipa::{
     Modify, OpenApi,
 };
 
-use crate::auth::{self, users::Permission};
 use crate::routes::development;
 use crate::routes::open;
 use crate::routes::protected;
+use crate::{
+    auth::{self, users::Permission},
+    routes::development::DbNumber,
+};
 
 // ───── ErrorResponses ───────────────────────────────────────────────────── //
 
@@ -156,7 +159,8 @@ impl Modify for ServerAddon {
         protected::admin::health_check,
         protected::user::user_permissions,
         protected::user::request_obj_storage_upload,
-        development::upload_file
+        development::upload_file,
+        development::cleanup
         ),
         components(
             schemas(
@@ -176,7 +180,7 @@ impl Modify for ServerAddon {
                 GetRecommendedSongsResponse,
                 Password,
                 crate::service_providers::object_storage::presigned_post_form::PresignedPostData,
-                MediaType
+                MediaType,
             ),
             responses(
                 InternalErrorResponse,
