@@ -189,7 +189,7 @@ pub mod get {
         ),
         responses(
             (status = 200, response = IsExistsResponse),
-            (status = 417, response = BadRequestResponse),
+            (status = 400, response = BadRequestResponse),
             (status = 500, response = InternalErrorResponse)
         ),
         tag = "open"
