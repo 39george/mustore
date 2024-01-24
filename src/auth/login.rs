@@ -193,6 +193,8 @@ pub mod get {
     }
 
     /// Check if username is occupied
+    ///
+    /// Queried username is logged.
     #[utoipa::path(
         get,
         path = "/api/username_status",
@@ -206,8 +208,9 @@ pub mod get {
         ),
         tag = "open"
     )]
+    #[tracing::instrument(name = "Get username status", skip(app_state))]
     pub async fn username_status(
-        Query(username): Query<Username>,
+        Query(Username { username }): Query<Username>,
         State(app_state): State<AppState>,
     ) -> Result<Json<HashMap<&'static str, bool>>, AuthError> {
         let pg_client = app_state
@@ -217,11 +220,11 @@ pub mod get {
             .context("Failed to get  pg connection from pool")
             .map_err(AuthError::InternalError)?;
 
-        let _ = crate::domain::user_name::UserName::parse(&username.username)
+        let _ = crate::domain::user_name::UserName::parse(&username)
             .map_err(AuthError::ValidationError)?;
 
         let exists = user_auth_queries::check_if_username_occupied()
-            .bind(&pg_client, &username.username)
+            .bind(&pg_client, &username)
             .opt()
             .await
             .context("Failed to get username from pg")?;
