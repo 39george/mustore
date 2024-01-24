@@ -60,7 +60,7 @@ pub struct UserSignupData {
 
 /// Create a new user account
 ///
-/// All lines of the doc comment will be included to operation description.
+/// Username and email are logged.
 #[utoipa::path(
     post,
     path = "/api/signup",
@@ -75,7 +75,10 @@ pub struct UserSignupData {
     ),
     tag = "open"
 )]
-#[tracing::instrument(name = "Signup attempt", skip_all)]
+#[tracing::instrument(
+    name = "Signup attempt",
+    skip(app_state, password, user_role, admin_token)
+)]
 pub async fn signup(
     State(app_state): State<AppState>,
     Form(UserSignupData {
