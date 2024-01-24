@@ -1,21 +1,18 @@
 import { useCallback, useEffect, useState } from "react";
 import { API_URL } from "../config";
 import axios, { AxiosError } from "axios";
+import { handle_axios_error, wait } from "../helpers/helpers";
 
-// const MAX_RETRIES = 5;
-// const RETRY_DELAY_MS = 1000;
-const MAX_RETRIES = 1;
-const RETRY_DELAY_MS = 100;
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 1000;
+// const MAX_RETRIES = 1;
+// const RETRY_DELAY_MS = 100;
 
 type GenreOrMood = string[];
 
 const useGenresMoodsApi = (endpoint: string) => {
   const [data, set_data] = useState<GenreOrMood>([]);
   const [error, set_error] = useState<string | null>(null);
-
-  const wait = (ms: number) => {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  };
 
   const fetch_data = useCallback(
     async (attempts: number = 1) => {
@@ -41,7 +38,7 @@ const useGenresMoodsApi = (endpoint: string) => {
               await wait(RETRY_DELAY_MS);
               fetch_data(attempts + 1);
             } else {
-              handle_axios_error(error);
+              handle_axios_error(error, set_error);
             }
           } else if (error.request) {
             if (attempts < MAX_RETRIES) {
@@ -63,22 +60,22 @@ const useGenresMoodsApi = (endpoint: string) => {
     [endpoint]
   );
 
-  const handle_axios_error = (error: AxiosError) => {
-    if (error.response) {
-      switch (error.response.status) {
-        case 400:
-          console.error("Bad request.", error.message);
-          break;
-        case 500:
-          set_error("Что-то не так с нашим сервером, мы уже работаем над этим");
-          console.error("Server responded with error: ", error.message);
-          break;
-        default:
-          console.error("An unexpected error occured: ", error.message);
-          break;
-      }
-    }
-  };
+  // const handle_axios_error = (error: AxiosError) => {
+  //   if (error.response) {
+  //     switch (error.response.status) {
+  //       case 400:
+  //         console.error("Bad request.", error.message);
+  //         break;
+  //       case 500:
+  //         set_error("Что-то не так с нашим сервером, мы уже работаем над этим");
+  //         console.error("Server responded with error: ", error.message);
+  //         break;
+  //       default:
+  //         console.error("An unexpected error occured: ", error.message);
+  //         break;
+  //     }
+  //   }
+  // };
 
   useEffect(() => {
     let is_mounted = true;

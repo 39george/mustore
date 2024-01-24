@@ -50,3 +50,7 @@ export interface SongItem {
 export interface CheckedItems {
   [key: string]: boolean;
 }
+
+export interface UsernameExistence {
+  exists: boolean;
+}

@@ -5,13 +5,12 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import zxcvbn from "zxcvbn";
-import { API_URL } from "../config";
 import { RootState } from "../state/store";
 import { FaEye } from "react-icons/fa";
 import { TbEyeClosed } from "react-icons/tb";
 import { FaTriangleExclamation } from "react-icons/fa6";
 import { GoCheckCircleFill } from "react-icons/go";
-import axios from "axios";
+import useCheckUsernameExistnece from "../hooks/useCheckUsernameExistence";
 
 interface FromData {
   username: string;
@@ -38,13 +37,15 @@ type UsernameStatus =
   | "имя не должно иметь более 256 символов"
   | "это имя уже занято"
   | "имя содержит запрещенный символ"
+  | "нет ответа от сервера, пожалуйста, проверьте соединение с интернетом и попробуйте еще раз"
   | "имя свободно";
 
-type UsernameCheckProgress = "" | "unacceptable" | "pending" | "approved";
-
-interface UsernameExistence {
-  exists: boolean;
-}
+type UsernameCheckProgress =
+  | ""
+  | "unacceptable"
+  | "pending"
+  | "approved"
+  | "server_error";
 
 interface EmailInputInfo {
   success?: boolean;
@@ -99,6 +100,8 @@ const SignUp: FC = () => {
   const ref_username_check_progress = useRef<UsernameCheckProgress>("");
   const [username_border_color, set_username_border_color] =
     useState<string>("");
+  const { error: username_check_error, check_is_username_exists } =
+    useCheckUsernameExistnece();
   const [email_input_info, set_email_input_info] = useState<EmailInputInfo>({});
   const email_schema = z.string().email();
   const [is_password_visible, set_is_password_visible] = useState<InputNames>({
@@ -119,6 +122,7 @@ const SignUp: FC = () => {
   const [input_disabled, set_input_disabled] = useState(true);
   const [confirm_password_info, set_confirm_password_info] =
     useState<ConfirmPasswordInfo>({});
+  const [button_disabled, set_button_disabled] = useState(true);
   const [input_validity, set_input_validity] = useState({
     username: false,
     email: false,
@@ -156,22 +160,34 @@ const SignUp: FC = () => {
         ref_username_check_progress.current = "pending";
         timer = setTimeout(() => {
           const check_existence = async () => {
-            const username_exists = await check_is_username_exists(
+            // const username_data = await check_is_username_exists(
+            //   form_data.username
+            // );
+
+            const username_data = await check_is_username_exists(
               form_data.username
             );
 
             if (ref_username_check_progress.current !== "pending") {
               return;
             }
+            console.log(username_data);
 
-            if (username_exists) {
-              set_username_status("это имя уже занято");
-              set_username_check_progress("unacceptable");
-              ref_username_check_progress.current = "unacceptable";
+            if (username_data === null) {
+              set_username_status(
+                "нет ответа от сервера, пожалуйста, проверьте соединение с интернетом и попробуйте еще раз"
+              );
+              set_username_check_progress("server_error");
             } else {
-              set_username_status("имя свободно");
-              set_username_check_progress("approved");
-              ref_username_check_progress.current = "approved";
+              if (username_data?.exists) {
+                set_username_status("это имя уже занято");
+                set_username_check_progress("unacceptable");
+                ref_username_check_progress.current = "unacceptable";
+              } else {
+                set_username_status("имя свободно");
+                set_username_check_progress("approved");
+                ref_username_check_progress.current = "approved";
+              }
             }
           };
 
@@ -216,16 +232,17 @@ const SignUp: FC = () => {
     return true;
   };
 
-  const check_is_username_exists = async (username: string) => {
-    try {
-      const response = await axios.get<UsernameExistence>(
-        `${API_URL}/username_status?username=${username}`
-      );
-      return response.data.exists;
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  // const check_is_username_exists = async (username: string) => {
+  //   try {
+  //     const response = await axios.get<UsernameExistence>(
+  //       `${API_URL}/username_status?username=${username}`
+  //     );
+  //     return response.data.exists;
+  //   } catch (error) {
+  //     console.error(error);
+  //     return error;
+  //   }
+  // };
 
   useEffect(() => {
     switch (username_check_porgress) {
@@ -237,6 +254,9 @@ const SignUp: FC = () => {
         break;
       case "pending":
         set_username_border_color("");
+        break;
+      case "server_error":
+        set_username_border_color(`1px solid ${colors.warning}`);
         break;
       case "approved":
         set_username_border_color(`1px solid ${colors.success}`);
@@ -684,7 +704,17 @@ const SignUp: FC = () => {
                 </div>
               </div>
             </div> */}
-            <button type="submit">Присоединиться</button>
+            <button
+              type="submit"
+              disabled={button_disabled}
+              style={
+                button_disabled
+                  ? { opacity: "0.5", cursor: "default" }
+                  : { opacity: "1", cursor: "pointer" }
+              }
+            >
+              Присоединиться
+            </button>
           </form>
         </div>
       </div>
