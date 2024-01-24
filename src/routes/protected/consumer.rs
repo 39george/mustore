@@ -44,7 +44,7 @@ async fn health_check() -> StatusCode {
 }
 
 // TODO: implement function
-#[tracing::instrument(name = "Accept offer", skip_all)]
+#[tracing::instrument(name = "Accept offer", skip_all, fields(username))]
 async fn accept_offer(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
@@ -53,6 +53,7 @@ async fn accept_offer(
     let _user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
+    tracing::Span::current().record("username", &user.username);
 
     // Check that this offer is available for that user
     // We should check that user is participant of conversation

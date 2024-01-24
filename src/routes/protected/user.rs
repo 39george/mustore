@@ -144,7 +144,8 @@ async fn user_permissions(
 )]
 #[tracing::instrument(
     name = "Request post form data for obj store upload.",
-    skip_all
+    skip_all,
+    fields(username)
 )]
 async fn request_obj_storage_upload(
     auth_session: AuthSession,
@@ -154,6 +155,7 @@ async fn request_obj_storage_upload(
     let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
+    tracing::Span::current().record("username", &user.username);
 
     params.validate(&())?;
 
@@ -190,7 +192,11 @@ async fn request_obj_storage_upload(
     Ok(Json(presigned_post_data))
 }
 
-#[tracing::instrument(name = "Get ordinary conversations list", skip_all)]
+#[tracing::instrument(
+    name = "Get ordinary conversations list",
+    skip_all,
+    fields(username)
+)]
 async fn get_conversations(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
@@ -198,6 +204,7 @@ async fn get_conversations(
     let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
+    tracing::Span::current().record("username", &user.username);
 
     let db_client = app_state
         .pg_pool
@@ -214,7 +221,11 @@ async fn get_conversations(
     Ok(Json(entries))
 }
 
-#[tracing::instrument(name = "Get conversation id by user id", skip_all)]
+#[tracing::instrument(
+    name = "Get conversation id by user id",
+    skip_all,
+    fields(username)
+)]
 async fn get_conversation_id(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
@@ -225,6 +236,7 @@ async fn get_conversation_id(
     let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
+    tracing::Span::current().record("username", &user.username);
 
     let db_client = app_state
         .pg_pool
@@ -241,7 +253,11 @@ async fn get_conversation_id(
     Ok(Json(conversation_id))
 }
 
-#[tracing::instrument(name = "Create new conversation", skip_all)]
+#[tracing::instrument(
+    name = "Create new conversation",
+    skip_all,
+    fields(username, with_user_id)
+)]
 async fn create_new_conversation(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
@@ -252,6 +268,7 @@ async fn create_new_conversation(
     let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
+    tracing::Span::current().record("username", &user.username);
 
     let mut db_client = app_state
         .pg_pool
@@ -289,7 +306,7 @@ async fn create_new_conversation(
     }
 }
 
-#[tracing::instrument(name = "Send a message", skip_all)]
+#[tracing::instrument(name = "Send a message", skip_all, fields(username))]
 async fn send_message(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
@@ -298,6 +315,7 @@ async fn send_message(
     let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
+    tracing::Span::current().record("username", &user.username);
 
     params.validate(&())?;
 
@@ -350,7 +368,7 @@ async fn send_message(
     Ok(StatusCode::CREATED)
 }
 
-#[tracing::instrument(name = "List conversation", skip_all)]
+#[tracing::instrument(name = "List conversation", skip_all, fields(username))]
 async fn list_conversation(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
@@ -362,6 +380,7 @@ async fn list_conversation(
     let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
+    tracing::Span::current().record("username", &user.username);
 
     let db_client = app_state
         .pg_pool

@@ -82,7 +82,11 @@ async fn health_check() -> StatusCode {
     StatusCode::OK
 }
 
-#[tracing::instrument(name = "Submit a new product", skip_all)]
+#[tracing::instrument(
+    name = "Submit a new product",
+    skip_all,
+    fields(username)
+)]
 async fn submit_product(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
@@ -91,6 +95,7 @@ async fn submit_product(
     let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
+    tracing::Span::current().record("username", &user.username);
 
     req.validate(&()).map_err(ResponseError::ValidationError)?;
 
@@ -312,7 +317,7 @@ async fn submit_product(
     Ok(StatusCode::CREATED)
 }
 
-#[tracing::instrument(name = "Submit service", skip_all)]
+#[tracing::instrument(name = "Submit service", skip_all, fields(username))]
 async fn submit_service(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
@@ -321,6 +326,7 @@ async fn submit_service(
     let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
+    tracing::Span::current().record("username", &user.username);
 
     req.validate(&()).map_err(ResponseError::ValidationError)?;
 
@@ -534,7 +540,7 @@ async fn submit_service(
     Ok(StatusCode::CREATED)
 }
 
-#[tracing::instrument(name = "Create a new offer", skip_all)]
+#[tracing::instrument(name = "Create a new offer", skip_all, fields(username))]
 async fn create_offer(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
@@ -543,6 +549,7 @@ async fn create_offer(
     let _user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
+    tracing::Span::current().record("username", &user.username);
 
     let db_client = app_state
         .pg_pool
