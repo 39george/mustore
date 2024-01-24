@@ -50,7 +50,7 @@ async fn accept_offer(
     State(app_state): State<AppState>,
     Form(AcceptOffer { offer_id: _ }): Form<AcceptOffer>,
 ) -> Result<StatusCode, ResponseError> {
-    let _user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
+    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
     tracing::Span::current().record("username", &user.username);
