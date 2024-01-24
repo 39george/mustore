@@ -24,7 +24,7 @@ use crate::startup::AppState;
 
 // ───── Types ────────────────────────────────────────────────────────────── //
 
-#[derive(Clone, Deserialize, ToSchema)]
+#[derive(Clone, Debug, Deserialize, ToSchema)]
 pub struct Credentials {
     #[schema(
         min_length = 3,
@@ -90,6 +90,8 @@ pub mod post {
     use super::*;
 
     /// Login account
+    ///
+    /// Username is logged.
     #[utoipa::path(
         post,
         path = "/api/login",
@@ -109,7 +111,7 @@ pub mod post {
         ),
         tag = "open"
     )]
-    #[tracing::instrument(name = "Login attempt", skip_all)]
+    #[tracing::instrument(name = "Login attempt", skip(auth_session, creds), fields(username = %creds.username))]
     pub async fn login(
         mut auth_session: AuthSession,
         Json(creds): Json<Credentials>,
@@ -169,7 +171,15 @@ pub mod get {
         ),
         tag = "open"
     )]
+    #[tracing::instrument(
+        name = "Logout",
+        skip(auth_session),
+        fields(username)
+    )]
     pub async fn logout(mut auth_session: AuthSession) -> impl IntoResponse {
+        if let Some(ref user) = auth_session.user {
+            tracing::Span::current().record("username", &user.username);
+        }
         match auth_session.logout().await {
             // FIXME: write where to redirect to
             Ok(_) => Redirect::to("/").into_response(),
