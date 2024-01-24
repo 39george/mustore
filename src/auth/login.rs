@@ -162,6 +162,8 @@ pub mod get {
     use super::*;
 
     /// Log out from account
+    ///
+    /// Username is logged if exists.
     #[utoipa::path(
         get,
         path = "/api/logout",
