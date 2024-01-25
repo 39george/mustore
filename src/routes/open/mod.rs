@@ -11,9 +11,9 @@ use garde::Validate;
 
 use crate::auth::users::AuthSession;
 use crate::cornucopia::queries::open_access;
-use crate::cornucopia::queries::open_access::GetNewSongsResponse;
-use crate::cornucopia::queries::open_access::GetRecommendedSongsResponse;
-use crate::cornucopia::queries::open_access::GetSongsListResponse;
+use crate::cornucopia::queries::open_access::GetNewSongs;
+use crate::cornucopia::queries::open_access::GetRecommendedSongs;
+use crate::cornucopia::queries::open_access::GetSongsList;
 use crate::domain::requests::open_access::GetSongsListRequest;
 use crate::domain::requests::open_access::SongsAmount;
 use crate::domain::requests::open_access::Stats;
@@ -123,7 +123,7 @@ async fn get_values_list(
     ),
     responses(
         (status = 200, description = "Got songs successfully",
-            body = [GetSongsListResponse],
+            body = [GetSongsList],
             content_type = "application/json"
         ),
         (status = 400, response = BadRequestResponse),
@@ -137,7 +137,7 @@ async fn get_songs(
     axum_extra::extract::Query(params): axum_extra::extract::Query<
         GetSongsListRequest,
     >,
-) -> Result<Json<Vec<GetSongsListResponse>>, ResponseError> {
+) -> Result<Json<Vec<GetSongsList>>, ResponseError> {
     params.validate(&())?;
 
     let user_id = auth_session.user.map(|u| u.id);
@@ -180,7 +180,7 @@ async fn get_songs(
     ),
     responses(
         (status = 200, description = "Got songs successfully",
-            body = [GetNewSongsResponse],
+            body = [GetNewSongs],
             content_type = "application/json"
         ),
         (status = 400, response = BadRequestResponse),
@@ -195,7 +195,7 @@ async fn get_new_songs(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
     Query(amount): Query<SongsAmount>,
-) -> Result<Json<Vec<GetNewSongsResponse>>, ResponseError> {
+) -> Result<Json<Vec<GetNewSongs>>, ResponseError> {
     amount.validate(&())?;
 
     let user_id = auth_session.user.map(|u| u.id);
@@ -224,7 +224,7 @@ async fn get_new_songs(
     ),
     responses(
         (status = 200, description = "Got songs successfully",
-            body = [GetRecommendedSongsResponse],
+            body = [GetRecommendedSongs],
             content_type = "application/json"
         ),
         (status = 400, response = BadRequestResponse),
@@ -239,7 +239,7 @@ async fn get_recommended_songs(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
     Query(amount): Query<SongsAmount>,
-) -> Result<Json<Vec<GetRecommendedSongsResponse>>, ResponseError> {
+) -> Result<Json<Vec<GetRecommendedSongs>>, ResponseError> {
     amount.validate(&())?;
 
     let user_id = auth_session.user.map(|u| u.id);
