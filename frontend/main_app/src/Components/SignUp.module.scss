@@ -262,6 +262,101 @@
   border-radius: 0.375rem;
 }
 
+.account_types {
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  letter-spacing: 0;
+}
+
+.account_types_header {
+  span {
+    color: rgba($color: $main_dark, $alpha: 0.5);
+  }
+}
+
+.options_container {
+  margin-top: 1rem;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1em;
+  cursor: pointer;
+
+  input {
+    position: relative;
+    appearance: none;
+
+    width: 0.75rem;
+    height: 0.75rem;
+
+    border-radius: 50%;
+    border: 1px solid rgba($color: $main_dark, $alpha: 0.5);
+
+    transition: border 0.1s ease-out;
+    cursor: pointer;
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translateY(-50%) translateX(-50%);
+      width: 0.5rem;
+      height: 0.5rem;
+      background-color: $main_dark;
+      border-radius: 50%;
+      display: none;
+    }
+
+    &:checked {
+      border: 1px solid $main_dark;
+      &::after {
+        display: block;
+      }
+    }
+
+    &:hover {
+      border: 1px solid $main_dark;
+    }
+  }
+
+  &:hover {
+    input {
+      border: 1px solid $main_dark;
+    }
+    .account_type {
+      color: $main_dark;
+    }
+  }
+}
+
+.account_type {
+  margin-left: 0.5rem;
+  color: rgba($color: $main_dark, $alpha: 0.5);
+  cursor: pointer;
+  transition: color 0.1s ease-out;
+}
+
+.account_type_checked {
+  color: $main_dark;
+}
+
+.divider {
+  border: none;
+  width: 100%;
+  height: 1px;
+  margin-top: 0;
+  background-color: rgba($color: $main_dark, $alpha: 0.1);
+}
+
+.additional_info {
+  margin-top: 0.5em;
+  font-size: 0.75rem;
+  color: rgba($color: $main_dark, $alpha: 0.5);
+}
+
 // Loading circle
 .loader {
   width: 1.125rem;

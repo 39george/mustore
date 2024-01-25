@@ -67,6 +67,8 @@ interface ConfirmPasswordInfo {
   message?: string;
 }
 
+type OptionId = "option_creator" | "option_consumer" | null;
+
 const colors = {
   warning: "#EF0606",
   neutral: "#d9d9d9",
@@ -122,6 +124,7 @@ const SignUp: FC = () => {
   const [input_disabled, set_input_disabled] = useState(true);
   const [confirm_password_info, set_confirm_password_info] =
     useState<ConfirmPasswordInfo>({});
+  const [selected_option, set_selected_option] = useState<OptionId>(null);
   const [button_disabled, set_button_disabled] = useState(true);
   const [input_validity, set_input_validity] = useState({
     username: false,
@@ -160,10 +163,6 @@ const SignUp: FC = () => {
         ref_username_check_progress.current = "pending";
         timer = setTimeout(() => {
           const check_existence = async () => {
-            // const username_data = await check_is_username_exists(
-            //   form_data.username
-            // );
-
             const username_data = await check_is_username_exists(
               form_data.username
             );
@@ -171,7 +170,6 @@ const SignUp: FC = () => {
             if (ref_username_check_progress.current !== "pending") {
               return;
             }
-            console.log(username_data);
 
             if (username_data === null) {
               set_username_status(
@@ -231,18 +229,6 @@ const SignUp: FC = () => {
     }
     return true;
   };
-
-  // const check_is_username_exists = async (username: string) => {
-  //   try {
-  //     const response = await axios.get<UsernameExistence>(
-  //       `${API_URL}/username_status?username=${username}`
-  //     );
-  //     return response.data.exists;
-  //   } catch (error) {
-  //     console.error(error);
-  //     return error;
-  //   }
-  // };
 
   useEffect(() => {
     switch (username_check_porgress) {
@@ -429,6 +415,11 @@ const SignUp: FC = () => {
       }));
     }
   }, [is_password_visible.password, is_password_visible.confirm_password]);
+
+  // Handling account's option change
+  const handle_option_change = (e: React.ChangeEvent<HTMLInputElement>) => {
+    set_selected_option(e.target.id as OptionId);
+  };
 
   // Handling returning to the previous page
   const handle_close = () => {
@@ -690,20 +681,61 @@ const SignUp: FC = () => {
                 </div>
               )}
             </div>
-            {/* <div className={styles.input_block}>
+            <div className={styles.input_block}>
               <div
                 className={`${styles.input_container} ${styles.account_types}`}
               >
-                <div className={styles.account_type_header}>
-                  <p className={styles.account_type_p}>Выберите тип аккаунта</p>
-                  <GoChevronDown className={styles.chevron_icon} />
+                <p className={styles.account_types_header}>
+                  Выберите тип аккаунта <span>*</span>
+                </p>
+                <div className={styles.options_container}>
+                  <div className={styles.option}>
+                    <input
+                      type="radio"
+                      id="option_creator"
+                      name="options"
+                      onChange={handle_option_change}
+                      checked={selected_option === "option_creator"}
+                    />
+                    <label
+                      htmlFor="option_creator"
+                      className={`${styles.account_type} ${
+                        selected_option === "option_creator"
+                          ? styles.account_type_checked
+                          : ""
+                      }`}
+                    >
+                      Автор
+                    </label>
+                  </div>
+                  <div className={styles.option}>
+                    <input
+                      type="radio"
+                      id="option_consumer"
+                      name="options"
+                      onChange={handle_option_change}
+                      checked={selected_option === "option_consumer"}
+                    />
+                    <label
+                      htmlFor="option_consumer"
+                      className={`${styles.account_type} ${
+                        selected_option === "option_consumer"
+                          ? styles.account_type_checked
+                          : ""
+                      }`}
+                    >
+                      Покупатель
+                    </label>
+                  </div>
                 </div>
-                <div className={styles.account_types_container}>
-                  <p className={styles.account_type}>Автор</p>
-                  <p className={styles.account_type}>Покупатель</p>
-                </div>
+                <hr className={styles.divider} />
+                <p className={styles.additional_info}>
+                  *Вы всегда сможете расширить свои возможности позже,
+                  воспользовавшись функцией обновления аккаунта в личном
+                  кабинете
+                </p>
               </div>
-            </div> */}
+            </div>
             <button
               type="submit"
               disabled={button_disabled}
