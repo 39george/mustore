@@ -14,6 +14,7 @@ use aws_sdk_s3::Client;
 use secrecy::ExposeSecret;
 
 use crate::config::ObjectStorageSettings;
+use crate::domain::object_key::ObjectKey;
 use crate::error_chain_fmt;
 
 use self::presigned_post_form::PresignedPostData;
@@ -106,7 +107,7 @@ impl ObjectStorage {
     /// returns the URI of the newly uploaded object.
     pub async fn put<'a>(
         &self,
-        key: &str,
+        key: &ObjectKey,
         bytes: Vec<u8>,
         mediatype: mediatype::MediaType<'a>,
     ) -> Result<(), ObjectStorageError> {
@@ -114,7 +115,7 @@ impl ObjectStorage {
             .client
             .put_object()
             .bucket(&self.settings.bucket_name)
-            .key(key)
+            .key(key.as_ref())
             .content_encoding(mediatype.to_string())
             .body(
                 ByteStream::try_from(SdkBody::from(bytes))
@@ -130,23 +131,21 @@ impl ObjectStorage {
     /// Moves a file to `received` folder from 'upload', returns a new key.
     pub async fn receive(
         &self,
-        key: &str,
-    ) -> Result<String, ObjectStorageError> {
-        let new_key = match key.strip_prefix("upload/") {
-            Some(rest) => format!("received/{}", rest),
-            None => {
-                return Err(ObjectStorageError::BadObjectKeyError(format!(
-                    "Key starts not with 'upload/', cant receive it: {}",
-                    key
-                )));
-            }
-        };
+        key: &ObjectKey,
+    ) -> Result<ObjectKey, ObjectStorageError> {
+        if key.directory() != ("upload") {
+            return Err(ObjectStorageError::BadObjectKeyError(format!(
+                "Key starts not with 'upload/', cant receive it: {}",
+                key
+            )));
+        }
+        let new_key = key.clone().moved("received");
         let _copy_response = self
             .client
             .copy_object()
             .bucket(&self.settings.bucket_name)
             .copy_source(format!("{}/{key}", &self.settings.bucket_name))
-            .key(&new_key)
+            .key(new_key.as_ref())
             .send()
             .await
             .context("Failed to copy object to the 'received/' directory")?;
@@ -155,7 +154,7 @@ impl ObjectStorage {
             .client
             .delete_object()
             .bucket(&self.settings.bucket_name)
-            .key(key)
+            .key(key.as_ref())
             .send()
             .await
             .context("Failed to delete old object from 'upload/' directory")?;
@@ -166,13 +165,13 @@ impl ObjectStorage {
     /// Retrieves object meta info and returns it.
     pub async fn get_object_meta(
         &self,
-        key: &str,
+        key: &ObjectKey,
     ) -> Result<HeadObjectOutput, ObjectStorageError> {
         let head_response = self
             .client
             .head_object()
             .bucket(&self.settings.bucket_name)
-            .key(key)
+            .key(key.as_ref())
             .send()
             .await
             .context("Failed to retrieve object meta by key")?;
@@ -185,7 +184,7 @@ impl ObjectStorage {
     /// the bucket for a limited duration, without needing further authentication.
     pub async fn generate_presigned_url(
         &self,
-        key: &str,
+        key: &ObjectKey,
         expiration: Duration,
     ) -> Result<String, ObjectStorageError> {
         // Construct a presigning config with the desired expiration time for the link.
@@ -198,7 +197,7 @@ impl ObjectStorage {
             .client
             .get_object()
             .bucket(&self.settings.bucket_name)
-            .key(key)
+            .key(key.as_ref())
             .presigned(presigning_config)
             .await
             .context("Failed to generate presigned url")?;
@@ -208,7 +207,7 @@ impl ObjectStorage {
 
     pub fn generate_presigned_post_form(
         &self,
-        object_key: &str,
+        object_key: &ObjectKey,
         mime: mediatype::MediaTypeBuf,
         max: u64,
     ) -> Result<PresignedPostData, ObjectStorageError> {
@@ -218,7 +217,7 @@ impl ObjectStorage {
             &self.settings.endpoint_url,
             &self.settings.region,
             &self.settings.bucket_name,
-            object_key,
+            object_key.as_ref(),
         )
         .with_content_length_range(0, max)
         .with_mime(mime.to_ref());
@@ -229,19 +228,12 @@ impl ObjectStorage {
     /// Deletes an object from the bucket specified by the object's URI.
     pub async fn delete_object_by_key(
         &self,
-        key: &str,
+        key: &ObjectKey,
     ) -> Result<(), ObjectStorageError> {
-        // Make sure something was actually extracted to prevent erroneous deletions
-        if key.is_empty() || key == "/" {
-            return Err(ObjectStorageError::BadObjectKeyError(
-                "Invalid object key provided for deletion".to_string(),
-            ));
-        }
-
         self.client
             .delete_object()
             .bucket(&self.settings.bucket_name)
-            .key(key)
+            .key(key.as_ref())
             .send()
             .await
             .with_context(|| format!("Failed to delete object: {}", key))?;

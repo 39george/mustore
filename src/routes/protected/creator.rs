@@ -17,6 +17,7 @@ use http::StatusCode;
 use crate::auth::users::AuthSession;
 use crate::cornucopia::queries::creator_access;
 use crate::cornucopia::types::public::Objecttype;
+use crate::domain::object_key::ObjectKey;
 use crate::domain::requests::creator_access::CreateOfferRequest;
 use crate::domain::requests::creator_access::SubmitProductRequest;
 use crate::domain::requests::creator_access::SubmitServiceRequest;
@@ -120,13 +121,13 @@ async fn submit_product(
         SubmitProductRequest::Cover { product } => (product, None, None, None),
     };
 
-    let mut object_keys = vec![product.cover_object_key.as_ref()];
+    let mut object_keys = vec![&product.cover_object_key];
 
     if let Some(ref mp) = music_product {
-        object_keys.push(mp.master_object_key.as_ref());
-        object_keys.push(mp.multitrack_object_key.as_ref());
+        object_keys.push(&mp.master_object_key);
+        object_keys.push(&mp.multitrack_object_key);
         if let Some(ref tagged) = mp.master_tagged_object_key {
-            object_keys.push(tagged.as_ref());
+            object_keys.push(tagged);
         }
     }
 
@@ -139,12 +140,10 @@ async fn submit_product(
 
     // Check that keys are exist
     for &key in object_keys.iter() {
-        let meta = s3
+        let _meta = s3
             .get_object_meta(key)
             .await
             .map_err(ResponseError::ObjectStorageError)?;
-        // TODO: remove dbg here
-        dbg!(meta);
     }
 
     let mut db_client = app_state
@@ -176,9 +175,10 @@ async fn submit_product(
     creator_access::insert_product_cover_object_key()
         .bind(
             &transaction,
-            &s3.receive(product.cover_object_key.as_ref())
+            &s3.receive(&product.cover_object_key)
                 .await
-                .map_err(ResponseError::ObjectStorageError)?,
+                .map_err(ResponseError::ObjectStorageError)?
+                .as_ref(),
             &product_id,
         )
         .await
@@ -251,9 +251,10 @@ async fn submit_product(
         creator_access::insert_music_product_master_object_key()
             .bind(
                 &transaction,
-                &s3.receive(music_product.master_object_key.as_ref())
+                &s3.receive(&music_product.master_object_key)
                     .await
-                    .map_err(ResponseError::ObjectStorageError)?,
+                    .map_err(ResponseError::ObjectStorageError)?
+                    .as_ref(),
                 &song_id,
                 &beat_id,
             )
@@ -265,9 +266,10 @@ async fn submit_product(
             creator_access::insert_music_product_master_tagged_object_key()
                 .bind(
                     &transaction,
-                    &s3.receive(tagged_key.as_ref())
+                    &s3.receive(&tagged_key)
                         .await
-                        .map_err(ResponseError::ObjectStorageError)?,
+                        .map_err(ResponseError::ObjectStorageError)?
+                        .as_ref(),
                     &song_id,
                     &beat_id,
                 )
@@ -279,9 +281,10 @@ async fn submit_product(
         creator_access::insert_music_product_multitrack_object_key()
             .bind(
                 &transaction,
-                &s3.receive(music_product.multitrack_object_key.as_ref())
+                &s3.receive(&music_product.multitrack_object_key)
                     .await
-                    .map_err(ResponseError::ObjectStorageError)?,
+                    .map_err(ResponseError::ObjectStorageError)?
+                    .as_ref(),
                 &song_id,
                 &beat_id,
             )
@@ -344,9 +347,9 @@ async fn submit_service(
         SubmitServiceRequest::CoverDesign(ref service) => (service, &None),
     };
 
-    let mut object_keys = vec![service.cover_object_key.as_ref()];
+    let mut object_keys = vec![&service.cover_object_key];
     if let Some(ref credits) = service.credits_object_keys {
-        object_keys.extend(credits.iter().map(|c| c.as_ref()));
+        object_keys.extend(credits.into_iter().collect::<Vec<_>>());
     }
 
     verify_upload_request_data_in_redis(
@@ -358,12 +361,10 @@ async fn submit_service(
 
     // Check that keys are exist
     for &key in object_keys.iter() {
-        let meta = s3
+        let _meta = s3
             .get_object_meta(key)
             .await
             .map_err(ResponseError::ObjectStorageError)?;
-        // TODO: remove dbg here
-        dbg!(meta);
     }
 
     let mut db_client = app_state
@@ -395,9 +396,10 @@ async fn submit_service(
     creator_access::insert_service_cover_object_key()
         .bind(
             &transaction,
-            &s3.receive(service.cover_object_key.as_ref())
+            &s3.receive(&service.cover_object_key)
                 .await
-                .map_err(ResponseError::ObjectStorageError)?,
+                .map_err(ResponseError::ObjectStorageError)?
+                .as_ref(),
             &service_id,
         )
         .await
@@ -416,9 +418,10 @@ async fn submit_service(
                 creator_access::insert_mixing_credit_object_key()
                     .bind(
                         &transaction,
-                        &s3.receive(key.as_ref())
+                        &s3.receive(key)
                             .await
-                            .map_err(ResponseError::ObjectStorageError)?,
+                            .map_err(ResponseError::ObjectStorageError)?
+                            .as_ref(),
                         &Objecttype::audio,
                         &id,
                     )
@@ -439,9 +442,10 @@ async fn submit_service(
                 creator_access::insert_song_writing_credit_object_key()
                     .bind(
                         &transaction,
-                        &s3.receive(key.as_ref())
+                        &s3.receive(key)
                             .await
-                            .map_err(ResponseError::ObjectStorageError)?,
+                            .map_err(ResponseError::ObjectStorageError)?
+                            .as_ref(),
                         &Objecttype::audio,
                         &id,
                     )
@@ -462,9 +466,10 @@ async fn submit_service(
                 creator_access::insert_beat_writing_credit_object_key()
                     .bind(
                         &transaction,
-                        &s3.receive(key.as_ref())
+                        &s3.receive(key)
                             .await
-                            .map_err(ResponseError::ObjectStorageError)?,
+                            .map_err(ResponseError::ObjectStorageError)?
+                            .as_ref(),
                         &Objecttype::audio,
                         &id,
                     )
@@ -493,9 +498,10 @@ async fn submit_service(
                 creator_access::insert_cover_design_credit_object_key()
                     .bind(
                         &transaction,
-                        &s3.receive(key.as_ref())
+                        &s3.receive(key)
                             .await
-                            .map_err(ResponseError::ObjectStorageError)?,
+                            .map_err(ResponseError::ObjectStorageError)?
+                            .as_ref(),
                         &Objecttype::image,
                         &id,
                     )
@@ -582,11 +588,11 @@ async fn create_offer(
 )]
 async fn verify_upload_request_data_in_redis(
     con: &RedisPool,
-    obj_keys: &[&str],
+    obj_keys: &[&ObjectKey],
     user_id: i32,
 ) -> RedisResult<()> {
     for obj_key in obj_keys.into_iter() {
-        let upload_request = UploadRequest::new(user_id, obj_key);
+        let upload_request = UploadRequest::new(user_id, (*obj_key).clone());
         let _created_at: String = con.get(&upload_request.to_string()).await?;
     }
     Ok(())
@@ -598,11 +604,11 @@ async fn verify_upload_request_data_in_redis(
 )]
 async fn delete_upload_request_data_from_redis(
     con: &RedisPool,
-    obj_keys: &[&str],
+    obj_keys: &[&ObjectKey],
     user_id: i32,
 ) -> RedisResult<()> {
     for obj_key in obj_keys.into_iter() {
-        let upload_request = UploadRequest::new(user_id, obj_key);
+        let upload_request = UploadRequest::new(user_id, (*obj_key).clone());
         con.del(&upload_request.to_string()).await?;
     }
     Ok(())

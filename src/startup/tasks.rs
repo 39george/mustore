@@ -76,9 +76,16 @@ pub fn check_current_user_uploads(
                                     Err(e) => { tracing::error!("Failed to delete key from redis: {e}"); continue; },
                                 }
                                 if let Some(key) = key.into_string() {
-                                    match obj_storage.delete_object_by_key(&key).await {
-                                        Ok(()) => tracing::info!("Object with key {key} is successfully deleted from obj storage"),
-                                        Err(e) => tracing::warn!("Failed to delete object with key {key} from object storage: {e}"),
+                                    match key.parse() {
+                                        Ok(key) => {
+                                            match obj_storage.delete_object_by_key(&key).await {
+                                                Ok(()) => tracing::info!("Object with key {key} is successfully deleted from obj storage"),
+                                                Err(e) => tracing::warn!("Failed to delete object with key {key} from object storage: {e}"),
+                                            }
+                                        },
+                                        Err(e) => {
+                                            tracing::error!("Failed to parse {key} as objet key: {e}");
+                                        },
                                     }
                                 }
                             }

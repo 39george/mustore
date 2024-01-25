@@ -50,13 +50,13 @@ async fn song_submit_success() {
             name: "some_song".to_string(),
             description: None,
             moods: vec!["веселый".to_string()],
-            cover_object_key: image_key.into(),
+            cover_object_key: image_key.parse().unwrap(),
             price: 100.into(),
         },
         music_product: MusicProduct {
-            master_object_key: song_key.into(),
+            master_object_key: song_key.parse().unwrap(),
             master_tagged_object_key: None,
-            multitrack_object_key: arch_key.into(),
+            multitrack_object_key: arch_key.parse().unwrap(),
             primary_genre: "Хор".to_string(),
             secondary_genre: None,
             tempo: 100,
@@ -97,13 +97,22 @@ async fn song_submit_without_files_fails() {
             name: "some_song".to_string(),
             description: None,
             moods: vec!["веселый".to_string()],
-            cover_object_key: "some_keyyyyyyyyyyyy".into(),
+            cover_object_key:
+                "abc/owner:0678418B-D415-4BC0-ADC2-B3E2686DB2F1:file"
+                    .parse()
+                    .unwrap(),
             price: 100.into(),
         },
         music_product: MusicProduct {
-            master_object_key: "some_keyyyyyyyyyyyy".into(),
+            master_object_key:
+                "abc/owner:0678418B-D415-4BC0-ADC2-B3E2686DB2F1:file"
+                    .parse()
+                    .unwrap(),
             master_tagged_object_key: None,
-            multitrack_object_key: "some_keyyyyyyyyyyyy".into(),
+            multitrack_object_key:
+                "abc/owner:0678418B-D415-4BC0-ADC2-B3E2686DB2F1:file"
+                    .parse()
+                    .unwrap(),
             primary_genre: "Хор".to_string(),
             secondary_genre: None,
             tempo: 100,
@@ -163,13 +172,13 @@ async fn beat_submit_success() {
             name: "some_song".to_string(),
             description: None,
             moods: vec!["веселый".to_string()],
-            cover_object_key: image_key.into(),
+            cover_object_key: image_key.parse().unwrap(),
             price: 100.into(),
         },
         music_product: MusicProduct {
-            master_object_key: beat_key.into(),
+            master_object_key: beat_key.parse().unwrap(),
             master_tagged_object_key: None,
-            multitrack_object_key: arch_key.into(),
+            multitrack_object_key: arch_key.parse().unwrap(),
             primary_genre: "Хор".to_string(),
             secondary_genre: None,
             tempo: 100,
@@ -214,7 +223,7 @@ async fn cover_submit_success() {
             name: "some_song".to_string(),
             description: None,
             moods: vec!["веселый".to_string()],
-            cover_object_key: image_key.into(),
+            cover_object_key: image_key.parse().unwrap(),
             price: 100.into(),
         },
     };
@@ -255,7 +264,7 @@ async fn lyric_submit_success() {
             name: "some_song".to_string(),
             description: None,
             moods: vec!["веселый".to_string()],
-            cover_object_key: image_key.into(),
+            cover_object_key: image_key.parse().unwrap(),
             price: 100.into(),
         },
         lyric: "this is just lyric. Is it long enough or not?".into(),
@@ -305,7 +314,7 @@ async fn mixing_service_submit_with_credits_success() {
             )
             .await;
         assert_eq!(response.status().as_u16(), 200);
-        credits.push(credit_key.into());
+        credits.push(credit_key.parse().unwrap());
     }
 
     let genres_list = open_access::get_genres_list()
@@ -321,7 +330,7 @@ async fn mixing_service_submit_with_credits_success() {
         service: mustore::domain::requests::creator_access::Service {
             name: "Some service".to_string(),
             description: None,
-            cover_object_key: image_key.into(),
+            cover_object_key: image_key.parse().unwrap(),
             display_price: 500.into(),
             credits_object_keys: Some(credits),
         },
@@ -411,7 +420,7 @@ async fn submit_all_kinds_of_services_without_credits_success() {
         service: mustore::domain::requests::creator_access::Service {
             name: "Some service".to_string(),
             description: None,
-            cover_object_key: image_key.into(),
+            cover_object_key: image_key.parse().unwrap(),
             display_price: 500.into(),
             credits_object_keys: None,
         },
@@ -427,7 +436,7 @@ async fn submit_all_kinds_of_services_without_credits_success() {
         service: mustore::domain::requests::creator_access::Service {
             name: "Some service".to_string(),
             description: None,
-            cover_object_key: image_key.into(),
+            cover_object_key: image_key.parse().unwrap(),
             display_price: 500.into(),
             credits_object_keys: None,
         },
@@ -443,7 +452,7 @@ async fn submit_all_kinds_of_services_without_credits_success() {
         service: mustore::domain::requests::creator_access::Service {
             name: "Some service".to_string(),
             description: None,
-            cover_object_key: image_key.into(),
+            cover_object_key: image_key.parse().unwrap(),
             display_price: 500.into(),
             credits_object_keys: None,
         },
@@ -459,7 +468,7 @@ async fn submit_all_kinds_of_services_without_credits_success() {
         service: mustore::domain::requests::creator_access::Service {
             name: "Some service".to_string(),
             description: None,
-            cover_object_key: image_key.into(),
+            cover_object_key: image_key.parse().unwrap(),
             display_price: 500.into(),
             credits_object_keys: None,
         },
@@ -475,7 +484,7 @@ async fn submit_all_kinds_of_services_without_credits_success() {
         mustore::domain::requests::creator_access::Service {
             name: "Some service".to_string(),
             description: None,
-            cover_object_key: image_key.into(),
+            cover_object_key: image_key.parse().unwrap(),
             display_price: 500.into(),
             credits_object_keys: None,
         },
@@ -535,7 +544,7 @@ async fn submitting_service_too_much_credits_fails() {
             )
             .await;
         assert_eq!(response.status().as_u16(), 200);
-        credits.push(credit_key.into());
+        credits.push(credit_key.parse().unwrap());
     }
 
     let genres_list = open_access::get_genres_list()
@@ -551,7 +560,7 @@ async fn submitting_service_too_much_credits_fails() {
         service: mustore::domain::requests::creator_access::Service {
             name: "Some service".to_string(),
             description: None,
-            cover_object_key: image_key.into(),
+            cover_object_key: image_key.parse().unwrap(),
             display_price: 500.into(),
             credits_object_keys: Some(credits),
         },
@@ -594,7 +603,7 @@ async fn submitting_ghost_writing_service_bad_formed_credits_fails() {
         service: mustore::domain::requests::creator_access::Service {
             name: "Some service".to_string(),
             description: None,
-            cover_object_key: image_key.into(),
+            cover_object_key: image_key.parse().unwrap(),
             display_price: 500.into(),
             credits_object_keys: None,
         },
@@ -623,7 +632,7 @@ async fn submitting_ghost_writing_service_bad_formed_credits_fails() {
         service: mustore::domain::requests::creator_access::Service {
             name: "Some service".to_string(),
             description: None,
-            cover_object_key: image_key.into(),
+            cover_object_key: image_key.parse().unwrap(),
             display_price: 500.into(),
             credits_object_keys: None,
         },
@@ -650,7 +659,7 @@ async fn submitting_ghost_writing_service_bad_formed_credits_fails() {
         service: mustore::domain::requests::creator_access::Service {
             name: "Some service".to_string(),
             description: None,
-            cover_object_key: image_key.into(),
+            cover_object_key: image_key.parse().unwrap(),
             display_price: 500.into(),
             credits_object_keys: None,
         },

@@ -16,6 +16,7 @@ use std::io::Cursor;
 
 use super::AuthError;
 use crate::cornucopia::queries::user_auth_queries;
+use crate::domain::object_key::ObjectKey;
 use crate::domain::user_candidate::UserCandidate;
 use crate::startup::AppState;
 use crate::telemetry::spawn_blocking_with_tracing;
@@ -80,8 +81,14 @@ pub async fn confirm(
         .map_err(AuthError::AccountConfirmationFailed)?;
 
     // Upload identicon to the object storage
-    let avatar_key =
-        format!("received/{}-avatar.png", &user_candidate_data.username);
+    let avatar_key = ObjectKey::new(
+        "received",
+        &user_candidate_data.username,
+        uuid::Uuid::new_v4(),
+        "avatar.png",
+    )
+    .context("Failed to build object key")?;
+
     app_state
         .object_storage
         .put(&avatar_key, identicon, mediatype::media_type!(IMAGE / PNG))
@@ -163,7 +170,7 @@ pub async fn confirm(
     }
 
     if let Err(e) = user_auth_queries::insert_user_avatar_image()
-        .bind(&transaction, &avatar_key, &user_id)
+        .bind(&transaction, &avatar_key.as_ref(), &user_id)
         .await
         .context("Failed to insert a new user to the pg")
         .map_err(AuthError::AccountConfirmationFailed)

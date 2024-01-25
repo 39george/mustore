@@ -159,13 +159,12 @@ async fn cleanup(
                     }
                 }
                 if let Some(upload_request_key) = key.into_string() {
-                    let object_key = upload_request_key
+                    let upload_request = upload_request_key
                         .parse::<UploadRequest>()
-                        .context("Failed to parse upload request key")?
-                        .object_key;
-                    match obj_storage.delete_object_by_key(&object_key).await {
-                                        Ok(()) => tracing::info!("Object with key {object_key} is successfully deleted from obj storage"),
-                                        Err(e) => tracing::warn!("Failed to delete object with key {object_key} from object storage: {e}"),
+                        .context(format!("Failed to parse upload request key: {upload_request_key}"))?;
+                    match obj_storage.delete_object_by_key(upload_request.object_key()).await {
+                                        Ok(()) => tracing::info!("Object with key {upload_request} is successfully deleted from obj storage"),
+                                        Err(e) => tracing::warn!("Failed to delete object with key {upload_request} from object storage: {e}"),
                                     }
                 }
             }

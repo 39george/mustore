@@ -8,29 +8,7 @@ use crate::domain::music_parameters::MusicKey;
 use crate::domain::music_parameters::Sex;
 use crate::domain::*;
 
-#[derive(Serialize, Deserialize, Debug, Validate)]
-#[garde(transparent)]
-pub struct ObjKey(
-    #[garde(
-        length(min = OBJ_KEY_MIN_LEN, max = OBJ_KEY_MAX_LEN),
-        custom(contains_no_control_characters)
-    )]
-    String,
-);
-
-impl AsRef<str> for ObjKey {
-    fn as_ref(&self) -> &str {
-        &self.0
-    }
-}
-
-impl<T> From<T> for ObjKey 
-where T: std::fmt::Display
-{
-    fn from(value: T) -> Self {
-        ObjKey(value.to_string())
-    }
-}
+use self::object_key::ObjectKey;
 
 #[derive(Serialize, Deserialize, Debug, Validate)]
 #[garde(transparent)]
@@ -78,20 +56,18 @@ pub struct Product {
         custom(contains_no_control_characters)
     ))]
     pub moods: Vec<String>,
-    #[garde(dive)]
-    pub cover_object_key: ObjKey,
+    #[garde(skip)]
+    pub cover_object_key: ObjectKey,
     #[garde(skip)]
     pub price: Decimal,
 }
 
 #[derive(Serialize, Deserialize, Debug, Validate)]
+#[garde(allow_unvalidated)]
 pub struct MusicProduct {
-    #[garde(dive)]
-    pub master_object_key: ObjKey,
-    #[garde(dive)]
-    pub master_tagged_object_key: Option<ObjKey>,
-    #[garde(dive)]
-    pub multitrack_object_key: ObjKey,
+    pub master_object_key: ObjectKey,
+    pub master_tagged_object_key: Option<ObjectKey>,
+    pub multitrack_object_key: ObjectKey,
     #[garde(
         length(min=GENRE_MIN_LEN, max=GENRE_MAX_LEN),
         custom(forbidden_characters),
@@ -110,7 +86,6 @@ pub struct MusicProduct {
     pub tempo: i16,
     #[garde(range(min = MIN_AUDIO_DURATION_SEC, max = MAX_AUDIO_DURATION_SEC))]
     pub duration: i16,
-    #[garde(skip)]
     pub music_key: MusicKey,
 }
 
@@ -160,16 +135,15 @@ pub struct Service {
         custom(contains_no_control_characters)
     ))]
     pub description: Option<String>,
-    #[garde(dive)]
-    pub cover_object_key: ObjKey,
+    #[garde(skip)]
+    pub cover_object_key: ObjectKey,
     #[garde(skip)]
     pub display_price: Decimal,
     #[garde(
-        dive,
         // Checked, length works as expected here
         length(min = 1, max = 3),
     )]
-    pub credits_object_keys: Option<Vec<ObjKey>>,
+    pub credits_object_keys: Option<Vec<ObjectKey>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Validate)]
@@ -177,7 +151,8 @@ pub struct MusicService {
     #[garde(dive)]
     pub service: Service,
     #[garde(inner(inner(
-        custom(forbidden_characters),
+        // NOTE: some genres contain '/' symbol
+        // custom(forbidden_characters),
         custom(contains_no_control_characters)
     )))]
     pub genres: Option<Vec<String>>

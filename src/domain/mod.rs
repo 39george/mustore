@@ -1,6 +1,7 @@
 //! src/domain/mod.rs
 
 pub mod music_parameters;
+pub mod object_key;
 pub mod requests;
 pub mod responses;
 pub mod signup_token;
