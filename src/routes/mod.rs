@@ -1,3 +1,6 @@
+//! We specify 400 BadRequest response in openapi documentation
+//! only when we can particularly return that. For example, on validation error.
+
 use axum::body::Body;
 use axum::response::IntoResponse;
 use axum::response::Response;
@@ -33,6 +36,9 @@ pub enum ResponseError {
     TooManyUploadsError,
     #[error("Authentication error")]
     AuthError(#[from] AuthError),
+    /// Source error is for internal use, and static str is for response
+    #[error("Can't resolve given object key as upload")]
+    NotFoundError(#[source] anyhow::Error, &'static str),
 }
 
 impl std::fmt::Debug for ResponseError {
@@ -81,6 +87,11 @@ impl IntoResponse for ResponseError {
                 .body(Body::from(e.to_string()))
                 .unwrap_or(StatusCode::BAD_REQUEST.into_response()),
             ResponseError::AuthError(e) => e.into_response(),
+            ResponseError::NotFoundError(_, param) => Response::builder()
+                .status(StatusCode::NOT_FOUND)
+                .header("Content-Type", "application/json")
+                .body(Body::from(format!("{{\"param\":{}}}", param)))
+                .unwrap_or(StatusCode::NOT_FOUND.into_response()),
         }
     }
 }
