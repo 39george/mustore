@@ -1,3 +1,7 @@
+//! We derive ToSchema to all types need to show their fields to frontend,
+//! and derive ToResponse to all types we bind as `response = Type`.
+//! We only need ToSchema derived if we set response as `body = Type`.
+
 use utoipa::{
     openapi::{
         security::{ApiKey, ApiKeyValue, SecurityScheme},
@@ -6,12 +10,16 @@ use utoipa::{
     Modify, OpenApi,
 };
 
-use crate::routes::development;
-use crate::routes::open;
 use crate::routes::protected;
 use crate::{
     auth::{self, users::Permission},
-    routes::development::DbNumber,
+    domain::responses::user_access::DialogId,
+};
+use crate::{
+    domain::requests::user_access::SendMessageRequest, routes::development,
+};
+use crate::{
+    domain::responses::user_access::ConversationDataResponse, routes::open,
 };
 
 // ───── ErrorResponses ───────────────────────────────────────────────────── //
@@ -50,11 +58,22 @@ pub struct UnauthorizedErrorResponse(String);
 #[response(description = "Too many uploads error")]
 pub struct TooManyUploadsErrorResponse;
 
+// We use ToSchema here, because we write manually in every case,
+// inlined, description, examples etc.
+#[derive(utoipa::ToResponse)]
+#[response(
+    description = "Not found some data (param name passed)",
+    content_type = "application/json",
+    example = json!({
+        "param": "param_name" }),
+)]
+pub struct NotFoundResponse {
+    _param: String,
+}
 // ───── Responses ────────────────────────────────────────────────────────── //
 
-#[derive(utoipa::ToSchema, utoipa::ToResponse)]
-#[response(description = "Person response returns single Person entity")]
-#[schema(as = GetSongsListResponse)]
+#[derive(utoipa::ToSchema)]
+#[schema(as = GetSongsList)]
 pub struct GetSongsListResponse {
     pub song_id: i32,
     pub created_at: time::OffsetDateTime,
@@ -69,7 +88,7 @@ pub struct GetSongsListResponse {
 }
 
 #[derive(utoipa::ToSchema)]
-#[schema(as = GetNewSongsResponse)]
+#[schema(as = GetNewSongs)]
 pub struct GetNewSongsResponse {
     pub song_id: i32,
     pub created_at: time::OffsetDateTime,
@@ -82,7 +101,7 @@ pub struct GetNewSongsResponse {
 }
 
 #[derive(utoipa::ToSchema)]
-#[schema(as = GetRecommendedSongsResponse)]
+#[schema(as = GetRecommendedSongs)]
 pub struct GetRecommendedSongsResponse {
     pub song_id: i32,
     pub created_at: time::OffsetDateTime,
@@ -101,6 +120,17 @@ pub struct GetRecommendedSongsResponse {
     example = json!({"exists": true }),
 )]
 pub struct IsExistsResponse(String);
+
+#[derive(utoipa::ToSchema)]
+#[schema(as = GetConversationsEntries)]
+pub struct GetConversationsEntriesResponse {
+    pub conversation_id: i32,
+    pub interlocutor: String,
+    pub last_message_text: String,
+    pub last_message_timestamp: time::OffsetDateTime,
+    pub image_url: String,
+    pub unread_messages_count: i64,
+}
 
 // ───── TypeWrappers ─────────────────────────────────────────────────────── //
 
@@ -159,6 +189,11 @@ impl Modify for ServerAddon {
         protected::admin::health_check,
         protected::user::user_permissions,
         protected::user::request_obj_storage_upload,
+        protected::user::get_conversations,
+        protected::user::get_dialog_id,
+        protected::user::create_new_conversation,
+        protected::user::send_message,
+        protected::user::list_conversation,
         development::upload_file,
         development::cleanup
         ),
@@ -178,9 +213,18 @@ impl Modify for ServerAddon {
                 GetSongsListResponse,
                 GetNewSongsResponse,
                 GetRecommendedSongsResponse,
+                GetConversationsEntriesResponse,
                 Password,
+                DialogId,
                 crate::service_providers::object_storage::presigned_post_form::PresignedPostData,
                 MediaType,
+                SendMessageRequest,
+                crate::domain::responses::user_access::Entry,
+                crate::domain::responses::user_access::Interlocutor,
+                crate::domain::responses::user_access::Message,
+                crate::domain::responses::user_access::Offer,
+                crate::domain::responses::user_access::Attachment,
+                crate::domain::responses::user_access::ServiceData
             ),
             responses(
                 InternalErrorResponse,
@@ -190,7 +234,9 @@ impl Modify for ServerAddon {
                 TooManyUploadsErrorResponse,
                 IsExistsResponse,
                 crate::service_providers::object_storage::presigned_post_form::PresignedPostData,
-                Permission
+                Permission,
+                NotFoundResponse,
+                ConversationDataResponse
             )
         ),
         modifiers(&ServerAddon),
