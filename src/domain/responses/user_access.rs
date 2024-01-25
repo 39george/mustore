@@ -1,10 +1,12 @@
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use time::OffsetDateTime;
+use utoipa::{ToResponse, ToSchema};
 
 use crate::{
     cornucopia::queries::user_access::ListConversationById,
+    domain::object_key::{ObjectKey, ObjectKeyError},
     error_chain_fmt,
     service_providers::object_storage::{ObjectStorage, ObjectStorageError},
 };
@@ -35,49 +37,110 @@ impl<T> UnpackOption for Option<T> {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, ToSchema)]
+pub struct DialogId {
+    pub id: Option<i32>,
+}
+
+#[derive(Serialize, Deserialize, Debug, ToSchema, std::hash::Hash)]
 pub struct Interlocutor {
+    #[schema(example = "someuser123")]
     pub username: String,
     pub id: i32,
+    #[schema(example = "https://storage.com/someimage.png")]
     pub avatar_url: String,
 }
 
-#[derive(Eq, PartialEq, Serialize, Deserialize, Debug)]
+impl std::cmp::PartialEq for Interlocutor {
+    fn eq(&self, other: &Self) -> bool {
+        self.id.eq(&other.id)
+    }
+}
+impl std::cmp::Eq for Interlocutor {}
+
+#[derive(Serialize, Deserialize, Debug, ToSchema)]
+pub struct Attachment {
+    #[schema(example = "image.png")]
+    filename: String,
+    #[schema(
+        value_type = String,
+        example = "received/Lisa:21C960E7-5CA8-4974-98D7-6501DCCCAFD7:image.png"
+    )]
+    key: ObjectKey,
+}
+
+impl Attachment {
+    fn from_str(s: &str) -> Result<Attachment, ObjectKeyError> {
+        let key: ObjectKey = s.parse()?;
+        let filename = key.filename().to_string();
+        Ok(Attachment { filename, key })
+    }
+}
+
+impl std::cmp::PartialEq for Attachment {
+    fn eq(&self, other: &Self) -> bool {
+        self.key.eq(&other.key)
+    }
+}
+
+#[derive(Eq, PartialEq, Serialize, Deserialize, Debug, ToSchema)]
 pub struct ServiceData {
+    #[schema(example = "Mixing")]
     pub service_name: String,
+    #[schema(example = "https://objectstorage.com/cover.png")]
     pub service_cover_url: String,
     pub service_id: i32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, ToSchema)]
 pub struct Message {
+    #[schema(example = 123)]
     pub message_id: i32,
+    #[schema(example = 77)]
     pub interlocutor_id: i32,
+    #[schema(example = "Hello, how are you?")]
     pub text: String,
+    #[serde(with = "time::serde::iso8601")]
     pub created_at: OffsetDateTime,
+    #[serde(with = "time::serde::iso8601")]
     pub updated_at: OffsetDateTime,
+    #[schema(inline = true)]
     pub service: Option<ServiceData>,
+    #[schema(example = 727)]
     pub reply_message_id: Option<i32>,
-    pub attachments: Option<Vec<String>>,
+    /// These are just file keys and filenames.
+    /// To get url, call the special endpoint using given key.
+    pub attachments: Option<Vec<Attachment>>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, ToSchema)]
 pub struct Offer {
+    #[schema(example = "I can mix that with these conditions")]
     pub text: String,
     pub offer_id: i32,
     pub interlocutor_id: i32,
+    #[schema(inline = true)]
     pub service: ServiceData,
+    #[schema(
+        value_type = f32,
+        example = 18.50
+    )]
     pub price: Decimal,
+    #[serde(with = "time::serde::iso8601")]
     pub delivery_date: OffsetDateTime,
     pub free_revisions: i32,
+    #[schema(
+        value_type = f32,
+        example = 2.0
+    )]
     pub revision_price: Decimal,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, ToSchema)]
 #[serde(tag = "entry_type", rename_all = "camelCase")]
 pub enum Entry {
-    Message(Message),
-    Offer(Offer),
+    Message(#[schema(inline = true)] Message),
+    Offer(#[schema(inline = true)] Offer),
 }
 
 impl Entry {
@@ -95,10 +158,12 @@ impl Entry {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, ToResponse)]
 pub struct ConversationDataResponse {
     pub self_user_id: i32,
-    pub interlocutors: HashMap<i32, Interlocutor>,
+    #[response(inline = true)]
+    pub interlocutors: HashSet<Interlocutor>,
+    #[response(inline = true)]
     pub entries: Vec<Entry>,
 }
 
@@ -110,6 +175,8 @@ pub enum ConversationDataError {
     UnexpectedError(#[from] anyhow::Error),
     #[error("No related data presented")]
     NoRelatedDataError,
+    #[error(transparent)]
+    ObjectKeyError(#[from] ObjectKeyError),
 }
 
 impl std::fmt::Debug for ConversationDataError {
@@ -125,18 +192,17 @@ impl ConversationDataResponse {
         object_storage: &ObjectStorage,
         self_user_id: i32,
     ) -> Result<Self, ConversationDataError> {
-        let mut interlocutors: HashMap<i32, Interlocutor> = HashMap::new();
+        let mut interlocutors: HashSet<Interlocutor> = HashSet::new();
         let mut entries: Vec<Entry> = Vec::new();
 
         let expiration = std::time::Duration::from_secs(30 * 60);
 
         // Asynchronously collect presigned URLs
         let mut presigned_urls = HashMap::new();
-        let mut message_attachments = HashMap::new();
         for data in &conversation_data {
             let presigned_avatar_key = object_storage
                 .generate_presigned_url(
-                    &data.participant_avatar_key,
+                    &data.participant_avatar_key.parse()?,
                     expiration,
                 )
                 .await?;
@@ -146,22 +212,9 @@ impl ConversationDataResponse {
             );
             if let Some(ref cover_key) = data.service_cover_key {
                 let url = object_storage
-                    .generate_presigned_url(cover_key, expiration)
+                    .generate_presigned_url(&cover_key.parse()?, expiration)
                     .await?;
                 presigned_urls.insert(cover_key.clone(), url);
-            }
-            if let Some(message_id) = data.message_id {
-                if let Some(ref data_attachments) = data.message_attachments {
-                    let mut attachments_unpacked = Vec::new();
-                    for key in data_attachments {
-                        let url = object_storage
-                            .generate_presigned_url(&key, expiration)
-                            .await?;
-                        attachments_unpacked.push(url);
-                    }
-                    message_attachments
-                        .insert(message_id, attachments_unpacked);
-                }
             }
         }
 
@@ -171,13 +224,11 @@ impl ConversationDataResponse {
                     "failed to get avatar url from hash for interlocutor",
                 )?;
 
-            interlocutors
-                .entry(data.participant_user_id)
-                .or_insert_with(|| Interlocutor {
-                    username: data.participant_username,
-                    id: data.participant_user_id,
-                    avatar_url,
-                });
+            interlocutors.insert(Interlocutor {
+                username: data.participant_username,
+                id: data.participant_user_id,
+                avatar_url,
+            });
 
             let service = data
                 .service_id
@@ -212,7 +263,12 @@ impl ConversationDataResponse {
                     )?,
                     service,
                     reply_message_id: data.reply_message_id,
-                    attachments: message_attachments.remove(&message_id),
+                    attachments: data
+                        .message_attachments
+                        .map(|v| v.into_iter()
+                            .map(|s| Attachment::from_str(&s))
+                            .collect::<Result<Vec<Attachment>, ObjectKeyError>>()
+                        ).transpose()?,
                 }));
             } else if let Some(offer_id) = data.offer_id {
                 entries.push(Entry::Offer(Offer {
