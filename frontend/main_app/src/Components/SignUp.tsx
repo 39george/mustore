@@ -10,13 +10,18 @@ import { FaEye } from "react-icons/fa";
 import { TbEyeClosed } from "react-icons/tb";
 import { FaTriangleExclamation } from "react-icons/fa6";
 import { GoCheckCircleFill } from "react-icons/go";
-import useCheckUsernameExistnece from "../hooks/useCheckUsernameExistence";
+import useCheckUsernameExistneceApi from "../hooks/useCheckUsernameExistenceApi";
+import axios from "axios";
+import { API_URL } from "../config";
+import useSignUpUserApi from "../hooks/useSignUpUserApi";
 
-interface FromData {
+interface FormData {
   username: string;
   email: string;
   password: string;
   confirm_password: string;
+  user_role: OptionId;
+  [key: string]: string | null;
 }
 
 type InputName = "password" | "confirm_password";
@@ -67,7 +72,14 @@ interface ConfirmPasswordInfo {
   message?: string;
 }
 
-type OptionId = "option_creator" | "option_consumer" | null;
+type OptionId = "creator" | "consumer" | null;
+
+interface InputValidity {
+  username: boolean;
+  email: boolean;
+  password: boolean;
+  user_role: boolean;
+}
 
 const colors = {
   warning: "#EF0606",
@@ -86,12 +98,14 @@ const SignUp: FC = () => {
   const previous_path = useSelector<RootState, string>(
     (state) => state.previous_path.previous_path
   );
-  const [form_data, set_form_data] = useState<FromData>({
+  const [form_data, set_form_data] = useState<FormData>({
     username: "",
     email: "",
     password: "",
     confirm_password: "",
+    user_role: null,
   });
+  const { error_data: signup_error, post_data } = useSignUpUserApi();
   const [input_type, set_input_type] = useState<InputTypes>({
     password: "password",
     confirm_password: "password",
@@ -102,8 +116,8 @@ const SignUp: FC = () => {
   const ref_username_check_progress = useRef<UsernameCheckProgress>("");
   const [username_border_color, set_username_border_color] =
     useState<string>("");
-  const { error: username_check_error, check_is_username_exists } =
-    useCheckUsernameExistnece();
+  const { error_data: username_check_error, check_is_username_exists } =
+    useCheckUsernameExistneceApi();
   const [email_input_info, set_email_input_info] = useState<EmailInputInfo>({});
   const email_schema = z.string().email();
   const [is_password_visible, set_is_password_visible] = useState<InputNames>({
@@ -124,13 +138,13 @@ const SignUp: FC = () => {
   const [input_disabled, set_input_disabled] = useState(true);
   const [confirm_password_info, set_confirm_password_info] =
     useState<ConfirmPasswordInfo>({});
-  const [selected_option, set_selected_option] = useState<OptionId>(null);
   const [button_disabled, set_button_disabled] = useState(true);
-  const [input_validity, set_input_validity] = useState({
+  const [button_class_name, set_button_class_name] = useState("");
+  const [input_validity, set_input_validity] = useState<InputValidity>({
     username: false,
     email: false,
     password: false,
-    account_type: false,
+    user_role: false,
   });
 
   // Handle input change and submit
@@ -145,7 +159,32 @@ const SignUp: FC = () => {
   const handle_submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    console.log(form_data);
+    const form_urlencoded = convert_to_urlencoded(form_data);
+
+    const try_to_signup = async () => {
+      const response = await post_data(form_urlencoded);
+
+      if (response === 201) {
+        console.log("Success! A confirmation email was sent");
+      }
+
+      console.log(signup_error);
+    };
+
+    try_to_signup();
+  };
+
+  const convert_to_urlencoded = (data_object: FormData): string => {
+    let converted_form_data = new URLSearchParams();
+    let property: keyof FormData;
+
+    for (property in data_object) {
+      if (property !== "confirm_password") {
+        converted_form_data.append(property, data_object[property] as string);
+      }
+    }
+
+    return converted_form_data.toString();
   };
 
   // Checking username validity
@@ -181,10 +220,18 @@ const SignUp: FC = () => {
                 set_username_status("это имя уже занято");
                 set_username_check_progress("unacceptable");
                 ref_username_check_progress.current = "unacceptable";
+                set_input_validity((prev) => ({
+                  ...prev,
+                  username: false,
+                }));
               } else {
                 set_username_status("имя свободно");
                 set_username_check_progress("approved");
                 ref_username_check_progress.current = "approved";
+                set_input_validity((prev) => ({
+                  ...prev,
+                  username: true,
+                }));
               }
             }
           };
@@ -194,6 +241,10 @@ const SignUp: FC = () => {
       } else {
         set_username_check_progress("unacceptable");
         ref_username_check_progress.current = "unacceptable";
+        set_input_validity((prev) => ({
+          ...prev,
+          username: false,
+        }));
       }
     } else {
       if (timer) {
@@ -368,11 +419,19 @@ const SignUp: FC = () => {
           success: true,
           message: "пароли совпадают",
         });
+        set_input_validity((prev) => ({
+          ...prev,
+          password: true,
+        }));
       } else {
         set_confirm_password_info({
           success: false,
           message: "пароли должны совпадать",
         });
+        set_input_validity((prev) => ({
+          ...prev,
+          password: false,
+        }));
       }
     }
   }, [form_data.confirm_password, form_data.password]);
@@ -418,12 +477,45 @@ const SignUp: FC = () => {
 
   // Handling account's option change
   const handle_option_change = (e: React.ChangeEvent<HTMLInputElement>) => {
-    set_selected_option(e.target.id as OptionId);
+    set_form_data((prev) => ({
+      ...prev,
+      user_role: e.target.id as OptionId,
+    }));
   };
+
+  useEffect(() => {
+    if (form_data.user_role) {
+      set_input_validity((prev) => ({
+        ...prev,
+        user_role: true,
+      }));
+    }
+  }, [form_data.user_role]);
 
   // Handling returning to the previous page
   const handle_close = () => {
     navigate(previous_path);
+  };
+
+  // Handling submit button enable/disable
+  useEffect(() => {
+    if (no_false_values(input_validity)) {
+      set_button_disabled(false);
+    } else {
+      set_button_disabled(true);
+    }
+  }, [input_validity]);
+
+  const no_false_values = (input_object: InputValidity) => {
+    return Object.values(input_object).every((value) => value === true);
+  };
+
+  // Handling button hover
+  const handle_mouse_enter = () => {
+    set_button_class_name(`${styles.button_hover}`);
+  };
+  const handle_mouse_leave = () => {
+    set_button_class_name("");
   };
 
   // Rendering component
@@ -692,15 +784,15 @@ const SignUp: FC = () => {
                   <div className={styles.option}>
                     <input
                       type="radio"
-                      id="option_creator"
+                      id="creator"
                       name="options"
                       onChange={handle_option_change}
-                      checked={selected_option === "option_creator"}
+                      checked={form_data.user_role === "creator"}
                     />
                     <label
-                      htmlFor="option_creator"
+                      htmlFor="creator"
                       className={`${styles.account_type} ${
-                        selected_option === "option_creator"
+                        form_data.user_role === "creator"
                           ? styles.account_type_checked
                           : ""
                       }`}
@@ -711,15 +803,15 @@ const SignUp: FC = () => {
                   <div className={styles.option}>
                     <input
                       type="radio"
-                      id="option_consumer"
+                      id="consumer"
                       name="options"
                       onChange={handle_option_change}
-                      checked={selected_option === "option_consumer"}
+                      checked={form_data.user_role === "consumer"}
                     />
                     <label
-                      htmlFor="option_consumer"
+                      htmlFor="consumer"
                       className={`${styles.account_type} ${
-                        selected_option === "option_consumer"
+                        form_data.user_role === "consumer"
                           ? styles.account_type_checked
                           : ""
                       }`}
@@ -739,6 +831,9 @@ const SignUp: FC = () => {
             <button
               type="submit"
               disabled={button_disabled}
+              onMouseEnter={handle_mouse_enter}
+              onMouseLeave={handle_mouse_leave}
+              className={button_class_name}
               style={
                 button_disabled
                   ? { opacity: "0.5", cursor: "default" }

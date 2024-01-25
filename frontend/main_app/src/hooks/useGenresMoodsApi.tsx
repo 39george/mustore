@@ -1,10 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
-import { API_URL } from "../config";
+import { API_URL, MAX_RETRIES, RETRY_DELAY_MS } from "../config";
 import axios from "axios";
 import { handle_axios_error, wait } from "../helpers/helpers";
-
-const MAX_RETRIES = 7;
-const RETRY_DELAY_MS = 1000;
 
 type GenreOrMood = string[];
 
