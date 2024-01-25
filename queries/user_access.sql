@@ -16,6 +16,9 @@ WHERE id = (
     WHERE id = :id
 );
 
+--! user_exists
+SELECT id FROM users WHERE users.username = :username;
+
 --! get_user_system_notifications : (system_notifications_id?)
 SELECT s.id, s.text, s.users_id, s.created_at, views.system_notifications_id
 FROM system_notifications s
@@ -29,11 +32,13 @@ ORDER BY s.created_at DESC;
 INSERT INTO views (users_id, system_notifications_id)
 VALUES (:user_id, :system_notification_id);
 
---! get_conversation_by_user_id : (conversations_id?)
+--! get_dialog_by_user_id : (conversations_id)
 SELECT c.id AS conversations_id
 FROM conversations c
 JOIN participants p1 ON c.id = p1.conversations_id AND p1.users_id = :first_user_id
-JOIN participants p2 ON c.id = p2.conversations_id AND p2.users_id = :second_user_id;
+JOIN participants p2 ON c.id = p2.conversations_id AND p2.users_id = :second_user_id
+GROUP BY c.id
+HAVING COUNT(*) = 2;
 
 --! get_conversations_entries
 SELECT 
