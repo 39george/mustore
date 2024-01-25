@@ -26,16 +26,21 @@ use crate::auth::users::AuthSession;
 use crate::auth::users::Permission;
 use crate::cornucopia::queries::user_access;
 use crate::cornucopia::queries::user_access::GetConversationsEntries;
+use crate::domain::object_key::ObjectKey;
 use crate::domain::requests::user_access::CreateConversationRequest;
 use crate::domain::requests::user_access::GetConversationRequest;
 use crate::domain::requests::user_access::ListConversationRequest;
 use crate::domain::requests::user_access::SendMessageRequest;
 use crate::domain::requests::user_access::UploadFileRequest;
 use crate::domain::responses::user_access::ConversationDataResponse;
+use crate::domain::responses::user_access::DialogId;
 use crate::domain::upload_request::UploadRequest;
+use crate::domain::user_name::UserName;
 use crate::routes::ResponseError;
 use crate::service_providers::object_storage::presigned_post_form::PresignedPostData;
 use crate::startup::api_doc::BadRequestResponse;
+use crate::startup::api_doc::InternalErrorResponse;
+use crate::startup::api_doc::NotFoundResponse;
 use crate::startup::AppState;
 use crate::types::data_size::DataSizes;
 
@@ -67,7 +72,7 @@ pub fn user_router() -> Router<AppState> {
         .route("/health_check", routing::get(health_check))
         .route("/upload_form", routing::get(request_obj_storage_upload))
         .route("/conversations", routing::get(get_conversations))
-        .route("/conversation_id", routing::get(get_conversation_id))
+        .route("/dialog_id", routing::get(get_dialog_id))
         .route("/new_conversation", routing::post(create_new_conversation))
         .route("/send_message", routing::post(send_message))
         .route("/list_conversation", routing::get(list_conversation))
@@ -84,7 +89,7 @@ pub fn user_router() -> Router<AppState> {
         (status = 403, description = "Forbidden")
     ),
     security(
-     ("api_key" = [])
+        ("api_key" = [])
     ),
     tag = "health_checks"
 )]
@@ -98,8 +103,9 @@ async fn health_check() -> StatusCode {
     get,
     path = "/api/protected/user/permissions",
     responses(
-        (status = 200, response = Permission ),
-        (status = 403, description = "Forbidden")
+        (status = 200, response = Permission),
+        (status = 403, description = "Forbidden"),
+        (status = 500, response = InternalErrorResponse)
     ),
     security(
      ("api_key" = [])
@@ -128,6 +134,7 @@ async fn user_permissions(
     responses(
         (status = 200, response = PresignedPostData),
         (status = 400, response = BadRequestResponse),
+        (status = 403, description = "Forbidden"),
         (
             status = 415,
             description = "Server will not generate presigned post form for provided media type",
@@ -135,10 +142,10 @@ async fn user_permissions(
             body = String,
             example = json!({"AllowedFormats": ["application/zip", "audio/wav", "video/mp4"]})
         ),
-        (status = 403, description = "Forbidden")
+        (status = 500, response = InternalErrorResponse)
     ),
     security(
-     ("api_key" = [])
+        ("api_key" = [])
     ),
     tag = "protected.users"
 )]
@@ -171,12 +178,14 @@ async fn request_obj_storage_upload(
         }
     };
 
-    let object_key = format!(
-        "upload/{}-{}-{}",
-        user.username,
+    let object_key = ObjectKey::new(
+        "upload",
+        &user.username,
         uuid::Uuid::new_v4(),
-        params.file_name
-    );
+        &params.file_name,
+    )
+    .context("Failed to build object key")
+    .map_err(ResponseError::BadRequest)?;
 
     let presigned_post_data =
         app_state.object_storage.generate_presigned_post_form(
@@ -192,6 +201,37 @@ async fn request_obj_storage_upload(
     Ok(Json(presigned_post_data))
 }
 
+/// Get conversations list.
+#[utoipa::path(
+    get,
+    path = "/api/protected/user/conversations",
+    responses(
+        (
+            status = 200,
+            body = Vec<GetConversationsEntries>,
+            content_type = "application/json",
+            description = "Conversations list",
+            example = json!(
+                [
+                  {
+                    "conversation_id": 1236,
+                    "image_url": "https://images.com/image123.png",
+                    "interlocutor": "Jack",
+                    "last_message_text": "Hi, How do you do!",
+                    "last_message_timestamp": "2024-01-24T09:31:39.404Z",
+                    "unread_messages_count": 3
+                  }
+                ]
+            )
+        ),
+        (status = 403, description = "Forbidden"),
+        (status = 500, response = InternalErrorResponse)
+    ),
+    security(
+        ("api_key" = [])
+    ),
+    tag = "protected.users"
+)]
 #[tracing::instrument(
     name = "Get ordinary conversations list",
     skip_all,
@@ -221,22 +261,51 @@ async fn get_conversations(
     Ok(Json(entries))
 }
 
-#[tracing::instrument(
-    name = "Get conversation id by user id",
-    skip_all,
-    fields(username)
+/// Get dialog id by user id.
+#[utoipa::path(
+    get,
+    path = "/api/protected/user/dialog_id",
+    params(
+        ("with_username" = String, Query, description = "Username which one you request dialog with")
+    ),
+    responses(
+        (
+            status = 200,
+            body = DialogId,
+            content_type = "application/json",
+            description = "Dialog id",
+            example = json!({
+                "id": 123
+            })
+        ),
+        (status = 403, description = "Forbidden"),
+        (status = 404, response = NotFoundResponse),
+        (status = 500, response = InternalErrorResponse)
+    ),
+    security(
+        ("api_key" = [])
+    ),
+    tag = "protected.users"
 )]
-async fn get_conversation_id(
+#[tracing::instrument(
+    name = "Get dialog id by user id",
+    skip_all,
+    fields(username, dialog_with)
+)]
+async fn get_dialog_id(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
-    Query(GetConversationRequest { with_user_id }): Query<
-        GetConversationRequest,
-    >,
-) -> Result<Json<Option<i32>>, ResponseError> {
+    Query(GetConversationRequest {
+        with_user: with_username,
+    }): Query<GetConversationRequest>,
+) -> Result<Json<DialogId>, ResponseError> {
     let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
     tracing::Span::current().record("username", &user.username);
+    tracing::Span::current().record("dialog_with", &with_username);
+    let _ =
+        UserName::parse(&with_username).map_err(ResponseError::BadRequest)?;
 
     let db_client = app_state
         .pg_pool
@@ -244,15 +313,59 @@ async fn get_conversation_id(
         .await
         .context("Failed to get connection from postgres pool")?;
 
-    let conversation_id = user_access::get_conversation_by_user_id()
+    // TODO: update that logic to work with 1 pg query
+    // Check that `with_user_id` exists in db
+    let with_user_id = match user_access::user_exists()
+        .bind(&db_client, &with_username)
+        .opt()
+        .await
+        .context("Failed to fetch user by id from pg")?
+    {
+        Some(id) => id,
+        None => {
+            return Err(ResponseError::NotFoundError(
+                anyhow::anyhow!("Failed to get user id by username"),
+                "no_username_in_db",
+            ))
+        }
+    };
+
+    // TODO: we should query by username I think, and do 1 query
+    let id = user_access::get_dialog_by_user_id()
         .bind(&db_client, &user.id, &with_user_id)
-        .one()
+        .opt()
         .await
         .context("Failed to get conversation id by user id")?;
 
-    Ok(Json(conversation_id))
+    Ok(Json(DialogId { id }))
 }
 
+/// Create a new conversation.
+#[utoipa::path(
+    post,
+    path = "/api/protected/user/new_conversation",
+    params(
+        CreateConversationRequest
+    ),
+    responses(
+        (
+            status = 201,
+            body = DialogId,
+            content_type = "application/json",
+            description = "Conversation id",
+            example = json!({
+                "id": 123
+            })
+        ),
+        (status = 403, description = "Forbidden"),
+        (status = 404, response = NotFoundResponse),
+        (status = 500, response = InternalErrorResponse)
+    ),
+    security(
+        ("api_key" = [])
+    ),
+    tag = "protected.users"
+)]
 #[tracing::instrument(
     name = "Create new conversation",
     skip_all,
@@ -261,14 +374,16 @@ async fn get_conversation_id(
 async fn create_new_conversation(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
-    Query(CreateConversationRequest { with_user_id }): Query<
+    Query(CreateConversationRequest { with_username }): Query<
         CreateConversationRequest,
     >,
-) -> Result<(StatusCode, Json<i32>), ResponseError> {
+) -> Result<(StatusCode, Json<DialogId>), ResponseError> {
     let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
     tracing::Span::current().record("username", &user.username);
+    let _ =
+        UserName::parse(&with_username).map_err(ResponseError::BadRequest)?;
 
     let mut db_client = app_state
         .pg_pool
@@ -280,6 +395,23 @@ async fn create_new_conversation(
         .transaction()
         .await
         .context("Failed to get a transaction from pg")?;
+
+    // TODO: update that logic to work with 1 pg query
+    // Check that `with_user_id` exists in db
+    let with_user_id = match user_access::user_exists()
+        .bind(&transaction, &with_username)
+        .opt()
+        .await
+        .context("Failed to fetch user by id from pg")?
+    {
+        Some(id) => id,
+        None => {
+            return Err(ResponseError::NotFoundError(
+                anyhow::anyhow!("Failed to get user id by username"),
+                "no_username_in_db",
+            ))
+        }
+    };
 
     let conversation_id = user_access::create_new_conversation()
         .bind(&transaction)
@@ -302,10 +434,43 @@ async fn create_new_conversation(
             "Count was equal {count}, but should be 2"
         )))
     } else {
-        Ok((StatusCode::CREATED, Json(conversation_id)))
+        Ok((
+            StatusCode::CREATED,
+            Json(DialogId {
+                id: Some(conversation_id),
+            }),
+        ))
     }
 }
 
+// TODO: Implement checking that conversation_id, reply_message_id, service_id are valid.
+// TODO: Check that all attachments are really exist.
+/// Send a new message.
+#[utoipa::path(
+    post,
+    path = "/api/protected/user/send_message",
+    request_body (
+        content = SendMessageRequest,
+        content_type = "application/Json",
+        example = json!({
+            "attachments": ["attachment1.wav"],
+            "conversation_id": 2,
+            "reply_message_id": null,
+            "service_id": null,
+            "text": "this is a new message"
+        }),
+    ),
+    responses(
+        (status = 201, description = "Message is created"),
+        (status = 403, description = "Forbidden"),
+        (status = 404, response = NotFoundResponse),
+        (status = 500, description = "Something happened on the server, or provided id's were incorrect")
+    ),
+    security(
+        ("api_key" = [])
+    ),
+    tag = "protected.users"
+)]
 #[tracing::instrument(name = "Send a message", skip_all, fields(username))]
 async fn send_message(
     auth_session: AuthSession,
@@ -318,6 +483,8 @@ async fn send_message(
     tracing::Span::current().record("username", &user.username);
 
     params.validate(&())?;
+
+    let s3 = app_state.object_storage;
 
     let mut db_client = app_state
         .pg_pool
@@ -343,22 +510,28 @@ async fn send_message(
         .await
         .context("Failed to insert new message to pg.")?;
 
-    for attachment in &params.attachments {
-        user_access::insert_message_attachment()
-            .bind(&transaction, attachment, &message_id)
-            .await
-            .context("Failed to insert message attachment to pg.")?;
-    }
-
+    let attachments = params.attachments.iter().collect::<Vec<_>>();
     remove_attachments_data_from_redis(
         &app_state.redis_pool,
-        &params.attachments,
+        &attachments,
         user.id,
     )
     .await
-    .context(
-        "Failed to remove message attachments upload information from redis.",
-    )?;
+    .context("Failed to remove attachments from redis")
+    .map_err(|e| ResponseError::NotFoundError(e, "no_attachment_in_cache"))?;
+
+    for attachment in &params.attachments {
+        // Move attachments into `received` folder
+        let new_key = s3
+            .receive(&attachment)
+            .await
+            .map_err(ResponseError::ObjectStorageError)?;
+
+        user_access::insert_message_attachment()
+            .bind(&transaction, &new_key.as_ref(), &message_id)
+            .await
+            .context("Failed to insert message attachment to pg.")?;
+    }
 
     transaction
         .commit()
@@ -368,6 +541,25 @@ async fn send_message(
     Ok(StatusCode::CREATED)
 }
 
+// TODO: check that conversation exists.
+/// List conversation by id, 30 entries returned.
+#[utoipa::path(
+    get,
+    path = "/api/protected/user/list_conversation",
+    params(
+        ListConversationRequest
+    ),
+    responses(
+        (status = 201, response = ConversationDataResponse),
+        (status = 403, description = "Forbidden"),
+        (status = 404, response = NotFoundResponse),
+        (status = 500, description = "Something happened on the server, or provided id were incorrect")
+    ),
+    security(
+        ("api_key" = [])
+    ),
+    tag = "protected.users"
+)]
 #[tracing::instrument(name = "List conversation", skip_all, fields(username))]
 async fn list_conversation(
     auth_session: AuthSession,
@@ -413,13 +605,13 @@ async fn list_conversation(
 )]
 async fn store_upload_request_data(
     con: &RedisPool,
-    object_key: &str,
+    object_key: &ObjectKey,
     user_id: i32,
 ) -> RedisResult<()> {
     let created_at = OffsetDateTime::now_utc()
         .format(&crate::DEFAULT_TIME_FORMAT)
         .unwrap();
-    let upload_request = UploadRequest::new(user_id, object_key);
+    let upload_request = UploadRequest::new(user_id, object_key.clone());
     con.set(&upload_request.to_string(), &created_at, None, None, false)
         .await?;
     Ok(())
@@ -455,12 +647,12 @@ async fn check_current_user_uploads(
 #[tracing::instrument(name = "Remove upload data from redis.", skip_all)]
 async fn remove_attachments_data_from_redis(
     con: &RedisPool,
-    keys: &Vec<String>,
+    keys: &[&ObjectKey],
     user_id: i32,
 ) -> RedisResult<()> {
-    for obj_key in keys.iter() {
-        let upload_request = UploadRequest::new(user_id, obj_key).to_string();
-
+    for obj_key in keys.into_iter() {
+        let upload_request =
+            UploadRequest::new(user_id, (*obj_key).clone()).to_string();
         // Check that there are such upload is
         let _created_at: String = con.get(&upload_request).await?;
 
