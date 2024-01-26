@@ -6,7 +6,6 @@ use axum::middleware::AddExtension;
 use axum::routing;
 use axum::serve::Serve;
 use axum::Router;
-use axum::ServiceExt;
 use axum_login::AuthManagerLayerBuilder;
 use deadpool_postgres::Client;
 use deadpool_postgres::Manager;

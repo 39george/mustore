@@ -167,11 +167,10 @@ pub mod map_response {
 
 pub mod ban_by_ip {
     use axum::extract::ConnectInfo;
+    use axum::http::StatusCode;
     use axum::{body::Body, extract::Request, response::Response};
-    use axum::{body::Bytes, http::StatusCode};
     use fred::interfaces::KeysInterface;
     use futures::future::BoxFuture;
-    use http_body_util::BodyExt;
     use std::net::SocketAddr;
     use std::task::{Context, Poll};
     use tower::{Layer, Service};
