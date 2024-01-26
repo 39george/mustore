@@ -33,9 +33,9 @@ UPDATE admin_signup_tokens
 SET used = TRUE
 WHERE token = :token;
 
---! check_if_user_exists_already
+--! check_if_email_exists_already
 SELECT id FROM users
-WHERE email = :email OR username = :username;
+WHERE email = :email;
 
 --! check_if_username_occupied
 SELECT id FROM users WHERE username = :username;

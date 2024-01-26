@@ -118,17 +118,29 @@ pub async fn signup(
         .context("Failed to get  pg connection from pool")
         .map_err(AuthError::InternalError)?;
 
-    let if_id_exists = user_auth_queries::check_if_user_exists_already()
-        .bind(&pg_client, &email.as_ref(), &username.as_ref())
+    let if_email_exists = user_auth_queries::check_if_email_exists_already()
+        .bind(&pg_client, &email.as_ref())
         .opt()
         .await
         .context("Failed to get user data from db")
         .map_err(AuthError::InternalError)?;
 
-    if if_id_exists.is_some() {
+    if if_email_exists.is_some() {
+        return Ok(StatusCode::CREATED);
+    }
+
+    let if_username_occupied = user_auth_queries::check_if_username_occupied()
+        .bind(&pg_client, &username.as_ref())
+        .opt()
+        .await
+        .context("Failed to get user data from db")
+        .map_err(AuthError::InternalError)?;
+
+    if if_username_occupied.is_some() {
         return Err(anyhow::anyhow!("User is already exists!"))
             .map_err(AuthError::SignupFailed);
     }
+
     let validation_token = SignupToken::generate();
 
     let user_candidate = UserCandidate::new(

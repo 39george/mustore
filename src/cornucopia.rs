@@ -1786,7 +1786,7 @@ u64, tokio_postgres :: Error > > + Send + 'a>>, C > for InsertMessageAttachmentS
     InsertMessageAttachmentParams < T1,>) -> std::pin::Pin<Box<dyn futures::Future<Output = Result < u64, tokio_postgres ::
     Error > > + Send + 'a>> { Box::pin(self.bind(client, & params.key,& params.message_id,) ) }
 }}pub mod user_auth_queries
-{ use futures::{{StreamExt, TryStreamExt}};use futures; use cornucopia_async::GenericClient;#[derive( Debug)] pub struct CheckIfUserExistsAlreadyParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,> { pub email : T1,pub username : T2,}#[derive( Debug)] pub struct InsertNewUserParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,T3 : cornucopia_async::StringSql,> { pub user_settings_id : i32,pub username : T1,pub email : T2,pub password_hash : T3,}#[derive( Debug)] pub struct StoreUserPermissionParams < T1 : cornucopia_async::StringSql,> { pub user_id : i32,pub permission : T1,}#[derive( Debug)] pub struct InsertUserAvatarImageParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub users_id : i32,}#[derive(serde::Serialize, Debug, Clone, PartialEq, )] pub struct GetAuthUserDataByEmail
+{ use futures::{{StreamExt, TryStreamExt}};use futures; use cornucopia_async::GenericClient;#[derive( Debug)] pub struct InsertNewUserParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,T3 : cornucopia_async::StringSql,> { pub user_settings_id : i32,pub username : T1,pub email : T2,pub password_hash : T3,}#[derive( Debug)] pub struct StoreUserPermissionParams < T1 : cornucopia_async::StringSql,> { pub user_id : i32,pub permission : T1,}#[derive( Debug)] pub struct InsertUserAvatarImageParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub users_id : i32,}#[derive(serde::Serialize, Debug, Clone, PartialEq, )] pub struct GetAuthUserDataByEmail
 { pub id : i32,pub username : String,pub password_hash : String,}pub struct GetAuthUserDataByEmailBorrowed < 'a >
 { pub id : i32,pub username : &'a str,pub password_hash : &'a str,} impl < 'a > From < GetAuthUserDataByEmailBorrowed <
 'a >> for GetAuthUserDataByEmail
@@ -2085,30 +2085,21 @@ token : & 'a uuid::Uuid,) -> Result < u64, tokio_postgres :: Error >
 {
     let stmt = self.0.prepare(client) .await ? ;
     client.execute(stmt, & [token,]) .await
-} }pub fn check_if_user_exists_already() -> CheckIfUserExistsAlreadyStmt
-{ CheckIfUserExistsAlreadyStmt(cornucopia_async :: private :: Stmt :: new("SELECT id FROM users
-WHERE email = $1 OR username = $2")) } pub
-struct CheckIfUserExistsAlreadyStmt(cornucopia_async :: private :: Stmt) ; impl
-CheckIfUserExistsAlreadyStmt { pub fn bind < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,>
+} }pub fn check_if_email_exists_already() -> CheckIfEmailExistsAlreadyStmt
+{ CheckIfEmailExistsAlreadyStmt(cornucopia_async :: private :: Stmt :: new("SELECT id FROM users
+WHERE email = $1")) } pub
+struct CheckIfEmailExistsAlreadyStmt(cornucopia_async :: private :: Stmt) ; impl
+CheckIfEmailExistsAlreadyStmt { pub fn bind < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,>
 (& 'a mut self, client : & 'a  C,
-email : & 'a T1,username : & 'a T2,) -> I32Query < 'a, C,
-i32, 2 >
+email : & 'a T1,) -> I32Query < 'a, C,
+i32, 1 >
 {
     I32Query
     {
-        client, params : [email,username,], stmt : & mut self.0, extractor :
+        client, params : [email,], stmt : & mut self.0, extractor :
         | row | { row.get(0) }, mapper : | it | { it },
     }
-} }impl < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,> cornucopia_async ::
-Params < 'a, CheckIfUserExistsAlreadyParams < T1,T2,>, I32Query < 'a,
-C, i32, 2 >, C > for CheckIfUserExistsAlreadyStmt
-{
-    fn
-    params(& 'a mut self, client : & 'a  C, params : & 'a
-    CheckIfUserExistsAlreadyParams < T1,T2,>) -> I32Query < 'a, C,
-    i32, 2 >
-    { self.bind(client, & params.email,& params.username,) }
-}pub fn check_if_username_occupied() -> CheckIfUsernameOccupiedStmt
+} }pub fn check_if_username_occupied() -> CheckIfUsernameOccupiedStmt
 { CheckIfUsernameOccupiedStmt(cornucopia_async :: private :: Stmt :: new("SELECT id FROM users WHERE username = $1")) } pub
 struct CheckIfUsernameOccupiedStmt(cornucopia_async :: private :: Stmt) ; impl
 CheckIfUsernameOccupiedStmt { pub fn bind < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,>
