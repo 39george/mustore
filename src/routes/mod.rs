@@ -41,6 +41,8 @@ pub enum ResponseError {
     NotFoundError(#[source] anyhow::Error, &'static str),
     #[error("Have no access")]
     ForbiddenError(#[source] anyhow::Error),
+    #[error("Conflict error")]
+    ConflictError(#[source] anyhow::Error),
 }
 
 impl std::fmt::Debug for ResponseError {
@@ -96,6 +98,9 @@ impl IntoResponse for ResponseError {
                 .unwrap_or(StatusCode::NOT_FOUND.into_response()),
             ResponseError::ForbiddenError(_) => {
                 StatusCode::FORBIDDEN.into_response()
+            }
+            ResponseError::ConflictError(_) => {
+                StatusCode::CONFLICT.into_response()
             }
         }
     }

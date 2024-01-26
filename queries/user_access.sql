@@ -32,11 +32,13 @@ ORDER BY s.created_at DESC;
 INSERT INTO views (users_id, system_notifications_id)
 VALUES (:user_id, :system_notification_id);
 
---! get_dialog_by_user_id : (conversations_id)
+--! get_dialog_by_username : (conversations_id)
 SELECT c.id AS conversations_id
 FROM conversations c
 JOIN participants p1 ON c.id = p1.conversations_id AND p1.users_id = :first_user_id
-JOIN participants p2 ON c.id = p2.conversations_id AND p2.users_id = :second_user_id
+JOIN participants p2 ON c.id = p2.conversations_id AND p2.users_id = (
+    SELECT id FROM users WHERE username = :username
+)
 GROUP BY c.id
 HAVING COUNT(*) = 2;
 
@@ -76,6 +78,9 @@ FROM conversations conv
 JOIN participants part ON part.conversations_id = conv.id
 JOIN users ON part.users_id = users.id
 WHERE users.id = :user_id AND conv.id = :conversation_id;
+
+--! conversation_exists
+SELECT id FROM conversations WHERE conversations.id = :id;
 
 --! list_conversation_by_id : (message_id?, message_text?, message_created_at?, message_updated_at?, reply_message_id?, message_attachments?, service_id?, service_name?, service_cover_key?, offer_id?, offer_text?, offer_price?, offer_delivery_date?, offer_free_revisions?, offer_revision_price?)
 SELECT 

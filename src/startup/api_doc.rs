@@ -7,7 +7,7 @@ use utoipa::{
         security::{ApiKey, ApiKeyValue, SecurityScheme},
         ServerBuilder,
     },
-    Modify, OpenApi,
+    Modify, OpenApi, ToResponse, ToSchema,
 };
 
 use crate::routes::protected;
@@ -24,11 +24,11 @@ use crate::{
 
 // ───── ErrorResponses ───────────────────────────────────────────────────── //
 
-#[derive(utoipa::ToResponse)]
+#[derive(ToResponse)]
 #[response(description = "Something happened on the server")]
 pub struct InternalErrorResponse;
 
-#[derive(utoipa::ToResponse)]
+#[derive(ToResponse)]
 #[response(
     description = "Request was formed erroneously",
     content_type = "application/json",
@@ -39,11 +39,11 @@ pub struct InternalErrorResponse;
 )]
 pub struct BadRequestResponse(String);
 
-#[derive(utoipa::ToResponse)]
+#[derive(ToResponse)]
 #[response(description = "Not acceptable error")]
 pub struct NotAcceptableErrorResponse;
 
-#[derive(utoipa::ToResponse)]
+#[derive(ToResponse)]
 #[response(
     description = "Unauthorized error",
     content_type = "text/plain",
@@ -54,13 +54,13 @@ pub struct NotAcceptableErrorResponse;
 )]
 pub struct UnauthorizedErrorResponse(String);
 
-#[derive(utoipa::ToResponse)]
+#[derive(ToResponse)]
 #[response(description = "Too many uploads error")]
 pub struct TooManyUploadsErrorResponse;
 
 // We use ToSchema here, because we write manually in every case,
 // inlined, description, examples etc.
-#[derive(utoipa::ToResponse)]
+#[derive(ToResponse)]
 #[response(
     description = "Not found some data (param name passed)",
     content_type = "application/json",
@@ -70,9 +70,13 @@ pub struct TooManyUploadsErrorResponse;
 pub struct NotFoundResponse {
     _param: String,
 }
+
+#[derive(ToResponse)]
+#[response(description = "Conflict error")]
+pub struct ConflictErrorResponse;
 // ───── Responses ────────────────────────────────────────────────────────── //
 
-#[derive(utoipa::ToSchema)]
+#[derive(ToSchema)]
 #[schema(as = GetSongsList)]
 pub struct GetSongsListResponse {
     pub song_id: i32,
@@ -87,7 +91,7 @@ pub struct GetSongsListResponse {
     pub is_user_liked: Option<bool>,
 }
 
-#[derive(utoipa::ToSchema)]
+#[derive(ToSchema)]
 #[schema(as = GetNewSongs)]
 pub struct GetNewSongsResponse {
     pub song_id: i32,
@@ -100,7 +104,7 @@ pub struct GetNewSongsResponse {
     pub is_user_liked: Option<bool>,
 }
 
-#[derive(utoipa::ToSchema)]
+#[derive(ToSchema)]
 #[schema(as = GetRecommendedSongs)]
 pub struct GetRecommendedSongsResponse {
     pub song_id: i32,
@@ -113,7 +117,7 @@ pub struct GetRecommendedSongsResponse {
     pub is_user_liked: Option<bool>,
 }
 
-#[derive(utoipa::ToSchema, utoipa::ToResponse)]
+#[derive(ToSchema, ToResponse)]
 #[response(
     description = "If value exists",
     content_type = "application/json",
@@ -121,7 +125,7 @@ pub struct GetRecommendedSongsResponse {
 )]
 pub struct IsExistsResponse(String);
 
-#[derive(utoipa::ToSchema)]
+#[derive(ToSchema)]
 #[schema(as = GetConversationsEntries)]
 pub struct GetConversationsEntriesResponse {
     pub conversation_id: i32,
@@ -134,13 +138,20 @@ pub struct GetConversationsEntriesResponse {
 
 // ───── TypeWrappers ─────────────────────────────────────────────────────── //
 
-#[derive(utoipa::ToSchema)]
+#[derive(ToSchema)]
 #[schema(as = Secret)]
 pub struct Password(String);
 
-#[derive(utoipa::ToSchema)]
+#[derive(ToSchema)]
 #[schema(as = mediatype::MediaTypeBuf)]
 pub struct MediaType(String);
+
+#[derive(ToSchema)]
+#[schema(
+    value_type = String,
+    example = "received/Lisa:21C960E7-5CA8-4974-98D7-6501DCCCAFD7:file.ext"
+)]
+pub struct ObjectKey(String);
 
 // ───── Addons ───────────────────────────────────────────────────────────── //
 
@@ -185,6 +196,7 @@ impl Modify for ServerAddon {
         protected::health_check,
         protected::user::health_check,
         protected::creator::health_check,
+        protected::creator::submit_product,
         protected::consumer::health_check,
         protected::admin::health_check,
         protected::user::user_permissions,
@@ -220,12 +232,17 @@ impl Modify for ServerAddon {
                 crate::service_providers::object_storage::presigned_post_form::PresignedPostData,
                 MediaType,
                 SendMessageRequest,
+                ObjectKey,
                 crate::domain::responses::user_access::Entry,
                 crate::domain::responses::user_access::Interlocutor,
                 crate::domain::responses::user_access::Message,
                 crate::domain::responses::user_access::Offer,
                 crate::domain::responses::user_access::Attachment,
-                crate::domain::responses::user_access::ServiceData
+                crate::domain::responses::user_access::ServiceData,
+                crate::domain::requests::creator_access::Lyric,
+                crate::domain::requests::creator_access::Product,
+                crate::domain::requests::creator_access::MusicProduct,
+                crate::domain::requests::creator_access::SubmitProductRequest,
             ),
             responses(
                 InternalErrorResponse,
@@ -237,7 +254,8 @@ impl Modify for ServerAddon {
                 crate::service_providers::object_storage::presigned_post_form::PresignedPostData,
                 Permission,
                 NotFoundResponse,
-                ConversationDataResponse
+                ConversationDataResponse,
+                ConflictErrorResponse
             )
         ),
         modifiers(&ServerAddon),

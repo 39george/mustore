@@ -1274,7 +1274,7 @@ SelectUserDataWithAvatarKey, 1 >
         | row | { SelectUserDataWithAvatarKeyBorrowed { id : row.get(0),key : row.get(1),username : row.get(2),email : row.get(3),} }, mapper : | it | { <SelectUserDataWithAvatarKey>::from(it) },
     }
 } }}pub mod user_access
-{ use futures::{{StreamExt, TryStreamExt}};use futures; use cornucopia_async::GenericClient;#[derive(Clone,Copy, Debug)] pub struct SetUserSettingsParams < > { pub inbox_messages : bool,pub order_messages : bool,pub order_updates : bool,pub id : i32,}#[derive(Clone,Copy, Debug)] pub struct SetSystemNotificationHaveBeenSeenParams < > { pub user_id : i32,pub system_notification_id : i32,}#[derive(Clone,Copy, Debug)] pub struct GetDialogByUserIdParams < > { pub first_user_id : i32,pub second_user_id : i32,}#[derive(Clone,Copy, Debug)] pub struct UserHasAccessToConversationParams < > { pub user_id : i32,pub conversation_id : i32,}#[derive(Clone,Copy, Debug)] pub struct ListConversationByIdParams < > { pub conversation_id : i32,pub offset : i64,}#[derive(Clone,Copy, Debug)] pub struct AddParticipantsToConversationParams < > { pub conversation_id : i32,pub user1 : i32,pub user2 : i32,}#[derive( Debug)] pub struct InsertNewMessageParams < T1 : cornucopia_async::StringSql,> { pub conversation_id : i32,pub service_id : Option<i32>,pub user_id : i32,pub reply_message_id : Option<i32>,pub text : T1,}#[derive( Debug)] pub struct InsertMessageAttachmentParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub message_id : i32,}#[derive(serde::Serialize, Debug, Clone, PartialEq, Copy)] pub struct GetUserSettings
+{ use futures::{{StreamExt, TryStreamExt}};use futures; use cornucopia_async::GenericClient;#[derive(Clone,Copy, Debug)] pub struct SetUserSettingsParams < > { pub inbox_messages : bool,pub order_messages : bool,pub order_updates : bool,pub id : i32,}#[derive(Clone,Copy, Debug)] pub struct SetSystemNotificationHaveBeenSeenParams < > { pub user_id : i32,pub system_notification_id : i32,}#[derive( Debug)] pub struct GetDialogByUsernameParams < T1 : cornucopia_async::StringSql,> { pub first_user_id : i32,pub username : T1,}#[derive(Clone,Copy, Debug)] pub struct UserHasAccessToConversationParams < > { pub user_id : i32,pub conversation_id : i32,}#[derive(Clone,Copy, Debug)] pub struct ListConversationByIdParams < > { pub conversation_id : i32,pub offset : i64,}#[derive(Clone,Copy, Debug)] pub struct AddParticipantsToConversationParams < > { pub conversation_id : i32,pub user1 : i32,pub user2 : i32,}#[derive( Debug)] pub struct InsertNewMessageParams < T1 : cornucopia_async::StringSql,> { pub conversation_id : i32,pub service_id : Option<i32>,pub user_id : i32,pub reply_message_id : Option<i32>,pub text : T1,}#[derive( Debug)] pub struct InsertMessageAttachmentParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub message_id : i32,}#[derive(serde::Serialize, Debug, Clone, PartialEq, Copy)] pub struct GetUserSettings
 { pub inbox_messages : bool,pub order_messages : bool,pub order_updates : bool,}pub struct GetUserSettingsQuery < 'a, C : GenericClient, T, const N : usize >
 {
     client : & 'a  C, params :
@@ -1584,33 +1584,35 @@ u64, tokio_postgres :: Error > > + Send + 'a>>, C > for SetSystemNotificationHav
     params(& 'a mut self, client : & 'a  C, params : & 'a
     SetSystemNotificationHaveBeenSeenParams < >) -> std::pin::Pin<Box<dyn futures::Future<Output = Result < u64, tokio_postgres ::
     Error > > + Send + 'a>> { Box::pin(self.bind(client, & params.user_id,& params.system_notification_id,) ) }
-}pub fn get_dialog_by_user_id() -> GetDialogByUserIdStmt
-{ GetDialogByUserIdStmt(cornucopia_async :: private :: Stmt :: new("SELECT c.id AS conversations_id
+}pub fn get_dialog_by_username() -> GetDialogByUsernameStmt
+{ GetDialogByUsernameStmt(cornucopia_async :: private :: Stmt :: new("SELECT c.id AS conversations_id
 FROM conversations c
 JOIN participants p1 ON c.id = p1.conversations_id AND p1.users_id = $1
-JOIN participants p2 ON c.id = p2.conversations_id AND p2.users_id = $2
+JOIN participants p2 ON c.id = p2.conversations_id AND p2.users_id = (
+    SELECT id FROM users WHERE username = $2
+)
 GROUP BY c.id
 HAVING COUNT(*) = 2")) } pub
-struct GetDialogByUserIdStmt(cornucopia_async :: private :: Stmt) ; impl
-GetDialogByUserIdStmt { pub fn bind < 'a, C : GenericClient, >
+struct GetDialogByUsernameStmt(cornucopia_async :: private :: Stmt) ; impl
+GetDialogByUsernameStmt { pub fn bind < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,>
 (& 'a mut self, client : & 'a  C,
-first_user_id : & 'a i32,second_user_id : & 'a i32,) -> I32Query < 'a, C,
+first_user_id : & 'a i32,username : & 'a T1,) -> I32Query < 'a, C,
 i32, 2 >
 {
     I32Query
     {
-        client, params : [first_user_id,second_user_id,], stmt : & mut self.0, extractor :
+        client, params : [first_user_id,username,], stmt : & mut self.0, extractor :
         | row | { row.get(0) }, mapper : | it | { it },
     }
-} }impl < 'a, C : GenericClient, > cornucopia_async ::
-Params < 'a, GetDialogByUserIdParams < >, I32Query < 'a,
-C, i32, 2 >, C > for GetDialogByUserIdStmt
+} }impl < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,> cornucopia_async ::
+Params < 'a, GetDialogByUsernameParams < T1,>, I32Query < 'a,
+C, i32, 2 >, C > for GetDialogByUsernameStmt
 {
     fn
     params(& 'a mut self, client : & 'a  C, params : & 'a
-    GetDialogByUserIdParams < >) -> I32Query < 'a, C,
+    GetDialogByUsernameParams < T1,>) -> I32Query < 'a, C,
     i32, 2 >
-    { self.bind(client, & params.first_user_id,& params.second_user_id,) }
+    { self.bind(client, & params.first_user_id,& params.username,) }
 }pub fn get_conversations_entries() -> GetConversationsEntriesStmt
 { GetConversationsEntriesStmt(cornucopia_async :: private :: Stmt :: new("SELECT 
     conversations.id AS conversation_id,
@@ -1677,7 +1679,20 @@ C, i32, 2 >, C > for UserHasAccessToConversationStmt
     UserHasAccessToConversationParams < >) -> I32Query < 'a, C,
     i32, 2 >
     { self.bind(client, & params.user_id,& params.conversation_id,) }
-}pub fn list_conversation_by_id() -> ListConversationByIdStmt
+}pub fn conversation_exists() -> ConversationExistsStmt
+{ ConversationExistsStmt(cornucopia_async :: private :: Stmt :: new("SELECT id FROM conversations WHERE conversations.id = $1")) } pub
+struct ConversationExistsStmt(cornucopia_async :: private :: Stmt) ; impl
+ConversationExistsStmt { pub fn bind < 'a, C : GenericClient, >
+(& 'a mut self, client : & 'a  C,
+id : & 'a i32,) -> I32Query < 'a, C,
+i32, 1 >
+{
+    I32Query
+    {
+        client, params : [id,], stmt : & mut self.0, extractor :
+        | row | { row.get(0) }, mapper : | it | { it },
+    }
+} }pub fn list_conversation_by_id() -> ListConversationByIdStmt
 { ListConversationByIdStmt(cornucopia_async :: private :: Stmt :: new("SELECT 
     conv.id as conversation_id,
     part.users_id as participant_user_id,

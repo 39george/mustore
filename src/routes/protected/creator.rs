@@ -24,6 +24,8 @@ use crate::domain::requests::creator_access::SubmitServiceRequest;
 use crate::domain::upload_request::UploadRequest;
 use crate::error_chain_fmt;
 use crate::routes::ResponseError;
+use crate::startup::api_doc::InternalErrorResponse;
+use crate::startup::api_doc::NotFoundResponse;
 use crate::startup::AppState;
 
 // ───── Types ────────────────────────────────────────────────────────────── //
@@ -83,6 +85,25 @@ async fn health_check() -> StatusCode {
     StatusCode::OK
 }
 
+// TODO: receive attachments, and check if they exists
+/// Submit a new product.
+#[utoipa::path(
+    post,
+    path = "/api/protected/creator/submit_product",
+    request_body(
+        content = SubmitProductRequest,
+        content_type = "application/json"
+    ),
+    responses(
+        (status = 201, description = "Product was submitted"),
+        (status = 403, description = "Forbidden"),
+        (status = 500, response = InternalErrorResponse)
+    ),
+    security(
+        ("api_key" = [])
+    ),
+    tag = "protected.creators"
+)]
 #[tracing::instrument(
     name = "Submit a new product",
     skip_all,

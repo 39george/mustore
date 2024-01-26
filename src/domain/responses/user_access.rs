@@ -39,7 +39,7 @@ impl<T> UnpackOption for Option<T> {
 
 #[derive(Serialize, Deserialize, Debug, ToSchema)]
 pub struct DialogId {
-    pub id: Option<i32>,
+    pub id: i32,
 }
 
 #[derive(Serialize, Deserialize, Debug, ToSchema, std::hash::Hash)]
@@ -62,10 +62,6 @@ impl std::cmp::Eq for Interlocutor {}
 pub struct Attachment {
     #[schema(example = "image.png")]
     filename: String,
-    #[schema(
-        value_type = String,
-        example = "received/Lisa:21C960E7-5CA8-4974-98D7-6501DCCCAFD7:image.png"
-    )]
     key: ObjectKey,
 }
 

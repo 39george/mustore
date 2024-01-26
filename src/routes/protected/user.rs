@@ -39,6 +39,7 @@ use crate::domain::user_name::UserName;
 use crate::routes::ResponseError;
 use crate::service_providers::object_storage::presigned_post_form::PresignedPostData;
 use crate::startup::api_doc::BadRequestResponse;
+use crate::startup::api_doc::ConflictErrorResponse;
 use crate::startup::api_doc::InternalErrorResponse;
 use crate::startup::api_doc::NotFoundResponse;
 use crate::startup::AppState;
@@ -261,7 +262,7 @@ async fn get_conversations(
     Ok(Json(entries))
 }
 
-/// Get dialog id by user id.
+/// Get dialog id by user id, if not found, returns NotFound: 'dialog_id'.
 #[utoipa::path(
     get,
     path = "/api/protected/user/dialog_id",
@@ -289,8 +290,8 @@ async fn get_conversations(
 )]
 #[tracing::instrument(
     name = "Get dialog id by user id",
-    skip_all,
-    fields(username, dialog_with)
+    skip(auth_session, app_state),
+    fields(username)
 )]
 async fn get_dialog_id(
     auth_session: AuthSession,
@@ -313,34 +314,13 @@ async fn get_dialog_id(
         .await
         .context("Failed to get connection from postgres pool")?;
 
-    // TODO: update that logic to work with 1 pg query
-    // Check that `with_user_id` exists in db
-    let with_user_id = match user_access::user_exists()
-        .bind(&db_client, &with_username)
-        .opt()
-        .await
-        .context("Failed to fetch user by id from pg")?
-    {
-        Some(id) => id,
-        None => {
-            return Err(ResponseError::NotFoundError(
-                anyhow::anyhow!("Failed to get user id by username"),
-                "no_username_in_db",
-            ))
-        }
-    };
-
-    // TODO: we should query by username I think, and do 1 query
-    let id = user_access::get_dialog_by_user_id()
-        .bind(&db_client, &user.id, &with_user_id)
-        .opt()
-        .await
-        .context("Failed to get conversation id by user id")?;
+    let id =
+        get_dialog_by_username(&db_client, &user.id, &with_username).await?;
 
     Ok(Json(DialogId { id }))
 }
 
-/// Create a new conversation.
+/// Create a new conversation. Returns 409 Conflict, if conversation already exists.
 #[utoipa::path(
     post,
     path = "/api/protected/user/new_conversation",
@@ -359,6 +339,7 @@ async fn get_dialog_id(
         ),
         (status = 403, description = "Forbidden"),
         (status = 404, response = NotFoundResponse),
+        (status = 409, response = ConflictErrorResponse),
         (status = 500, response = InternalErrorResponse)
     ),
     security(
@@ -368,8 +349,8 @@ async fn get_dialog_id(
 )]
 #[tracing::instrument(
     name = "Create new conversation",
-    skip_all,
-    fields(username, with_user_id)
+    skip(auth_session, app_state),
+    fields(username)
 )]
 async fn create_new_conversation(
     auth_session: AuthSession,
@@ -396,7 +377,6 @@ async fn create_new_conversation(
         .await
         .context("Failed to get a transaction from pg")?;
 
-    // TODO: update that logic to work with 1 pg query
     // Check that `with_user_id` exists in db
     let with_user_id = match user_access::user_exists()
         .bind(&transaction, &with_username)
@@ -408,10 +388,19 @@ async fn create_new_conversation(
         None => {
             return Err(ResponseError::NotFoundError(
                 anyhow::anyhow!("Failed to get user id by username"),
-                "no_username_in_db",
+                "with_username",
             ))
         }
     };
+
+    if get_dialog_by_username(&transaction, &user.id, &with_username)
+        .await
+        .is_ok()
+    {
+        return Err(ResponseError::ConflictError(anyhow::anyhow!(
+            "Can't create a new dialog: it is already exists!"
+        )));
+    }
 
     let conversation_id = user_access::create_new_conversation()
         .bind(&transaction)
@@ -437,14 +426,12 @@ async fn create_new_conversation(
         Ok((
             StatusCode::CREATED,
             Json(DialogId {
-                id: Some(conversation_id),
+                id: conversation_id,
             }),
         ))
     }
 }
 
-// TODO: Implement checking that conversation_id, reply_message_id, service_id are valid.
-// TODO: Check that all attachments are really exist.
 /// Send a new message.
 #[utoipa::path(
     post,
@@ -505,7 +492,7 @@ async fn send_message(
     )
     .await?;
 
-    let message_id = user_access::insert_new_message()
+    let message_id = match user_access::insert_new_message()
         .bind(
             &transaction,
             &params.conversation_id,
@@ -516,7 +503,26 @@ async fn send_message(
         )
         .one()
         .await
-        .context("Failed to insert new message to pg.")?;
+    {
+        Ok(id) => id,
+        Err(e) => match e.code() {
+            Some(st)
+                if st.eq(
+                    &tokio_postgres::error::SqlState::FOREIGN_KEY_VIOLATION,
+                ) =>
+            {
+                return Err(ResponseError::NotFoundError(
+                    anyhow::anyhow!("Got error: {e}"),
+                    "some_field",
+                ));
+            }
+            _ => {
+                return Err(ResponseError::UnexpectedError(anyhow::anyhow!(
+                    "Failed to insert a new message into pg: {e}"
+                )))
+            }
+        },
+    };
 
     let attachments = params.attachments.iter().collect::<Vec<_>>();
     remove_attachments_data_from_redis(
@@ -538,7 +544,7 @@ async fn send_message(
         user_access::insert_message_attachment()
             .bind(&transaction, &new_key.as_ref(), &message_id)
             .await
-            .context("Failed to insert message attachment to pg.")?;
+            .context("Failed to insert message attachment into pg.")?;
     }
 
     transaction
@@ -549,7 +555,6 @@ async fn send_message(
     Ok(StatusCode::CREATED)
 }
 
-// TODO: check that conversation exists.
 /// List conversation by id, 30 entries returned.
 /// Can return forbidden, if has no access to the provided conversation id.
 #[utoipa::path(
@@ -589,6 +594,7 @@ async fn list_conversation(
         .await
         .context("Failed to get connection from postgres pool")?;
 
+    check_conversation_exists(&db_client, &conversation_id).await?;
     check_conversation_access(
         &db_client,
         &user.id,
@@ -679,7 +685,7 @@ async fn remove_attachments_data_from_redis(
 }
 
 /// Check that user has access to the conversation
-#[tracing::instrument(name = "Remove upload data from redis.", skip_all)]
+#[tracing::instrument(name = "Check conversation access", skip_all)]
 async fn check_conversation_access<T: cornucopia_async::GenericClient>(
     db_client: &T,
     user_id: &i32,
@@ -696,4 +702,39 @@ async fn check_conversation_access<T: cornucopia_async::GenericClient>(
             username,
             conversation_id
         )))
+}
+
+/// Check that conversation exists
+#[tracing::instrument(name = "Check conversation exists", skip_all)]
+async fn check_conversation_exists<T: cornucopia_async::GenericClient>(
+    db_client: &T,
+    conversation_id: &i32,
+) -> Result<i32, ResponseError> {
+    user_access::conversation_exists()
+        .bind(db_client, conversation_id)
+        .opt()
+        .await
+        .context("Failed to fetch conversation access from db")?
+        .ok_or(ResponseError::NotFoundError(
+            anyhow::anyhow!(
+                "Conversation with id {conversation_id} not exists",
+            ),
+            "conversation_id",
+        ))
+}
+
+async fn get_dialog_by_username<T: cornucopia_async::GenericClient>(
+    client: &T,
+    user_id: &i32,
+    with_username: &str,
+) -> Result<i32, ResponseError> {
+    user_access::get_dialog_by_username()
+        .bind(client, user_id, &with_username)
+        .opt()
+        .await
+        .context("Failed to get conversation id by user id")?
+        .ok_or(ResponseError::NotFoundError(
+            anyhow::anyhow!("Optional from db was none"),
+            "dialog_id",
+        ))
 }

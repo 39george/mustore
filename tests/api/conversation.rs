@@ -49,7 +49,7 @@ async fn send_messages_in_two_directions_success() {
     let response = client2
         .post(format!("{}/api/protected/user/send_message", app.address))
         .json(&SendMessageRequest {
-            conversation_id: dialog.id.unwrap(),
+            conversation_id: dialog.id,
             text: "Hello! How are you!".to_string(),
             service_id: None,
             attachments: vec![],
@@ -64,7 +64,7 @@ async fn send_messages_in_two_directions_success() {
     let response = client1
         .post(format!("{}/api/protected/user/send_message", app.address))
         .json(&SendMessageRequest {
-            conversation_id: dialog.id.unwrap(),
+            conversation_id: dialog.id,
             text: "Thanks, I'm fine!".to_string(),
             service_id: None,
             attachments: vec![],
@@ -81,7 +81,7 @@ async fn send_messages_in_two_directions_success() {
             "{}/api/protected/user/list_conversation",
             app.address
         ))
-        .query(&[("conversation_id", dialog.id.unwrap()), ("offset", 0)])
+        .query(&[("conversation_id", dialog.id), ("offset", 0)])
         .send()
         .await
         .unwrap();
