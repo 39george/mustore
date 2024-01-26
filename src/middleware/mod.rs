@@ -229,8 +229,10 @@ pub mod ban_by_ip {
                     let con = state.redis_pool.next();
                     if let Ok(count) = con.get::<u16, _>(&key).await {
                         if count > 30 {
+                            let _ =
+                                con.expire::<(), _>(&key, 60 * 60 * 12).await;
                             tracing::error!(
-                                "Address: {}, was banned for 1 minute",
+                                "Address: {}, was banned for 12 hours",
                                 addr
                             );
                             let response = Response::builder()

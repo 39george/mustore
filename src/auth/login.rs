@@ -135,7 +135,7 @@ pub mod post {
 
 pub mod get {
 
-    use std::{collections::HashMap, net::SocketAddr};
+    use std::{collections::HashMap, net::SocketAddr, time::Duration};
 
     use anyhow::Context;
     use axum::{
@@ -209,6 +209,7 @@ pub mod get {
         State(app_state): State<AppState>,
         Query(Username { username }): Query<Username>,
     ) -> Result<Json<HashMap<&'static str, bool>>, AuthError> {
+        tokio::time::sleep(Duration::from_millis(300)).await;
         let key = format!("username_status_req:{}", address.ip());
         let con = app_state.redis_pool.next();
         con.incr::<(), _>(&key).await.unwrap();
