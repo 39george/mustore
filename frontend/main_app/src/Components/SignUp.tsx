@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import zxcvbn from "zxcvbn";
+import ReCAPTCHA from "react-google-recaptcha";
 import { RootState } from "../state/store";
 import { FaEye } from "react-icons/fa";
 import { TbEyeClosed } from "react-icons/tb";
@@ -12,6 +13,7 @@ import { FaTriangleExclamation } from "react-icons/fa6";
 import { GoCheckCircleFill } from "react-icons/go";
 import useCheckUsernameExistneceApi from "../hooks/useCheckUsernameExistenceApi";
 import useSignUpUserApi from "../hooks/useSignUpUserApi";
+import { SITE_KEY } from "../config";
 
 interface FormData {
   username: string;
@@ -144,6 +146,7 @@ const SignUp: FC = () => {
     useState<ConfirmPasswordInfo>({});
   const [button_disabled, set_button_disabled] = useState(true);
   const [button_class_name, set_button_class_name] = useState("");
+  const recaptcha_ref = useRef<ReCAPTCHA>(null);
   const [input_validity, set_input_validity] = useState<InputValidity>({
     username: false,
     email: false,
@@ -162,6 +165,11 @@ const SignUp: FC = () => {
 
   const handle_submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (recaptcha_ref.current) {
+      const token = recaptcha_ref.current.getValue();
+      console.log(token);
+    }
 
     const form_urlencoded = convert_to_urlencoded(form_data);
 
@@ -518,8 +526,6 @@ const SignUp: FC = () => {
     }
   }, [input_validity, username_check_porgress]);
 
-  console.log(button_disabled);
-
   const no_false_values = (input_object: InputValidity) => {
     return Object.values(input_object).every((value) => value === true);
   };
@@ -538,9 +544,11 @@ const SignUp: FC = () => {
     idx: number
   ) => {
     if (e.key === "Enter") {
-      e.preventDefault();
-      if (idx < input_refs.length - 1) {
-        input_refs[idx + 1].current?.focus();
+      if (input_refs[idx].current?.value) {
+        e.preventDefault();
+        if (idx < input_refs.length - 1) {
+          input_refs[idx + 1].current?.focus();
+        }
       }
     }
   };
@@ -864,6 +872,10 @@ const SignUp: FC = () => {
                 </p>
               </div>
             </div>
+            <ReCAPTCHA
+              sitekey={SITE_KEY}
+              ref={recaptcha_ref}
+            />
             <button
               type="submit"
               disabled={button_disabled}
