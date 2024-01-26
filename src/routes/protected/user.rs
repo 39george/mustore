@@ -497,6 +497,14 @@ async fn send_message(
         .await
         .context("Failed to get a transaction from pg")?;
 
+    check_conversation_access(
+        &transaction,
+        &user.id,
+        &user.username,
+        &params.conversation_id,
+    )
+    .await?;
+
     let message_id = user_access::insert_new_message()
         .bind(
             &transaction,
@@ -543,6 +551,7 @@ async fn send_message(
 
 // TODO: check that conversation exists.
 /// List conversation by id, 30 entries returned.
+/// Can return forbidden, if has no access to the provided conversation id.
 #[utoipa::path(
     get,
     path = "/api/protected/user/list_conversation",
@@ -579,6 +588,14 @@ async fn list_conversation(
         .get()
         .await
         .context("Failed to get connection from postgres pool")?;
+
+    check_conversation_access(
+        &db_client,
+        &user.id,
+        &user.username,
+        &conversation_id,
+    )
+    .await?;
 
     let conversations = user_access::list_conversation_by_id()
         .bind(&db_client, &conversation_id, &offset)
@@ -659,4 +676,24 @@ async fn remove_attachments_data_from_redis(
         con.del(&upload_request).await?;
     }
     Ok(())
+}
+
+/// Check that user has access to the conversation
+#[tracing::instrument(name = "Remove upload data from redis.", skip_all)]
+async fn check_conversation_access<T: cornucopia_async::GenericClient>(
+    db_client: &T,
+    user_id: &i32,
+    username: &str,
+    conversation_id: &i32,
+) -> Result<i32, ResponseError> {
+    user_access::user_has_access_to_conversation()
+        .bind(db_client, user_id, conversation_id)
+        .opt()
+        .await
+        .context("Failed to fetch conversation access from db")?
+        .ok_or(ResponseError::ForbiddenError(anyhow::anyhow!(
+            "{} has no access to the requested conversation id: {}",
+            username,
+            conversation_id
+        )))
 }

@@ -1274,7 +1274,7 @@ SelectUserDataWithAvatarKey, 1 >
         | row | { SelectUserDataWithAvatarKeyBorrowed { id : row.get(0),key : row.get(1),username : row.get(2),email : row.get(3),} }, mapper : | it | { <SelectUserDataWithAvatarKey>::from(it) },
     }
 } }}pub mod user_access
-{ use futures::{{StreamExt, TryStreamExt}};use futures; use cornucopia_async::GenericClient;#[derive(Clone,Copy, Debug)] pub struct SetUserSettingsParams < > { pub inbox_messages : bool,pub order_messages : bool,pub order_updates : bool,pub id : i32,}#[derive(Clone,Copy, Debug)] pub struct SetSystemNotificationHaveBeenSeenParams < > { pub user_id : i32,pub system_notification_id : i32,}#[derive(Clone,Copy, Debug)] pub struct GetDialogByUserIdParams < > { pub first_user_id : i32,pub second_user_id : i32,}#[derive(Clone,Copy, Debug)] pub struct ListConversationByIdParams < > { pub conversation_id : i32,pub offset : i64,}#[derive(Clone,Copy, Debug)] pub struct AddParticipantsToConversationParams < > { pub conversation_id : i32,pub user1 : i32,pub user2 : i32,}#[derive( Debug)] pub struct InsertNewMessageParams < T1 : cornucopia_async::StringSql,> { pub conversation_id : i32,pub service_id : Option<i32>,pub user_id : i32,pub reply_message_id : Option<i32>,pub text : T1,}#[derive( Debug)] pub struct InsertMessageAttachmentParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub message_id : i32,}#[derive(serde::Serialize, Debug, Clone, PartialEq, Copy)] pub struct GetUserSettings
+{ use futures::{{StreamExt, TryStreamExt}};use futures; use cornucopia_async::GenericClient;#[derive(Clone,Copy, Debug)] pub struct SetUserSettingsParams < > { pub inbox_messages : bool,pub order_messages : bool,pub order_updates : bool,pub id : i32,}#[derive(Clone,Copy, Debug)] pub struct SetSystemNotificationHaveBeenSeenParams < > { pub user_id : i32,pub system_notification_id : i32,}#[derive(Clone,Copy, Debug)] pub struct GetDialogByUserIdParams < > { pub first_user_id : i32,pub second_user_id : i32,}#[derive(Clone,Copy, Debug)] pub struct UserHasAccessToConversationParams < > { pub user_id : i32,pub conversation_id : i32,}#[derive(Clone,Copy, Debug)] pub struct ListConversationByIdParams < > { pub conversation_id : i32,pub offset : i64,}#[derive(Clone,Copy, Debug)] pub struct AddParticipantsToConversationParams < > { pub conversation_id : i32,pub user1 : i32,pub user2 : i32,}#[derive( Debug)] pub struct InsertNewMessageParams < T1 : cornucopia_async::StringSql,> { pub conversation_id : i32,pub service_id : Option<i32>,pub user_id : i32,pub reply_message_id : Option<i32>,pub text : T1,}#[derive( Debug)] pub struct InsertMessageAttachmentParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub message_id : i32,}#[derive(serde::Serialize, Debug, Clone, PartialEq, Copy)] pub struct GetUserSettings
 { pub inbox_messages : bool,pub order_messages : bool,pub order_updates : bool,}pub struct GetUserSettingsQuery < 'a, C : GenericClient, T, const N : usize >
 {
     client : & 'a  C, params :
@@ -1651,7 +1651,33 @@ GetConversationsEntries, 1 >
         client, params : [user_id,], stmt : & mut self.0, extractor :
         | row | { GetConversationsEntriesBorrowed { conversation_id : row.get(0),interlocutor : row.get(1),last_message_text : row.get(2),last_message_timestamp : row.get(3),image_url : row.get(4),unread_messages_count : row.get(5),} }, mapper : | it | { <GetConversationsEntries>::from(it) },
     }
-} }pub fn list_conversation_by_id() -> ListConversationByIdStmt
+} }pub fn user_has_access_to_conversation() -> UserHasAccessToConversationStmt
+{ UserHasAccessToConversationStmt(cornucopia_async :: private :: Stmt :: new("SELECT conv.id
+FROM conversations conv
+JOIN participants part ON part.conversations_id = conv.id
+JOIN users ON part.users_id = users.id
+WHERE users.id = $1 AND conv.id = $2")) } pub
+struct UserHasAccessToConversationStmt(cornucopia_async :: private :: Stmt) ; impl
+UserHasAccessToConversationStmt { pub fn bind < 'a, C : GenericClient, >
+(& 'a mut self, client : & 'a  C,
+user_id : & 'a i32,conversation_id : & 'a i32,) -> I32Query < 'a, C,
+i32, 2 >
+{
+    I32Query
+    {
+        client, params : [user_id,conversation_id,], stmt : & mut self.0, extractor :
+        | row | { row.get(0) }, mapper : | it | { it },
+    }
+} }impl < 'a, C : GenericClient, > cornucopia_async ::
+Params < 'a, UserHasAccessToConversationParams < >, I32Query < 'a,
+C, i32, 2 >, C > for UserHasAccessToConversationStmt
+{
+    fn
+    params(& 'a mut self, client : & 'a  C, params : & 'a
+    UserHasAccessToConversationParams < >) -> I32Query < 'a, C,
+    i32, 2 >
+    { self.bind(client, & params.user_id,& params.conversation_id,) }
+}pub fn list_conversation_by_id() -> ListConversationByIdStmt
 { ListConversationByIdStmt(cornucopia_async :: private :: Stmt :: new("SELECT 
     conv.id as conversation_id,
     part.users_id as participant_user_id,

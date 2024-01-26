@@ -70,6 +70,13 @@ LEFT JOIN LATERAL
 WHERE 
     conversations.id IN (SELECT conversations_id FROM participants WHERE users_id = :user_id);
 
+--! user_has_access_to_conversation
+SELECT conv.id
+FROM conversations conv
+JOIN participants part ON part.conversations_id = conv.id
+JOIN users ON part.users_id = users.id
+WHERE users.id = :user_id AND conv.id = :conversation_id;
+
 --! list_conversation_by_id : (message_id?, message_text?, message_created_at?, message_updated_at?, reply_message_id?, message_attachments?, service_id?, service_name?, service_cover_key?, offer_id?, offer_text?, offer_price?, offer_delivery_date?, offer_free_revisions?, offer_revision_price?)
 SELECT 
     conv.id as conversation_id,

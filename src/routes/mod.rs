@@ -39,6 +39,8 @@ pub enum ResponseError {
     /// Source error is for internal use, and static str is for response
     #[error("Can't resolve given object key as upload")]
     NotFoundError(#[source] anyhow::Error, &'static str),
+    #[error("Have no access")]
+    ForbiddenError(#[source] anyhow::Error),
 }
 
 impl std::fmt::Debug for ResponseError {
@@ -92,6 +94,9 @@ impl IntoResponse for ResponseError {
                 .header("Content-Type", "application/json")
                 .body(Body::from(format!("{{\"param\":{}}}", param)))
                 .unwrap_or(StatusCode::NOT_FOUND.into_response()),
+            ResponseError::ForbiddenError(_) => {
+                StatusCode::FORBIDDEN.into_response()
+            }
         }
     }
 }
