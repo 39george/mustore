@@ -110,6 +110,7 @@ impl TestApp {
 
         // Run tests on 1st redis database
         config.redis.db_number = 1;
+        config.object_storage.bucket_name = String::from("mustore-test-data");
         let redis_client = get_redis_connection_pool(&config.redis)
             .await
             .unwrap()
