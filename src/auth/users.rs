@@ -103,7 +103,7 @@ impl AuthnBackend for Backend {
         creds: Self::Credentials,
     ) -> Result<Option<Self::User>, Self::Error> {
         let user =
-            get_user_data(&self.app_state.pg_pool, Some(&creds.username), None)
+            get_user_data(&self.app_state.pg_pool, Some(&creds.email), None)
                 .await;
 
         let provided_password = creds.password.clone();
@@ -155,7 +155,7 @@ pub type AuthSession = axum_login::AuthSession<Backend>;
 #[tracing::instrument(name = "Get user data from db", skip_all)]
 async fn get_user_data(
     pool: &Pool,
-    username: Option<&str>,
+    email: Option<&str>,
     id: Option<&i32>,
 ) -> Result<User, AuthError> {
     let connection = pool
@@ -163,16 +163,14 @@ async fn get_user_data(
         .await
         .context("Failed to get connection from db pool")?;
 
-    let data = match (username, id) {
-        (Some(username), None) => {
-            user_auth_queries::get_auth_user_data_by_username()
-                .bind(&connection, &username)
-                .opt()
-                .await
-                .context("Failed to query user from db by username")
-                .map_err(AuthError::InvalidCredentialsError)?
-                .map(|r| (r.id, r.username, Secret::new(r.password_hash)))
-        }
+    let data = match (email, id) {
+        (Some(email), None) => user_auth_queries::get_auth_user_data_by_email()
+            .bind(&connection, &email)
+            .opt()
+            .await
+            .context("Failed to query user from db by email")
+            .map_err(AuthError::InvalidCredentialsError)?
+            .map(|r| (r.id, r.username, Secret::new(r.password_hash))),
         (None, Some(id)) => user_auth_queries::get_auth_user_data_by_id()
             .bind(&connection, id)
             .opt()

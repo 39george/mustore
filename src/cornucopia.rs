@@ -1786,27 +1786,27 @@ u64, tokio_postgres :: Error > > + Send + 'a>>, C > for InsertMessageAttachmentS
     InsertMessageAttachmentParams < T1,>) -> std::pin::Pin<Box<dyn futures::Future<Output = Result < u64, tokio_postgres ::
     Error > > + Send + 'a>> { Box::pin(self.bind(client, & params.key,& params.message_id,) ) }
 }}pub mod user_auth_queries
-{ use futures::{{StreamExt, TryStreamExt}};use futures; use cornucopia_async::GenericClient;#[derive( Debug)] pub struct CheckIfUserExistsAlreadyParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,> { pub email : T1,pub username : T2,}#[derive( Debug)] pub struct InsertNewUserParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,T3 : cornucopia_async::StringSql,> { pub user_settings_id : i32,pub username : T1,pub email : T2,pub password_hash : T3,}#[derive( Debug)] pub struct StoreUserPermissionParams < T1 : cornucopia_async::StringSql,> { pub user_id : i32,pub permission : T1,}#[derive( Debug)] pub struct InsertUserAvatarImageParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub users_id : i32,}#[derive(serde::Serialize, Debug, Clone, PartialEq, )] pub struct GetAuthUserDataByUsername
-{ pub id : i32,pub username : String,pub password_hash : String,}pub struct GetAuthUserDataByUsernameBorrowed < 'a >
-{ pub id : i32,pub username : &'a str,pub password_hash : &'a str,} impl < 'a > From < GetAuthUserDataByUsernameBorrowed <
-'a >> for GetAuthUserDataByUsername
+{ use futures::{{StreamExt, TryStreamExt}};use futures; use cornucopia_async::GenericClient;#[derive( Debug)] pub struct CheckIfUserExistsAlreadyParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,> { pub email : T1,pub username : T2,}#[derive( Debug)] pub struct InsertNewUserParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,T3 : cornucopia_async::StringSql,> { pub user_settings_id : i32,pub username : T1,pub email : T2,pub password_hash : T3,}#[derive( Debug)] pub struct StoreUserPermissionParams < T1 : cornucopia_async::StringSql,> { pub user_id : i32,pub permission : T1,}#[derive( Debug)] pub struct InsertUserAvatarImageParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub users_id : i32,}#[derive(serde::Serialize, Debug, Clone, PartialEq, )] pub struct GetAuthUserDataByEmail
+{ pub id : i32,pub username : String,pub password_hash : String,}pub struct GetAuthUserDataByEmailBorrowed < 'a >
+{ pub id : i32,pub username : &'a str,pub password_hash : &'a str,} impl < 'a > From < GetAuthUserDataByEmailBorrowed <
+'a >> for GetAuthUserDataByEmail
 {
     fn
-    from(GetAuthUserDataByUsernameBorrowed { id,username,password_hash,} : GetAuthUserDataByUsernameBorrowed < 'a >)
+    from(GetAuthUserDataByEmailBorrowed { id,username,password_hash,} : GetAuthUserDataByEmailBorrowed < 'a >)
     -> Self { Self { id,username: username.into(),password_hash: password_hash.into(),} }
-}pub struct GetAuthUserDataByUsernameQuery < 'a, C : GenericClient, T, const N : usize >
+}pub struct GetAuthUserDataByEmailQuery < 'a, C : GenericClient, T, const N : usize >
 {
     client : & 'a  C, params :
     [& 'a (dyn postgres_types :: ToSql + Sync) ; N], stmt : & 'a mut cornucopia_async
-    :: private :: Stmt, extractor : fn(& tokio_postgres :: Row) -> GetAuthUserDataByUsernameBorrowed,
-    mapper : fn(GetAuthUserDataByUsernameBorrowed) -> T,
-} impl < 'a, C, T : 'a, const N : usize > GetAuthUserDataByUsernameQuery < 'a, C, T, N >
+    :: private :: Stmt, extractor : fn(& tokio_postgres :: Row) -> GetAuthUserDataByEmailBorrowed,
+    mapper : fn(GetAuthUserDataByEmailBorrowed) -> T,
+} impl < 'a, C, T : 'a, const N : usize > GetAuthUserDataByEmailQuery < 'a, C, T, N >
 where C : GenericClient
 {
-    pub fn map < R > (self, mapper : fn(GetAuthUserDataByUsernameBorrowed) -> R) -> GetAuthUserDataByUsernameQuery
+    pub fn map < R > (self, mapper : fn(GetAuthUserDataByEmailBorrowed) -> R) -> GetAuthUserDataByEmailQuery
     < 'a, C, R, N >
     {
-        GetAuthUserDataByUsernameQuery
+        GetAuthUserDataByEmailQuery
         {
             client : self.client, params : self.params, stmt : self.stmt,
             extractor : self.extractor, mapper,
@@ -1998,20 +1998,20 @@ where C : GenericClient
         res.map(| row | (self.mapper) ((self.extractor) (& row)))) .into_stream() ;
         Ok(it)
     }
-}pub fn get_auth_user_data_by_username() -> GetAuthUserDataByUsernameStmt
-{ GetAuthUserDataByUsernameStmt(cornucopia_async :: private :: Stmt :: new("SELECT id, username, password_hash
+}pub fn get_auth_user_data_by_email() -> GetAuthUserDataByEmailStmt
+{ GetAuthUserDataByEmailStmt(cornucopia_async :: private :: Stmt :: new("SELECT id, username, password_hash
 FROM users
-WHERE username = $1")) } pub
-struct GetAuthUserDataByUsernameStmt(cornucopia_async :: private :: Stmt) ; impl
-GetAuthUserDataByUsernameStmt { pub fn bind < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,>
+WHERE email = $1")) } pub
+struct GetAuthUserDataByEmailStmt(cornucopia_async :: private :: Stmt) ; impl
+GetAuthUserDataByEmailStmt { pub fn bind < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,>
 (& 'a mut self, client : & 'a  C,
-username : & 'a T1,) -> GetAuthUserDataByUsernameQuery < 'a, C,
-GetAuthUserDataByUsername, 1 >
+email : & 'a T1,) -> GetAuthUserDataByEmailQuery < 'a, C,
+GetAuthUserDataByEmail, 1 >
 {
-    GetAuthUserDataByUsernameQuery
+    GetAuthUserDataByEmailQuery
     {
-        client, params : [username,], stmt : & mut self.0, extractor :
-        | row | { GetAuthUserDataByUsernameBorrowed { id : row.get(0),username : row.get(1),password_hash : row.get(2),} }, mapper : | it | { <GetAuthUserDataByUsername>::from(it) },
+        client, params : [email,], stmt : & mut self.0, extractor :
+        | row | { GetAuthUserDataByEmailBorrowed { id : row.get(0),username : row.get(1),password_hash : row.get(2),} }, mapper : | it | { <GetAuthUserDataByEmail>::from(it) },
     }
 } }pub fn get_auth_user_data_by_id() -> GetAuthUserDataByIdStmt
 { GetAuthUserDataByIdStmt(cornucopia_async :: private :: Stmt :: new("SELECT id, username, password_hash

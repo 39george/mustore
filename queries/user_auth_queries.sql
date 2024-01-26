@@ -1,7 +1,7 @@
---! get_auth_user_data_by_username
+--! get_auth_user_data_by_email
 SELECT id, username, password_hash
 FROM users
-WHERE username = :username;
+WHERE email = :email;
 
 --! get_auth_user_data_by_id
 SELECT id, username, password_hash

@@ -26,13 +26,7 @@ use crate::startup::AppState;
 
 #[derive(Clone, Debug, Deserialize, ToSchema)]
 pub struct Credentials {
-    #[schema(
-        min_length = 3,
-        max_length = 256,
-        pattern = r#"[^/()"<>\\{};:]*"#,
-        example = "user1"
-    )]
-    pub username: String,
+    pub email: String,
     #[schema(min_length = 8, max_length = 32, format = Password)]
     pub password: Secret<String>,
 }
@@ -80,7 +74,7 @@ pub mod post {
     use secrecy::ExposeSecret;
 
     use crate::{
-        domain::{user_name::UserName, user_password::UserPassword},
+        domain::{user_email::UserEmail, user_password::UserPassword},
         startup::api_doc::{
             BadRequestResponse, InternalErrorResponse,
             UnauthorizedErrorResponse,
@@ -111,12 +105,12 @@ pub mod post {
         ),
         tag = "open"
     )]
-    #[tracing::instrument(name = "Login attempt", skip(auth_session, creds), fields(username = %creds.username))]
+    #[tracing::instrument(name = "Login attempt", skip(auth_session, creds), fields(email = %creds.email))]
     pub async fn login(
         mut auth_session: AuthSession,
         Json(creds): Json<Credentials>,
     ) -> Result<StatusCode, AuthError> {
-        let _ = UserName::parse(&creds.username)
+        let _ = UserEmail::parse(&creds.email)
             .map_err(AuthError::ValidationError)?;
         UserPassword::parse(creds.password.expose_secret(), &[])
             .map_err(AuthError::ValidationError)?;

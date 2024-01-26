@@ -1,6 +1,12 @@
+use std::net::SocketAddr;
+
+use axum::extract::connect_info::IntoMakeServiceWithConnectInfo;
+use axum::extract::ConnectInfo;
+use axum::middleware::AddExtension;
 use axum::routing;
 use axum::serve::Serve;
 use axum::Router;
+use axum::ServiceExt;
 use axum_login::AuthManagerLayerBuilder;
 use deadpool_postgres::Client;
 use deadpool_postgres::Manager;
@@ -50,11 +56,16 @@ lazy_static::lazy_static! {
     static ref MOSKOW_TIME_OFFSET: UtcOffset = UtcOffset::from_hms(3, 0, 0).unwrap();
 }
 
+type Server = Serve<
+    IntoMakeServiceWithConnectInfo<Router, SocketAddr>,
+    AddExtension<Router, ConnectInfo<SocketAddr>>,
+>;
+
 /// This is a central type of our codebase. `Application` type builds server
 /// for both production and testing purposes.
 pub struct Application {
     port: u16,
-    serve: Serve<Router, Router>,
+    server: Server,
 }
 
 /// Shareable type, we insert it to the main `Router` as state,
@@ -106,7 +117,7 @@ impl Application {
         let listener = TcpListener::bind(address).await?;
         let port = listener.local_addr()?.port();
 
-        let serve = Self::build_server(
+        let server = Self::build_server(
             &configuration.app_base_url,
             listener,
             pg_pool,
@@ -124,7 +135,7 @@ impl Application {
             }
         });
 
-        Ok(Self { serve, port })
+        Ok(Self { server, port })
     }
 
     pub fn port(&self) -> u16 {
@@ -133,7 +144,9 @@ impl Application {
 
     /// This function only returns when the application is stopped.
     pub async fn run_until_stopped(self) -> Result<(), std::io::Error> {
-        self.serve.with_graceful_shutdown(shutdown_signal()).await?;
+        self.server
+            .with_graceful_shutdown(shutdown_signal())
+            .await?;
         Ok(())
     }
 
@@ -146,7 +159,7 @@ impl Application {
         redis_pool_tower_sessions: RedisPool,
         object_storage: ObjectStorage,
         email_client: EmailClient,
-    ) -> Serve<Router, Router> {
+    ) -> Server {
         let argon2_obj = argon2::Argon2::new(
             argon2::Algorithm::Argon2id,
             argon2::Version::V0x13,
@@ -242,7 +255,10 @@ impl Application {
             }
         }
 
-        axum::serve(listener, app)
+        axum::serve(
+            listener,
+            app.into_make_service_with_connect_info::<std::net::SocketAddr>(),
+        )
     }
 }
 

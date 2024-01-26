@@ -194,7 +194,7 @@ impl TestApp {
         let response = client
             .post(format!("{}/api/login", &self.address))
             .json(&serde_json::json!({
-                "username": test_user.username,
+                "email": test_user.email,
                 "password": test_user.password
             }))
             .send()
