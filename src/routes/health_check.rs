@@ -21,7 +21,6 @@ pub struct MyConnectInfo {
 
 impl Connected<IncomingStream<'_>> for MyConnectInfo {
     fn connect_info(target: IncomingStream<'_>) -> Self {
-        dbg!(target);
         MyConnectInfo {
             // ...
         }

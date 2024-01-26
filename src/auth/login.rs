@@ -135,13 +135,14 @@ pub mod post {
 
 pub mod get {
 
-    use std::collections::HashMap;
+    use std::{collections::HashMap, net::SocketAddr};
 
     use anyhow::Context;
     use axum::{
-        extract::{Query, State},
+        extract::{ConnectInfo, Query, State},
         Json,
     };
+    use fred::interfaces::KeysInterface;
 
     use crate::{
         cornucopia::queries::user_auth_queries,
@@ -204,9 +205,17 @@ pub mod get {
     )]
     #[tracing::instrument(name = "Get username status", skip(app_state))]
     pub async fn username_status(
-        Query(Username { username }): Query<Username>,
+        ConnectInfo(address): ConnectInfo<SocketAddr>,
         State(app_state): State<AppState>,
+        Query(Username { username }): Query<Username>,
     ) -> Result<Json<HashMap<&'static str, bool>>, AuthError> {
+        let key = format!("username_status_req:{}", address.ip());
+        let con = app_state.redis_pool.next();
+        con.incr::<(), _>(&key).await.unwrap();
+        con.expire::<(), _>(&key, 60) // 1 minute
+            .await
+            .unwrap();
+
         let pg_client = app_state
             .pg_pool
             .get()

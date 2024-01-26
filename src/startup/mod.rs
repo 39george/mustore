@@ -207,6 +207,7 @@ impl Application {
         let auth_service =
             AuthManagerLayerBuilder::new(backend, session_layer).build();
 
+        #[rustfmt::skip]
         let mut app = Router::new()
             .nest("/api/protected", protected_router())
             .nest("/api/open", open_router())
@@ -218,8 +219,11 @@ impl Application {
             )
             .with_state(app_state.clone())
             .merge(auth::login::login_router(app_state.clone()))
-            .layer(crate::middleware::map_response::BadRequestIntoJsonLayer)
-            .layer(auth_service);
+            .layer(crate::middleware::map_response::BadRequestIntoJsonLayer) // 3
+            .layer(auth_service)                                             // 2
+            .layer(crate::middleware::ban_by_ip::BanLayer {                  // 1
+                state: app_state.clone(),
+            });
 
         if let Ok(_) = std::env::var("TEST_TRACING") {
             app = app.layer(

@@ -164,3 +164,87 @@ pub mod map_response {
         Ok(bytes)
     }
 }
+
+pub mod ban_by_ip {
+    use axum::extract::ConnectInfo;
+    use axum::{body::Body, extract::Request, response::Response};
+    use axum::{body::Bytes, http::StatusCode};
+    use fred::interfaces::KeysInterface;
+    use futures::future::BoxFuture;
+    use http_body_util::BodyExt;
+    use std::net::SocketAddr;
+    use std::task::{Context, Poll};
+    use tower::{Layer, Service};
+
+    use crate::startup::AppState;
+
+    #[derive(Clone)]
+    pub struct BanLayer {
+        pub state: AppState,
+    }
+
+    impl<S> Layer<S> for BanLayer {
+        type Service = Ban<S>;
+
+        fn layer(&self, inner: S) -> Self::Service {
+            Ban {
+                inner,
+                state: self.state.clone(),
+            }
+        }
+    }
+
+    #[derive(Clone)]
+    pub struct Ban<S> {
+        inner: S,
+        state: AppState,
+    }
+
+    impl<S> Service<Request> for Ban<S>
+    where
+        S: Service<Request, Response = Response> + Send + 'static,
+        S::Future: Send + 'static,
+    {
+        type Response = S::Response;
+        type Error = S::Error;
+        // `BoxFuture` is a type alias for `Pin<Box<dyn Future + Send + 'a>>`
+        type Future = BoxFuture<'static, Result<Self::Response, Self::Error>>;
+
+        fn poll_ready(
+            &mut self,
+            cx: &mut Context<'_>,
+        ) -> Poll<Result<(), Self::Error>> {
+            self.inner.poll_ready(cx)
+        }
+
+        fn call(&mut self, request: Request) -> Self::Future {
+            let addr = request
+                .extensions()
+                .get::<ConnectInfo<SocketAddr>>()
+                .cloned();
+            let state = self.state.clone();
+            let future = self.inner.call(request);
+            Box::pin(async move {
+                if let Some(ConnectInfo(addr)) = addr {
+                    let key = format!("username_status_req:{}", addr.ip());
+                    let con = state.redis_pool.next();
+                    if let Ok(count) = con.get::<u16, _>(&key).await {
+                        if count > 30 {
+                            tracing::error!(
+                                "Address: {}, was banned for 1 minute",
+                                addr
+                            );
+                            let response = Response::builder()
+                                .status(StatusCode::IM_A_TEAPOT)
+                                .body(Body::empty())
+                                .unwrap();
+                            return Ok(response);
+                        }
+                    }
+                }
+                let response: Response = future.await?;
+                Ok(response)
+            })
+        }
+    }
+}
