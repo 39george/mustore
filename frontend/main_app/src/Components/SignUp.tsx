@@ -106,6 +106,12 @@ const SignUp: FC = () => {
     user_role: null,
   });
   const { error_data: signup_error, post_data } = useSignUpUserApi();
+  const input_refs = [
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+  ];
   const [input_type, set_input_type] = useState<InputTypes>({
     password: "password",
     confirm_password: "password",
@@ -518,6 +524,19 @@ const SignUp: FC = () => {
     set_button_class_name("");
   };
 
+  // Handling moving focus to the next input by pressing `enter` key
+  const handle_enter_key_down = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    idx: number
+  ) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (idx < input_refs.length - 1) {
+        input_refs[idx + 1].current?.focus();
+      }
+    }
+  };
+
   // Rendering component
   return (
     <div className={styles.sign_up_window}>
@@ -553,12 +572,15 @@ const SignUp: FC = () => {
                   type="text"
                   name="username"
                   placeholder="Имя пользователя"
+                  ref={input_refs[0]}
                   onChange={handle_change}
+                  onKeyDown={(e) => handle_enter_key_down(e, 0)}
                   className={styles.sign_up_input}
                   style={{
                     border: `${username_border_color}`,
                   }}
                   required
+                  autoFocus
                 />
               </div>
               {username_check_porgress === "pending" && (
@@ -593,7 +615,9 @@ const SignUp: FC = () => {
                 <input
                   type="text"
                   name="email"
+                  ref={input_refs[1]}
                   onChange={handle_change}
+                  onKeyDown={(e) => handle_enter_key_down(e, 1)}
                   placeholder="Email"
                   className={styles.sign_up_input}
                   style={{
@@ -634,7 +658,9 @@ const SignUp: FC = () => {
                 <input
                   type={input_type.password}
                   name="password"
+                  ref={input_refs[2]}
                   onChange={handle_change}
+                  onKeyDown={(e) => handle_enter_key_down(e, 2)}
                   placeholder="Пароль"
                   className={styles.sign_up_input}
                   style={{
@@ -723,7 +749,9 @@ const SignUp: FC = () => {
                 <input
                   type={input_type.confirm_password}
                   name="confirm_password"
+                  ref={input_refs[3]}
                   onChange={handle_change}
+                  onKeyDown={(e) => handle_enter_key_down(e, 3)}
                   placeholder="Подтвердите пароль"
                   className={styles.sign_up_input}
                   style={{
