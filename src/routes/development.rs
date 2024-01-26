@@ -50,6 +50,7 @@ pub fn user_router(state: AppState) -> Router {
                 .layer(DefaultBodyLimit::max(5.gb_to_bytes())),
         )
         .route("/cleanup", routing::post(cleanup))
+        .route("/reset_ban", routing::post(reset_ban))
         .with_state(state)
 }
 
@@ -175,4 +176,29 @@ async fn cleanup(
         }
     }
     Ok(StatusCode::OK)
+}
+
+/// Reset ban in redis.
+#[utoipa::path(
+    post,
+    path = "/api/reset_ban",
+    responses(
+        (status = 200),
+        (status = 500, description = "Some internall error"),
+    ),
+    tag = "development"
+)]
+#[tracing::instrument(name = "Reset ban in redis", skip_all)]
+async fn reset_ban(State(state): State<AppState>) -> StatusCode {
+    let con = state.redis_pool.next();
+    let pattern = "username_status_req*";
+    let mut scan = con.scan(pattern, None, None);
+    while let Ok(Some(mut page)) = scan.try_next().await {
+        if let Some(keys) = page.take_results() {
+            for key in keys.into_iter() {
+                let _ = con.del::<(), _>(&key).await;
+            }
+        }
+    }
+    StatusCode::OK
 }

@@ -195,7 +195,8 @@ impl Modify for ServerAddon {
         protected::user::send_message,
         protected::user::list_conversation,
         development::upload_file,
-        development::cleanup
+        development::cleanup,
+        development::reset_ban
         ),
         components(
             schemas(
