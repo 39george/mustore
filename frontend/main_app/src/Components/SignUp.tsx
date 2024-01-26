@@ -174,7 +174,9 @@ const SignUp: FC = () => {
         console.log("Success! A confirmation email was sent");
       }
 
-      console.log(signup_error);
+      if (signup_error) {
+        console.error(signup_error);
+      }
     };
 
     try_to_signup();

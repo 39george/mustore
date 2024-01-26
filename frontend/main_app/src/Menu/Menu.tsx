@@ -612,7 +612,13 @@ const Menu: FC = () => {
           <hr />
           <div className={styles.sidebar_logging}>
             <div className={styles.sidebar_log}>войти</div>
-            <div className={styles.sidebar_log}>создать аккаунт</div>
+            <NavLink
+              to="signup"
+              className={styles.sidebar_log}
+              onClick={() => handle_signup_click(location.pathname)}
+            >
+              создать аккаунт
+            </NavLink>
           </div>
         </div>
         <div className={styles.sidebar_footer}>
