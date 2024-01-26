@@ -57,7 +57,7 @@ async fn song_submit_success() {
             master_object_key: song_key.parse().unwrap(),
             master_tagged_object_key: None,
             multitrack_object_key: arch_key.parse().unwrap(),
-            primary_genre: "Хор".to_string(),
+            primary_genre: "хор".to_string(),
             secondary_genre: None,
             tempo: 100,
             duration: 30,
@@ -113,7 +113,7 @@ async fn song_submit_without_files_fails() {
                 "abc/owner:0678418B-D415-4BC0-ADC2-B3E2686DB2F1:file"
                     .parse()
                     .unwrap(),
-            primary_genre: "Хор".to_string(),
+            primary_genre: "хор".to_string(),
             secondary_genre: None,
             tempo: 100,
             duration: 30,
@@ -179,7 +179,7 @@ async fn beat_submit_success() {
             master_object_key: beat_key.parse().unwrap(),
             master_tagged_object_key: None,
             multitrack_object_key: arch_key.parse().unwrap(),
-            primary_genre: "Хор".to_string(),
+            primary_genre: "хор".to_string(),
             secondary_genre: None,
             tempo: 100,
             duration: 30,
