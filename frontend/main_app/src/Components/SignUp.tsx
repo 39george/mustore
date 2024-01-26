@@ -11,8 +11,6 @@ import { TbEyeClosed } from "react-icons/tb";
 import { FaTriangleExclamation } from "react-icons/fa6";
 import { GoCheckCircleFill } from "react-icons/go";
 import useCheckUsernameExistneceApi from "../hooks/useCheckUsernameExistenceApi";
-import axios from "axios";
-import { API_URL } from "../config";
 import useSignUpUserApi from "../hooks/useSignUpUserApi";
 
 interface FormData {
@@ -223,6 +221,10 @@ const SignUp: FC = () => {
                 "нет ответа от сервера, пожалуйста, проверьте соединение с интернетом и попробуйте еще раз"
               );
               set_username_check_progress("server_error");
+              set_input_validity((prev) => ({
+                ...prev,
+                username: false,
+              }));
             } else {
               if (username_data?.exists) {
                 set_username_status("это имя уже занято");
@@ -507,12 +509,16 @@ const SignUp: FC = () => {
 
   // Handling submit button enable/disable
   useEffect(() => {
-    if (no_false_values(input_validity)) {
+    if (username_check_porgress === "pending") {
+      set_button_disabled(true);
+    } else if (no_false_values(input_validity)) {
       set_button_disabled(false);
     } else {
       set_button_disabled(true);
     }
-  }, [input_validity]);
+  }, [input_validity, username_check_porgress]);
+
+  console.log(button_disabled);
 
   const no_false_values = (input_object: InputValidity) => {
     return Object.values(input_object).every((value) => value === true);
