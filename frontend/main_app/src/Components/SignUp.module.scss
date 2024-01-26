@@ -190,10 +190,6 @@
   color: $main_dark;
   background-color: $main_bright;
 
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-
   &:focus {
     outline: none;
     border: 1px solid $main_dark;
