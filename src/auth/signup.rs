@@ -1,11 +1,13 @@
 //! src/auth/user_signup.rs
 
 use std::collections::HashMap;
+use std::net::SocketAddr;
 
 use anyhow::Context;
 use argon2::password_hash::SaltString;
 use argon2::PasswordHasher;
 use askama::Template;
+use axum::extract::ConnectInfo;
 use axum::extract::State;
 use axum::Form;
 use fred::clients::RedisPool;
@@ -54,6 +56,7 @@ pub struct UserSignupData {
     /// If user is admin, a valid admin token should be provided.
     /// User should have only a role, or only an admin token, not both!
     admin_token: Option<uuid::Uuid>,
+    recaptcha_token: String,
 }
 
 // ───── Handlers ─────────────────────────────────────────────────────────── //
@@ -71,6 +74,14 @@ pub struct UserSignupData {
     responses(
         (status = 201, description = "Account created"),
         (status = 400, response = BadRequestResponse),
+        (
+            status = 403,
+            description = "Recaptcha verification failed",
+            content_type = "application/json",
+            example = json!({
+                "reason": "some reason"
+            })
+        ),
         (status = 500, response = InternalErrorResponse)
     ),
     tag = "open"
@@ -81,12 +92,14 @@ pub struct UserSignupData {
 )]
 pub async fn signup(
     State(app_state): State<AppState>,
+    ConnectInfo(addr): ConnectInfo<SocketAddr>,
     Form(UserSignupData {
         username,
         password,
         email,
         user_role,
         admin_token,
+        recaptcha_token,
     }): Form<UserSignupData>,
 ) -> Result<StatusCode, AuthError> {
     if user_role.is_some() && admin_token.is_some()
@@ -170,6 +183,11 @@ pub async fn signup(
     )
     .await
     .context("Failed to send confirmation email")?;
+
+    app_state
+        .captcha_verifier
+        .validate(recaptcha_token, addr.ip())
+        .await?;
 
     Ok(StatusCode::CREATED)
 }

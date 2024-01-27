@@ -17,4 +17,6 @@ object_storage:
   endpoint_url: "http://172.20.0.10:9000"
   region: "ru-central1"
   bucket_name: "mustore-data"
+recaptcha:
+  endpoint_url: "https://www.google.com/recaptcha/api/siteverify"
 

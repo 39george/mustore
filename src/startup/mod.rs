@@ -39,6 +39,7 @@ use crate::routes::development;
 use crate::routes::health_check::health_check;
 use crate::routes::open::open_router;
 use crate::routes::protected::protected_router;
+use crate::service_providers::captcha_verifier::CaptchaVerifier;
 use crate::service_providers::object_storage::ObjectStorage;
 
 use self::api_doc::ApiDoc;
@@ -77,6 +78,7 @@ pub struct AppState {
     pub object_storage: ObjectStorage,
     pub email_client: EmailClient,
     pub argon2_obj: argon2::Argon2<'static>,
+    pub captcha_verifier: CaptchaVerifier,
 }
 
 impl Application {
@@ -108,6 +110,10 @@ impl Application {
             &configuration.email_client,
             configuration.email_delivery_service,
         )?;
+        let captcha_verifier = CaptchaVerifier::new(
+            configuration.recaptcha.endpoint_url.parse().unwrap(),
+            configuration.recaptcha.secret,
+        );
         db_migration::run_migration(&pg_pool).await;
 
         let address =
@@ -124,6 +130,7 @@ impl Application {
             redis_pool_tower_sessions,
             object_storage,
             email_client,
+            captcha_verifier,
         );
 
         tokio::spawn(async {
@@ -158,6 +165,7 @@ impl Application {
         redis_pool_tower_sessions: RedisPool,
         object_storage: ObjectStorage,
         email_client: EmailClient,
+        captcha_verifier: CaptchaVerifier,
     ) -> Server {
         let argon2_obj = argon2::Argon2::new(
             argon2::Algorithm::Argon2id,
@@ -175,6 +183,7 @@ impl Application {
             email_client,
             base_url: base_url.to_string(),
             argon2_obj,
+            captcha_verifier,
         };
 
         // Set 'secure' attribute for cookies

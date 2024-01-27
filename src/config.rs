@@ -20,6 +20,7 @@ pub struct Settings {
     pub email_client: EmailClientSettings,
     pub email_delivery_service: EmailDeliveryService,
     pub object_storage: ObjectStorageSettings,
+    pub recaptcha: RecaptchaSettings,
 }
 
 impl Settings {
@@ -117,6 +118,13 @@ pub struct ObjectStorageSettings {
     pub secret_access_key: Secret<String>,
 }
 
+#[derive(Debug, Deserialize)]
+pub struct RecaptchaSettings {
+    pub endpoint_url: String,
+    #[serde(default = "recaptcha_secret_key")]
+    pub secret: Secret<String>,
+}
+
 fn load_value_from_file<T: AsRef<Path>>(
     path: T,
 ) -> Result<String, std::io::Error> {
@@ -178,5 +186,15 @@ fn object_storage_acces_key() -> Secret<String> {
                 .expect("OBJECT_STORAGE_ACCESS_KEY_FILE var is unset!"),
         )
         .expect("Can't read object-storage-access-key file!"),
+    )
+}
+
+fn recaptcha_secret_key() -> Secret<String> {
+    Secret::new(
+        load_value_from_file(
+            std::env::var("RECAPTCHA_SECRET_KEY_FILE")
+                .expect("RECAPTCHA_SECRET_KEY_FILE var is unset!"),
+        )
+        .expect("Can't read email token file!"),
     )
 }

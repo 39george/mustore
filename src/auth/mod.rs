@@ -8,6 +8,7 @@ use axum::response::Response;
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
 use crate::error_chain_fmt;
+use crate::service_providers::captcha_verifier::CaptchaError;
 use crate::service_providers::object_storage::ObjectStorageError;
 
 // ───── Submodules ───────────────────────────────────────────────────────── //
@@ -35,6 +36,8 @@ pub enum AuthError {
     SignupFailed(#[source] anyhow::Error),
     #[error("Account confirmation failed: {0}")]
     AccountConfirmationFailed(#[source] anyhow::Error),
+    #[error("Recaptcha verification failed: {0}")]
+    RecaptchaFailed(#[from] CaptchaError),
 }
 
 impl std::fmt::Debug for AuthError {
@@ -74,6 +77,10 @@ impl IntoResponse for AuthError {
                 )
                 .into_response()
             }
+            AuthError::RecaptchaFailed(e) => Response::builder()
+                .status(StatusCode::FORBIDDEN)
+                .body(Body::from(format!("{{\"reason\": \"{e}\"}}")))
+                .unwrap_or(StatusCode::FORBIDDEN.into_response()),
         }
     }
 }
