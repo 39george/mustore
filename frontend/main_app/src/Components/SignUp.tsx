@@ -14,6 +14,7 @@ import { GoCheckCircleFill } from "react-icons/go";
 import useCheckUsernameExistneceApi from "../hooks/useCheckUsernameExistenceApi";
 import useSignUpUserApi from "../hooks/useSignUpUserApi";
 import { SITE_KEY } from "../config";
+import EmailConfirmation from "./EmailConfirmation";
 
 interface FormData {
   username: string;
@@ -556,6 +557,7 @@ const SignUp: FC = () => {
   // Rendering component
   return (
     <div className={styles.sign_up_window}>
+      <EmailConfirmation />
       <HiMiniXMark
         className={styles.close_icon}
         onClick={handle_close}
