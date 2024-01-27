@@ -54,7 +54,7 @@ pub struct CaptchaVerifier {
 struct CaptchaResponse {
     success: bool,
     /// Timestamp of the challenge load (ISO format yyyy-MM-dd'T'HH:mm:ssZZ)
-    challenge_ts: OffsetDateTime,
+    challenge_ts: Option<OffsetDateTime>,
     /// The hostname of the site where the reCAPTCHA was solved
     hostname: String,
     #[serde(rename = "error-codes")]
@@ -70,11 +70,7 @@ impl CaptchaVerifier {
         }
     }
 
-    pub async fn validate(
-        &self,
-        token: String,
-        ip: IpAddr,
-    ) -> Result<(), CaptchaError> {
+    pub async fn validate(&self, token: String, ip: IpAddr) -> Result<(), CaptchaError> {
         let query = &[
             ("secret", self.secret.expose_secret()),
             ("response", &token),
@@ -90,10 +86,7 @@ impl CaptchaVerifier {
             .await?;
 
         if !response.success {
-            tracing::warn!(
-                "Captcha was not passed: {:?}",
-                response.error_codes
-            );
+            tracing::warn!("Captcha was not passed: {:?}", response.error_codes);
             Err(CaptchaError::VerificationFailed)
         } else {
             Ok(())
