@@ -81,7 +81,7 @@ pub struct UserSignupData {
 )]
 #[tracing::instrument(
     name = "Signup attempt",
-    skip(app_state, password, user_role, admin_token)
+    skip(app_state, password, user_role, admin_token, recaptcha_token)
 )]
 pub async fn signup(
     State(app_state): State<AppState>,
