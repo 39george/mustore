@@ -24,29 +24,9 @@ pub mod user;
 
 pub fn protected_router() -> Router<AppState> {
     Router::new()
-        .route("/health_check", routing::get(health_check))
-        .route_layer(permission_required!(crate::auth::users::Backend, "user"))
         .nest("/user", user_router())
         .nest("/creator", creator_router())
         .nest("/consumer", consumer_router())
         .nest("/admin", admin_router())
         .nest("/minio", minio_router())
-}
-
-/// Check access to top-level protected endpoint.
-#[utoipa::path(
-        get,
-        path = "/api/protected/health_check",
-        responses(
-            (status = 200, description = "Accessed to protected health check"),
-            (status = 403, description = "Forbidden")
-        ),
-        security(
-         ("api_key" = [])
-        ),
-        tag = "health_checks"
-)]
-#[tracing::instrument(name = "Protected health check", skip_all)]
-async fn health_check() -> StatusCode {
-    StatusCode::OK
 }

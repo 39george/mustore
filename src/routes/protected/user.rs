@@ -81,19 +81,6 @@ pub fn user_router() -> Router<AppState> {
         .layer(permission_required!(crate::auth::users::Backend, "user"))
 }
 
-/// Check access to user's endpoint.
-#[utoipa::path(
-    get,
-    path = "/api/protected/user/health_check",
-    responses(
-        (status = 200, description = "Accessed to protected health check"),
-        (status = 403, description = "Forbidden")
-    ),
-    security(
-        ("api_key" = [])
-    ),
-    tag = "health_checks"
-)]
 #[tracing::instrument(name = "User's health check", skip_all)]
 async fn health_check() -> StatusCode {
     StatusCode::OK
