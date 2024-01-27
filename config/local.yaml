@@ -18,5 +18,5 @@ object_storage:
   region: "ru-central1"
   bucket_name: "mustore-data"
 recaptcha:
-  endpoint_url: "https://www.google.com/recaptcha/api/siteverify"
+  endpoint_url: "http://ghashytest.com"
 

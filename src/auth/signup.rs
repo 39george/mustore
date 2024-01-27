@@ -74,14 +74,7 @@ pub struct UserSignupData {
     responses(
         (status = 201, description = "Account created"),
         (status = 400, response = BadRequestResponse),
-        (
-            status = 403,
-            description = "Recaptcha verification failed",
-            content_type = "application/json",
-            example = json!({
-                "reason": "some reason"
-            })
-        ),
+        (status = 403, description = "Recaptcha verification failed"),
         (status = 500, response = InternalErrorResponse)
     ),
     tag = "open"
@@ -123,6 +116,11 @@ pub async fn signup(
     .await
     .context("Failed to join thread")
     .map_err(AuthError::InternalError)??;
+
+    app_state
+        .captcha_verifier
+        .validate(recaptcha_token, addr.ip())
+        .await?;
 
     let pg_client = app_state
         .pg_pool
@@ -183,11 +181,6 @@ pub async fn signup(
     )
     .await
     .context("Failed to send confirmation email")?;
-
-    app_state
-        .captcha_verifier
-        .validate(recaptcha_token, addr.ip())
-        .await?;
 
     Ok(StatusCode::CREATED)
 }

@@ -64,6 +64,7 @@ impl TestUser {
         form.insert("username", self.username.clone());
         form.insert("password", self.password.clone());
         form.insert("email", self.email.clone());
+        form.insert("recaptcha_token", String::from("token"));
         match (&self.role, self.admin_token) {
             (None, Some(admin_token)) => {
                 form.insert(

@@ -3,7 +3,6 @@ use std::net::IpAddr;
 use reqwest::Url;
 use secrecy::{ExposeSecret, Secret};
 use serde::Deserialize;
-use time::OffsetDateTime;
 
 use crate::error_chain_fmt;
 
@@ -30,14 +29,14 @@ pub enum GoogleCaptchaError {
 }
 
 #[derive(thiserror::Error)]
-pub enum CaptchaError {
+pub enum RecaptchaError {
     #[error(transparent)]
     ClientError(#[from] reqwest::Error),
     #[error("Service response says that success is false")]
     VerificationFailed,
 }
 
-impl std::fmt::Debug for CaptchaError {
+impl std::fmt::Debug for RecaptchaError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         error_chain_fmt(self, f)
     }
@@ -45,7 +44,7 @@ impl std::fmt::Debug for CaptchaError {
 
 #[derive(Clone, Debug)]
 pub struct CaptchaVerifier {
-    service_addr: Url,
+    service_url: Url,
     client: reqwest::Client,
     secret: Secret<String>,
 }
@@ -54,19 +53,17 @@ pub struct CaptchaVerifier {
 struct CaptchaResponse {
     success: bool,
     /// Timestamp of the challenge load (ISO format yyyy-MM-dd'T'HH:mm:ssZZ)
-    // #[serde(with = "time::serde::iso8601")]
-    // challenge_ts: OffsetDateTime,
     challenge_ts: Option<String>,
     /// The hostname of the site where the reCAPTCHA was solved
     hostname: String,
     #[serde(rename = "error-codes")]
-    error_codes: Option<Vec<String>>,
+    error_codes: Option<Vec<GoogleCaptchaError>>,
 }
 
 impl CaptchaVerifier {
     pub fn new(service_addr: Url, secret: Secret<String>) -> Self {
         CaptchaVerifier {
-            service_addr,
+            service_url: service_addr,
             client: reqwest::Client::new(),
             secret,
         }
@@ -76,7 +73,12 @@ impl CaptchaVerifier {
         &self,
         token: String,
         ip: IpAddr,
-    ) -> Result<(), CaptchaError> {
+    ) -> Result<(), RecaptchaError> {
+        // Return Ok for development environment
+        if self.service_url.domain().eq(&Some("ghashytest.com")) {
+            return Ok(());
+        }
+
         let query = &[
             ("secret", self.secret.expose_secret()),
             ("response", &token),
@@ -84,7 +86,7 @@ impl CaptchaVerifier {
         ];
         let response: CaptchaResponse = self
             .client
-            .post(self.service_addr.clone())
+            .post(self.service_url.clone())
             .query(query)
             .send()
             .await?
@@ -93,10 +95,12 @@ impl CaptchaVerifier {
 
         if !response.success {
             tracing::warn!(
-                "Captcha was not passed: {:?}",
-                response.error_codes
+                "Captcha was not passed: {:?}, hostname: {}, challenge_ts: {:?}",
+                response.error_codes,
+                response.hostname,
+                response.challenge_ts
             );
-            Err(CaptchaError::VerificationFailed)
+            Err(RecaptchaError::VerificationFailed)
         } else {
             Ok(())
         }
