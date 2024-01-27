@@ -24,8 +24,8 @@ use crate::domain::requests::creator_access::SubmitServiceRequest;
 use crate::domain::upload_request::UploadRequest;
 use crate::error_chain_fmt;
 use crate::routes::ResponseError;
+use crate::startup::api_doc::BadRequestResponse;
 use crate::startup::api_doc::InternalErrorResponse;
-use crate::startup::api_doc::NotFoundResponse;
 use crate::startup::AppState;
 
 // ───── Types ────────────────────────────────────────────────────────────── //
@@ -72,7 +72,6 @@ async fn health_check() -> StatusCode {
     StatusCode::OK
 }
 
-// TODO: receive attachments, and check if they exists
 /// Submit a new product.
 #[utoipa::path(
     post,
@@ -83,6 +82,7 @@ async fn health_check() -> StatusCode {
     ),
     responses(
         (status = 201, description = "Product was submitted"),
+        (status = 400, response = BadRequestResponse),
         (status = 403, description = "Forbidden"),
         (status = 500, response = InternalErrorResponse)
     ),
@@ -251,7 +251,8 @@ async fn submit_product(
                 .map_err(ResponseError::UnexpectedError)?;
             (None, Some(song_id))
         }
-        // TODO: doc, why this is unreachable
+        // Unreachable, because when we parse
+        // Beat, Song, Lyric, Cover cases, only provided paths available.
         _ => unreachable!(),
     };
 
@@ -328,6 +329,25 @@ async fn submit_product(
     Ok(StatusCode::CREATED)
 }
 
+/// Submit a new service.
+#[utoipa::path(
+    post,
+    path = "/api/protected/creator/submit_service",
+    request_body(
+        content = SubmitServiceRequest,
+        content_type = "application/json"
+    ),
+    responses(
+        (status = 201, description = "Service was submitted"),
+        (status = 400, response = BadRequestResponse),
+        (status = 403, description = "Forbidden"),
+        (status = 500, response = InternalErrorResponse)
+    ),
+    security(
+        ("api_key" = [])
+    ),
+    tag = "protected.creators"
+)]
 #[tracing::instrument(name = "Submit service", skip_all, fields(username))]
 async fn submit_service(
     auth_session: AuthSession,
@@ -554,16 +574,37 @@ async fn submit_service(
     Ok(StatusCode::CREATED)
 }
 
+/// Create a new offer.
+#[utoipa::path(
+    post,
+    path = "/api/protected/creator/create_offer",
+    request_body(
+        content = CreateOfferRequest,
+        content_type = "application/json"
+    ),
+    responses(
+        (status = 201, description = "Offer is created"),
+        (status = 400, response = BadRequestResponse),
+        (status = 403, description = "Forbidden"),
+        (status = 500, response = InternalErrorResponse)
+    ),
+    security(
+        ("api_key" = [])
+    ),
+    tag = "protected.creators"
+)]
 #[tracing::instrument(name = "Create a new offer", skip_all, fields(username))]
 async fn create_offer(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
-    Json(params): Json<CreateOfferRequest>,
+    Json(req): Json<CreateOfferRequest>,
 ) -> Result<StatusCode, ResponseError> {
     let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
     tracing::Span::current().record("username", &user.username);
+
+    req.validate(&()).map_err(ResponseError::ValidationError)?;
 
     let db_client = app_state
         .pg_pool
@@ -574,13 +615,13 @@ async fn create_offer(
     creator_access::create_offer()
         .bind(
             &db_client,
-            &params.conversation_id,
-            &params.service_id,
-            &params.text,
-            &params.price,
-            &params.delivery_date,
-            &params.free_revisions,
-            &params.revision_price,
+            &req.conversation_id,
+            &req.service_id,
+            &req.text,
+            &req.price,
+            &req.delivery_date,
+            &req.free_revisions,
+            &req.revision_price,
         )
         .await
         .context("Failed to insert new offer into pg")?;

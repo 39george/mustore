@@ -194,6 +194,8 @@ impl Modify for ServerAddon {
         auth::login::get::logout,
         auth::login::get::username_status,
         protected::creator::submit_product,
+        protected::creator::submit_service,
+        protected::creator::create_offer,
         protected::user::user_permissions,
         protected::user::request_obj_storage_upload,
         protected::user::get_conversations,
@@ -238,6 +240,10 @@ impl Modify for ServerAddon {
                 crate::domain::requests::creator_access::Product,
                 crate::domain::requests::creator_access::MusicProduct,
                 crate::domain::requests::creator_access::SubmitProductRequest,
+                crate::domain::requests::creator_access::Service,
+                crate::domain::requests::creator_access::MusicService,
+                crate::domain::requests::creator_access::SubmitServiceRequest,
+                crate::domain::requests::creator_access::CreateOfferRequest
             ),
             responses(
                 InternalErrorResponse,
