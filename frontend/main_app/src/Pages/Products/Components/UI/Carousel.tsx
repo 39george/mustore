@@ -10,8 +10,6 @@ interface ClassNames {
 }
 
 const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
-  const [is_mobile, set_is_mobile] = useState(window.innerWidth <= 1024);
-  const [is_ipad] = useState(/iPad/.test(navigator.userAgent));
   const [current_index, set_current_index] = useState(0);
   const [container_width, set_container_widht] = useState(0);
   const [items_per_slide, set_items_per_slide] = useState(1);
@@ -83,7 +81,6 @@ const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
 
     const handle_resize = () => {
       update_container_width();
-      set_is_mobile(window.innerWidth <= 1024);
     };
 
     window.addEventListener("resize", handle_resize);
@@ -175,20 +172,18 @@ const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
       is_function_called.current = false;
     };
 
-    if (window.innerWidth <= 1024 || is_ipad) {
-      document.addEventListener("touchstart", handle_touch_start);
-      document.addEventListener("touchmove", handle_touch_move, {
-        passive: false,
-      });
-      document.addEventListener("touchend", handle_touch_end);
-    }
+    document.addEventListener("touchstart", handle_touch_start);
+    document.addEventListener("touchmove", handle_touch_move, {
+      passive: false,
+    });
+    document.addEventListener("touchend", handle_touch_end);
 
     return () => {
       document.removeEventListener("touchstart", handle_touch_start);
       document.removeEventListener("touchmove", handle_touch_move);
       document.removeEventListener("touchend", handle_touch_end);
     };
-  }, [items_per_slide, current_index, config.MAX_INDEX, is_mobile]);
+  }, [items_per_slide, current_index, config.MAX_INDEX]);
 
   // Rendering component
   return (
