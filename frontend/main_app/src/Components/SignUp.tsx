@@ -14,6 +14,7 @@ import { GoCheckCircleFill } from "react-icons/go";
 import useCheckUsernameExistneceApi from "../hooks/useCheckUsernameExistenceApi";
 import useSignUpUserApi from "../hooks/useSignUpUserApi";
 import { SITE_KEY } from "../config";
+import bg_texture from "../assets/SignUp/signup_bg_texture.png";
 
 interface FormData {
   username: string;
@@ -39,7 +40,7 @@ type InputTypes = {
 type UsernameStatus =
   | ""
   | "имя должно иметь не менее 3 символов"
-  | "имя не должно иметь более 256 символов"
+  | "имя не должно иметь более 50 символов"
   | "это имя уже занято"
   | "имя содержит запрещенный символ"
   | "нет ответа от сервера, пожалуйста, проверьте соединение с интернетом и попробуйте еще раз"
@@ -288,8 +289,8 @@ const SignUp: FC = () => {
       set_username_status("имя должно иметь не менее 3 символов");
       return false;
     }
-    if (username.length > 256) {
-      set_username_status("имя не должно иметь более 256 символов");
+    if (username.length > 50) {
+      set_username_status("имя не должно иметь более 50 символов");
       return false;
     }
     if (!forbidden_symbols.test(username)) {
@@ -561,6 +562,7 @@ const SignUp: FC = () => {
         onClick={handle_close}
       />
       <div className={styles.log_in_section}>
+        <div className={styles.bg_texture}></div>
         <div className={styles.log_in_content}>
           <p className={styles.p_log_in}>Уже есть аккаунт?</p>
           <button className={styles.button_log_in}>Войти</button>
