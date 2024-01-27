@@ -14,7 +14,6 @@ import { GoCheckCircleFill } from "react-icons/go";
 import useCheckUsernameExistneceApi from "../hooks/useCheckUsernameExistenceApi";
 import useSignUpUserApi from "../hooks/useSignUpUserApi";
 import { SITE_KEY } from "../config";
-import bg_texture from "../assets/SignUp/signup_bg_texture.png";
 
 interface FormData {
   username: string;

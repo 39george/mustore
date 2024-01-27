@@ -11,6 +11,7 @@ interface ClassNames {
 
 const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
   const [is_mobile, set_is_mobile] = useState(window.innerWidth <= 1024);
+  const [is_ipad] = useState(/iPad/.test(navigator.userAgent));
   const [current_index, set_current_index] = useState(0);
   const [container_width, set_container_widht] = useState(0);
   const [items_per_slide, set_items_per_slide] = useState(1);
@@ -174,7 +175,7 @@ const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
       is_function_called.current = false;
     };
 
-    if (window.innerWidth <= 1024) {
+    if (window.innerWidth <= 1024 || is_ipad) {
       document.addEventListener("touchstart", handle_touch_start);
       document.addEventListener("touchmove", handle_touch_move, {
         passive: false,
@@ -187,7 +188,7 @@ const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
       document.removeEventListener("touchmove", handle_touch_move);
       document.removeEventListener("touchend", handle_touch_end);
     };
-  }, [items_per_slide, current_index, config.MAX_INDEX]);
+  }, [items_per_slide, current_index, config.MAX_INDEX, is_mobile]);
 
   // Rendering component
   return (
@@ -207,9 +208,7 @@ const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
       <div
         className={styles.wrapper}
         style={{
-          transform: `${
-            is_next_hovered && !is_mobile ? "translateX(-20px)" : ""
-          }`,
+          transform: `${is_next_hovered ? "translateX(-20px)" : ""}`,
         }}
       >
         <div

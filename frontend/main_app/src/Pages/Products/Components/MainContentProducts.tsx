@@ -118,7 +118,7 @@ const MainContentProducts: FC = () => {
   } = useCheckboxState();
   const [checked_sex, set_checked_sex] = useState<CheckedItems>({ any: true });
   const music_symbols = ["♭", "♯"];
-  const [is_iphone, set_is_iphone] = useState(false);
+  const [is_iphone] = useState(/iPhone/.test(navigator.userAgent));
 
   // Changing checkbox for sex block
   const handle_sex_checkbox_change = (sex: string) => {
@@ -227,11 +227,6 @@ const MainContentProducts: FC = () => {
       return char;
     });
   };
-
-  // Check if iphone
-  useEffect(() => {
-    set_is_iphone(/iPhone/.test(navigator.userAgent));
-  }, []);
 
   // Setting nav bar position logic
   const set_left_bar_position = () => {
