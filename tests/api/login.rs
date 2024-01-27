@@ -58,7 +58,7 @@ async fn access_to_protected_with_login_is_allowed() {
     assert_eq!(status_code.as_u16(), 200);
 
     let response = client
-        .get(format!("{}/api/protected/health_check", app.address))
+        .get(format!("{}/api/protected/user/permissions", app.address))
         .send()
         .await
         .unwrap();
@@ -75,7 +75,7 @@ async fn access_to_protected_without_login_is_restricted() {
         .unwrap();
 
     let response = client
-        .get(format!("{}/api/protected/health_check", app.address))
+        .get(format!("{}/api/protected/user/permissions", app.address))
         .send()
         .await
         .unwrap();
