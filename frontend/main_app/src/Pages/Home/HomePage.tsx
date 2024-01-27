@@ -20,6 +20,7 @@ interface HomePageRefs {
   services_ref: React.RefObject<HTMLDivElement>;
   join_us_ref: React.RefObject<HTMLDivElement>;
   authors_reviews_ref: React.RefObject<HTMLDivElement>;
+  footer_ref: React.RefObject<HTMLDivElement>;
 }
 
 interface CurrentEntries {
@@ -36,6 +37,7 @@ const HomePage: FC = () => {
     services_ref: useRef(null),
     join_us_ref: useRef(null),
     authors_reviews_ref: useRef(null),
+    footer_ref: useRef(null),
   };
 
   let current_entries = useRef<CurrentEntries[]>([
@@ -55,6 +57,10 @@ const HomePage: FC = () => {
       id: "authors_reviews",
       is_intersecting: false,
     },
+    {
+      id: "footer",
+      is_intersecting: false,
+    },
   ]);
   let prioritized_section = useRef<CurrentEntries>({
     id: null,
@@ -72,6 +78,7 @@ const HomePage: FC = () => {
       refs.why_us_ref.current,
       refs.group_ref.current,
       refs.authors_reviews_ref.current,
+      refs.footer_ref.current,
     ];
 
     const observer = new IntersectionObserver(
@@ -95,7 +102,7 @@ const HomePage: FC = () => {
         }
       },
       {
-        threshold: 0.04,
+        threshold: 0.02,
       }
     );
 
@@ -157,7 +164,12 @@ const HomePage: FC = () => {
       >
         <AuthorsReviews />
       </div>
-      <Footer />
+      <div
+        ref={refs.footer_ref}
+        id="footer"
+      >
+        <Footer />
+      </div>
     </>
   );
 };

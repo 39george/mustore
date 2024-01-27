@@ -5,6 +5,7 @@ export type ActiveSection =
   | "why_us"
   | "group"
   | "authors_reviews"
+  | "footer"
   | null;
 
 interface ActiveSectionState {

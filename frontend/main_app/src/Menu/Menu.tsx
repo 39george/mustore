@@ -56,6 +56,9 @@ const Menu: FC = () => {
           `${styles.nav_bar} ${styles.nav_bar_dark_default} ${styles.nav_bar_dark_black}`
         );
         break;
+      case "footer":
+        set_nav_bar_class_names(`${styles.nav_bar}`);
+        break;
     }
   }, [intersecting_section]);
 
@@ -63,6 +66,7 @@ const Menu: FC = () => {
     if (
       intersecting_section === "hero" ||
       intersecting_section === "group" ||
+      intersecting_section === "footer" ||
       intersecting_section === null
     ) {
       set_is_nav_dark(false);
