@@ -33,6 +33,7 @@ pub struct TestUser {
 }
 
 impl TestUser {
+    /// `Idx` - is index which response from email mock we will retrieve.
     pub fn generate_user(role: String, idx: usize) -> Self {
         Self {
             username: fake::faker::name::en::Name().fake(),

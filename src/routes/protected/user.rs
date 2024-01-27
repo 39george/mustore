@@ -471,6 +471,7 @@ async fn send_message(
         .await
         .context("Failed to get a transaction from pg")?;
 
+    check_conversation_exists(&transaction, &params.conversation_id).await?;
     check_conversation_access(
         &transaction,
         &user.id,
@@ -479,7 +480,7 @@ async fn send_message(
     )
     .await?;
 
-    let message_id = match user_access::insert_new_message()
+    let message_id = user_access::insert_new_message()
         .bind(
             &transaction,
             &params.conversation_id,
@@ -490,26 +491,7 @@ async fn send_message(
         )
         .one()
         .await
-    {
-        Ok(id) => id,
-        Err(e) => match e.code() {
-            Some(st)
-                if st.eq(
-                    &tokio_postgres::error::SqlState::FOREIGN_KEY_VIOLATION,
-                ) =>
-            {
-                return Err(ResponseError::NotFoundError(
-                    anyhow::anyhow!("Got error: {e}"),
-                    "some_field",
-                ));
-            }
-            _ => {
-                return Err(ResponseError::UnexpectedError(anyhow::anyhow!(
-                    "Failed to insert a new message into pg: {e}"
-                )))
-            }
-        },
-    };
+        .context("Failed to insert a new message into pg")?;
 
     let attachments = params.attachments.iter().collect::<Vec<_>>();
     remove_attachments_data_from_redis(
@@ -518,8 +500,7 @@ async fn send_message(
         user.id,
     )
     .await
-    .context("Failed to remove attachments from redis")
-    .map_err(|e| ResponseError::NotFoundError(e, "no_attachment_in_cache"))?;
+    .context("Failed to remove attachments from redis")?;
 
     for attachment in &params.attachments {
         // Move attachments into `received` folder
