@@ -368,7 +368,7 @@
 }
 
 // Loading circle
-.loader {
+.loader_small {
   width: 1.125rem;
   height: 1.125rem;
 
@@ -376,10 +376,35 @@
 
   border: 0.125rem solid #d9d9d9;
   border-top: 0.125rem solid #868381;
-  border-bottom: 0.125rem solid #868381;
   border-radius: 50%;
 
-  animation: spin 0.5s ease-in-out infinite;
+  animation: spin 0.5s linear infinite;
+}
+
+.loader_bg {
+  position: absolute;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 100vw;
+  height: 100vh;
+  min-height: 1020px;
+
+  background-color: rgba($color: #000000, $alpha: 0.3);
+  z-index: 4;
+}
+
+.loader_big {
+  width: 5rem;
+  height: 5rem;
+
+  border: 0.25rem solid $main_bright;
+  border-top: 0.25rem solid $accent_red;
+  border-radius: 50%;
+
+  animation: spin 0.5s linear infinite;
 }
 
 @media (max-width: 1010px) {
@@ -417,7 +442,6 @@
     padding: 0.625rem 1.5rem;
 
     font-size: 0.75rem;
-    background: $main_dark;
   }
 
   .sign_up_section {

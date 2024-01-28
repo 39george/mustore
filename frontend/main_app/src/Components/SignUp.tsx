@@ -22,6 +22,7 @@ interface FormData {
   password: string;
   confirm_password: string;
   user_role: OptionId;
+  recaptcha_token: string;
   [key: string]: string | null;
 }
 
@@ -80,6 +81,7 @@ interface InputValidity {
   email: boolean;
   password: boolean;
   user_role: boolean;
+  recaptcha: boolean;
 }
 
 const colors = {
@@ -105,6 +107,7 @@ const SignUp: FC = () => {
     password: "",
     confirm_password: "",
     user_role: null,
+    recaptcha_token: "",
   });
   const { error_data: signup_error, post_data } = useSignUpUserApi();
   const input_refs = [
@@ -148,15 +151,18 @@ const SignUp: FC = () => {
   const [button_disabled, set_button_disabled] = useState(true);
   const [button_class_name, set_button_class_name] = useState("");
   const recaptcha_ref = useRef<ReCAPTCHA>(null);
+  const [sign_up_in_progress, set_sign_up_in_porgress] = useState(false);
+  const [confirm_email_visible, set_confirm_email_visible] = useState(false);
   const [input_validity, set_input_validity] = useState<InputValidity>({
     username: false,
     email: false,
     password: false,
     user_role: false,
+    recaptcha: false,
   });
 
-  // Handle input change and submit
-  const handle_change = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle input change, recaptcha change and submit
+  const handle_input_change = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     set_form_data((prev_state) => ({
       ...prev_state,
@@ -164,20 +170,44 @@ const SignUp: FC = () => {
     }));
   };
 
+  const handle_recaptcha_change = () => {
+    if (recaptcha_ref.current) {
+      const token = recaptcha_ref.current.getValue();
+      if (token) {
+        set_form_data((prev) => ({
+          ...prev,
+          recaptcha_token: token,
+        }));
+        set_input_validity((prev) => ({
+          ...prev,
+          recaptcha: true,
+        }));
+      } else {
+        console.error("token is null");
+        set_input_validity((prev) => ({
+          ...prev,
+          recaptcha: false,
+        }));
+      }
+    }
+  };
+
   const handle_submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (recaptcha_ref.current) {
-      const token = recaptcha_ref.current.getValue();
-      console.log(token);
-    }
-
     const form_urlencoded = convert_to_urlencoded(form_data);
+    set_sign_up_in_porgress(true);
 
     const try_to_signup = async () => {
       const response = await post_data(form_urlencoded);
 
       if (response === 201) {
+        // setTimeout(() => {
+        //   set_sign_up_in_porgress(false);
+        //   set_confirm_email_visible(true);
+        // }, 1000);
+        set_sign_up_in_porgress(false);
+        set_confirm_email_visible(true);
         console.log("Success! A confirmation email was sent");
       }
 
@@ -557,7 +587,12 @@ const SignUp: FC = () => {
   // Rendering component
   return (
     <div className={styles.sign_up_window}>
-      <EmailConfirmation />
+      {confirm_email_visible && <EmailConfirmation />}
+      {sign_up_in_progress && (
+        <div className={styles.loader_bg}>
+          <div className={styles.loader_big}></div>
+        </div>
+      )}
       <HiMiniXMark
         className={styles.close_icon}
         onClick={handle_close}
@@ -592,7 +627,7 @@ const SignUp: FC = () => {
                   name="username"
                   placeholder="Имя пользователя"
                   ref={input_refs[0]}
-                  onChange={handle_change}
+                  onChange={handle_input_change}
                   onKeyDown={(e) => handle_enter_key_down(e, 0)}
                   className={styles.sign_up_input}
                   style={{
@@ -603,7 +638,7 @@ const SignUp: FC = () => {
                 />
               </div>
               {username_check_porgress === "pending" && (
-                <div className={styles.loader}></div>
+                <div className={styles.loader_small}></div>
               )}
               {form_data.username !== "" &&
                 username_check_porgress !== "pending" && (
@@ -635,7 +670,7 @@ const SignUp: FC = () => {
                   type="text"
                   name="email"
                   ref={input_refs[1]}
-                  onChange={handle_change}
+                  onChange={handle_input_change}
                   onKeyDown={(e) => handle_enter_key_down(e, 1)}
                   placeholder="Email"
                   className={styles.sign_up_input}
@@ -678,7 +713,7 @@ const SignUp: FC = () => {
                   type={input_type.password}
                   name="password"
                   ref={input_refs[2]}
-                  onChange={handle_change}
+                  onChange={handle_input_change}
                   onKeyDown={(e) => handle_enter_key_down(e, 2)}
                   placeholder="Пароль"
                   className={styles.sign_up_input}
@@ -769,7 +804,7 @@ const SignUp: FC = () => {
                   type={input_type.confirm_password}
                   name="confirm_password"
                   ref={input_refs[3]}
-                  onChange={handle_change}
+                  onChange={handle_input_change}
                   onKeyDown={(e) => handle_enter_key_down(e, 3)}
                   placeholder="Подтвердите пароль"
                   className={styles.sign_up_input}
@@ -878,6 +913,7 @@ const SignUp: FC = () => {
             <ReCAPTCHA
               sitekey={SITE_KEY}
               ref={recaptcha_ref}
+              onChange={handle_recaptcha_change}
             />
             <button
               type="submit"
