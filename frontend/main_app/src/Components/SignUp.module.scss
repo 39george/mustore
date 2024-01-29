@@ -292,6 +292,7 @@
   display: flex;
   align-items: center;
   margin-bottom: 1em;
+  width: fit-content;
   cursor: pointer;
 
   input {
@@ -407,6 +408,7 @@
   animation: spin 0.5s linear infinite;
 }
 
+// Media queries
 @media (max-width: 1010px) {
   .sign_up_window {
     justify-content: center;

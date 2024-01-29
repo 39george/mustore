@@ -14,7 +14,9 @@ export const handle_axios_error = (
         console.error("Bad request.", error.message);
         break;
       case 500:
-        set_error("Что-то не так с нашим сервером, мы уже работаем над этим");
+        set_error(
+          "Что-то не так с нашим сервером, мы уже работаем над этим. Пожалуйста, попробуйте обновить страницу"
+        );
         console.error("Server responded with error: ", error.message);
         break;
       default:

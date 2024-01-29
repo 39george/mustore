@@ -4,12 +4,10 @@ import { handle_axios_error, wait } from "../helpers/helpers";
 import { useState } from "react";
 
 const useSignUpUserApi = () => {
-  const [error_data, set_error_data] = useState<string | null>();
+  const [signup_status, set_signup_status] = useState<number | null>(null);
+  const [signup_error, set_signup_error] = useState<string | null>(null);
 
-  const post_data = async (
-    data: string,
-    attempts: number = 1
-  ): Promise<number | null | undefined> => {
+  const post_data = async (data: string, attempts: number = 1) => {
     try {
       const response = await axios.post(`${API_URL}/signup`, data, {
         headers: {
@@ -17,7 +15,7 @@ const useSignUpUserApi = () => {
         },
       });
 
-      return response.status;
+      set_signup_status(response.status);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         if (error.response) {
@@ -29,20 +27,18 @@ const useSignUpUserApi = () => {
 
           if (attempts < MAX_RETRIES) {
             await wait(RETRY_DELAY_MS);
-            return post_data(data, attempts + 1);
+            post_data(data, attempts + 1);
           } else {
-            handle_axios_error(error, set_error_data);
-            return null;
+            handle_axios_error(error, set_signup_error);
           }
         } else if (error.request) {
           if (attempts < MAX_RETRIES) {
             await wait(RETRY_DELAY_MS);
-            return post_data(data, attempts + 1);
+            post_data(data, attempts + 1);
           } else {
-            set_error_data(
+            set_signup_error(
               "Нет ответа от сервера, пожалуйста, проверьте соединение с интернетом и попробуйте еще раз"
             );
-            return null;
           }
         } else {
           console.error("API Error: Reqest setup error:", error.message);
@@ -53,7 +49,7 @@ const useSignUpUserApi = () => {
     }
   };
 
-  return { error_data, post_data };
+  return { signup_status, signup_error, post_data };
 };
 
 export default useSignUpUserApi;

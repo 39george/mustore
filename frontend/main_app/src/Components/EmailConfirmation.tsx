@@ -1,14 +1,25 @@
 import styles from "./EmailConfirmation.module.scss";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import logo from "../assets/svg/logo.svg";
 import { FC } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { set_active_section } from "../state/active_section_slice";
+import { RootState } from "../state/store";
 
 const EmailConfirmation: FC = () => {
   const dispatch = useDispatch();
-  const handle_click = () => {
+  const navigate = useNavigate();
+
+  const handle_help_link_click = () => {
     dispatch(set_active_section(null));
+  };
+
+  const previous_path = useSelector<RootState, string>(
+    (state) => state.previous_path.previous_path
+  );
+
+  const handle_return_link_click = () => {
+    navigate(previous_path);
   };
 
   return (
@@ -32,7 +43,7 @@ const EmailConfirmation: FC = () => {
             <NavLink
               to="../help"
               className={styles.help_link}
-              onClick={handle_click}
+              onClick={handle_help_link_click}
             >
               Не приходит письмо?
             </NavLink>
@@ -41,12 +52,12 @@ const EmailConfirmation: FC = () => {
               alt="logo"
               className={styles.logo}
             />
-            <div
-              style={{
-                width: "6.875rem",
-                height: "1rem",
-              }}
-            ></div>
+            <p
+              className={styles.return_link}
+              onClick={handle_return_link_click}
+            >
+              Вернуться на сайт
+            </p>
           </div>
         </div>
       </div>

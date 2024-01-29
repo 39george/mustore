@@ -15,6 +15,7 @@ import useCheckUsernameExistneceApi from "../hooks/useCheckUsernameExistenceApi"
 import useSignUpUserApi from "../hooks/useSignUpUserApi";
 import { SITE_KEY } from "../config";
 import EmailConfirmation from "./EmailConfirmation";
+import ErrorWindow from "./ErrorWindow";
 
 interface FormData {
   username: string;
@@ -109,7 +110,7 @@ const SignUp: FC = () => {
     user_role: null,
     recaptcha_token: "",
   });
-  const { error_data: signup_error, post_data } = useSignUpUserApi();
+  const { signup_status, signup_error, post_data } = useSignUpUserApi();
   const input_refs = [
     useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null),
@@ -199,25 +200,25 @@ const SignUp: FC = () => {
     set_sign_up_in_porgress(true);
 
     const try_to_signup = async () => {
-      const response = await post_data(form_urlencoded);
-
-      if (response === 201) {
-        // setTimeout(() => {
-        //   set_sign_up_in_porgress(false);
-        //   set_confirm_email_visible(true);
-        // }, 1000);
-        set_sign_up_in_porgress(false);
-        set_confirm_email_visible(true);
-        console.log("Success! A confirmation email was sent");
-      }
-
-      if (signup_error) {
-        console.error(signup_error);
-      }
+      await post_data(form_urlencoded);
     };
 
     try_to_signup();
   };
+
+  useEffect(() => {
+    if (signup_status === 201) {
+      setTimeout(() => {
+        set_sign_up_in_porgress(false);
+        set_confirm_email_visible(true);
+      }, 1000);
+    }
+
+    if (signup_error) {
+      set_sign_up_in_porgress(false);
+      console.error(signup_error);
+    }
+  }, [signup_status, signup_error]);
 
   const convert_to_urlencoded = (data_object: FormData): string => {
     let converted_form_data = new URLSearchParams();
@@ -541,11 +542,6 @@ const SignUp: FC = () => {
     }
   }, [form_data.user_role]);
 
-  // Handling returning to the previous page
-  const handle_close = () => {
-    navigate(previous_path);
-  };
-
   // Handling submit button enable/disable
   useEffect(() => {
     if (username_check_porgress === "pending") {
@@ -584,9 +580,15 @@ const SignUp: FC = () => {
     }
   };
 
+  // Handling returning to the previous page
+  const handle_close = () => {
+    navigate(previous_path);
+  };
+
   // Rendering component
   return (
     <div className={styles.sign_up_window}>
+      {signup_error && <ErrorWindow error_message={signup_error} />}
       {confirm_email_visible && <EmailConfirmation />}
       {sign_up_in_progress && (
         <div className={styles.loader_bg}>
