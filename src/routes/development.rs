@@ -42,6 +42,7 @@ pub struct DbNumber {
 }
 
 // ───── Handlers ─────────────────────────────────────────────────────────── //
+
 pub fn user_router(state: AppState) -> Router {
     Router::new()
         .route(
