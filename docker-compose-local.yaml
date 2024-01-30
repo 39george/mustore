@@ -1,8 +1,16 @@
+# In recent versions of Dockerfile, EXPOSE doesn't have any operational
+# impact anymore, it is just informative.
+#
+# In older versions of Docker, the EXPOSE keyword could be used for service
+# discovery by linked containers, but (a) it still didn't have any operational
+# impact -- the ports were available whether or not there was a matching EXPOSE
+# -- and container "linking" has been deprecated for a quite some time.
+
 services:
   mustore:
     image: ghashy/mustore:0.1
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     secrets:
       - object-storage-key-id
       - object-storage-access-key
@@ -43,8 +51,8 @@ services:
 
   email-mock:
     image: ghashy/email-mock:0.1
-    ports:
-      - "8001:8001"
+    expose:
+      - "8001"
     networks:
       - default
     healthcheck:
@@ -85,8 +93,8 @@ services:
     command: sh -c "redis-server --requirepass $(cat $$REDIS_PASSWORD_FILE)"
     volumes:
       - redis_volume:/data
-    ports:
-      - "6379:6379"
+    expose:
+      - "6379"
     networks:
       - default
     healthcheck:
@@ -121,6 +129,21 @@ services:
       timeout: 5s
       retries: 2
       start_period: 2s
+
+  nginx:
+    image: nginx:alpine
+    restart: always
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "10000:10000"
+    networks:
+      - default
+    healthcheck:
+      test: ["CMD", "service", "nginx", "status"]
+      interval: 5s
+      timeout: 5s
+      retries: 2
 
 volumes:
   redis_volume:
