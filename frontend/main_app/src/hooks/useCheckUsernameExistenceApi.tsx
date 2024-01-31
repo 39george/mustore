@@ -2,7 +2,7 @@ import { useState } from "react";
 import { API_URL, MAX_RETRIES, RETRY_DELAY_MS } from "../config";
 import axios from "axios";
 import { UsernameExistence } from "../types/types";
-import { handle_axios_error, wait } from "../helpers/helpers";
+import { wait } from "../helpers/helpers";
 
 const useCheckUsernameExistneceApi = () => {
   const [error_data, set_error_data] = useState<string | null>();
@@ -25,12 +25,20 @@ const useCheckUsernameExistneceApi = () => {
             error.response.data
           );
 
-          if (attempts < MAX_RETRIES) {
-            await wait(RETRY_DELAY_MS);
-            return fetch_data(username, attempts + 1);
-          } else {
-            handle_axios_error(error, set_error_data);
-            return null;
+          switch (error.response.status) {
+            case 400:
+              console.error("Bad request.", error.message);
+              break;
+            case 500:
+              if (attempts < MAX_RETRIES) {
+                await wait(RETRY_DELAY_MS);
+                return fetch_data(username, attempts + 1);
+              } else {
+                set_error_data(
+                  "Что-то не так с нашим сервером, мы уже работаем над этим. Пожалуйста, попробуйте обновить страницу"
+                );
+                return null;
+              }
           }
         } else if (error.request) {
           if (attempts < MAX_RETRIES) {
