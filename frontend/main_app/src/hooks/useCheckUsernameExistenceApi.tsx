@@ -19,12 +19,6 @@ const useCheckUsernameExistneceApi = () => {
     } catch (error) {
       if (axios.isAxiosError(error)) {
         if (error.response) {
-          console.error(
-            "API Error:",
-            error.response.status,
-            error.response.data
-          );
-
           switch (error.response.status) {
             case 400:
               console.error("Bad request.", error.message);
@@ -40,8 +34,10 @@ const useCheckUsernameExistneceApi = () => {
                 return null;
               }
             default:
-              set_error_data(
-                "Нет ответа от сервера, пожалуйста, проверьте соединение с интернетом и попробуйте еще раз"
+              console.error(
+                "API error: ",
+                error.response.status,
+                error.response.data
               );
               return null;
           }
@@ -50,16 +46,16 @@ const useCheckUsernameExistneceApi = () => {
             await wait(RETRY_DELAY_MS);
             return fetch_data(username, attempts + 1);
           } else {
-            set_error_data(
-              "Нет ответа от сервера, пожалуйста, проверьте соединение с интернетом и попробуйте еще раз"
-            );
+            console.error("Server is not responding, ", error.message);
             return null;
           }
         } else {
           console.error("API Error: Reqest setup error:", error.message);
+          return null;
         }
       } else {
         console.error("Non-Axios:", error);
+        return null;
       }
     }
   };
