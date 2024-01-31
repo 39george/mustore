@@ -39,6 +39,11 @@ const useCheckUsernameExistneceApi = () => {
                 );
                 return null;
               }
+            default:
+              set_error_data(
+                "Нет ответа от сервера, пожалуйста, проверьте соединение с интернетом и попробуйте еще раз"
+              );
+              return null;
           }
         } else if (error.request) {
           if (attempts < MAX_RETRIES) {
