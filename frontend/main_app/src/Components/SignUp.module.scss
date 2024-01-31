@@ -67,12 +67,15 @@
 
   border: none;
   border-radius: 0.25rem;
-  color: $main_bright;
   background: linear-gradient(#7764df, #6b59d0);
 
   cursor: pointer;
   filter: brightness(100%);
   transition: filter 0.2s ease-out;
+
+  a {
+    color: $main_bright;
+  }
 
   &:hover {
     filter: brightness(110%);
@@ -112,10 +115,6 @@
     font-family: "Inter", sans-serif;
     color: $accent_red;
     letter-spacing: 0.2em;
-  }
-
-  br {
-    display: none;
   }
 }
 

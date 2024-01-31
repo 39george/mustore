@@ -6,14 +6,37 @@ import Footer from "./Pages/Footer";
 import ProductsPage from "./Pages/Products/ProductsPage";
 import ContentSection from "./Pages/Products/Components/ContentSection";
 import SignUp from "./Components/SignUp";
+import LogIn from "./Components/LogIn";
+import { useEffect } from "react";
+import axios from "axios";
+import { API_URL } from "./config";
 
 function App() {
+  useEffect(() => {
+    const check_user_permissions = async () => {
+      try {
+        const request = await axios.get(
+          `${API_URL}/protected/user/permissions`
+        );
+        console.log(request.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    check_user_permissions();
+  }, []);
+
   return (
     <BrowserRouter>
       <Routes>
         <Route
           path="signup"
           element={<SignUp />}
+        />
+        <Route
+          path="login"
+          element={<LogIn />}
         />
         <Route
           path="/"

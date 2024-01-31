@@ -118,7 +118,7 @@ const Menu: FC = () => {
   const handle_page_navigation = usePageNavigation();
 
   // Handle signup click
-  const handle_signup_click = (path: string) => {
+  const handle_signup_login_click = (path: string) => {
     dispatch(set_previous_path(path));
   };
 
@@ -326,12 +326,18 @@ const Menu: FC = () => {
         </li>
       </ul>
       <div className={styles.logging}>
-        <div className={styles.log}>войти</div>
+        <NavLink
+          to="login"
+          className={styles.log}
+          onClick={() => handle_signup_login_click(location.pathname)}
+        >
+          войти
+        </NavLink>
         <div className={styles.divider}>|</div>
         <NavLink
           to="signup"
           className={styles.log}
-          onClick={() => handle_signup_click(location.pathname)}
+          onClick={() => handle_signup_login_click(location.pathname)}
         >
           создать аккаунт
         </NavLink>
@@ -615,11 +621,17 @@ const Menu: FC = () => {
           </div>
           <hr />
           <div className={styles.sidebar_logging}>
-            <div className={styles.sidebar_log}>войти</div>
+            <NavLink
+              to="login"
+              className={styles.sidebar_log}
+              onClick={() => handle_signup_login_click(location.pathname)}
+            >
+              войти
+            </NavLink>
             <NavLink
               to="signup"
               className={styles.sidebar_log}
-              onClick={() => handle_signup_click(location.pathname)}
+              onClick={() => handle_signup_login_click(location.pathname)}
             >
               создать аккаунт
             </NavLink>

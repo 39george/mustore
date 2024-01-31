@@ -2,7 +2,7 @@ import styles from "./SignUp.module.scss";
 import { FC, FormEvent, useEffect, useRef, useState } from "react";
 import { HiMiniXMark } from "react-icons/hi2";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import zxcvbn from "zxcvbn";
 import ReCAPTCHA from "react-google-recaptcha";
@@ -16,6 +16,7 @@ import useSignUpUserApi from "../hooks/useSignUpUserApi";
 import { SITE_KEY } from "../config";
 import EmailConfirmation from "./EmailConfirmation";
 import ErrorWindow from "./ErrorWindow";
+import { handle_enter_key_down } from "../helpers/helpers";
 
 interface FormData {
   username: string;
@@ -127,8 +128,7 @@ const SignUp: FC = () => {
   const ref_username_check_progress = useRef<UsernameCheckProgress>("");
   const [username_border_color, set_username_border_color] =
     useState<string>("");
-  const { error_data: username_check_error, check_is_username_exists } =
-    useCheckUsernameExistneceApi();
+  const { check_is_username_exists } = useCheckUsernameExistneceApi();
   const [email_input_info, set_email_input_info] = useState<EmailInputInfo>({});
   const email_schema = z.string().email();
   const [is_password_visible, set_is_password_visible] = useState<InputNames>({
@@ -565,21 +565,6 @@ const SignUp: FC = () => {
     set_button_class_name("");
   };
 
-  // Handling moving focus to the next input by pressing `enter` key
-  const handle_enter_key_down = (
-    e: React.KeyboardEvent<HTMLInputElement>,
-    idx: number
-  ) => {
-    if (e.key === "Enter") {
-      if (input_refs[idx].current?.value) {
-        e.preventDefault();
-        if (idx < input_refs.length - 1) {
-          input_refs[idx + 1].current?.focus();
-        }
-      }
-    }
-  };
-
   // Handling returning to the previous page
   const handle_close = () => {
     navigate(previous_path);
@@ -603,7 +588,9 @@ const SignUp: FC = () => {
         <div className={styles.bg_texture}></div>
         <div className={styles.log_in_content}>
           <p className={styles.p_log_in}>Уже есть аккаунт?</p>
-          <button className={styles.button_log_in}>Войти</button>
+          <button className={styles.button_log_in}>
+            <NavLink to="../login">Войти</NavLink>
+          </button>
         </div>
       </div>
       <div className={styles.sign_up_section}>
@@ -611,7 +598,6 @@ const SignUp: FC = () => {
           <p className={styles.p_join_us}>присоединяйтесь к сообществу</p>
           <h1 className={styles.title}>
             HARMONY<span>.</span>
-            {/* <br /> */}
             SPHERE
           </h1>
           <h2 className={styles.tagline}>
@@ -630,7 +616,7 @@ const SignUp: FC = () => {
                   placeholder="Имя пользователя"
                   ref={input_refs[0]}
                   onChange={handle_input_change}
-                  onKeyDown={(e) => handle_enter_key_down(e, 0)}
+                  onKeyDown={(e) => handle_enter_key_down(e, 0, input_refs)}
                   className={styles.sign_up_input}
                   style={{
                     border: `${username_border_color}`,
@@ -673,7 +659,7 @@ const SignUp: FC = () => {
                   name="email"
                   ref={input_refs[1]}
                   onChange={handle_input_change}
-                  onKeyDown={(e) => handle_enter_key_down(e, 1)}
+                  onKeyDown={(e) => handle_enter_key_down(e, 1, input_refs)}
                   placeholder="Email"
                   className={styles.sign_up_input}
                   style={{
@@ -716,7 +702,7 @@ const SignUp: FC = () => {
                   name="password"
                   ref={input_refs[2]}
                   onChange={handle_input_change}
-                  onKeyDown={(e) => handle_enter_key_down(e, 2)}
+                  onKeyDown={(e) => handle_enter_key_down(e, 2, input_refs)}
                   placeholder="Пароль"
                   className={styles.sign_up_input}
                   style={{
@@ -807,7 +793,7 @@ const SignUp: FC = () => {
                   name="confirm_password"
                   ref={input_refs[3]}
                   onChange={handle_input_change}
-                  onKeyDown={(e) => handle_enter_key_down(e, 3)}
+                  onKeyDown={(e) => handle_enter_key_down(e, 3, input_refs)}
                   placeholder="Подтвердите пароль"
                   className={styles.sign_up_input}
                   style={{
