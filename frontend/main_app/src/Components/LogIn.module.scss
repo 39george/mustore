@@ -1,0 +1,195 @@
+@import "../colors.scss";
+
+.login_window {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background-color: $main_bright;
+  padding-top: 1.065rem;
+}
+
+.upper_bar {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 1.25rem;
+}
+
+.sign_up {
+  display: flex;
+  align-items: center;
+}
+
+.sign_up_p {
+  font-weight: 600;
+  margin-right: 0.875em;
+}
+
+.sign_up_button {
+  padding: 0.7em 2em;
+
+  font-family: "Raleway", sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+
+  border: none;
+  border-radius: 0.25rem;
+  background: linear-gradient(#7764df, #6b59d0);
+
+  cursor: pointer;
+  filter: brightness(100%);
+  transition: filter 0.2s ease-out;
+
+  a {
+    color: $main_bright;
+  }
+
+  &:hover {
+    filter: brightness(110%);
+  }
+}
+
+.close_icon {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  cursor: pointer;
+}
+
+.main_content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.p_welcome {
+  margin-top: 6.75em;
+  font-weight: 600;
+}
+
+.title {
+  margin-top: 0.55em;
+
+  font-family: "Lexend", sans-serif;
+  font-size: 2.5rem;
+  letter-spacing: 0.4rem;
+  text-align: center;
+
+  span {
+    font-family: "Inter", sans-serif;
+    color: $accent_purple;
+    letter-spacing: 0.2em;
+  }
+}
+
+.p_login {
+  margin-top: 5.125em;
+  font-weight: 600;
+}
+
+.form_login {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  margin-top: 1.375rem;
+
+  button {
+    width: 15rem;
+
+    margin-top: 1.75rem;
+    padding: 1em 2.25rem;
+
+    font-family: "Raleway", sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+
+    border: none;
+    border-radius: 0.25rem;
+    color: $main_bright;
+    background-color: $main_dark;
+
+    cursor: pointer;
+    filter: brightness(100%);
+    transition: 0.2s ease-out;
+
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+}
+
+.input_block {
+  margin-bottom: 1rem;
+  width: 15rem;
+}
+
+.login_input {
+  width: 100%;
+
+  padding: 0.625rem 1.75rem 0.625rem 0.75rem;
+
+  border: none;
+  border: 1px solid #868381;
+  border-radius: 0.25rem;
+  color: $main_dark;
+  background-color: $main_bright;
+
+  &:focus {
+    outline: none;
+    border: 1px solid $main_dark;
+  }
+}
+
+.forgot_password_prompt {
+  width: fit-content;
+
+  margin-top: 0.25rem;
+  margin-left: auto;
+
+  font-size: 0.675rem;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  letter-spacing: 0;
+
+  color: rgba($color: $main_dark, $alpha: 0.5);
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.waves_decor {
+  position: absolute;
+  bottom: 0;
+
+  width: 100%;
+  height: 30%;
+  background-image: url("../assets/svg/waves_decor.svg");
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.input_info {
+  display: flex;
+  align-items: center;
+  margin: 0 0.75rem 0.25rem;
+}
+
+.warning_icon {
+  flex-shrink: 0;
+  width: 0.75rem;
+  height: 0.75rem;
+  color: $warning;
+}
+
+.info_message {
+  margin-left: 0.25rem;
+  font-size: 0.75rem;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  letter-spacing: 0;
+  color: $warning;
+}
