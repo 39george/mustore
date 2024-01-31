@@ -14,7 +14,6 @@ const useSignUpUserApi = () => {
           "Content-Type": "application/x-www-form-urlencoded",
         },
       });
-
       set_signup_status(response.status);
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -25,11 +24,33 @@ const useSignUpUserApi = () => {
             error.response.data
           );
 
-          if (attempts < MAX_RETRIES) {
-            await wait(RETRY_DELAY_MS);
-            post_data(data, attempts + 1);
-          } else {
-            handle_axios_error(error, set_signup_error);
+          switch (error.response.status) {
+            case 400:
+              console.error("Bad request.", error.message);
+              break;
+            case 403:
+              set_signup_error("Recaptcha verification failed");
+              break;
+            case 500:
+              if (attempts < MAX_RETRIES) {
+                await wait(RETRY_DELAY_MS);
+                post_data(data, attempts + 1);
+              } else {
+                set_signup_error(
+                  "Что-то не так с нашим сервером, мы уже работаем над этим. Пожалуйста, попробуйте обновить страницу"
+                );
+              }
+              break;
+            default:
+              console.error(
+                "API error: ",
+                error.response.status,
+                error.response.data
+              );
+              set_signup_error(
+                "Нет ответа от сервера, пожалуйста, проверьте соединение с интернетом и попробуйте еще раз"
+              );
+              break;
           }
         } else if (error.request) {
           if (attempts < MAX_RETRIES) {
