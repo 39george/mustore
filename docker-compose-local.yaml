@@ -43,11 +43,24 @@ services:
       email-mock:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health_check"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health_check"]
+      # The health check will first run interval seconds after the container is 
+      # started, and then again interval seconds after each previous check 
+      # completes.
       interval: 5s
+      # If a single run of the check takes longer than timeout seconds then the 
+      # check is considered to have failed.
       timeout: 5s
+      # It takes retries consecutive failures of the health check for the 
+      # container to be considered unhealthy.
       retries: 2
-      start_period: 5s
+      # Start period provides initialization time for containers that need time 
+      # to bootstrap. Probe failure during that period will not be counted 
+      # towards the maximum number of retries. However, if a health check 
+      # succeeds during the start period, the container is considered started 
+      # and all consecutive failures will be counted towards the maximum number 
+      # of retries.
+      start_period: 3s
 
   email-mock:
     image: ghashy/email-mock:0.1
@@ -139,11 +152,15 @@ services:
       - "10000:10000"
     networks:
       - default
+    depends_on:
+      mustore:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "service", "nginx", "status"]
       interval: 5s
       timeout: 5s
-      retries: 2
+      retries: 3
+      start_period: 5s
 
 volumes:
   redis_volume:
