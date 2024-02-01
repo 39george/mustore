@@ -8,24 +8,37 @@ import ContentSection from "./Pages/Products/Components/ContentSection";
 import SignUp from "./Components/SignUp";
 import LogIn from "./Components/LogIn";
 import { useEffect } from "react";
-import axios from "axios";
-import { API_URL } from "./config";
+// import axios from "axios";
+// import { API_URL } from "./config";
+import { useSelector } from "react-redux";
+import { RootState } from "./state/store";
+import { UserPermissions } from "./state/user_permissions_slice";
+import useCheckPermissionsApi from "./hooks/API/useCheckPermissionsApi";
 
 function App() {
-  useEffect(() => {
-    const check_user_permissions = async () => {
-      try {
-        const request = await axios.get(
-          `${API_URL}/protected/user/permissions`
-        );
-        console.log(request.data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
+  const user_permissions = useSelector<RootState, UserPermissions[]>(
+    (state) => state.user_permissions.permissions
+  );
+  const { check_user_permissions } = useCheckPermissionsApi();
 
+  console.log(user_permissions);
+
+  useEffect(() => {
     check_user_permissions();
   }, []);
+
+  // useEffect(() => {
+  //   const logout = async () => {
+  //     try {
+  //       const request = await axios.get(`${API_URL}/logout`);
+  //       console.log(request.status);
+  //     } catch (error) {
+  //       console.error(error);
+  //     }
+  //   };
+
+  //   logout();
+  // }, []);
 
   return (
     <BrowserRouter>
