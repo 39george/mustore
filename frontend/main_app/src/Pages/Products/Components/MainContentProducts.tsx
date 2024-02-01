@@ -3,7 +3,7 @@ import styles from "./MainContentProducts.module.scss";
 import { FC, useEffect, useRef, useState } from "react";
 import { GoChevronDown } from "react-icons/go";
 import { music_keys } from "../music_keys";
-import useGenresMoodsApi from "../../../hooks/useGenresMoodsApi";
+import useGenresMoodsApi from "../../../hooks/API/useGenresMoodsApi";
 import useCheckboxState from "../../../hooks/useCheckboxState";
 import { CheckedItems } from "../../../types/types";
 import DraggableSlider from "./UI/DraggableSlider";
