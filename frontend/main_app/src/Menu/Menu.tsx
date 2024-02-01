@@ -17,6 +17,7 @@ import {
 } from "../state/active_section_slice";
 import { RootState } from "../state/store";
 import { set_previous_path } from "../state/previous_path_slice";
+import { UserPermissions } from "../state/user_permissions_slice";
 
 const Menu: FC = () => {
   const [link_toggled, set_link_toggled] = useState<ToggledLinks>({
@@ -36,6 +37,9 @@ const Menu: FC = () => {
   const [is_nav_dark, set_is_nav_dark] = useState(false);
   const location = useLocation();
   const dispatch = useDispatch();
+  const user_permissions = useSelector<RootState, UserPermissions[]>(
+    (state) => state.user_permissions.permissions
+  );
 
   // Define class names based on the intersecting section
   useEffect(() => {
@@ -325,23 +329,27 @@ const Menu: FC = () => {
           </ul>
         </li>
       </ul>
-      <div className={styles.logging}>
-        <NavLink
-          to="login"
-          className={styles.log}
-          onClick={() => handle_signup_login_click(location.pathname)}
-        >
-          войти
-        </NavLink>
-        <div className={styles.divider}>|</div>
-        <NavLink
-          to="signup"
-          className={styles.log}
-          onClick={() => handle_signup_login_click(location.pathname)}
-        >
-          создать аккаунт
-        </NavLink>
-      </div>
+      {user_permissions.length !== 0 ? (
+        <div style={{ marginLeft: "auto" }}>user is logged in</div>
+      ) : (
+        <div className={styles.logging}>
+          <NavLink
+            to="login"
+            className={styles.log}
+            onClick={() => handle_signup_login_click(location.pathname)}
+          >
+            войти
+          </NavLink>
+          <div className={styles.divider}>|</div>
+          <NavLink
+            to="signup"
+            className={styles.log}
+            onClick={() => handle_signup_login_click(location.pathname)}
+          >
+            создать аккаунт
+          </NavLink>
+        </div>
+      )}
       <div className={styles.toggle_icons_container}>
         <IoMenu
           className={`${styles.burger_icon} ${sidebar_open ? "" : styles.show}`}
