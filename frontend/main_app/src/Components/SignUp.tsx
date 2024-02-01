@@ -597,6 +597,7 @@ const SignUp: FC = () => {
           </NavLink>
         </div>
       </div>
+      <div className={styles.filler} />
       <div className={styles.sign_up_section}>
         <div className={styles.sign_up_content}>
           <p className={styles.p_join_us}>Присоединяйтесь к сообществу</p>

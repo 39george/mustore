@@ -20,13 +20,17 @@
 }
 
 .log_in_section {
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
 
   display: flex;
   justify-content: center;
   width: 40%;
+  height: 100%;
 
   border-radius: 0 3.375rem 3.375rem 0;
+  // border-radius: 0 1.375rem 1.375rem 0;
   background-color: $main_dark;
 }
 
@@ -77,6 +81,11 @@
   &:hover {
     filter: brightness(110%);
   }
+}
+
+.filler {
+  width: 40%;
+  height: 100%;
 }
 
 .sign_up_section {
@@ -361,7 +370,7 @@
 }
 
 .loader_bg {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
 
@@ -373,6 +382,9 @@
   min-height: 874px;
 
   background-color: rgba($color: #000000, $alpha: 0.3);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+
   z-index: 4;
 }
 
@@ -391,12 +403,34 @@
 }
 
 // Media queries
+@media (max-height: 874px) {
+  .log_in_section,
+  .bg_texture {
+    border-radius: 0
+      clamp(
+        1.375rem,
+        calc(1.375rem + (54 - 22) * ((100vh - 400px) / (874 - 400))),
+        3.375em
+      )
+      clamp(
+        1.375rem,
+        calc(1.375rem + (54 - 22) * ((100vh - 400px) / (874 - 400))),
+        3.375em
+      )
+      0;
+  }
+}
+
 @media (max-width: 1010px) {
   .sign_up_window {
     justify-content: center;
   }
 
   .bg_texture {
+    display: none;
+  }
+
+  .filler {
     display: none;
   }
 
