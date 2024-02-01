@@ -1,11 +1,18 @@
 @import "../colors.scss";
 
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 .login_window {
-  position: relative;
   width: 100vw;
   height: 100vh;
-  min-height: 794px;
-
+  // min-height: 570px;
   padding-top: 1.065rem;
 
   background-color: $main_bright;
@@ -97,7 +104,7 @@
   button {
     width: 15rem;
 
-    margin-top: 1.75rem;
+    margin: 1.75rem 0;
     padding: 1em 2.25rem;
 
     font-family: "Raleway", sans-serif;
@@ -167,12 +174,14 @@
 }
 
 .waves_decor {
-  position: absolute;
-  bottom: 0;
+  position: fixed;
+  bottom: 0px;
 
-  width: 100%;
+  width: 110%;
   height: 30%;
-  background-image: url("../assets/svg/waves_decor.svg");
+
+  transform: translateY(4px);
+  background-image: url("../assets/svg/waves_decor2.svg");
   background-size: cover;
   background-repeat: no-repeat;
 }
@@ -197,6 +206,68 @@
     Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
   letter-spacing: 0;
   color: $warning;
+}
+
+.loader_bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  display: flex;
+  justify-content: center;
+
+  width: 100vw;
+  height: 100vh;
+  min-height: 794px;
+
+  background-color: rgba($color: #000000, $alpha: 0.3);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: 4;
+}
+
+.loader_big {
+  position: sticky;
+  top: calc(50% - 2.5rem);
+
+  width: 5rem;
+  height: 5rem;
+
+  border: 0.25rem solid $main_bright;
+  border-top: 0.25rem solid $accent_red;
+  border-radius: 50%;
+
+  animation: spin 0.5s linear infinite;
+}
+
+@media (max-height: 764px) {
+  .p_welcome {
+    margin-top: clamp(
+      1.5em,
+      calc(1.5em + (108 - 24) * ((100vh - 690px) / (764 - 690))),
+      6.75em
+    );
+  }
+}
+
+@media (max-height: 670px) {
+  .p_login {
+    margin-top: clamp(
+      2.5em,
+      calc(2.5em + (82 - 40) * ((100vh - 612px) / (670 - 612))),
+      5.125em
+    );
+  }
+}
+
+@media (max-height: 612px) {
+  .p_welcome {
+    margin-top: 3em;
+  }
+
+  .waves_decor {
+    display: none;
+  }
 }
 
 @media (max-width: 1010px) {
@@ -225,7 +296,7 @@
 
 @media (max-width: 440px) {
   .p_welcome {
-    margin-top: 4em;
+    margin-top: 3.5em;
   }
 
   .title {
@@ -234,6 +305,12 @@
   }
 
   .p_login {
-    margin-top: 3.5em;
+    margin-top: 5.5em;
+  }
+}
+
+@media (max-width: 440px) and (max-height: 710px) {
+  .waves_decor {
+    display: none;
   }
 }
