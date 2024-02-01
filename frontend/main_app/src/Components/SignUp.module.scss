@@ -362,20 +362,24 @@
 
 .loader_bg {
   position: absolute;
+  top: 0;
+  left: 0;
 
   display: flex;
   justify-content: center;
-  align-items: center;
 
   width: 100vw;
   height: 100vh;
-  min-height: 1020px;
+  min-height: 874px;
 
   background-color: rgba($color: #000000, $alpha: 0.3);
   z-index: 4;
 }
 
 .loader_big {
+  position: sticky;
+  top: calc(50% - 2.5rem);
+
   width: 5rem;
   height: 5rem;
 

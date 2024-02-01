@@ -197,6 +197,7 @@ const SignUp: FC = () => {
     e.preventDefault();
 
     const form_urlencoded = convert_to_urlencoded(form_data);
+
     set_sign_up_in_porgress(true);
 
     const try_to_signup = async () => {
@@ -216,7 +217,7 @@ const SignUp: FC = () => {
 
     if (signup_error) {
       set_sign_up_in_porgress(false);
-      console.error(signup_error);
+      // console.error(signup_error);
     }
   }, [signup_status, signup_error]);
 
