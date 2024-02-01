@@ -14,7 +14,7 @@
 
   width: 100vw;
   height: 100vh;
-  min-height: 1020px;
+  min-height: 874px;
 
   background-color: $main_bright;
 }
@@ -58,7 +58,7 @@
 
 .button_log_in {
   margin-top: 3rem;
-  padding: 0.625rem 2rem;
+  padding: 0.7em 2em;
 
   font-family: "Raleway", sans-serif;
   font-size: 0.875rem;
@@ -67,15 +67,12 @@
 
   border: none;
   border-radius: 0.25rem;
+  color: $main_bright;
   background: linear-gradient(#7764df, #6b59d0);
 
   cursor: pointer;
   filter: brightness(100%);
   transition: filter 0.2s ease-out;
-
-  a {
-    color: $main_bright;
-  }
 
   &:hover {
     filter: brightness(110%);
@@ -94,8 +91,6 @@
 }
 
 .p_join_us {
-  margin-bottom: 3rem;
-
   font-family: "Geologica", sans-serif;
   font-weight: 300;
   text-align: center;
@@ -104,7 +99,7 @@
 .title {
   width: fit-content;
 
-  margin: 0 auto 1em;
+  margin: 0.55em auto 1em;
 
   font-family: "Lexend", sans-serif;
   font-size: 2.5rem;
@@ -115,22 +110,6 @@
     font-family: "Inter", sans-serif;
     color: $accent_red;
     letter-spacing: 0.2em;
-  }
-}
-
-.tagline {
-  max-width: 31rem;
-
-  margin: 0 auto 4.5rem;
-
-  font-size: 1rem;
-  font-family: "Geologica", sans-serif;
-  font-weight: 100;
-  text-align: center;
-
-  span {
-    font-weight: 300;
-    color: $accent_red;
   }
 }
 
@@ -433,14 +412,13 @@
   }
 
   .p_log_in {
+    margin-right: 0.875em;
     font-size: 0.875rem;
     color: $main_dark;
   }
 
   .button_log_in {
     margin-top: 0;
-    margin-left: 1rem;
-    padding: 0.625rem 1.5rem;
 
     font-size: 0.75rem;
   }
@@ -477,37 +455,18 @@
     font-size: 0.75rem;
   }
 
-  .button_log_in {
-    padding: 0.625rem 1rem;
-    font-size: 0.625rem;
-  }
-
   .p_join_us {
-    margin-bottom: 2rem;
     font-size: 0.875rem;
   }
 
   .title {
     font-size: 2rem;
   }
-
-  .tagline {
-    margin-bottom: 2rem;
-    font-size: 0.875rem;
-  }
 }
 
 @media (max-width: 440px) {
-  .button_log_in {
-    margin-left: 0.5rem;
-  }
-
   .title {
     font-size: 1.5rem;
     letter-spacing: 0.1em;
-  }
-
-  .tagline {
-    font-size: 0.75rem;
   }
 }

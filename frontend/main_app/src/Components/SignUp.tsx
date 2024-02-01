@@ -588,22 +588,21 @@ const SignUp: FC = () => {
         <div className={styles.bg_texture}></div>
         <div className={styles.log_in_content}>
           <p className={styles.p_log_in}>Уже есть аккаунт?</p>
-          <button className={styles.button_log_in}>
-            <NavLink to="../login">Войти</NavLink>
-          </button>
+          <NavLink
+            to="../login"
+            className={styles.button_log_in}
+          >
+            Войти
+          </NavLink>
         </div>
       </div>
       <div className={styles.sign_up_section}>
         <div className={styles.sign_up_content}>
-          <p className={styles.p_join_us}>присоединяйтесь к сообществу</p>
+          <p className={styles.p_join_us}>Присоединяйтесь к сообществу</p>
           <h1 className={styles.title}>
             HARMONY<span>.</span>
             SPHERE
           </h1>
-          <h2 className={styles.tagline}>
-            Сервис для тех, кто хочет найти или предложить свои{" "}
-            <span>музыкальные решения.</span>
-          </h2>
           <form
             onSubmit={handle_submit}
             className={styles.sign_up_form}
