@@ -4,8 +4,11 @@
   position: relative;
   width: 100vw;
   height: 100vh;
-  background-color: $main_bright;
+  min-height: 794px;
+
   padding-top: 1.065rem;
+
+  background-color: $main_bright;
 }
 
 .upper_bar {
@@ -34,15 +37,12 @@
 
   border: none;
   border-radius: 0.25rem;
+  color: $main_bright;
   background: linear-gradient(#7764df, #6b59d0);
 
   cursor: pointer;
   filter: brightness(100%);
   transition: filter 0.2s ease-out;
-
-  a {
-    color: $main_bright;
-  }
 
   &:hover {
     filter: brightness(110%);
@@ -118,6 +118,11 @@
     -ms-user-select: none;
     user-select: none;
   }
+
+  .button_hover {
+    filter: brightness(110%);
+    background-color: #292826;
+  }
 }
 
 .input_block {
@@ -192,4 +197,43 @@
     Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
   letter-spacing: 0;
   color: $warning;
+}
+
+@media (max-width: 1010px) {
+  .sign_up_p {
+    font-size: 0.875rem;
+  }
+
+  .sign_up_button {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .sign_up_p {
+    font-size: 0.75rem;
+  }
+
+  .p_welcome {
+    font-size: 0.875rem;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 440px) {
+  .p_welcome {
+    margin-top: 4em;
+  }
+
+  .title {
+    font-size: 1.5rem;
+    letter-spacing: 0.1em;
+  }
+
+  .p_login {
+    margin-top: 3.5em;
+  }
 }
