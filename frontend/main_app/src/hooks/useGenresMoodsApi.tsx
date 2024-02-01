@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { API_URL, MAX_RETRIES, RETRY_DELAY_MS } from "../config";
 import axios from "axios";
-import { handle_axios_error, wait } from "../helpers/helpers";
+import { wait } from "../helpers/helpers";
 
 type GenreOrMood = string[];
 
@@ -23,17 +23,30 @@ const useGenresMoodsApi = (endpoint: string) => {
       } catch (error) {
         if (axios.isAxiosError(error)) {
           if (error.response) {
-            console.error(
-              "API Error:",
-              error.response.status,
-              error.response.data
-            );
-
-            if (attempts < MAX_RETRIES) {
-              await wait(RETRY_DELAY_MS);
-              fetch_data(attempts + 1);
-            } else {
-              handle_axios_error(error, set_error);
+            switch (error.response.status) {
+              case 400:
+                console.error("Bad request.", error.message);
+                break;
+              case 500:
+                if (attempts < MAX_RETRIES) {
+                  await wait(RETRY_DELAY_MS);
+                  fetch_data(attempts + 1);
+                } else {
+                  set_error(
+                    "Что-то не так с нашим сервером, мы уже работаем над этим. Пожалуйста, попробуйте обновить страницу"
+                  );
+                }
+                break;
+              default:
+                console.error(
+                  "API error: ",
+                  error.response.status,
+                  error.response.data
+                );
+                set_error(
+                  "Нет ответа от сервера, пожалуйста, проверьте соединение с интернетом и попробуйте еще раз"
+                );
+                break;
             }
           } else if (error.request) {
             if (attempts < MAX_RETRIES) {

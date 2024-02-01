@@ -1,6 +1,6 @@
 import axios from "axios";
 import { API_URL, MAX_RETRIES, RETRY_DELAY_MS } from "../config";
-import { handle_axios_error, wait } from "../helpers/helpers";
+import { wait } from "../helpers/helpers";
 import { useState } from "react";
 
 const useSignUpUserApi = () => {
@@ -18,12 +18,6 @@ const useSignUpUserApi = () => {
     } catch (error) {
       if (axios.isAxiosError(error)) {
         if (error.response) {
-          console.error(
-            "API Error:",
-            error.response.status,
-            error.response.data
-          );
-
           switch (error.response.status) {
             case 400:
               console.error("Bad request.", error.message);
