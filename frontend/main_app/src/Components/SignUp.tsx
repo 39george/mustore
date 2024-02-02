@@ -14,8 +14,8 @@ import { GoCheckCircleFill } from "react-icons/go";
 import useCheckUsernameExistneceApi from "../hooks/API/useCheckUsernameExistenceApi";
 import useSignUpUserApi from "../hooks/API/useSignUpUserApi";
 import { SITE_KEY } from "../config";
-import EmailConfirmation from "./EmailConfirmation";
-import ErrorWindow from "./ErrorWindow";
+import EmailConfirmation from "./UI/EmailConfirmation";
+import ErrorWindow from "./UI/ErrorWindow";
 import { handle_enter_key_down } from "../helpers/helpers";
 
 interface FormData {

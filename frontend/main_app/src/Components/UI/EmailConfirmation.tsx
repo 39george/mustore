@@ -1,10 +1,10 @@
 import styles from "./EmailConfirmation.module.scss";
 import { NavLink, useNavigate } from "react-router-dom";
-import logo from "../assets/svg/logo.svg";
+import logo from "../../assets/svg/logo.svg";
 import { FC } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { set_active_section } from "../state/active_section_slice";
-import { RootState } from "../state/store";
+import { set_active_section } from "../../state/active_section_slice";
+import { RootState } from "../../state/store";
 
 const EmailConfirmation: FC = () => {
   const dispatch = useDispatch();

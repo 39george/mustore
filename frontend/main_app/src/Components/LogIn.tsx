@@ -7,7 +7,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "../state/store";
 import useLogInUserApi from "../hooks/API/useLogInUserApi";
-import ErrorWindow from "./ErrorWindow";
+import ErrorWindow from "./UI/ErrorWindow";
 import useCheckPermissionsApi from "../hooks/API/useCheckPermissionsApi";
 
 interface FormData {

@@ -1,7 +1,7 @@
 import styles from "./ErrorWindow.module.scss";
 import { FC } from "react";
 import { FaCircleXmark } from "react-icons/fa6";
-import logo from "../assets/svg/logo.svg";
+import logo from "../../assets/svg/logo.svg";
 
 interface ErrorWindowProps {
   error_message: string;
