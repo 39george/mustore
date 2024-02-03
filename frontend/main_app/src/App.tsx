@@ -8,20 +8,12 @@ import ContentSection from "./Pages/Products/Components/ContentSection";
 import SignUp from "./Components/SignUp";
 import LogIn from "./Components/LogIn";
 import { useEffect } from "react";
-// import axios from "axios";
-// import { API_URL } from "./config";
-import { useSelector } from "react-redux";
-import { RootState } from "./state/store";
-import { UserPermissions } from "./state/user_permissions_slice";
+import axios from "axios";
+import { API_URL } from "./config";
 import useCheckPermissionsApi from "./hooks/API/useCheckPermissionsApi";
 
 function App() {
-  const user_permissions = useSelector<RootState, UserPermissions[]>(
-    (state) => state.user_permissions.permissions
-  );
   const { check_user_permissions } = useCheckPermissionsApi();
-
-  console.log(user_permissions);
 
   useEffect(() => {
     check_user_permissions();

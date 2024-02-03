@@ -1,8 +1,7 @@
 import styles from "./CarouselItem.module.scss";
 import { FC, useMemo } from "react";
 import { CarouselItem } from "../../../../types/types";
-// import { GoHeartFill } from "react-icons/go";
-import { GoHeart } from "react-icons/go";
+import { FaRegHeart } from "react-icons/fa";
 import { PiShoppingCartFill } from "react-icons/pi";
 
 interface ClassNames {
@@ -81,7 +80,7 @@ const CarouselItem: FC<CarouselItemProps> = ({
           <p className={class_names.price}>{formatted_price} ₽</p>
           <div className={styles.action_icons}>
             <div className={styles.likes}>
-              <GoHeart className={class_names.like_icon} />
+              <FaRegHeart className={class_names.like_icon} />
               <p className={class_names.likes_amount}>{carousel_items.likes}</p>
             </div>
             <PiShoppingCartFill className={class_names.cart_icon} />

@@ -2,8 +2,7 @@ import styles from "./SongItem.module.scss";
 import { FC } from "react";
 import { SongItem } from "../../../../types/types";
 import { BsThreeDotsVertical } from "react-icons/bs";
-// import { GoHeartFill } from "react-icons/go";
-import { GoHeart } from "react-icons/go";
+import { FaRegHeart } from "react-icons/fa";
 import { PiHeadphonesFill, PiShoppingCartFill } from "react-icons/pi";
 
 const SongItem: FC<SongItem> = (props) => {
@@ -24,7 +23,7 @@ const SongItem: FC<SongItem> = (props) => {
       <p className={styles.author}>{props.author}</p>
       <div className={styles.likes_and_listenings}>
         <div className={styles.likes}>
-          <GoHeart className={styles.like_icon} />
+          <FaRegHeart className={styles.like_icon} />
           <p className={styles.likes_amount}>{props.likes}</p>
         </div>
         <div className={styles.listenings}>
