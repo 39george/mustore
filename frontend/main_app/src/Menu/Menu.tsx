@@ -17,7 +17,8 @@ import {
 } from "../state/active_section_slice";
 import { RootState } from "../state/store";
 import { set_previous_path } from "../state/previous_path_slice";
-import { UserPermissions } from "../state/user_permissions_slice";
+import { PermissionsState } from "../state/user_permissions_slice";
+import UserToolbar from "../Components/UI/UserToolbar";
 
 const Menu: FC = () => {
   const [link_toggled, set_link_toggled] = useState<ToggledLinks>({
@@ -37,9 +38,25 @@ const Menu: FC = () => {
   const [is_nav_dark, set_is_nav_dark] = useState(false);
   const location = useLocation();
   const dispatch = useDispatch();
-  const user_permissions = useSelector<RootState, UserPermissions[]>(
-    (state) => state.user_permissions.permissions
+  const user_permissions = useSelector<RootState, PermissionsState>(
+    (state) => state.user_permissions
   );
+  const [is_mobile, set_is_mobile] = useState(window.innerWidth <= 1010);
+
+  // Checking for window resize
+  useEffect(() => {
+    const handle_resize = () => {
+      set_is_mobile(window.innerWidth <= 1010);
+    };
+
+    handle_resize();
+
+    window.addEventListener("resize", handle_resize);
+
+    return () => {
+      window.removeEventListener("resize", handle_resize);
+    };
+  }, []);
 
   // Define class names based on the intersecting section
   useEffect(() => {
@@ -329,8 +346,13 @@ const Menu: FC = () => {
           </ul>
         </li>
       </ul>
-      {user_permissions.length !== 0 ? (
-        <div style={{ marginLeft: "auto" }}>user is logged in</div>
+      {user_permissions.is_loading ? (
+        <div
+          style={{ marginLeft: "auto" }}
+          className={styles.loader_small}
+        ></div>
+      ) : user_permissions.permissions.length !== 0 && !is_mobile ? (
+        <UserToolbar />
       ) : (
         <div className={styles.logging}>
           <NavLink

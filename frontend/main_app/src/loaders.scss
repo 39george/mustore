@@ -1,0 +1,55 @@
+@import "./colors.scss";
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loader_small {
+  width: 1.125rem;
+  height: 1.125rem;
+
+  margin: 0.25rem 0.75rem 0;
+
+  border: 0.125rem solid #d9d9d9;
+  border-top: 0.125rem solid #868381;
+  border-radius: 50%;
+
+  animation: spin 0.5s linear infinite;
+}
+
+.loader_bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  display: flex;
+  justify-content: center;
+
+  width: 100vw;
+  height: 100vh;
+  min-height: 874px;
+
+  background-color: rgba($color: #000000, $alpha: 0.3);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+
+  z-index: 4;
+}
+
+.loader_big {
+  position: sticky;
+  top: calc(50% - 2.5rem);
+
+  width: 5rem;
+  height: 5rem;
+
+  border: 0.25rem solid $main_bright;
+  border-top: 0.25rem solid $accent_red;
+  border-radius: 50%;
+
+  animation: spin 0.5s linear infinite;
+}
