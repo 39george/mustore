@@ -5,6 +5,7 @@ import { wait } from "../../helpers/helpers";
 import { useDispatch } from "react-redux";
 import {
   UserPermissions,
+  set_loading_state,
   set_user_permissions,
 } from "../../state/user_permissions_slice";
 
@@ -17,13 +18,15 @@ const useCheckPermissionsApi = () => {
       const response = await axios.get<UserPermissions[]>(
         `${API_URL}/protected/user/permissions`
       );
+      dispatch(set_loading_state(false));
       dispatch(set_user_permissions(response.data));
     } catch (error) {
       if (axios.isAxiosError(error)) {
         if (error.response) {
           switch (error.response.status) {
             case 403:
-              set_error_data("User is logged out");
+              dispatch(set_loading_state(false));
+              dispatch(set_user_permissions([]));
               break;
             case 500:
               if (attempts < MAX_RETRIES) {
@@ -48,7 +51,11 @@ const useCheckPermissionsApi = () => {
             await wait(RETRY_DELAY_MS);
             fetch_data(attempts + 1);
           } else {
-            console.error("Server is not responding, ", error.message);
+            dispatch(set_loading_state(false));
+            dispatch(set_user_permissions([]));
+            set_error_data(
+              "Нет ответа от сервера, пожалуйста, проверьте соединение с интернетом и попробуйте еще раз"
+            );
           }
         } else {
           console.error("API Error: Reqest setup error:", error.message);
