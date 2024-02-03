@@ -8,8 +8,6 @@ import ContentSection from "./Pages/Products/Components/ContentSection";
 import SignUp from "./Components/SignUp";
 import LogIn from "./Components/LogIn";
 import { useEffect } from "react";
-import axios from "axios";
-import { API_URL } from "./config";
 import useCheckPermissionsApi from "./hooks/API/useCheckPermissionsApi";
 
 function App() {
@@ -18,19 +16,6 @@ function App() {
   useEffect(() => {
     check_user_permissions();
   }, []);
-
-  // useEffect(() => {
-  //   const logout = async () => {
-  //     try {
-  //       const request = await axios.get(`${API_URL}/logout`);
-  //       console.log(request.status);
-  //     } catch (error) {
-  //       console.error(error);
-  //     }
-  //   };
-
-  //   logout();
-  // }, []);
 
   return (
     <BrowserRouter>
