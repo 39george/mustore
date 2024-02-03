@@ -64,7 +64,7 @@ const useLogInUserApi = () => {
     }
   };
 
-  return { login_status, login_error, post_data };
+  return { login_status, set_login_status, login_error, post_data };
 };
 
 export default useLogInUserApi;

@@ -32,8 +32,12 @@ const LogIn: FC = () => {
   const [button_disabled, set_button_disabled] = useState(true);
   const [button_class_name, set_button_class_name] = useState("");
   const [login_in_progress, set_login_in_porgress] = useState(false);
-  const { login_status, login_error, post_data } = useLogInUserApi();
+  const { login_status, set_login_status, login_error, post_data } =
+    useLogInUserApi();
   const { check_user_permissions } = useCheckPermissionsApi();
+  const [input_block_class_name, set_input_block_class_name] = useState(
+    `${styles.input_block}`
+  );
 
   // Handling submit and input change
   const handle_submit = (e: FormEvent<HTMLFormElement>) => {
@@ -51,14 +55,21 @@ const LogIn: FC = () => {
   useEffect(() => {
     if (login_status !== null) {
       if (login_status === 200) {
-        setTimeout(() => {
-          set_login_in_porgress(false);
-          check_user_permissions();
-          handle_close();
-        }, 500);
+        const handle_success = async () => {
+          await check_user_permissions();
+
+          setTimeout(() => {
+            set_login_in_porgress(false);
+            handle_close();
+          }, 500);
+        };
+        handle_success();
       } else {
         setTimeout(() => {
           set_login_in_porgress(false);
+          set_input_block_class_name(
+            `${styles.input_block} ${styles.error_transform}`
+          );
           set_wrong_data(true);
         }, 500);
       }
@@ -67,6 +78,9 @@ const LogIn: FC = () => {
     if (login_error) {
       set_login_in_porgress(false);
     }
+
+    set_login_status(null);
+    set_input_block_class_name(`${styles.input_block}`);
   }, [login_status, login_error]);
 
   const handle_input_change = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -138,7 +152,7 @@ const LogIn: FC = () => {
               <p className={styles.info_message}>неверный email или пароль</p>
             </div>
           )}
-          <div className={styles.input_block}>
+          <div className={input_block_class_name}>
             <input
               type="text"
               name="email"
@@ -151,7 +165,7 @@ const LogIn: FC = () => {
               autoFocus
             />
           </div>
-          <div className={styles.input_block}>
+          <div className={input_block_class_name}>
             <input
               type="password"
               name="password"
