@@ -7,19 +7,49 @@
   margin-left: auto;
 }
 
-.likes_container,
-.cart_icon,
-.user_avatar_container {
+.wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 2.5rem;
+  height: 2.5rem;
+
   margin-left: 1.25rem;
-}
 
-.cart_icon,
-.user_avatar_container {
+  border-radius: 50%;
+  border: 2px solid transparent;
+  transition: border 0.1s ease-out;
+  box-shadow: 0 0 8px 1px rgba($color: #000000, $alpha: 0);
   cursor: pointer;
-}
 
-.like_icon {
-  cursor: pointer;
+  &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateY(-50%) translateX(-50%);
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border-top: 2px solid transparent;
+    border-bottom: 2px solid transparent;
+    border-left: 2px solid transparent;
+    border-right: 2px solid rgba($color: $accent_red, $alpha: 0.5);
+    opacity: 0;
+    transition: 0.2s ease-out;
+    z-index: -1;
+  }
+
+  &:hover {
+    border: 2px solid rgba($color: $main_dark, $alpha: 0.08);
+    box-shadow: 0 0 8px 1px rgba($color: #000000, $alpha: 0.1);
+    &::after {
+      opacity: 1;
+      transform: translateY(-50%) translateX(-50%) rotate(-90deg);
+    }
+  }
 }
 
 .likes_container {
@@ -64,11 +94,26 @@
   overflow: hidden;
 }
 
+.user_avatar_container_visible {
+  border: 2px solid rgba($color: $main_dark, $alpha: 0.08);
+  box-shadow: 0 0 8px 1px rgba($color: #000000, $alpha: 0.1);
+  &::after {
+    opacity: 1;
+    transform: translateY(-50%) translateX(-50%) rotate(-90deg);
+    border: 2px solid rgba($color: $accent_red, $alpha: 0.5);
+  }
+}
+
 .user_avatar {
   width: 100%;
   height: 100%;
 }
 
-.white_icons {
+.light_colors {
   color: $main_bright;
+
+  &:hover {
+    border: 2px solid rgba($color: $main_bright, $alpha: 0.2);
+    box-shadow: 0 0 8px 1px rgba($color: #ffffff, $alpha: 0.1);
+  }
 }
