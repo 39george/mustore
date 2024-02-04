@@ -223,11 +223,10 @@ a {
 
 // Sidebar
 .mobile_sidebar {
-  position: absolute;
+  position: fixed;
   top: 0;
   right: 0;
 
-  display: none;
   padding: 3rem 0 0.75rem;
 
   width: 15rem;
@@ -240,6 +239,9 @@ a {
   background-color: rgba($color: $main_dark, $alpha: 1);
   backdrop-filter: blur(9px);
   -webkit-backdrop-filter: blur(9px);
+
+  transform: translateX(15rem);
+  transition: transform 0.3s ease-out;
 
   z-index: 3;
 
@@ -326,7 +328,6 @@ a {
   }
 }
 
-// Add this class if link is toggled
 .link_toggled {
   .sidebar_submenu {
     display: block;
@@ -371,6 +372,18 @@ a {
   }
 }
 
+.sidebar_overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  width: 100vw;
+  height: 100vh;
+
+  background-color: rgba($color: #000000, $alpha: 0.5);
+  transition: opacity 0.2s ease-out;
+}
+
 // Media queries
 @media (max-width: 1010px) {
   .nav_bar {
@@ -390,7 +403,7 @@ a {
   }
 
   .sidebar_visible {
-    display: block;
+    transform: translateX(0rem);
   }
 }
 

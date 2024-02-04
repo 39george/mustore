@@ -19,6 +19,7 @@ import { RootState } from "../state/store";
 import { set_previous_path } from "../state/previous_path_slice";
 import { PermissionsState } from "../state/user_permissions_slice";
 import UserToolbar from "../Components/UI/UserToolbar";
+import UserToolbarMobile from "../Components/UI/UserToolbarMobile";
 
 const Menu: FC = () => {
   const [link_toggled, set_link_toggled] = useState<ToggledLinks>({
@@ -346,7 +347,7 @@ const Menu: FC = () => {
           </ul>
         </li>
       </ul>
-      {user_permissions.is_loading ? (
+      {user_permissions.is_loading && !is_mobile ? (
         <div
           style={{ marginLeft: "auto" }}
           className={styles.loader_small}
@@ -650,22 +651,31 @@ const Menu: FC = () => {
             </li>
           </div>
           <hr />
-          <div className={styles.sidebar_logging}>
-            <NavLink
-              to="login"
-              className={styles.sidebar_log}
-              onClick={() => handle_signup_login_click(location.pathname)}
-            >
-              войти
-            </NavLink>
-            <NavLink
-              to="signup"
-              className={styles.sidebar_log}
-              onClick={() => handle_signup_login_click(location.pathname)}
-            >
-              создать аккаунт
-            </NavLink>
-          </div>
+          {user_permissions.is_loading && is_mobile ? (
+            <div
+              style={{ marginTop: 32 }}
+              className={styles.loader_small}
+            ></div>
+          ) : user_permissions.permissions.length !== 0 && is_mobile ? (
+            <UserToolbarMobile sidebar_open={sidebar_open} />
+          ) : (
+            <div className={styles.sidebar_logging}>
+              <NavLink
+                to="login"
+                className={styles.sidebar_log}
+                onClick={() => handle_signup_login_click(location.pathname)}
+              >
+                войти
+              </NavLink>
+              <NavLink
+                to="signup"
+                className={styles.sidebar_log}
+                onClick={() => handle_signup_login_click(location.pathname)}
+              >
+                создать аккаунт
+              </NavLink>
+            </div>
+          )}
         </div>
         <div className={styles.sidebar_footer}>
           <div className={styles.copyright}>
@@ -699,6 +709,13 @@ const Menu: FC = () => {
           </div>
         </div>
       </div>
+      <div
+        className={styles.sidebar_overlay}
+        style={{
+          opacity: `${sidebar_open ? "1" : "0"}`,
+          visibility: `${sidebar_open ? "visible" : "hidden"}`,
+        }}
+      ></div>
     </nav>
   );
 };
