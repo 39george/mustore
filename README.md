@@ -9,6 +9,10 @@ Current To-Do:
 
 Testing a backend application for user signup and login involves several layers of testing from unit tests to integration and end-to-end tests. Below is a comprehensive list of tests that you should consider writing to ensure the robustness and reliability of your Rust Axum application's authentication flow:
 
+### To-Do from frontender:
+
+   - With user's permissions I need *username*, *likes amount and likes type (meaning on which product is the like)*, *cart amount and type*, *avatar* 
+
 ### Unit Tests:
 
 **1. Validation Logic:**
