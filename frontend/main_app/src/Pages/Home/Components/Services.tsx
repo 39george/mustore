@@ -1,11 +1,11 @@
 import styles from "./Services.module.scss";
 import { FC } from "react";
 import { NavLink } from "react-router-dom";
-import songwriting from "../../../assets/svg/songwriting.svg";
-import mixing from "../../../assets/svg/mixing.svg";
-import beatmaking from "../../../assets/svg/beatmaking.svg";
-import ghostwriting from "../../../assets/svg/ghostwriting.svg";
-import cover_design from "../../../assets/svg/cover_design.svg";
+import songwriting from "../../../assets/icons/songwriting.svg";
+import mixing from "../../../assets/icons/mixing.svg";
+import beatmaking from "../../../assets/icons/beatmaking.svg";
+import ghostwriting from "../../../assets/icons/ghostwriting.svg";
+import cover_design from "../../../assets/icons/cover_design.svg";
 import usePageNavigation from "../../../hooks/usePageNavigation";
 
 const Services: FC = () => {
