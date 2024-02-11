@@ -25,6 +25,11 @@ const useLogInUserApi = () => {
             case 401:
               set_login_status(error.response.status);
               break;
+            case 404:
+              set_login_error(
+                "Адрес для вашего запроса не найден. Проверьте корректность запроса и повторите попытку"
+              );
+              break;
             case 500:
               if (attempts < MAX_RETRIES) {
                 await wait(RETRY_DELAY_MS);

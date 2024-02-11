@@ -44,6 +44,8 @@ const useCheckPermissionsApi = () => {
                 error.response.status,
                 error.response.data
               );
+              dispatch(set_loading_state(false));
+              dispatch(set_user_permissions([]));
               break;
           }
         } else if (error.request) {
