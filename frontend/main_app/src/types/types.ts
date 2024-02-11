@@ -54,3 +54,9 @@ export interface CheckedItems {
 export interface UsernameExistence {
   exists: boolean;
 }
+
+export interface IServiceItem {
+  icon: string;
+  title: string;
+  description: string;
+}

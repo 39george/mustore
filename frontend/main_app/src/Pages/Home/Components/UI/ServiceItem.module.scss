@@ -1,0 +1,76 @@
+@import "../../../../colors.scss";
+
+.service {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+
+  padding: 1.75rem 1.5rem 1rem;
+
+  background-color: $main_bright;
+  border-radius: 0.75rem;
+  box-shadow: 0 3px 15.5px rgba($color: #000000, $alpha: 0.12);
+
+  transform: translateY(0);
+  transition: 0.15s ease-out;
+
+  cursor: default;
+
+  &:hover {
+    box-shadow: 0 3px 11px rgba($color: #000000, $alpha: 0.2);
+    transform: translateY(-4px);
+  }
+}
+
+.icon_wrapper {
+  width: 3.75rem;
+}
+
+.service_text {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+
+  width: 100%;
+  height: 100%;
+  max-width: 18rem;
+}
+
+.h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.description {
+  font-size: 0.875rem;
+  font-weight: 300;
+  line-height: 1.2rem;
+  letter-spacing: 0;
+  opacity: 0.7;
+}
+
+.link {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: $accent_red;
+  transition: 0.2s ease-out;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+@media (max-width: 470px) {
+  .service {
+    flex-direction: column;
+  }
+
+  .icon_wrapper {
+    width: fit-content;
+  }
+
+  .service_text {
+    text-align: center;
+  }
+}
