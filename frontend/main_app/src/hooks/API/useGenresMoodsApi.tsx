@@ -16,7 +16,13 @@ const useGenresMoodsApi = (endpoint: string) => {
           `${API_URL}/open/${endpoint}`
         );
         if (Array.isArray(response.data)) {
-          set_data(response.data);
+          const upper_cased = response.data.map((string) => {
+            if (string.includes("&")) {
+              return string.toUpperCase();
+            }
+            return string.charAt(0).toUpperCase() + string.slice(1);
+          });
+          set_data(upper_cased);
         } else {
           console.error("Unexpected response type:", response.data);
         }
