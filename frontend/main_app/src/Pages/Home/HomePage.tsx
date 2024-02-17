@@ -10,7 +10,7 @@ import {
   ActiveSection,
   set_active_section,
 } from "../../state/active_section_slice";
-import Footer from "../Footer";
+import Footer from "../../Components/Footer";
 
 interface HomePageRefs {
   hero_ref: React.RefObject<HTMLDivElement>;

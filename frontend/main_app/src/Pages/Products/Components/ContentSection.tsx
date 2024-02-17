@@ -8,7 +8,7 @@ import Carousel from "./UI/Carousel";
 import { carousel_items } from "./UI/content_dummies";
 import MainContentProducts from "./MainContentProducts";
 import { NavLink } from "react-router-dom";
-import Footer from "../../Footer";
+import Footer from "../../../Components/Footer";
 
 interface ContentSectionProps {
   section_type: "beats" | "covers" | "songs" | "texts";
