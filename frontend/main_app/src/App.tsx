@@ -9,6 +9,8 @@ import SignUp from "./Components/SignUp";
 import LogIn from "./Components/LogIn";
 import { useEffect } from "react";
 import useCheckPermissionsApi from "./hooks/API/useCheckPermissionsApi";
+import PersonalAccount from "./PersonalAccount/PersonalAccount";
+import Dashboard from "./PersonalAccount/Pages/Dashboard";
 
 function App() {
   const { check_user_permissions } = useCheckPermissionsApi();
@@ -28,6 +30,24 @@ function App() {
           path="login"
           element={<LogIn />}
         />
+        <Route
+          path="personal-account"
+          element={<PersonalAccount />}
+        >
+          <Route
+            path="dashboard"
+            element={<Dashboard />}
+          />
+          <Route
+            index
+            element={
+              <Navigate
+                to="dashboard"
+                replace
+              />
+            }
+          />
+        </Route>
         <Route
           path="/"
           element={<MainLayout />}
