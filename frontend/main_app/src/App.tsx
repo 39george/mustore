@@ -2,7 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import "./App.scss";
 import MainLayout from "./layouts/MainLayout";
 import HomePage from "./Pages/Home/HomePage";
-import Footer from "./Pages/Footer";
+import Footer from "./Components/Footer";
 import ProductsPage from "./Pages/Products/ProductsPage";
 import ContentSection from "./Pages/Products/Components/ContentSection";
 import SignUp from "./Components/SignUp";
