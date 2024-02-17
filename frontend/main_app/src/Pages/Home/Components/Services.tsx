@@ -54,9 +54,10 @@ const Services: FC = () => {
     <section className={styles.services_section}>
       <h2 className={styles.h2}>Или закажите необходимую услугу</h2>
       <div className={styles.services_container}>
-        {services.map((service) => {
+        {services.map((service, idx) => {
           return (
             <ServiceItem
+              key={idx}
               icon={service.icon}
               title={service.title}
               description={service.description}
