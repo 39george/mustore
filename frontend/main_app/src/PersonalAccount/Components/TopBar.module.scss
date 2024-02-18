@@ -70,6 +70,17 @@
   margin-left: 1.125rem;
 }
 
+.username {
+  margin-right: 1em;
+  font-size: 0.75rem;
+}
+
+.avatar_container {
+  padding: 0.125rem;
+  border-radius: 50%;
+  border: 2px solid $account_accent;
+}
+
 .image_wrapper {
   width: 2rem;
   height: 2rem;
