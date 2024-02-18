@@ -7,6 +7,7 @@ import conversations from "../../assets/icons/conversations_outline.svg";
 interface TopBarProps {
   avatar: string;
 }
+
 const TopBar: FC<TopBarProps> = ({ avatar }) => {
   const [header_name, set_header_name] = useState("");
   const location = useLocation();
