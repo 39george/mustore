@@ -11,6 +11,8 @@ import { useEffect } from "react";
 import useCheckPermissionsApi from "./hooks/API/useCheckPermissionsApi";
 import PersonalAccount from "./PersonalAccount/PersonalAccount";
 import Dashboard from "./PersonalAccount/Pages/Dashboard";
+import { useSelector } from "react-redux";
+import { RootState } from "./state/store";
 
 function App() {
   const { check_user_permissions } = useCheckPermissionsApi();
@@ -18,6 +20,11 @@ function App() {
   useEffect(() => {
     check_user_permissions();
   }, []);
+
+  // const user_permissions = useSelector(
+  //   (state: RootState) => state.user_permissions.permissions
+  // );
+  // console.log(user_permissions);
 
   return (
     <BrowserRouter>
