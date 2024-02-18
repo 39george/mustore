@@ -149,7 +149,7 @@ const Menu: FC = () => {
       <ul className={styles.nav_links}>
         <li className={styles.logo}>
           <NavLink
-            to="."
+            to="/"
             onClick={() => handle_page_navigation("")}
           >
             <img
