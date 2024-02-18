@@ -713,7 +713,7 @@ const Menu: FC = () => {
         className={styles.sidebar_overlay}
         style={{
           opacity: `${sidebar_open ? "1" : "0"}`,
-          visibility: `${sidebar_open ? "visible" : "hidden"}`,
+          visibility: `${sidebar_open && is_mobile ? "visible" : "hidden"}`,
         }}
       ></div>
     </nav>
