@@ -2,7 +2,10 @@
 
 .sidebar {
   position: relative;
+
   height: 100vh;
+  min-height: 930px;
+
   color: $main_bright;
   background-color: $account_dark;
 }
@@ -122,13 +125,11 @@ a {
     height: 100%;
     background-color: $account_sidebar_tab_fill;
     opacity: 0;
-    // display: none;
     transition: opacity 0.1s ease-out;
   }
 
   &:hover::before {
     opacity: 1;
-    // display: block;
   }
 }
 
