@@ -46,6 +46,10 @@ function App() {
             element={<Dashboard />}
           />
           <Route
+            path="*"
+            element={<div>page in development</div>}
+          />
+          <Route
             index
             element={
               <Navigate
