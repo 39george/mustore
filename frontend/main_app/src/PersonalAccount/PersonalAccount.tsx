@@ -6,13 +6,13 @@ import TopBar from "./Components/TopBar";
 
 const PersonalAccount: FC = () => {
   return (
-    <>
+    <div className={styles.personal_account}>
       <Sidebar />
-      <>
+      <div className={styles.main_view}>
         <TopBar />
         <Outlet />
-      </>
-    </>
+      </div>
+    </div>
   );
 };
 
