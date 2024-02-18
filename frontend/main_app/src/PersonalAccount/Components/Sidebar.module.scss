@@ -1,4 +1,5 @@
 @import "../../colors.scss";
+@import "./UI/GeneralStyles.scss";
 
 .sidebar {
   position: relative;
@@ -48,12 +49,9 @@
 }
 
 .image_wrapper {
-  width: 4.25rem;
-  height: 4.25rem;
+  @include image_wrapper_big;
 
   border: 2px solid $main_bright;
-  border-radius: 50%;
-  overflow: hidden;
 
   img {
     width: 100%;
@@ -76,21 +74,6 @@
 
 .user_role {
   color: rgba($color: $main_bright, $alpha: 0.8);
-}
-
-.rating_container {
-  display: flex;
-  align-items: center;
-}
-
-.star_icon {
-  color: $account_star;
-}
-
-.rating {
-  margin-left: 0.625em;
-  font-family: "Geologica", sans-serif;
-  font-weight: 200;
 }
 
 .tabs_container {

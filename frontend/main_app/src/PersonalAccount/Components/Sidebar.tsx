@@ -91,8 +91,8 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
           />
         </div>
         <div className={styles.meta_text}>
-          <p className={styles.user_role}>Автор</p>
           <p className={styles.username}>Alena NAI</p>
+          <p className={styles.user_role}>Автор</p>
           <div className={styles.rating_container}>
             <FaStar className={styles.star_icon} />
             <p className={styles.rating}>
