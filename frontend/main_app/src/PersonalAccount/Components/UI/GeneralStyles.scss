@@ -1,0 +1,38 @@
+@import "../../../colors.scss";
+
+@mixin widget($padding_size: 1.25rem) {
+  padding: $padding_size;
+  width: 80%;
+  border-radius: 0.75rem;
+  background-color: $widget_bg;
+  box-shadow: 0px 0px 1.5rem rgba(#000, 0.06);
+}
+
+@mixin image_wrapper_big($size: 4.25rem) {
+  width: $size;
+  height: $size;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+@mixin image_wrapper_small($size: 2rem) {
+  width: $size;
+  height: $size;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.rating_container {
+  display: flex;
+  align-items: center;
+}
+
+.star_icon {
+  color: $account_star;
+}
+
+.rating {
+  margin-left: 0.625em;
+  font-family: "Geologica", sans-serif;
+  font-weight: 200;
+}
