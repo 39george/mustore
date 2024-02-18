@@ -10,10 +10,6 @@
   background-color: $account_dark;
 }
 
-a {
-  color: $main_bright;
-}
-
 .collapse_icon_container {
   position: relative;
   width: fit-content;
@@ -101,7 +97,7 @@ a {
   margin-top: 3.125rem;
 }
 
-a {
+.tab_link {
   position: relative;
   display: flex;
   align-items: center;
@@ -109,6 +105,8 @@ a {
   padding: 0.75rem 2rem;
 
   font-weight: 600;
+
+  color: $main_bright;
 
   cursor: pointer;
 
