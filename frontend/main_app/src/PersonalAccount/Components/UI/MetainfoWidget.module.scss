@@ -1,14 +1,119 @@
 @import "../../../colors.scss";
+@import "./GeneralStyles.scss";
 
+.metainfo_widget {
+  @include widget;
+
+  max-width: 22.5rem;
+  margin: 2rem 0 0 2rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+}
 .image_wrapper {
-  width: 4.25rem;
-  height: 4.25rem;
-
-  border-radius: 50%;
-  overflow: hidden;
+  @include image_wrapper_big;
+  flex-shrink: 0;
 
   img {
     width: 100%;
     height: 100%;
   }
+}
+
+.text_info {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-left: 1.5rem;
+  width: 100%;
+}
+
+.username {
+  margin-bottom: 0.625rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.user_role {
+  color: rgba($color: $main_dark, $alpha: 0.8);
+}
+
+.rating_container {
+  margin-left: 1rem;
+}
+
+.divider {
+  border: none;
+  margin: 1.25rem 0;
+  width: 100%;
+  height: 1px;
+  background-color: $account_border;
+}
+
+.statistics {
+  & .statistics_unit:not(:last-child) {
+    margin-bottom: 1.25rem;
+  }
+}
+
+.statistics_unit,
+.earnings {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.statistics_text,
+.earnings_text {
+  max-width: 10.875rem;
+  font-weight: 500;
+  color: rgba($color: $main_dark, $alpha: 0.8);
+}
+
+.statistics_progress {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 5.5rem;
+}
+
+.statistics_progress_circle {
+  flex-shrink: 0;
+
+  width: 1.625rem;
+  height: 1.625rem;
+
+  border-radius: 50%;
+}
+
+.circle_green {
+  border: 1px solid $account_green;
+}
+
+@mixin circle_incomplete($border_props: 1px solid) {
+  border-top: $border_props $account_orange;
+  border-right: $border_props $account_orange;
+  border-bottom: $border_props $account_orange;
+  border-left: $border_props transparent;
+}
+.circle_orange {
+  @include circle_incomplete();
+  transform: rotate(45deg);
+}
+
+.statistics_result,
+.earnings_amount {
+  color: rgba($color: $main_dark, $alpha: 0.8);
+  font-family: "Geologica", sans-serif;
+
+  span {
+    font-family: "Raleway", sans-serif;
+    font-weight: 600;
+  }
+}
+
+.not_percentage {
+  color: $account_green;
 }

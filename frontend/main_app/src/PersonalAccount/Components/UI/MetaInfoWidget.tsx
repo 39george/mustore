@@ -75,24 +75,36 @@ const MetainfoWidget: FC = () => {
       <div className={styles.statistics}>
         <div className={styles.statistics_unit}>
           <p className={styles.statistics_text}>Ответы на новые сообщения</p>
-          <span className={styles.statistics_progress_circle}></span>
-          <p className={styles.statistics_result}>100%</p>
+          <div className={styles.statistics_progress}>
+            <span
+              className={`${styles.statistics_progress_circle} ${styles.circle_green}`}
+            ></span>
+            <p className={styles.statistics_result}>100%</p>
+          </div>
         </div>
         <div className={styles.statistics_unit}>
           <p className={styles.statistics_text}>Время ответа на сообщения</p>
-          <p className={styles.statistics_result}>
+          <p className={`${styles.statistics_result} ${styles.not_percentage}`}>
             1 <span>час</span>
           </p>
         </div>
         <div className={styles.statistics_unit}>
           <p className={styles.statistics_text}>Заказы, отданные в срок</p>
-          <span className={styles.statistics_progress_circle}></span>
-          <p className={styles.statistics_result}>75%</p>
+          <div className={styles.statistics_progress}>
+            <span
+              className={`${styles.statistics_progress_circle} ${styles.circle_orange}`}
+            ></span>
+            <p className={styles.statistics_result}>75%</p>
+          </div>
         </div>
         <div className={styles.statistics_unit}>
           <p className={styles.statistics_text}>Выполненные заказы</p>
-          <span className={styles.statistics_progress_circle}></span>
-          <p className={styles.statistics_result}>100%</p>
+          <div className={styles.statistics_progress}>
+            <span
+              className={`${styles.statistics_progress_circle} ${styles.circle_green}`}
+            ></span>
+            <p className={styles.statistics_result}>100%</p>
+          </div>
         </div>
       </div>
       <hr className={styles.divider} />
