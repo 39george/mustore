@@ -36,6 +36,8 @@ const useCheckPermissionsApi = () => {
                 set_error_data(
                   "Что-то не так с нашим сервером, мы уже работаем над этим. Пожалуйста, попробуйте обновить страницу"
                 );
+                dispatch(set_loading_state(false));
+                dispatch(set_user_permissions([]));
               }
               break;
             default:
