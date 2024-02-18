@@ -3,6 +3,7 @@ import { FC, useEffect, useRef } from "react";
 import avatar from "../../assets/HomePage/author_1.png";
 import useLogOutUserApi from "../../hooks/API/useLogOutUserApi";
 import useCheckPermissionsApi from "../../hooks/API/useCheckPermissionsApi";
+import { NavLink } from "react-router-dom";
 
 interface ToolbarPopUpMenuProps {
   visible: boolean;
@@ -69,7 +70,14 @@ const ToolbarPopUpMenu: FC<ToolbarPopUpMenuProps> = ({
       </div>
       <hr className={styles.divider} />
       <ul className={styles.options}>
-        <li className={styles.option}>Личный кабинет</li>
+        <li className={styles.option_account}>
+          <NavLink
+            to="personal-account/dashboard"
+            className={styles.option}
+          >
+            Личный кабинет
+          </NavLink>
+        </li>
         <li
           className={styles.option}
           onClick={try_to_logout}
