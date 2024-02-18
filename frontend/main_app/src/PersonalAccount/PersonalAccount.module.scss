@@ -2,4 +2,9 @@
 
 .personal_account {
   display: flex;
+  background-color: $account_bg;
+}
+
+.main_view {
+  width: 100%;
 }
