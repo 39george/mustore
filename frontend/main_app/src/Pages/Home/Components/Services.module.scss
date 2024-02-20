@@ -26,21 +26,10 @@
   flex-wrap: wrap;
 }
 
-.mock_service {
-  width: 26.25rem;
-  visibility: hidden;
-}
-
 // Media queries
 @media (max-width: 911px) {
   .services_container {
     justify-content: center;
-  }
-}
-
-@media (max-width: 863px) {
-  .mock_service {
-    display: none;
   }
 }
 
