@@ -72,9 +72,10 @@ export interface IConversationUnit {
   unread_messages: number;
 }
 
+type Status = "в работе" | "доставлен";
 export interface IOrderUnit {
   consumer: string;
   price: string;
   deliver_to: string;
-  status: string;
+  status: Status;
 }
