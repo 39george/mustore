@@ -1,4 +1,4 @@
-import styles from "./MetainfoWidget.module.scss";
+import styles from "./MetaInfoWidget.module.scss";
 import { FC, useEffect, useState } from "react";
 import avatar from "../../../assets/HomePage/author_1.png";
 import { FaStar } from "react-icons/fa6";
