@@ -1,6 +1,6 @@
 @import "../../colors.scss";
 
-@mixin widget($padding_size: 1.25rem) {
+@mixin widget($padding_size) {
   padding: $padding_size;
   width: 100%;
   border-radius: 0.75rem;
@@ -13,6 +13,14 @@
   height: $size;
   border-radius: 50%;
   overflow: hidden;
+}
+
+@mixin account_border($width, $height, $margin) {
+  border: none;
+  margin: $margin;
+  width: $width;
+  height: $height;
+  background-color: $account_border;
 }
 
 .rating_container {
