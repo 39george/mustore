@@ -10,13 +10,11 @@
 }
 
 .billboard_unit {
-  @include widget;
+  @include widget(1em);
 
   display: flex;
   justify-content: space-between;
   align-items: center;
-
-  padding: 1em;
 
   transform: translateY(0);
   transition: 0.15s ease-out;

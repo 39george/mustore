@@ -4,7 +4,7 @@
 .dashboard {
   height: calc(100vh - 4.75rem - 2px);
   overflow-y: scroll;
-  padding: 0 $margin_dashboard_layout;
+  padding: 0 $margin_dashboard_layout 2rem;
 
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -46,9 +46,8 @@
 }
 
 .workbench_widget {
-  @include widget;
+  @include widget(1.75rem 1rem);
 
-  padding: 1.75rem 1rem;
   width: fit-content;
 
   transform: translateY(0);

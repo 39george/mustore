@@ -2,7 +2,7 @@
 @import "../GeneralStyles.scss";
 
 .metainfo_widget {
-  @include widget;
+  @include widget(1.25rem);
 
   max-width: 26rem;
   height: fit-content;
@@ -47,11 +47,7 @@
 }
 
 .divider {
-  border: none;
-  margin: 1.25rem 0;
-  width: 100%;
-  height: 1px;
-  background-color: $account_border;
+  @include account_border(100%, 1px, 1.25rem 0);
 }
 
 .statistics {
