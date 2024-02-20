@@ -71,3 +71,10 @@ export interface IConversationUnit {
   time_stamp: string;
   unread_messages: number;
 }
+
+export interface IOrderUnit {
+  consumer: string;
+  price: string;
+  deliver_to: string;
+  status: string;
+}
