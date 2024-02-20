@@ -97,8 +97,11 @@ const ConversationsWidget: FC = () => {
         <NavLink
           to="../conversations"
           className={styles.show_all}
-        />
+        >
+          показать все
+        </NavLink>
       </div>
+      <hr className={styles.border_h} />
       <div className={styles.main_content}>
         {mock_conversations.map((conversation_unit, idx) => {
           return (
@@ -113,7 +116,9 @@ const ConversationsWidget: FC = () => {
             />
           );
         })}
+        <hr className={styles.border_v} />
       </div>
+      <hr className={styles.border_h} />
     </div>
   );
 };

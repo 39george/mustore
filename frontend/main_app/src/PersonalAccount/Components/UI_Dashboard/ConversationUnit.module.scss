@@ -1,6 +1,21 @@
 @import "../../../colors.scss";
 @import "../GeneralStyles.scss";
 
+.conversation_unit {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 1.25rem;
+
+  border-bottom: 1px solid $account_border;
+}
+
+.meta_info {
+  display: flex;
+  align-items: center;
+}
+
 .image_wrapper {
   @include image_wrapper(3.125rem);
 

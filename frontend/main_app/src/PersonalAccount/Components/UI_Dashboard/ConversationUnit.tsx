@@ -13,23 +13,25 @@ const ConversationUnit: FC<IConversationUnit> = ({
 }) => {
   return (
     <div className={styles.conversation_unit}>
-      <div className={styles.image_wrapper}>
-        <img
-          src={avatar}
-          alt="avatar"
-        />
-        <span
-          className={`${styles.online_status} ${
-            online_status ? styles.online : styles.offline
-          }`}
-        ></span>
-      </div>
-      <div className={styles.interlocutor_info}>
-        <p className={styles.interlocutor_name}>{interlocutor_name}</p>
-        <p className={styles.message}>
-          {message_author === "interlocutor" ? "" : "Я: "}
-          {message}
-        </p>
+      <div className={styles.meta_info}>
+        <div className={styles.image_wrapper}>
+          <img
+            src={avatar}
+            alt="avatar"
+          />
+          <span
+            className={`${styles.online_status} ${
+              online_status ? styles.online : styles.offline
+            }`}
+          ></span>
+        </div>
+        <div className={styles.interlocutor_info}>
+          <p className={styles.interlocutor_name}>{interlocutor_name}</p>
+          <p className={styles.message}>
+            {message_author === "interlocutor" ? "" : "Я: "}
+            {message}
+          </p>
+        </div>
       </div>
       <div className={styles.additional_info}>
         <p className={styles.time_stamp}>{time_stamp}</p>
