@@ -1,0 +1,33 @@
+@import "../../colors.scss";
+
+@mixin widget($padding_size: 1.25rem) {
+  padding: $padding_size;
+  width: 100%;
+  border-radius: 0.75rem;
+  background-color: $widget_bg;
+  box-shadow: 0 0 1.5rem rgba(#000, 0.06);
+}
+
+@mixin image_wrapper($size) {
+  width: $size;
+  height: $size;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.rating_container {
+  display: flex;
+  align-items: center;
+}
+
+.star_icon {
+  color: $account_star;
+}
+
+.rating {
+  margin-left: 0.625em;
+  font-family: "Geologica", sans-serif;
+  font-weight: 200;
+}
+
+$margin_dashboard_layout: clamp(0px, (100vw - 95rem) / 2, 9999px);
