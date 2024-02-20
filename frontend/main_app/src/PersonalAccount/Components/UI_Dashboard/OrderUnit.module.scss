@@ -1,0 +1,89 @@
+@import "../../../colors.scss";
+@import "../GeneralStyles.scss";
+
+.order_unit {
+  @include widget(1.25rem 1rem);
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 1rem;
+}
+
+.image_wrapper {
+  width: 5rem;
+  height: 3rem;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.order_info_container {
+  display: flex;
+  margin: 0 0.5rem;
+  letter-spacing: 0;
+}
+
+.order_main_info {
+  display: flex;
+
+  .order_info {
+    margin-right: 2rem;
+  }
+}
+
+.info_type {
+  margin-bottom: 1.5em;
+  font-size: 0.75rem;
+  color: rgba($color: $main_dark, $alpha: 0.5);
+}
+
+.info_content {
+  font-family: "Geologica", sans-serif;
+  font-weight: 400;
+  font-size: 0.875rem;
+}
+
+.info_status {
+  padding: 0.3em 0.5em;
+
+  font-family: "Geologica", sans-serif;
+  font-weight: 400;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+
+  border-radius: 0.5em;
+  color: $main_bright;
+}
+
+.in_progress {
+  background-color: $account_accent;
+}
+
+.delivered {
+  background-color: $account_status_delivered;
+}
+
+.to_order_link {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: $account_green;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+@media (max-width: 1352px) {
+  .image_wrapper {
+    display: none;
+  }
+
+  .order_info_container {
+    margin-left: 0;
+  }
+}
