@@ -2,6 +2,8 @@
 @import "../GeneralStyles.scss";
 
 .orders_widget {
+  flex-shrink: 0;
+
   width: 100%;
   max-width: 40rem;
   height: fit-content;
@@ -15,6 +17,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  margin-bottom: 1.875rem;
 }
 
 .name_and_price {
@@ -60,4 +64,10 @@
   width: 1rem;
   height: 1rem;
   margin-left: 0.25rem;
+}
+
+@media (max-width: 1352px) {
+  .orders_widget {
+    flex-shrink: 1;
+  }
 }

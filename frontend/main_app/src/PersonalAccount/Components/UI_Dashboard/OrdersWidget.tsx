@@ -1,6 +1,29 @@
 import styles from "./OrdersWidget.module.scss";
 import { FC } from "react";
 import { IoChevronDownOutline } from "react-icons/io5";
+import { IOrderUnit } from "../../../types/types";
+import OrderUnit from "./OrderUnit";
+
+const mock_orders: IOrderUnit[] = [
+  {
+    consumer: "Brian",
+    price: "10 000₽",
+    deliver_to: "1д 5ч",
+    status: "в работе",
+  },
+  {
+    consumer: "Tolya",
+    price: "3 000₽",
+    deliver_to: "3д 12ч",
+    status: "в работе",
+  },
+  {
+    consumer: "Peter",
+    price: "17 000₽",
+    deliver_to: "-- --",
+    status: "доставлен",
+  },
+];
 
 const OrdersWidget: FC = () => {
   return (
@@ -17,6 +40,17 @@ const OrdersWidget: FC = () => {
           <IoChevronDownOutline className={styles.chevron} />
         </div>
       </div>
+      {mock_orders.map((order, idx) => {
+        return (
+          <OrderUnit
+            key={idx}
+            consumer={order.consumer}
+            price={order.price}
+            deliver_to={order.deliver_to}
+            status={order.status}
+          />
+        );
+      })}
     </div>
   );
 };

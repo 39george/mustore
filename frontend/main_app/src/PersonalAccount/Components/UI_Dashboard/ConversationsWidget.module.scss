@@ -67,3 +67,9 @@
   top: 63px;
   right: 1rem;
 }
+
+@media (max-width: 1352px) {
+  .conversations_widget {
+    width: 21.875rem;
+  }
+}
