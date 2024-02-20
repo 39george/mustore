@@ -4,6 +4,7 @@ import MetainfoWidget from "../Components/UI_Dashboard/MetaInfoWidget";
 import WelcomeWidget from "../Components/UI_Dashboard/WelcomeWidget";
 import { FC } from "react";
 import ConversationsWidget from "../Components/UI_Dashboard/ConversationsWidget";
+import OrdersWidget from "../Components/UI_Dashboard/OrdersWidget";
 
 const Dashboard: FC = () => {
   return (
@@ -43,6 +44,7 @@ const Dashboard: FC = () => {
       </h2>
       <div className={styles.conversations_and_orders}>
         <ConversationsWidget />
+        <OrdersWidget />
       </div>
     </div>
   );

@@ -76,5 +76,7 @@
 }
 
 .conversations_and_orders {
+  display: flex;
+  justify-content: space-between;
   margin: 0 2rem;
 }
