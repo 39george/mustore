@@ -34,6 +34,8 @@
 .image_wrapper {
   @include image_wrapper(3.125rem);
 
+  flex-shrink: 0;
+
   img {
     width: 100%;
     height: 100%;
