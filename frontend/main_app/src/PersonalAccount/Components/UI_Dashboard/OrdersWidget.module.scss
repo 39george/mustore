@@ -1,1 +1,63 @@
 @import "../../../colors.scss";
+@import "../GeneralStyles.scss";
+
+.orders_widget {
+  width: 100%;
+  max-width: 40rem;
+  height: fit-content;
+
+  margin: 1.5rem 0 0 2.5rem;
+}
+
+.order_type {
+  @include widget(1.25rem 1rem);
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.name_and_price {
+  display: flex;
+  align-items: center;
+  font-size: 1.125rem;
+}
+
+.type_name {
+  font-weight: 600;
+}
+
+.sum_price {
+  font-family: "Geologica", sans-serif;
+  font-weight: 400;
+  color: rgba($color: $main_dark, $alpha: 0.5);
+}
+
+.type_selector {
+  display: flex;
+  align-items: center;
+
+  margin-left: 0.5rem;
+  padding: 0.5rem;
+
+  border: 1px solid $main_dark;
+  border-radius: 0.25rem;
+
+  cursor: pointer;
+}
+
+.current_select {
+  font-size: 0.875rem;
+  font-weight: 500;
+
+  span {
+    font-family: "Geologica", sans-serif;
+    font-weight: 300;
+  }
+}
+
+.chevron {
+  width: 1rem;
+  height: 1rem;
+  margin-left: 0.25rem;
+}
