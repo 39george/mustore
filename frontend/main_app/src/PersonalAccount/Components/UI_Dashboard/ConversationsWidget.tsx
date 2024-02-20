@@ -18,7 +18,7 @@ const mock_conversations: IConversationUnit[] = [
     message: "Все хорошо, спасибо",
     message_author: "user",
     online_status: false,
-    time_stamp: "11:02",
+    time_stamp: "пн",
     unread_messages: 1,
   },
   {
@@ -42,7 +42,7 @@ const mock_conversations: IConversationUnit[] = [
     message: "Есть ли какие-то новости?",
     message_author: "interlocutor",
     online_status: true,
-    time_stamp: "14:23",
+    time_stamp: "вс",
     unread_messages: 0,
   },
   {
@@ -92,7 +92,7 @@ const ConversationsWidget: FC = () => {
     <div className={styles.conversations_widget}>
       <div className={styles.top_bar}>
         <p className={styles.header}>
-          Беседы <span>(4)</span>
+          Беседы <span>(5)</span>
         </p>
         <NavLink
           to="../conversations"
