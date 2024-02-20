@@ -1,5 +1,5 @@
 @import "../../colors.scss";
-@import "./UI/GeneralStyles.scss";
+@import "./GeneralStyles.scss";
 
 .sidebar {
   position: relative;
@@ -49,7 +49,7 @@
 }
 
 .image_wrapper {
-  @include image_wrapper_big;
+  @include image_wrapper(4.25rem);
 
   border: 2px solid $main_bright;
 

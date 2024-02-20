@@ -11,6 +11,7 @@ const PersonalAccount: FC = () => {
       <Sidebar avatar={avatar} />
       <div className={styles.main_view}>
         <TopBar avatar={avatar} />
+        <hr className={styles.top_border} />
         <Outlet />
       </div>
     </div>

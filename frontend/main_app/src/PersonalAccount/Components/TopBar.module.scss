@@ -1,5 +1,5 @@
 @import "../../colors.scss";
-@import "./UI/GeneralStyles.scss";
+@import "./GeneralStyles.scss";
 
 .top_bar,
 .interactions_container,
@@ -11,7 +11,6 @@
 .top_bar {
   justify-content: space-between;
   padding: 1.125rem 2rem;
-  border-bottom: 0.125rem solid $account_border;
 }
 
 .h2 {
@@ -83,7 +82,7 @@
 }
 
 .image_wrapper {
-  @include image_wrapper_small;
+  @include image_wrapper(2rem);
 }
 
 .avatar {

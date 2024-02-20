@@ -8,3 +8,11 @@
 .main_view {
   width: 100%;
 }
+
+.top_border {
+  border: none;
+  width: 100%;
+  height: 0.125rem;
+  background-color: $account_border;
+  margin: 0;
+}

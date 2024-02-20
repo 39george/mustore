@@ -1,1 +1,76 @@
 @import "../../colors.scss";
+@import "../Components/GeneralStyles.scss";
+
+.dashboard {
+  height: calc(100vh - 4.75rem - 2px);
+  overflow-y: scroll;
+  padding: 0 $margin_dashboard_layout;
+
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.meta_and_welcome {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 2rem;
+}
+
+.welcome {
+  width: 100%;
+  max-width: 40rem;
+  margin-left: 2.5rem;
+}
+
+.h2 {
+  margin-top: 2.625rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.h2_workbench {
+  margin-top: 4rem;
+}
+
+.workbench {
+  display: flex;
+  align-items: center;
+  margin-top: 1.5rem;
+
+  & .workbench_widget:first-child {
+    margin-right: 2rem;
+  }
+}
+
+.workbench_widget {
+  @include widget;
+
+  padding: 1.75rem 1rem;
+  width: fit-content;
+
+  transform: translateY(0);
+  transition: 0.15s ease-out;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 0 1.5rem rgba($color: #000000, $alpha: 0.1);
+  }
+}
+
+.workbench_widget_text {
+  font-weight: 500;
+  text-align: center;
+  color: rgba($color: $main_dark, $alpha: 0.8);
+}
+
+.h2_conversations_and_orders {
+  margin: 4rem 0 0 2rem;
+}
+
+.conversations_and_orders {
+  margin: 0 2rem;
+}
