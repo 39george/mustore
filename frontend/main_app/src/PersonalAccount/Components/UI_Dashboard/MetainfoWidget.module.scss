@@ -1,19 +1,21 @@
 @import "../../../colors.scss";
-@import "./GeneralStyles.scss";
+@import "../GeneralStyles.scss";
 
 .metainfo_widget {
   @include widget;
 
-  max-width: 22.5rem;
-  margin: 2rem 0 0 2rem;
+  max-width: 26rem;
+  height: fit-content;
+  margin-top: 2rem;
 }
 
 .header {
   display: flex;
   align-items: center;
 }
+
 .image_wrapper {
-  @include image_wrapper_big;
+  @include image_wrapper(4.25rem);
   flex-shrink: 0;
 
   img {
@@ -70,6 +72,7 @@
   max-width: 10.875rem;
   font-weight: 500;
   color: rgba($color: $main_dark, $alpha: 0.8);
+  cursor: default;
 }
 
 .statistics_progress {

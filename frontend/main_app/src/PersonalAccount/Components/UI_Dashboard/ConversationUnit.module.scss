@@ -1,0 +1,11 @@
+@import "../../../colors.scss";
+@import "../GeneralStyles.scss";
+
+.image_wrapper {
+  @include image_wrapper(3.125rem);
+
+  img {
+    width: 100%;
+    height: 100%;
+  }
+}
