@@ -60,3 +60,14 @@ export interface IServiceItem {
   title: string;
   description: string;
 }
+
+type MessageAuthor = "interlocutor" | "user";
+
+export interface IConversationUnit {
+  interlocutor_name: string;
+  message: string;
+  message_author: MessageAuthor;
+  online_status: boolean;
+  time_stamp: string;
+  unread_messages: number;
+}
