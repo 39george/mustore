@@ -11,7 +11,9 @@ const Dashboard: FC = () => {
       <div className={styles.meta_and_welcome}>
         <MetainfoWidget />
         <div className={styles.welcome}>
-          <h2 className={styles.h2}>Добро пожаловать, Alena NAI!</h2>
+          <h2 className={styles.h2}>
+            Добро пожаловать, <span>Alena NAI</span>!
+          </h2>
           <WelcomeWidget />
           <h2 className={`${styles.h2} ${styles.h2_workbench}`}>
             Ваше рабочее пространство
