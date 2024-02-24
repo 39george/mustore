@@ -1,6 +1,6 @@
 import styles from "./Sidebar.module.scss";
-import { FC, useEffect, useState } from "react";
-import { IoChevronBackOutline } from "react-icons/io5";
+import React, { FC, useEffect, useState } from "react";
+import chevron from "../../assets/icons/chevron.svg";
 import { FaStar } from "react-icons/fa6";
 import { NavLink, useLocation } from "react-router-dom";
 import dashboard_icon from "../../assets/icons/dashboard.svg";
@@ -36,6 +36,14 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
   const [active_section, set_active_section] = useState<ActiveSections>("none");
   const location = useLocation();
   const current_pathname = location.pathname.replace("/personal-account/", "");
+  // const [sidebar_collapsed, set_sidebar_collapsed] = useState(
+  //   window.innerWidth <= 950
+  // );
+  const [sidebar_collapsed, set_sidebar_collapsed] = useState(true);
+  const [title, set_title] = useState(
+    window.innerWidth <= 950 ? "H.S" : "HARMONY.SPHERE"
+  );
+  const title_parts = title.split(".");
 
   useEffect(() => {
     switch (current_pathname) {
@@ -74,14 +82,62 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
     }
   }, [current_pathname]);
 
+  useEffect(() => {
+    const handle_resize = () => {
+      // if (window.innerWidth <= 950) {
+      //   set_sidebar_collapsed(true);
+      //   set_title("H.S");
+      // } else {
+      //   set_sidebar_collapsed(false);
+      //   set_title("HARMONY.SPHERE");
+      // }
+    };
+
+    window.addEventListener("resize", handle_resize);
+
+    return () => {
+      window.removeEventListener("resize", handle_resize);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (sidebar_collapsed) {
+      set_title("H.S");
+    } else {
+      set_title("HARMONY.SPHERE");
+    }
+  }, [sidebar_collapsed]);
+
   return (
-    <div className={styles.sidebar}>
-      <div className={styles.collapse_icon_container}>
-        <IoChevronBackOutline className={styles.collapse_icon} />
-        <IoChevronBackOutline className={styles.collapse_icon} />
+    <div
+      className={`${styles.sidebar} ${
+        sidebar_collapsed && styles.sidebar_collapsed
+      }`}
+    >
+      <div
+        className={styles.collapse_icon_container}
+        onClick={() => set_sidebar_collapsed(!sidebar_collapsed)}
+      >
+        {/* <IoChevronBackOutline className={styles.collapse_icon} />
+        <IoChevronBackOutline className={styles.collapse_icon} /> */}
+        <img
+          src={chevron}
+          alt="chveron icon"
+          className={styles.collapse_icon}
+        />
+        <img
+          src={chevron}
+          alt="chveron icon"
+          className={styles.collapse_icon}
+        />
       </div>
       <h2 className={styles.h2}>
-        HARMONY<span>.</span>SPHERE
+        {title_parts.map((part, idx) => (
+          <React.Fragment key={idx}>
+            {part}
+            {idx < title_parts.length - 1 && <span>.</span>}
+          </React.Fragment>
+        ))}
       </h2>
       <div className={styles.meta_info_container}>
         <div className={styles.image_wrapper}>
@@ -238,11 +294,11 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
           <p>Помощь</p>
         </NavLink>
       </div>
-      <img
+      {/* <img
         src={logo_account}
         alt="logo"
         className={styles.logo_icon}
-      />
+      /> */}
     </div>
   );
 };
