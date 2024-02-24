@@ -165,9 +165,9 @@ async fn cleanup(
                         .parse::<UploadRequest>()
                         .context(format!("Failed to parse upload request key: {upload_request_key}"))?;
                     match obj_storage.delete_object_by_key(upload_request.object_key()).await {
-                                        Ok(()) => tracing::info!("Object with key {upload_request} is successfully deleted from obj storage"),
-                                        Err(e) => tracing::warn!("Failed to delete object with key {upload_request} from object storage: {e}"),
-                                    }
+                        Ok(()) => tracing::info!("Object with key {upload_request} is successfully deleted from obj storage"),
+                        Err(e) => tracing::warn!("Failed to delete object with key {upload_request} from object storage: {e}"),
+                    }
                 }
             }
         }
