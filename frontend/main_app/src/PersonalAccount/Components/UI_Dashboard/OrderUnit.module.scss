@@ -43,9 +43,14 @@
 }
 
 .info_content {
+  width: 4rem;
   font-family: "Geologica", sans-serif;
   font-weight: 400;
   font-size: 0.875rem;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .info_status {
@@ -85,5 +90,35 @@
 
   .order_info_container {
     margin-left: 0;
+  }
+
+  .order_main_info {
+    .order_info {
+      margin-right: clamp(
+        2rem,
+        calc(2rem + (64 - 32) * ((100vw - 1200px) / (1352 - 1200))),
+        4rem
+      );
+    }
+  }
+}
+
+@media (max-width: 1280px) {
+  .image_wrapper {
+    display: block;
+  }
+
+  .order_info_container {
+    margin: 0 0.5rem;
+  }
+
+  .order_main_info {
+    .order_info {
+      margin-right: clamp(
+        2rem,
+        calc(2rem + (104 - 32) * ((100vw - 950px) / (1280 - 950))),
+        6.5rem
+      );
+    }
   }
 }

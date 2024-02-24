@@ -71,3 +71,11 @@
     flex-shrink: 1;
   }
 }
+
+@media (max-width: 1280px) {
+  .orders_widget {
+    max-width: 100%;
+    margin-top: 3rem;
+    margin-left: 0;
+  }
+}

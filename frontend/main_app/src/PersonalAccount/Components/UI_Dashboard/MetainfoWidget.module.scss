@@ -119,3 +119,48 @@
 .not_percentage {
   color: $account_green;
 }
+
+@media (max-width: 1200px) {
+  .metainfo_widget {
+    padding: 2rem 1.5rem;
+    max-width: 100%;
+  }
+
+  .main_info {
+    display: flex;
+    justify-content: space-between;
+
+    .divider {
+      margin: 0 5%;
+      width: 1px;
+      height: 13.25rem;
+    }
+  }
+
+  .header,
+  .statistics {
+    width: 80%;
+  }
+
+  .image_wrapper {
+    width: 5rem;
+    height: 5rem;
+  }
+
+  // .text_info {
+  //   margin-left: 2rem;
+  // }
+
+  .username {
+    margin-bottom: 1.5rem;
+  }
+
+  .earnings {
+    justify-content: space-around;
+    margin-top: 2rem;
+  }
+
+  .earnings_text {
+    max-width: fit-content;
+  }
+}

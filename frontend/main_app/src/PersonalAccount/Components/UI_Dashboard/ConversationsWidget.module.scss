@@ -61,7 +61,7 @@
 }
 
 .border_v {
-  @include account_border(1px, 33.635rem, 0);
+  @include account_border(1px, 33.5rem, 0);
 
   position: absolute;
   top: 63px;
@@ -71,5 +71,20 @@
 @media (max-width: 1352px) {
   .conversations_widget {
     width: 21.875rem;
+  }
+}
+
+@media (max-width: 1280px) {
+  .conversations_widget {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .main_content {
+    height: 25rem;
+  }
+
+  .border_v {
+    height: 25rem;
   }
 }

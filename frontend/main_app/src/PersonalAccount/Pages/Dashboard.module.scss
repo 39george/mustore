@@ -80,3 +80,32 @@
   justify-content: space-between;
   margin: 0 2rem;
 }
+
+@media (max-width: 1280px) {
+  .welcome {
+    width: 31.25rem;
+    flex-shrink: 0;
+  }
+
+  .conversations_and_orders {
+    flex-direction: column;
+    justify-content: initial;
+  }
+}
+
+@media (max-width: 1200px) {
+  .meta_and_welcome {
+    flex-direction: column;
+    justify-content: initial;
+  }
+
+  .welcome {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+  }
+
+  .h2 {
+    margin-top: 4rem;
+  }
+}
