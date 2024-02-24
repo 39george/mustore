@@ -121,7 +121,6 @@ VALUES (
     (SELECT id FROM permissions WHERE name = 'administrator')
 );
 
-
 CREATE TABLE admin_signup_tokens(
     id SERIAL PRIMARY KEY,
     token UUID NOT NULL UNIQUE,
