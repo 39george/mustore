@@ -230,9 +230,9 @@ pub mod ban_by_ip {
                     if let Ok(count) = con.get::<u16, _>(&key).await {
                         if count > 30 {
                             let _ =
-                                con.expire::<(), _>(&key, 60 * 60 * 12).await;
+                                con.expire::<(), _>(&key, 60 * 60 * 12).await; // 12 hours
                             tracing::error!(
-                                "Address: {}, was banned for 12 hours",
+                                "Address: {} was banned for 12 hours",
                                 addr
                             );
                             let response = Response::builder()
@@ -241,6 +241,10 @@ pub mod ban_by_ip {
                                 .unwrap();
                             return Ok(response);
                         }
+                        // Extend ban time for 1 minute
+                        con.expire::<(), _>(&key, 60) // 1 minute
+                            .await
+                            .unwrap();
                     }
                 }
                 let response: Response = future.await?;
