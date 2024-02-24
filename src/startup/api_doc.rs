@@ -74,6 +74,7 @@ pub struct NotFoundResponse {
 #[derive(ToResponse)]
 #[response(description = "Conflict error")]
 pub struct ConflictErrorResponse;
+
 // ───── Responses ────────────────────────────────────────────────────────── //
 
 #[derive(ToSchema)]
