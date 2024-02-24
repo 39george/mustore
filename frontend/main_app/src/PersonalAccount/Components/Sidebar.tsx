@@ -32,18 +32,22 @@ type ActiveSections =
   | "help"
   | "none";
 
+type DisplayStyle = "none" | "block";
+
 const Sidebar: FC<SidebarProps> = ({ avatar }) => {
   const [active_section, set_active_section] = useState<ActiveSections>("none");
   const location = useLocation();
   const current_pathname = location.pathname.replace("/personal-account/", "");
-  // const [sidebar_collapsed, set_sidebar_collapsed] = useState(
-  //   window.innerWidth <= 950
-  // );
-  const [sidebar_collapsed, set_sidebar_collapsed] = useState(true);
+  const [sidebar_collapsed, set_sidebar_collapsed] = useState(
+    window.innerWidth <= 950
+  );
   const [title, set_title] = useState(
     window.innerWidth <= 950 ? "H.S" : "HARMONY.SPHERE"
   );
   const title_parts = title.split(".");
+  const [display_style, set_display_style] = useState<DisplayStyle>(
+    window.innerWidth <= 950 ? "none" : "block"
+  );
 
   useEffect(() => {
     switch (current_pathname) {
@@ -84,13 +88,13 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
 
   useEffect(() => {
     const handle_resize = () => {
-      // if (window.innerWidth <= 950) {
-      //   set_sidebar_collapsed(true);
-      //   set_title("H.S");
-      // } else {
-      //   set_sidebar_collapsed(false);
-      //   set_title("HARMONY.SPHERE");
-      // }
+      if (window.innerWidth <= 950) {
+        set_sidebar_collapsed(true);
+        set_title("H.S");
+        set_display_style("none");
+      } else {
+        set_display_style("block");
+      }
     };
 
     window.addEventListener("resize", handle_resize);
@@ -116,10 +120,9 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
     >
       <div
         className={styles.collapse_icon_container}
+        style={{ display: `${display_style}` }}
         onClick={() => set_sidebar_collapsed(!sidebar_collapsed)}
       >
-        {/* <IoChevronBackOutline className={styles.collapse_icon} />
-        <IoChevronBackOutline className={styles.collapse_icon} /> */}
         <img
           src={chevron}
           alt="chveron icon"

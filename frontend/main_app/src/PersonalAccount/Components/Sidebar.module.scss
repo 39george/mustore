@@ -188,6 +188,10 @@
     display: none;
   }
 
+  .tabs_container {
+    height: calc(100vh - 12.5rem);
+  }
+
   .tab_link {
     justify-content: center;
     width: 3.75rem;
