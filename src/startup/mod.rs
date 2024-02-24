@@ -20,7 +20,6 @@ use time::Duration;
 use time::UtcOffset;
 use tokio::net::TcpListener;
 use tokio_postgres::NoTls;
-use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
 use utoipa::OpenApi;
 
@@ -86,20 +85,25 @@ impl Application {
     ///
     /// This functions builds a new `Application` with given configuration.
     /// It also configures a pool of connections to the PostgreSQL database.
-    pub async fn build(configuration: Settings) -> Result<Application, anyhow::Error> {
+    pub async fn build(
+        configuration: Settings,
+    ) -> Result<Application, anyhow::Error> {
         let pg_pool = get_postgres_connection_pool(&configuration.database);
         let pg_client = pg_pool
             .get()
             .await
             .expect("Failed to get pg client for scheduler");
-        let redis_pool = get_redis_connection_pool(&configuration.redis).await?;
-        let redis_pool_tower_sessions = get_redis_connection_pool(&configuration.redis).await?;
+        let redis_pool =
+            get_redis_connection_pool(&configuration.redis).await?;
+        let redis_pool_tower_sessions =
+            get_redis_connection_pool(&configuration.redis).await?;
 
         let redis_client = redis_pool.next().clone_new();
         fred::interfaces::ClientLike::connect(&redis_client);
         fred::interfaces::ClientLike::wait_for_connect(&redis_client).await?;
 
-        let object_storage = ObjectStorage::new(configuration.object_storage).await;
+        let object_storage =
+            ObjectStorage::new(configuration.object_storage).await;
         let object_storage2 = object_storage.clone();
         let email_client = get_email_client(
             &configuration.email_client,
@@ -111,7 +115,8 @@ impl Application {
         );
         db_migration::run_migration(&pg_pool).await;
 
-        let address = format!("{}:{}", configuration.app_addr, configuration.app_port);
+        let address =
+            format!("{}:{}", configuration.app_addr, configuration.app_port);
         tracing::info!("running on {} address", address);
         let listener = TcpListener::bind(address).await?;
         let port = listener.local_addr()?.port();
@@ -128,7 +133,9 @@ impl Application {
         );
 
         tokio::spawn(async {
-            if let Err(e) = run_scheduler(pg_client, redis_client, object_storage2).await {
+            if let Err(e) =
+                run_scheduler(pg_client, redis_client, object_storage2).await
+            {
                 tracing::error!("Scheduler failed with: {e}");
             }
         });
@@ -166,7 +173,7 @@ impl Application {
             argon2::Params::new(15000, 2, 1, None).unwrap(),
         );
 
-        // We do not wrap pool into arc because internally it alreaday has an
+        // We do not wrap pool into arc because internally it already has an
         // `Arc`, and copying is cheap.
         let app_state = AppState {
             pg_pool: pg_pool.clone(),
@@ -191,17 +198,21 @@ impl Application {
 
         // This uses `tower-sessions` to establish a layer that will provide the session
         // as a request extension.
-        let session_store = tower_sessions_redis_store::RedisStore::new(redis_pool_tower_sessions);
-        let mut session_layer = axum_login::tower_sessions::SessionManagerLayer::new(session_store)
-            .with_secure(with_secure)
-            .with_expiry(axum_login::tower_sessions::Expiry::OnInactivity(
-                Duration::days(1),
-            ));
+        let session_store = tower_sessions_redis_store::RedisStore::new(
+            redis_pool_tower_sessions,
+        );
+        let mut session_layer =
+            axum_login::tower_sessions::SessionManagerLayer::new(session_store)
+                .with_secure(with_secure)
+                .with_expiry(axum_login::tower_sessions::Expiry::OnInactivity(
+                    Duration::days(1),
+                ));
 
         // This combines the session layer with our backend to establish the auth
         // service which will provide the auth session as a request extension.
         let backend = crate::auth::users::Backend::new(app_state.clone());
-        let auth_service = AuthManagerLayerBuilder::new(backend, session_layer).build();
+        let auth_service =
+            AuthManagerLayerBuilder::new(backend, session_layer).build();
 
         #[rustfmt::skip]
         let mut app = Router::new()
@@ -225,13 +236,16 @@ impl Application {
             app = app.layer(
                 TraceLayer::new_for_http()
                     .make_span_with(
-                        tower_http::trace::DefaultMakeSpan::new().level(tracing::Level::INFO),
+                        tower_http::trace::DefaultMakeSpan::new()
+                            .level(tracing::Level::INFO),
                     )
                     .on_response(
-                        tower_http::trace::DefaultOnResponse::new().level(tracing::Level::INFO),
+                        tower_http::trace::DefaultOnResponse::new()
+                            .level(tracing::Level::INFO),
                     )
                     .on_failure(
-                        tower_http::trace::DefaultOnFailure::new().level(tracing::Level::ERROR),
+                        tower_http::trace::DefaultOnFailure::new()
+                            .level(tracing::Level::ERROR),
                     ),
             );
         }
@@ -239,7 +253,8 @@ impl Application {
         if let Ok(e) = std::env::var("ENVIRONMENT") {
             if e.eq("development") {
                 app = app.merge(
-                    SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()),
+                    SwaggerUi::new("/swagger-ui")
+                        .url("/api-docs/openapi.json", ApiDoc::openapi()),
                 );
                 app = app.nest("/api", development::user_router(app_state));
             }
@@ -260,10 +275,12 @@ async fn shutdown_signal() {
     };
     #[cfg(unix)]
     let terminate = async {
-        tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
-            .expect("failed to install signal handler")
-            .recv()
-            .await;
+        tokio::signal::unix::signal(
+            tokio::signal::unix::SignalKind::terminate(),
+        )
+        .expect("failed to install signal handler")
+        .recv()
+        .await;
     };
     #[cfg(not(unix))]
     let terminate = std::future::pending::<()>();
@@ -293,9 +310,10 @@ fn get_email_client(
 pub async fn get_redis_connection_pool(
     configuration: &RedisSettings,
 ) -> Result<RedisPool, anyhow::Error> {
-    let redis_config =
-        RedisConfig::from_url_centralized(configuration.connection_string().expose_secret())
-            .unwrap();
+    let redis_config = RedisConfig::from_url_centralized(
+        configuration.connection_string().expose_secret(),
+    )
+    .unwrap();
     let redis_pool = fred::types::Builder::default_centralized()
         .set_config(redis_config)
         .set_policy(ReconnectPolicy::default())
