@@ -14,6 +14,9 @@ import settings_icon from "../../assets/icons/settings.svg";
 import notifications_icon from "../../assets/icons/notifications.svg";
 import help_icon from "../../assets/icons/help.svg";
 import logo_account from "../../assets/icons/logo_account.svg";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../state/store";
+import { set_sidebar_collapsed } from "../../state/sidebar_collapsed_slice";
 
 interface SidebarProps {
   avatar: string;
@@ -38,9 +41,6 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
   const [active_section, set_active_section] = useState<ActiveSections>("none");
   const location = useLocation();
   const current_pathname = location.pathname.replace("/personal-account/", "");
-  const [sidebar_collapsed, set_sidebar_collapsed] = useState(
-    window.innerWidth <= 950
-  );
   const [title, set_title] = useState(
     window.innerWidth <= 950 ? "H.S" : "HARMONY.SPHERE"
   );
@@ -48,6 +48,10 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
   const [display_style, set_display_style] = useState<DisplayStyle>(
     window.innerWidth <= 950 ? "none" : "block"
   );
+  const sidebar_collapsed = useSelector(
+    (state: RootState) => state.sidebar_collapsed.sidebar_collapsed
+  );
+  const dispatch = useDispatch();
 
   useEffect(() => {
     switch (current_pathname) {
@@ -89,7 +93,7 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
   useEffect(() => {
     const handle_resize = () => {
       if (window.innerWidth <= 950) {
-        set_sidebar_collapsed(true);
+        dispatch(set_sidebar_collapsed(true));
         set_title("H.S");
         set_display_style("none");
       } else {
@@ -121,7 +125,7 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
       <div
         className={styles.collapse_icon_container}
         style={{ display: `${display_style}` }}
-        onClick={() => set_sidebar_collapsed(!sidebar_collapsed)}
+        onClick={() => dispatch(set_sidebar_collapsed(!sidebar_collapsed))}
       >
         <img
           src={chevron}
