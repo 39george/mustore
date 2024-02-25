@@ -623,7 +623,8 @@ async fn check_current_user_uploads(
                     user_id
                 );
                 return Err(ResponseError::TooManyUploadsError);
-            } else if keys.len() > 5 {
+            }
+            if keys.len() > 5 {
                 tracing::warn!(
                     "User {} already have 5 current uploads",
                     user_id
