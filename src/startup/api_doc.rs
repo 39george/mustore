@@ -146,6 +146,13 @@ pub struct Products {
     pub product_cover: String,
 }
 
+#[derive(ToSchema)]
+#[schema(as = GetUserAvatarUsername)]
+pub struct GetUserAvatarUsername {
+    username: String,
+    avatar: String,
+}
+
 // ───── TypeWrappers ─────────────────────────────────────────────────────── //
 
 #[derive(ToSchema)]
@@ -211,6 +218,7 @@ impl Modify for ServerAddon {
         protected::creator::create_offer,
         protected::consumer::status_bar_info,
         protected::user::user_permissions,
+        protected::user::avatar_username,
         protected::user::request_obj_storage_upload,
         protected::user::get_conversations,
         protected::user::get_dialog_id,
@@ -238,6 +246,7 @@ impl Modify for ServerAddon {
                 GetNewSongsResponse,
                 GetRecommendedSongsResponse,
                 GetConversationsEntriesResponse,
+                GetUserAvatarUsername,
                 Products,
                 Password,
                 DialogId,

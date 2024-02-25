@@ -19,6 +19,12 @@ WHERE id = (
 --! user_exists
 SELECT id FROM users WHERE users.username = :username;
 
+--! get_user_avatar_username
+SELECT username, key AS avatar
+FROM users
+JOIN objects ON users.id = objects.avatar_users_id
+WHERE users.id = :user_id;
+
 --! get_user_system_notifications : (system_notifications_id?)
 SELECT s.id, s.text, s.users_id, s.created_at, views.system_notifications_id
 FROM system_notifications s

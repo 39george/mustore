@@ -80,6 +80,7 @@ pub fn user_router() -> Router<AppState> {
         .route("/send_message", routing::post(send_message))
         .route("/list_conversation", routing::get(list_conversation))
         .route("/permissions", routing::get(user_permissions))
+        .route("/avatar_username", routing::get(avatar_username))
         .layer(permission_required!(crate::auth::users::Backend, "user"))
 }
 
@@ -112,6 +113,65 @@ async fn user_permissions(
     let all_permissions =
         auth_session.backend.get_all_permissions(&user).await?;
     Ok(Json(all_permissions))
+}
+
+/// Get user's avatar url and username.
+#[utoipa::path(
+    get,
+    path = "/api/protected/user/avatar_username",
+    responses(
+        (
+            status = 200,
+            body = GetUserAvatarUsername,
+            content_type = "application/json",
+            description = "Avatar url and username",
+            example = json!(
+                [
+                  {
+                     "username": "someusername",
+                     "avatar": "https://someurl.png",
+                  }
+                ]
+            )
+        ),
+        (status = 403, description = "Forbidden"),
+        (status = 500, response = InternalErrorResponse)
+    ),
+    security(
+     ("api_key" = [])
+    ),
+    tag = "protected.users"
+)]
+#[tracing::instrument(name = "Get list of user permissions", skip_all)]
+async fn avatar_username(
+    auth_session: AuthSession,
+    State(app_state): State<AppState>,
+) -> Result<Json<user_access::GetUserAvatarUsername>, ResponseError> {
+    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
+        anyhow::anyhow!("No such user in AuthSession!"),
+    ))?;
+
+    let db_client = app_state
+        .pg_pool
+        .get()
+        .await
+        .context("Failed to get connection from postgres pool")?;
+
+    let mut avatar_username = user_access::get_user_avatar_username()
+        .bind(&db_client, &user.id)
+        .one()
+        .await
+        .context("Failed to get conversations list from pg")?;
+    let object_key: ObjectKey = avatar_username
+        .avatar
+        .parse()
+        .context("Failed to parse avatar object key")?;
+    let result = app_state
+        .object_storage
+        .generate_presigned_url(&object_key, Duration::from_secs(1))
+        .await?;
+    avatar_username.avatar = result;
+    Ok(Json(avatar_username))
 }
 
 /// Get presigned post form to upload a file to the object storage.

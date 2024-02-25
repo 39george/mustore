@@ -1451,6 +1451,53 @@ where C : GenericClient
         res.map(| row | (self.mapper) ((self.extractor) (& row)))) .into_stream() ;
         Ok(it)
     }
+}#[derive(serde::Serialize, Debug, Clone, PartialEq, )] pub struct GetUserAvatarUsername
+{ pub username : String,pub avatar : String,}pub struct GetUserAvatarUsernameBorrowed < 'a >
+{ pub username : &'a str,pub avatar : &'a str,} impl < 'a > From < GetUserAvatarUsernameBorrowed <
+'a >> for GetUserAvatarUsername
+{
+    fn
+    from(GetUserAvatarUsernameBorrowed { username,avatar,} : GetUserAvatarUsernameBorrowed < 'a >)
+    -> Self { Self { username: username.into(),avatar: avatar.into(),} }
+}pub struct GetUserAvatarUsernameQuery < 'a, C : GenericClient, T, const N : usize >
+{
+    client : & 'a  C, params :
+    [& 'a (dyn postgres_types :: ToSql + Sync) ; N], stmt : & 'a mut cornucopia_async
+    :: private :: Stmt, extractor : fn(& tokio_postgres :: Row) -> GetUserAvatarUsernameBorrowed,
+    mapper : fn(GetUserAvatarUsernameBorrowed) -> T,
+} impl < 'a, C, T : 'a, const N : usize > GetUserAvatarUsernameQuery < 'a, C, T, N >
+where C : GenericClient
+{
+    pub fn map < R > (self, mapper : fn(GetUserAvatarUsernameBorrowed) -> R) -> GetUserAvatarUsernameQuery
+    < 'a, C, R, N >
+    {
+        GetUserAvatarUsernameQuery
+        {
+            client : self.client, params : self.params, stmt : self.stmt,
+            extractor : self.extractor, mapper,
+        }
+    } pub async fn one(self) -> Result < T, tokio_postgres :: Error >
+    {
+        let stmt = self.stmt.prepare(self.client) .await ? ; let row =
+        self.client.query_one(stmt, & self.params) .await ? ;
+        Ok((self.mapper) ((self.extractor) (& row)))
+    } pub async fn all(self) -> Result < Vec < T >, tokio_postgres :: Error >
+    { self.iter() .await ?.try_collect().await } pub async fn opt(self) -> Result
+    < Option < T >, tokio_postgres :: Error >
+    {
+        let stmt = self.stmt.prepare(self.client) .await ? ;
+        Ok(self.client.query_opt(stmt, & self.params) .await
+        ?.map(| row | (self.mapper) ((self.extractor) (& row))))
+    } pub async fn iter(self,) -> Result < impl futures::Stream < Item = Result
+    < T, tokio_postgres :: Error >> + 'a, tokio_postgres :: Error >
+    {
+        let stmt = self.stmt.prepare(self.client) .await ? ; let it =
+        self.client.query_raw(stmt, cornucopia_async :: private ::
+        slice_iter(& self.params)) .await ?
+        .map(move | res |
+        res.map(| row | (self.mapper) ((self.extractor) (& row)))) .into_stream() ;
+        Ok(it)
+    }
 }#[derive(serde::Serialize, Debug, Clone, PartialEq, )] pub struct GetUserSystemNotifications
 { pub id : i32,pub text : String,pub users_id : i32,pub created_at : time::OffsetDateTime,pub system_notifications_id : Option<i32>,}pub struct GetUserSystemNotificationsBorrowed < 'a >
 { pub id : i32,pub text : &'a str,pub users_id : i32,pub created_at : time::OffsetDateTime,pub system_notifications_id : Option<i32>,} impl < 'a > From < GetUserSystemNotificationsBorrowed <
@@ -1644,6 +1691,22 @@ i32, 1 >
     {
         client, params : [username,], stmt : & mut self.0, extractor :
         | row | { row.get(0) }, mapper : | it | { it },
+    }
+} }pub fn get_user_avatar_username() -> GetUserAvatarUsernameStmt
+{ GetUserAvatarUsernameStmt(cornucopia_async :: private :: Stmt :: new("SELECT username, key AS avatar
+FROM users
+JOIN objects ON users.id = objects.avatar_users_id
+WHERE users.id = $1")) } pub
+struct GetUserAvatarUsernameStmt(cornucopia_async :: private :: Stmt) ; impl
+GetUserAvatarUsernameStmt { pub fn bind < 'a, C : GenericClient, >
+(& 'a mut self, client : & 'a  C,
+user_id : & 'a i32,) -> GetUserAvatarUsernameQuery < 'a, C,
+GetUserAvatarUsername, 1 >
+{
+    GetUserAvatarUsernameQuery
+    {
+        client, params : [user_id,], stmt : & mut self.0, extractor :
+        | row | { GetUserAvatarUsernameBorrowed { username : row.get(0),avatar : row.get(1),} }, mapper : | it | { <GetUserAvatarUsername>::from(it) },
     }
 } }pub fn get_user_system_notifications() -> GetUserSystemNotificationsStmt
 { GetUserSystemNotificationsStmt(cornucopia_async :: private :: Stmt :: new("SELECT s.id, s.text, s.users_id, s.created_at, views.system_notifications_id
