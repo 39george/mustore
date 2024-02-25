@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::time::Duration;
 
 use anyhow::Context;
 use axum::extract::Query;
@@ -13,6 +14,7 @@ use fred::clients::RedisPool;
 use fred::interfaces::KeysInterface;
 use fred::prelude::RedisResult;
 use fred::types::Scanner;
+use futures::future::try_join_all;
 use futures::TryStreamExt;
 use garde::Validate;
 use http::StatusCode;
@@ -240,11 +242,28 @@ async fn get_conversations(
         .await
         .context("Failed to get connection from postgres pool")?;
 
-    let entries = user_access::get_conversations_entries()
+    let futures = user_access::get_conversations_entries()
         .bind(&db_client, &user.id)
         .all()
         .await
-        .context("Failed to get conversations list from pg")?;
+        .context("Failed to get conversations list from pg")?
+        .into_iter()
+        .map(|mut entry| {
+            let obj_storage = app_state.object_storage.clone();
+            async move {
+                let object_key: ObjectKey = entry
+                    .image_url
+                    .parse()
+                    .context("Failed to parse object key")?;
+                let result = obj_storage
+                    .generate_presigned_url(&object_key, Duration::from_secs(1))
+                    .await?;
+                entry.image_url = result;
+                Ok::<GetConversationsEntries, ResponseError>(entry)
+            }
+        });
+
+    let entries = try_join_all(futures).await?;
 
     Ok(Json(entries))
 }
