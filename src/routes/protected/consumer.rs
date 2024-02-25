@@ -17,17 +17,11 @@ use crate::startup::AppState;
 
 pub fn consumer_router() -> Router<AppState> {
     Router::new()
-        .route("/health_check", routing::get(health_check))
         .route("/accept_offer", routing::post(accept_offer))
         .layer(permission_required!(
             crate::auth::users::Backend,
             "consumer"
         ))
-}
-
-#[tracing::instrument(name = "Consumer's health check", skip_all)]
-async fn health_check() -> StatusCode {
-    StatusCode::OK
 }
 
 // TODO: implement function
