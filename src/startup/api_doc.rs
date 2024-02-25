@@ -137,6 +137,15 @@ pub struct GetConversationsEntriesResponse {
     pub unread_messages_count: i64,
 }
 
+#[derive(ToSchema)]
+#[schema(as = Products)]
+pub struct Products {
+    pub product_name: String,
+    pub author_username: String,
+    pub price: rust_decimal::Decimal,
+    pub product_cover: String,
+}
+
 // ───── TypeWrappers ─────────────────────────────────────────────────────── //
 
 #[derive(ToSchema)]
@@ -197,6 +206,7 @@ impl Modify for ServerAddon {
         protected::creator::submit_product,
         protected::creator::submit_service,
         protected::creator::create_offer,
+        protected::consumer::status_bar_info,
         protected::user::user_permissions,
         protected::user::request_obj_storage_upload,
         protected::user::get_conversations,
@@ -225,6 +235,7 @@ impl Modify for ServerAddon {
                 GetNewSongsResponse,
                 GetRecommendedSongsResponse,
                 GetConversationsEntriesResponse,
+                Products,
                 Password,
                 DialogId,
                 crate::service_providers::object_storage::presigned_post_form::PresignedPostData,
