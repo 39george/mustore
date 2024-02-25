@@ -39,7 +39,6 @@ ConversationResponses AS (
         FROM messages
         WHERE messages.conversations_id = conversations.id
           AND messages.users_id <> :user_id
-        LIMIT 1
     )
     AND conversations.created_at > NOW() - INTERVAL '1 month'
 )
