@@ -165,6 +165,9 @@ pub struct ObjectKey(String);
 
 // ───── Addons ───────────────────────────────────────────────────────────── //
 
+/// NOTE: We use security addon also as simple marker.
+/// For example, endpoint is protected by cookie auth, we will mark
+/// endpoint as secured with "api_key" = [].
 struct SecurityAddon;
 
 impl Modify for SecurityAddon {
