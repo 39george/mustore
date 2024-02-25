@@ -12,8 +12,6 @@ Testing a backend application for user signup and login involves several layers 
 ### To-Do from frontender:
 
    - With user's permissions I need *username*, *likes amount and likes type (meaning on which product is the like)*, *cart amount and type*, *avatar*
-   - Delete health check logs from docker compose - FIXED?
-   - BUG: wrong port for email confirmation (8000, should be 10000) - FIXED?
    - Check the backend for the info in personal account. I need username, user rating, user role, notifications info, orders info
 
 ### Unit Tests:
