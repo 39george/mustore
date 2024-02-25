@@ -113,7 +113,7 @@ pub struct ObjectStorageSettings {
     pub bucket_name: String,
     #[serde(default = "object_storage_key_id")]
     pub access_key_id: Secret<String>,
-    #[serde(default = "object_storage_acces_key")]
+    #[serde(default = "object_storage_access_key")]
     pub secret_access_key: Secret<String>,
 }
 
@@ -174,7 +174,7 @@ fn object_storage_key_id() -> Secret<String> {
     )
 }
 
-fn object_storage_acces_key() -> Secret<String> {
+fn object_storage_access_key() -> Secret<String> {
     Secret::new(
         load_value_from_file(
             std::env::var("OBJECT_STORAGE_ACCESS_KEY_FILE")
