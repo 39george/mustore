@@ -48,7 +48,7 @@ serde_urlencoded = "0.7.1"
 # Utility and miscellaneous dependencies
 futures = "0.3.30"
 async-trait = "0.1.77"
-config = "0.13.4"
+config = "0.14.0"
 uuid = { version = "1.7.0", features = ["v4", "serde"] }
 garde = { version = "0.18.0", features = ["derive", "email"] }
 linkify = "0.10.0"
@@ -95,7 +95,7 @@ utoipa-swagger-ui = { version = "6.0.0", features = ["axum"] }
 [dev-dependencies]
 # Sync version for testing purposes
 postgres = "0.19.7"
-wiremock = "0.5.22"
+wiremock = "0.6.0"
 fake = "2.9.2"
 
 [profile.dev.package."*"]
