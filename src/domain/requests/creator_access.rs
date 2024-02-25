@@ -240,7 +240,7 @@ pub struct CreateOfferRequest {
         example = 18.50
     )]
     pub price: Decimal,
-    #[serde(with = "time::serde::iso8601")]
+    #[serde(with = "crate::iso_format")]
     pub delivery_date: OffsetDateTime,
     pub free_revisions: i32,
     #[schema(

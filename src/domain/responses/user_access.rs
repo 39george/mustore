@@ -96,9 +96,9 @@ pub struct Message {
     pub interlocutor_id: i32,
     #[schema(example = "Hello, how are you?")]
     pub text: String,
-    #[serde(with = "time::serde::iso8601")]
+    #[serde(with = "crate::iso_format")]
     pub created_at: OffsetDateTime,
-    #[serde(with = "time::serde::iso8601")]
+    #[serde(with = "crate::iso_format")]
     pub updated_at: OffsetDateTime,
     #[schema(inline = true)]
     pub service: Option<ServiceData>,
@@ -122,7 +122,7 @@ pub struct Offer {
         example = 18.50
     )]
     pub price: Decimal,
-    #[serde(with = "time::serde::iso8601")]
+    #[serde(with = "crate::iso_format")]
     pub delivery_date: OffsetDateTime,
     pub free_revisions: i32,
     #[schema(

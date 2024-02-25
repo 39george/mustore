@@ -1,6 +1,12 @@
 //! src/lib.rs
 
-use time::macros::format_description;
+use time::{
+    format_description::well_known::{
+        iso8601::{self, TimePrecision},
+        Iso8601,
+    },
+    macros::format_description,
+};
 
 mod examples;
 
@@ -23,6 +29,19 @@ pub mod types;
 lazy_static::lazy_static! {
     pub static ref DEFAULT_TIME_FORMAT: &'static [time::format_description::FormatItem<'static>] = format_description!("[year]-[month]-[day] [hour]:[minute]:[second].[subsecond] [offset_hour sign:mandatory]:[offset_minute]:[offset_second]");
 }
+
+const SIMPLE_ISO: Iso8601<6651332276402088934156738804825718784> = Iso8601::<
+    {
+        iso8601::Config::DEFAULT
+            .set_year_is_six_digits(false)
+            .set_time_precision(TimePrecision::Second {
+                decimal_digits: None,
+            })
+            .encode()
+    },
+>;
+
+time::serde::format_description!(iso_format, OffsetDateTime, SIMPLE_ISO);
 
 pub const MAX_MP3_SIZE_MB: u64 = 15;
 pub const MAX_MULTITRACK_SIZE_GB: u64 = 5;
