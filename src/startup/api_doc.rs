@@ -149,8 +149,15 @@ pub struct Products {
 #[derive(ToSchema)]
 #[schema(as = GetUserAvatarUsername)]
 pub struct GetUserAvatarUsername {
-    username: String,
-    avatar: String,
+    pub username: String,
+    pub avatar: String,
+}
+
+#[derive(ToSchema)]
+#[schema(as = GetCreatorMarksAvg)]
+pub struct GetCreatorMarksAvg {
+    pub avg: rust_decimal::Decimal,
+    pub count: i64,
 }
 
 // ───── TypeWrappers ─────────────────────────────────────────────────────── //
@@ -216,6 +223,7 @@ impl Modify for ServerAddon {
         protected::creator::submit_product,
         protected::creator::submit_service,
         protected::creator::create_offer,
+        protected::creator::marks_avg,
         protected::consumer::status_bar_info,
         protected::user::user_permissions,
         protected::user::avatar_username,
@@ -247,6 +255,7 @@ impl Modify for ServerAddon {
                 GetRecommendedSongsResponse,
                 GetConversationsEntriesResponse,
                 GetUserAvatarUsername,
+                GetCreatorMarksAvg,
                 Products,
                 Password,
                 DialogId,

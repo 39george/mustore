@@ -61,6 +61,7 @@ impl IntoResponse for CreatorResponseError {
 pub fn creator_router() -> Router<AppState> {
     Router::new()
         .route("/health_check", routing::get(health_check))
+        .route("/marks_avg", routing::get(marks_avg))
         .route("/submit_product", routing::post(submit_product))
         .route("/submit_service", routing::post(submit_service))
         .route("/create_offer", routing::post(create_offer))
@@ -70,6 +71,56 @@ pub fn creator_router() -> Router<AppState> {
 #[tracing::instrument(name = "Creator's health check", skip_all)]
 async fn health_check() -> StatusCode {
     StatusCode::OK
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/protected/creator/marks_avg",
+    responses(
+        (
+            status = 200,
+            body = creator_access::GetCreatorMarksAvg,
+            content_type = "application/json",
+            description = "Marks avg for creator",
+            example = json!(
+                  {
+                    "avg": 4.7,
+                    "count": 15,
+                  }
+            )
+        ),
+        (status = 403, description = "Forbidden"),
+        (status = 500, response = InternalErrorResponse)
+    ),
+    security(
+        ("api_key" = [])
+    ),
+    tag = "protected.creators"
+)]
+#[tracing::instrument(name = "Get marks count & average for creator", skip_all)]
+async fn marks_avg(
+    auth_session: AuthSession,
+    State(app_state): State<AppState>,
+) -> Result<Json<creator_access::GetCreatorMarksAvg>, CreatorResponseError> {
+    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
+        anyhow::anyhow!("No such user in AuthSession!"),
+    ))?;
+
+    let db_client = app_state
+        .pg_pool
+        .get()
+        .await
+        .context("Failed to get connection from postgres pool")
+        .map_err(ResponseError::UnexpectedError)?;
+
+    let data = creator_access::get_creator_marks_avg()
+        .bind(&db_client, &user.id)
+        .one()
+        .await
+        .context("Failed to get marks avg data from database")
+        .map_err(ResponseError::UnexpectedError)?;
+
+    Ok(Json(data))
 }
 
 /// Submit a new product.
