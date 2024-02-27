@@ -161,7 +161,7 @@
 }
 
 // Sidebar collapsed
-.sidebar_collapsed {
+@mixin sidebar_collapsed {
   width: 3.75rem;
 
   .collapse_icon_container {
@@ -190,6 +190,7 @@
 
   .tabs_container {
     height: calc(100vh - 12.5rem);
+    margin-top: 0;
   }
 
   .tab_link {
@@ -213,5 +214,22 @@
 
   .section_name {
     display: none;
+  }
+}
+.sidebar_collapsed {
+  @include sidebar_collapsed;
+}
+
+@media (max-width: 950px) {
+  .sidebar {
+    @include sidebar_collapsed;
+  }
+}
+
+@media (max-width: 450px) {
+  .sidebar_collapsed {
+    .h2 {
+      margin: 1.625rem auto;
+    }
   }
 }

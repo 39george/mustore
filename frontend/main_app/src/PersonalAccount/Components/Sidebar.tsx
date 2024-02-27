@@ -16,42 +16,32 @@ import help_icon from "../../assets/icons/help.svg";
 import logo_account from "../../assets/icons/logo_account.svg";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../state/store";
-import { set_sidebar_collapsed } from "../../state/sidebar_collapsed_slice";
+import {
+  set_sidebar_chevron_display,
+  set_sidebar_collapsed,
+  set_sidebar_title,
+} from "../../state/sidebar_actions_slice";
+import { ActiveSections } from "../../types/types";
 
 interface SidebarProps {
   avatar: string;
 }
 
-type ActiveSections =
-  | "dashboard"
-  | "products"
-  | "services"
-  | "conversations"
-  | "orders"
-  | "statistics"
-  | "earnings"
-  | "settings"
-  | "notifications"
-  | "help"
-  | "none";
-
-type DisplayStyle = "none" | "block";
-
 const Sidebar: FC<SidebarProps> = ({ avatar }) => {
   const [active_section, set_active_section] = useState<ActiveSections>("none");
   const location = useLocation();
   const current_pathname = location.pathname.replace("/personal-account/", "");
-  const [title, set_title] = useState(
-    window.innerWidth <= 950 ? "H.S" : "HARMONY.SPHERE"
+  const dispatch = useDispatch();
+  const sidebar_collapsed = useSelector(
+    (state: RootState) => state.sidebar_actions.sidebar_collapsed
+  );
+  const title = useSelector(
+    (state: RootState) => state.sidebar_actions.sidebar_title
+  );
+  const display_style = useSelector(
+    (state: RootState) => state.sidebar_actions.sidebar_chevron_display
   );
   const title_parts = title.split(".");
-  const [display_style, set_display_style] = useState<DisplayStyle>(
-    window.innerWidth <= 950 ? "none" : "block"
-  );
-  const sidebar_collapsed = useSelector(
-    (state: RootState) => state.sidebar_collapsed.sidebar_collapsed
-  );
-  const dispatch = useDispatch();
 
   useEffect(() => {
     switch (current_pathname) {
@@ -94,10 +84,10 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
     const handle_resize = () => {
       if (window.innerWidth <= 950) {
         dispatch(set_sidebar_collapsed(true));
-        set_title("H.S");
-        set_display_style("none");
+        dispatch(set_sidebar_title("H.S"));
+        dispatch(set_sidebar_chevron_display("none"));
       } else {
-        set_display_style("block");
+        dispatch(set_sidebar_chevron_display("block"));
       }
     };
 
@@ -110,11 +100,21 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
 
   useEffect(() => {
     if (sidebar_collapsed) {
-      set_title("H.S");
+      dispatch(set_sidebar_title("H.S"));
     } else {
-      set_title("HARMONY.SPHERE");
+      dispatch(set_sidebar_title("HARMONY.SPHERE"));
     }
   }, [sidebar_collapsed]);
+
+  const handle_tab_link_click = (tab_name: ActiveSections) => {
+    if (tab_name === "conversations") {
+      dispatch(set_sidebar_collapsed(true));
+      dispatch(set_sidebar_title("H.S"));
+      dispatch(set_sidebar_chevron_display("none"));
+    } else {
+      dispatch(set_sidebar_chevron_display("block"));
+    }
+  };
 
   return (
     <div
@@ -170,6 +170,7 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
           className={`${styles.tab_link} ${
             active_section === "dashboard" && styles.tab_link_active
           }`}
+          onClick={() => handle_tab_link_click("dashboard")}
         >
           <img
             src={dashboard_icon}
@@ -184,6 +185,7 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
           className={`${styles.tab_link} ${
             active_section === "products" && styles.tab_link_active
           }`}
+          onClick={() => handle_tab_link_click("products")}
         >
           <img
             src={products_icon}
@@ -197,6 +199,7 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
           className={`${styles.tab_link} ${
             active_section === "services" && styles.tab_link_active
           }`}
+          onClick={() => handle_tab_link_click("services")}
         >
           <img
             src={services_icon}
@@ -211,6 +214,7 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
           className={`${styles.tab_link} ${
             active_section === "conversations" && styles.tab_link_active
           }`}
+          onClick={() => handle_tab_link_click("conversations")}
         >
           <img
             src={conversations_icon}
@@ -224,6 +228,7 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
           className={`${styles.tab_link} ${
             active_section === "orders" && styles.tab_link_active
           }`}
+          onClick={() => handle_tab_link_click("orders")}
         >
           <img
             src={orders_icon}
@@ -238,6 +243,7 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
           className={`${styles.tab_link} ${
             active_section === "statistics" && styles.tab_link_active
           }`}
+          onClick={() => handle_tab_link_click("statistics")}
         >
           <img
             src={statistics_icon}
@@ -251,6 +257,7 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
           className={`${styles.tab_link} ${
             active_section === "earnings" && styles.tab_link_active
           }`}
+          onClick={() => handle_tab_link_click("earnings")}
         >
           <img
             src={earnings_icon}
@@ -265,6 +272,7 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
           className={`${styles.tab_link} ${
             active_section === "settings" && styles.tab_link_active
           }`}
+          onClick={() => handle_tab_link_click("settings")}
         >
           <img
             src={settings_icon}
@@ -279,6 +287,7 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
           className={`${styles.tab_link} ${
             active_section === "notifications" && styles.tab_link_active
           }`}
+          onClick={() => handle_tab_link_click("notifications")}
         >
           <img
             src={notifications_icon}
@@ -292,6 +301,7 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
           className={`${styles.tab_link} ${
             active_section === "help" && styles.tab_link_active
           }`}
+          onClick={() => handle_tab_link_click("help")}
         >
           <img
             src={help_icon}

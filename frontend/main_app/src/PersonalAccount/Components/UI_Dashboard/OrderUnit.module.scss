@@ -11,7 +11,7 @@
   margin-bottom: 1rem;
 }
 
-.image_wrapper {
+.service_image_wrapper {
   width: 5rem;
   height: 3rem;
 
@@ -83,8 +83,15 @@
   }
 }
 
+.consumer_image_wrapper,
+.consumer_name,
+.divider {
+  display: none;
+}
+
+// Media queries
 @media (max-width: 1352px) {
-  .image_wrapper {
+  .service_image_wrapper {
     display: none;
   }
 
@@ -104,7 +111,7 @@
 }
 
 @media (max-width: 1280px) {
-  .image_wrapper {
+  .service_image_wrapper {
     display: block;
   }
 
@@ -120,5 +127,169 @@
         6.5rem
       );
     }
+  }
+}
+
+@media (max-width: 950px) {
+  .order_main_info {
+    .order_info {
+      margin-right: clamp(
+        2rem,
+        calc(2rem + (80 - 32) * ((100vw - 760px) / (950 - 760))),
+        5rem
+      );
+    }
+  }
+}
+
+@media (max-width: 760px) {
+  .service_image_wrapper {
+    display: none;
+  }
+
+  .order_info_container {
+    margin-left: 0;
+  }
+
+  .order_main_info {
+    .order_info {
+      margin-right: clamp(
+        2.5rem,
+        calc(2.5rem + (72 - 40) * ((100vw - 660px) / (760 - 660))),
+        4.5rem
+      );
+    }
+  }
+}
+
+@media (max-width: 665px) {
+  .order_unit,
+  .order_info_container,
+  .order_main_info {
+    flex-direction: column;
+  }
+
+  .consumer_name,
+  .divider {
+    display: block;
+  }
+
+  .order_unit {
+    width: 100%;
+    max-width: 16rem;
+    margin: 0;
+    padding: 0.5rem 0.5rem 0.875rem;
+  }
+
+  .service_image_wrapper {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 20vw;
+    max-width: 15rem;
+    max-height: 8.5rem;
+
+    img {
+      border-radius: 0.5rem;
+    }
+
+    .consumer_image_wrapper {
+      @include image_wrapper(3.125rem);
+
+      display: block;
+      position: absolute;
+      left: 0.675rem;
+      bottom: -0.875rem;
+      box-shadow: 0 0 0.5rem rgba(#000, 0.3);
+
+      img {
+        width: 100%;
+        height: 100%;
+      }
+    }
+  }
+
+  .order_info_container {
+    width: 100%;
+    margin: 0;
+  }
+
+  .order_info:first-child {
+    display: none;
+  }
+
+  .order_main_info {
+    .order_info {
+      margin: 0 0 0.75rem;
+    }
+  }
+
+  .order_info {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  .consumer_name {
+    position: relative;
+
+    width: fit-content;
+
+    margin: 0.5rem auto;
+
+    font-family: "Geologica", sans-serif;
+    font-size: 1.125rem;
+    font-weight: 400;
+
+    .online_status {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+
+      width: 0.5rem;
+      height: 0.5rem;
+
+      margin-left: 10%;
+
+      border-radius: 50%;
+      background-color: $account_offline_status;
+    }
+  }
+
+  .divider {
+    @include account_border(100%, 1px, 0 0 0.625rem);
+  }
+
+  .info_type {
+    margin: 0;
+  }
+
+  .info_content {
+    text-align: end;
+  }
+
+  .to_order_link {
+    display: flex;
+    justify-content: center;
+
+    width: 50%;
+
+    margin-top: 1.5rem;
+    padding: 0.5rem;
+
+    border: 1px solid $account_green;
+    border-radius: 0.25rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .order_unit {
+    max-width: 26.75rem;
+  }
+
+  .service_image_wrapper {
+    max-width: 25.75rem;
+    height: 40vw;
+    max-height: 13.25rem;
   }
 }

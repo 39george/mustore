@@ -2,6 +2,7 @@ import { IOrderUnit } from "../../../types/types";
 import styles from "./OrderUnit.module.scss";
 import { FC, useEffect, useState } from "react";
 import order_photo from "../../../assets/HomePage/album_covers/ablum_cover_9.png";
+import avatar from "../../../assets/HomePage/author_2.png";
 import { NavLink } from "react-router-dom";
 
 const OrderUnit: FC<IOrderUnit> = ({ consumer, deliver_to, price, status }) => {
@@ -20,11 +21,17 @@ const OrderUnit: FC<IOrderUnit> = ({ consumer, deliver_to, price, status }) => {
   }, [status]);
   return (
     <div className={styles.order_unit}>
-      <div className={styles.image_wrapper}>
+      <div className={styles.service_image_wrapper}>
         <img
           src={order_photo}
           alt="order photo"
         />
+        <div className={styles.consumer_image_wrapper}>
+          <img
+            src={avatar}
+            alt="consumer's avatar"
+          />
+        </div>
       </div>
       <div className={styles.order_info_container}>
         <div className={styles.order_main_info}>
@@ -32,6 +39,11 @@ const OrderUnit: FC<IOrderUnit> = ({ consumer, deliver_to, price, status }) => {
             <p className={styles.info_type}>Покупатель</p>
             <p className={styles.info_content}>{consumer}</p>
           </div>
+          <p className={styles.consumer_name}>
+            {consumer}
+            <span className={styles.online_status}></span>
+          </p>
+          <hr className={styles.divider} />
           <div className={styles.order_info}>
             <p className={styles.info_type}>Цена</p>
             <p className={styles.info_content}>{price}</p>

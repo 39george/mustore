@@ -79,3 +79,16 @@ export interface IOrderUnit {
   deliver_to: string;
   status: Status;
 }
+
+export type ActiveSections =
+  | "dashboard"
+  | "products"
+  | "services"
+  | "conversations"
+  | "orders"
+  | "statistics"
+  | "earnings"
+  | "settings"
+  | "notifications"
+  | "help"
+  | "none";

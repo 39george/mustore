@@ -1,8 +1,14 @@
 import { NavLink } from "react-router-dom";
-import { IConversationUnit } from "../../../types/types";
+import { ActiveSections, IConversationUnit } from "../../../types/types";
 import styles from "./ConversationsWidget.module.scss";
 import { FC } from "react";
 import ConversationUnit from "./ConversationUnit";
+import { useDispatch } from "react-redux";
+import {
+  set_sidebar_chevron_display,
+  set_sidebar_collapsed,
+  set_sidebar_title,
+} from "../../../state/sidebar_actions_slice";
 
 const mock_conversations: IConversationUnit[] = [
   {
@@ -88,6 +94,12 @@ const mock_conversations: IConversationUnit[] = [
 ];
 
 const ConversationsWidget: FC = () => {
+  const dispatch = useDispatch();
+  const handle_tab_link_click = () => {
+    dispatch(set_sidebar_collapsed(true));
+    dispatch(set_sidebar_title("H.S"));
+    dispatch(set_sidebar_chevron_display("none"));
+  };
   return (
     <div className={styles.conversations_widget}>
       <div className={styles.top_bar}>
@@ -97,6 +109,7 @@ const ConversationsWidget: FC = () => {
         <NavLink
           to="../conversations"
           className={styles.show_all}
+          onClick={handle_tab_link_click}
         >
           показать все
         </NavLink>

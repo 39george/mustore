@@ -147,10 +147,6 @@
     height: 5rem;
   }
 
-  // .text_info {
-  //   margin-left: 2rem;
-  // }
-
   .username {
     margin-bottom: 1.5rem;
   }
@@ -162,5 +158,58 @@
 
   .earnings_text {
     max-width: fit-content;
+  }
+}
+
+@media (max-width: 760px) {
+  .metainfo_widget {
+    padding: 1.25rem;
+  }
+
+  .main_info {
+    display: block;
+
+    .divider {
+      @include account_border(100%, 1px, 1.25rem 0);
+    }
+  }
+
+  .header,
+  .statistics {
+    width: 100%;
+  }
+
+  .image_wrapper {
+    @include image_wrapper(4.25rem);
+  }
+
+  .username {
+    margin-bottom: 0.625rem;
+  }
+
+  .earnings {
+    justify-content: space-between;
+    margin-top: 0;
+  }
+
+  .earnings_text {
+    max-width: 10.875rem;
+  }
+}
+
+@media (max-width: 450px) {
+  .text_info {
+    margin-left: 1.25rem;
+  }
+
+  .username {
+    font-size: 1rem;
+  }
+
+  .user_role,
+  .rating,
+  .statistics_unit,
+  .earnings {
+    font-size: 0.875rem;
   }
 }

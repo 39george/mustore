@@ -4,7 +4,6 @@
 .dashboard {
   @include disable_scrollbar;
 
-  // max-width: 1816px;
   height: calc(100vh - 4.75rem - 2px);
   overflow-y: scroll;
   padding: 0 $padding_dashboard_layout 2rem;
@@ -41,20 +40,20 @@
   display: flex;
   align-items: center;
   margin-top: 1.5rem;
-
-  & .workbench_widget:first-child {
-    margin-right: 2rem;
-  }
 }
 
 .workbench_widget {
-  @include widget(1.75rem 1rem);
+  @include widget(1.75em 1em);
 
   width: fit-content;
 
   transform: translateY(0);
-  transition: 0.15s ease-out;
+  transition: transform 0.15s ease-out;
   cursor: pointer;
+
+  &:first-child {
+    margin-right: 2rem;
+  }
 
   &:hover {
     transform: translateY(-4px);
@@ -72,10 +71,18 @@
   margin: 4rem 0 0 2rem;
 }
 
+.h2_conversations_and_orders_margin {
+  margin-left: 8.125rem;
+}
+
 .conversations_and_orders {
   display: flex;
   justify-content: space-between;
   margin: 0 2rem;
+}
+
+.margin_sidebar_collapsed {
+  margin: 0 8.125rem;
 }
 
 @media (max-width: 1280px) {
@@ -104,5 +111,62 @@
 
   .h2 {
     margin-top: 4rem;
+  }
+}
+
+@media (max-width: 950px) {
+  .h2_conversations_and_orders_margin {
+    margin-left: 2rem;
+  }
+
+  .margin_sidebar_collapsed {
+    margin: 0 2rem;
+  }
+}
+
+@media (max-width: 622px) {
+  .workbench {
+    justify-content: space-between;
+  }
+
+  .workbench_widget {
+    width: 45%;
+
+    &:first-child {
+      margin: 0;
+    }
+  }
+}
+
+@media (max-width: 520px) {
+  .meta_and_welcome,
+  .conversations_and_orders {
+    margin: 0 1rem;
+  }
+
+  .h2_conversations_and_orders {
+    margin: 4rem 0 0 1rem;
+  }
+
+  .workbench {
+    flex-direction: column;
+  }
+
+  .workbench_widget {
+    width: 100%;
+
+    &:first-child {
+      margin-bottom: 1rem;
+    }
+  }
+}
+
+@media (max-width: 450px) {
+  .h2 {
+    font-size: 1rem;
+  }
+
+  .workbench_widget {
+    font-size: 0.875rem;
   }
 }

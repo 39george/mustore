@@ -40,17 +40,19 @@ const OrdersWidget: FC = () => {
           <IoChevronDownOutline className={styles.chevron} />
         </div>
       </div>
-      {mock_orders.map((order, idx) => {
-        return (
-          <OrderUnit
-            key={idx}
-            consumer={order.consumer}
-            price={order.price}
-            deliver_to={order.deliver_to}
-            status={order.status}
-          />
-        );
-      })}
+      <div className={styles.order_units_container}>
+        {mock_orders.map((order, idx) => {
+          return (
+            <OrderUnit
+              key={idx}
+              consumer={order.consumer}
+              price={order.price}
+              deliver_to={order.deliver_to}
+              status={order.status}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 };

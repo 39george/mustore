@@ -71,11 +71,18 @@
 }
 
 .username {
+  width: fit-content;
+  max-width: 7rem;
+
   margin-right: 1em;
+
   font-family: "Geologica", sans-serif;
   font-weight: 200;
   font-size: 0.75rem;
   letter-spacing: 0;
+
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 .avatar_container {
@@ -91,4 +98,33 @@
 .avatar {
   width: 100%;
   height: 100%;
+}
+
+@media (max-width: 520px) {
+  .top_bar {
+    padding: 1rem;
+  }
+
+  .username {
+    max-width: 4rem;
+  }
+}
+
+@media (max-width: 450px) {
+  .h2 {
+    font-size: 1.125rem;
+  }
+
+  .notifications,
+  .conversations {
+    margin-right: 0.75rem;
+  }
+
+  .meta_info_container {
+    margin-left: 0.75rem;
+  }
+
+  .username {
+    display: none;
+  }
 }

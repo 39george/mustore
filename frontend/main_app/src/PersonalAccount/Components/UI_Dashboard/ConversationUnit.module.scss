@@ -59,7 +59,7 @@
 }
 
 .offline {
-  background-color: #b7b7b7;
+  background-color: $account_offline_status;
 }
 
 .interlocutor_info {
@@ -127,4 +127,10 @@
 .filler {
   width: 1.25rem;
   height: 1.25rem;
+}
+
+@media (max-width: 520px) {
+  .interlocutor_info {
+    width: 50%;
+  }
 }
