@@ -105,8 +105,25 @@
   }
 }
 
-// @media (max-width: 484px) {
-//   .name_and_price {
-//     font-size: 1rem;
-//   }
-// }
+@media (max-width: 450px) {
+  .orders_widget {
+    margin-top: 1.5rem;
+  }
+
+  .name_and_price {
+    flex-direction: column;
+    font-size: 1rem;
+  }
+
+  .type_name {
+    margin-bottom: 0.5rem;
+  }
+
+  .type_selector {
+    margin-top: 1.25rem;
+  }
+
+  .current_select {
+    font-size: 0.75rem;
+  }
+}

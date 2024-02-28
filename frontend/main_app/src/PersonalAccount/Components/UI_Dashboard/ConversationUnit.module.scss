@@ -51,7 +51,7 @@
   height: 0.75rem;
 
   border-radius: 50%;
-  outline: 3px solid $widget_bg;
+  box-shadow: 0 0 0 3px $widget_bg;
 }
 
 .online {
@@ -129,8 +129,21 @@
   height: 1.25rem;
 }
 
-@media (max-width: 520px) {
+@media (max-width: 450px) {
+  .meta_info {
+    flex-direction: column;
+    align-items: flex-start;
+    width: min-content;
+    margin: 0;
+  }
+
   .interlocutor_info {
-    width: 50%;
+    width: 39vw;
+    margin-left: 0;
+    margin-top: 0.75rem;
+  }
+
+  .interlocutor_name {
+    margin-bottom: 0.5rem;
   }
 }

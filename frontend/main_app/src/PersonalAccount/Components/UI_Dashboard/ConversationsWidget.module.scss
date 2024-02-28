@@ -44,28 +44,6 @@
 .main_content {
   height: 33.5rem;
   overflow-y: scroll;
-
-  &::-webkit-scrollbar {
-    width: 1rem;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background-color: rgba($color: $main_dark, $alpha: 0.3);
-    border: 0.25rem solid $main_bright;
-    border-radius: 0.5rem;
-
-    &:hover {
-      background-color: rgba($color: $main_dark, $alpha: 0.6);
-    }
-  }
-}
-
-.border_v {
-  @include account_border(1px, 33.5rem, 0);
-
-  position: absolute;
-  top: 63px;
-  right: 1rem;
 }
 
 @media (max-width: 1352px) {
@@ -86,5 +64,23 @@
 
   .border_v {
     height: 25rem;
+  }
+}
+
+@media (max-width: 450px) {
+  .header {
+    font-size: 1rem;
+  }
+
+  .show_all {
+    margin-left: 1em;
+    font-size: 0.75rem;
+    text-align: end;
+  }
+}
+
+@media (max-width: 336px) {
+  .border_v {
+    top: 5rem;
   }
 }

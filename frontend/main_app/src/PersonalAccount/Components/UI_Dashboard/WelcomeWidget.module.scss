@@ -37,3 +37,9 @@
   margin-left: 1rem;
   color: $account_accent;
 }
+
+@media (max-width: 450px) {
+  .billboard_unit {
+    font-size: 0.875rem;
+  }
+}

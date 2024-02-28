@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { ActiveSections, IConversationUnit } from "../../../types/types";
+import { IConversationUnit } from "../../../types/types";
 import styles from "./ConversationsWidget.module.scss";
 import { FC } from "react";
 import ConversationUnit from "./ConversationUnit";
@@ -129,7 +129,6 @@ const ConversationsWidget: FC = () => {
             />
           );
         })}
-        <hr className={styles.border_v} />
       </div>
       <hr className={styles.border_h} />
     </div>

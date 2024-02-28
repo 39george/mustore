@@ -89,6 +89,7 @@
   padding: 0.125rem;
   border-radius: 50%;
   border: 2px solid $account_accent;
+  cursor: pointer;
 }
 
 .image_wrapper {
@@ -106,7 +107,7 @@
   }
 
   .username {
-    max-width: 4rem;
+    display: none;
   }
 }
 
@@ -123,8 +124,12 @@
   .meta_info_container {
     margin-left: 0.75rem;
   }
+}
 
-  .username {
+@media (max-width: 450px) {
+  .notifications,
+  .conversations,
+  .divider {
     display: none;
   }
 }
