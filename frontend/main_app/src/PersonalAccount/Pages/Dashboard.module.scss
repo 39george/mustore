@@ -11,14 +11,15 @@
 
 .meta_and_welcome {
   display: flex;
-  justify-content: space-between;
+  // justify-content: space-between;
   margin: 0 2rem;
 }
 
 .welcome {
   width: 100%;
   max-width: 40rem;
-  margin-left: 2.5rem;
+  // margin-left: 2.5rem;
+  margin-left: auto;
 }
 
 .h2 {
@@ -77,12 +78,18 @@
 
 .conversations_and_orders {
   display: flex;
-  justify-content: space-between;
+  // justify-content: space-between;
   margin: 0 2rem;
 }
 
 .margin_sidebar_collapsed {
   margin: 0 8.125rem;
+}
+
+.meta_and_welcome,
+.h2_conversations_and_orders,
+.conversations_and_orders {
+  transition: margin 0.2s ease-out;
 }
 
 @media (max-width: 1280px) {

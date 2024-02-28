@@ -7,6 +7,7 @@
   max-width: 26rem;
   height: fit-content;
   margin-top: 2rem;
+  margin-right: 2.5rem;
 }
 
 .header {
@@ -122,8 +123,9 @@
 
 @media (max-width: 1200px) {
   .metainfo_widget {
-    padding: 2rem 1.5rem;
     max-width: 100%;
+    margin-right: 0;
+    padding: 2rem 1.5rem;
   }
 
   .main_info {
