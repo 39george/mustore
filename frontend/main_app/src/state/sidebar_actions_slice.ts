@@ -10,8 +10,11 @@ interface SidebarActionsState {
   sidebar_chevron_display: DisplayStyle;
 }
 
+const path = window.location.pathname;
+
 const initialState: SidebarActionsState = {
-  sidebar_collapsed: window.innerWidth <= 950,
+  sidebar_collapsed:
+    window.innerWidth <= 950 || path === "/personal-account/conversations",
   sidebar_title: window.innerWidth <= 950 ? "H.S" : "HARMONY.SPHERE",
   sidebar_chevron_display: window.innerWidth <= 950 ? "none" : "block",
 };
