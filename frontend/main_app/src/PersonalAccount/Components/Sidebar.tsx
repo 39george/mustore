@@ -112,7 +112,9 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
       dispatch(set_sidebar_title("H.S"));
       dispatch(set_sidebar_chevron_display("none"));
     } else {
-      dispatch(set_sidebar_chevron_display("block"));
+      if (window.innerWidth > 950) {
+        dispatch(set_sidebar_chevron_display("block"));
+      }
     }
   };
 
