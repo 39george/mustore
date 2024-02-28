@@ -13,7 +13,6 @@ import earnings_icon from "../../assets/icons/earnings.svg";
 import settings_icon from "../../assets/icons/settings.svg";
 import notifications_icon from "../../assets/icons/notifications.svg";
 import help_icon from "../../assets/icons/help.svg";
-import logo_account from "../../assets/icons/logo_account.svg";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../state/store";
 import {
@@ -27,6 +26,9 @@ interface SidebarProps {
   avatar: string;
 }
 
+const class_fade_in = `${styles.class_fade_in}`;
+const class_fade_in_image = `${styles.class_fade_in_image}`;
+
 const Sidebar: FC<SidebarProps> = ({ avatar }) => {
   const [active_section, set_active_section] = useState<ActiveSections>("none");
   const location = useLocation();
@@ -38,10 +40,14 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
   const title = useSelector(
     (state: RootState) => state.sidebar_actions.sidebar_title
   );
-  const display_style = useSelector(
+  const chevron_display_style = useSelector(
     (state: RootState) => state.sidebar_actions.sidebar_chevron_display
   );
   const title_parts = title.split(".");
+  const [after_rolldown, set_after_rolldown] = useState(``);
+  const [chevron_disabled, set_chevron_disabled] = useState(
+    current_pathname === "conversations" ? `${styles.chevron_disabled}` : ``
+  );
 
   useEffect(() => {
     switch (current_pathname) {
@@ -98,25 +104,43 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
     };
   }, []);
 
-  useEffect(() => {
-    if (sidebar_collapsed) {
-      dispatch(set_sidebar_title("H.S"));
-    } else {
-      dispatch(set_sidebar_title("HARMONY.SPHERE"));
-    }
-  }, [sidebar_collapsed]);
-
   const handle_tab_link_click = (tab_name: ActiveSections) => {
     if (tab_name === "conversations") {
       dispatch(set_sidebar_collapsed(true));
       dispatch(set_sidebar_title("H.S"));
-      dispatch(set_sidebar_chevron_display("none"));
+
+      if (window.innerWidth <= 950) {
+        dispatch(set_sidebar_chevron_display("none"));
+      } else {
+        set_chevron_disabled(`${styles.chevron_disabled}`);
+      }
     } else {
+      set_chevron_disabled(``);
       if (window.innerWidth > 950) {
         dispatch(set_sidebar_chevron_display("block"));
       }
     }
   };
+
+  const handle_collapse_icon_click = () => {
+    if (chevron_disabled) {
+      return;
+    }
+
+    dispatch(set_sidebar_collapsed(!sidebar_collapsed));
+  };
+
+  useEffect(() => {
+    if (!sidebar_collapsed) {
+      dispatch(set_sidebar_title("HARMONY.SPHERE"));
+      setTimeout(() => {
+        set_after_rolldown(`${styles.after_rolldown}`);
+      }, 400);
+    } else {
+      dispatch(set_sidebar_title("H.S"));
+      set_after_rolldown(``);
+    }
+  }, [sidebar_collapsed]);
 
   return (
     <div
@@ -125,9 +149,9 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
       }`}
     >
       <div
-        className={styles.collapse_icon_container}
-        style={{ display: `${display_style}` }}
-        onClick={() => dispatch(set_sidebar_collapsed(!sidebar_collapsed))}
+        className={`${styles.collapse_icon_container} ${chevron_disabled}`}
+        style={{ display: `${chevron_display_style}` }}
+        onClick={handle_collapse_icon_click}
       >
         <img
           src={chevron}
@@ -140,7 +164,7 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
           className={styles.collapse_icon}
         />
       </div>
-      <h2 className={styles.h2}>
+      <h2 className={`${styles.h2} ${!sidebar_collapsed && class_fade_in}`}>
         {title_parts.map((part, idx) => (
           <React.Fragment key={idx}>
             {part}
@@ -149,13 +173,21 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
         ))}
       </h2>
       <div className={styles.meta_info_container}>
-        <div className={styles.image_wrapper}>
+        <div
+          className={`${styles.image_wrapper} ${
+            !sidebar_collapsed && class_fade_in_image
+          }`}
+        >
           <img
             src={avatar}
             alt="user's avatar"
           />
         </div>
-        <div className={styles.meta_text}>
+        <div
+          className={`${styles.meta_text} ${
+            !sidebar_collapsed && class_fade_in
+          }`}
+        >
           <p className={styles.username}>Alena NAI</p>
           <p className={styles.user_role}>Автор</p>
           <div className={styles.rating_container}>
@@ -166,10 +198,14 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
           </div>
         </div>
       </div>
-      <div className={styles.tabs_container}>
+      <div
+        className={`${styles.tabs_container} ${
+          !sidebar_collapsed && after_rolldown
+        } `}
+      >
         <NavLink
           to="dashboard"
-          className={`${styles.tab_link} ${
+          className={`${styles.tab_link} ${styles.dashboard} ${
             active_section === "dashboard" && styles.tab_link_active
           }`}
           onClick={() => handle_tab_link_click("dashboard")}
@@ -181,10 +217,12 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
           />
           <p>Главная</p>
         </NavLink>
-        <p className={styles.section_name}>Контент</p>
+        <p className={`${styles.section_name} ${styles.section_content}`}>
+          Контент
+        </p>
         <NavLink
           to="products"
-          className={`${styles.tab_link} ${
+          className={`${styles.tab_link} ${styles.products} ${
             active_section === "products" && styles.tab_link_active
           }`}
           onClick={() => handle_tab_link_click("products")}
@@ -198,7 +236,7 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
         </NavLink>
         <NavLink
           to="services"
-          className={`${styles.tab_link} ${
+          className={`${styles.tab_link} ${styles.services} ${
             active_section === "services" && styles.tab_link_active
           }`}
           onClick={() => handle_tab_link_click("services")}
@@ -210,10 +248,12 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
           />
           <p>Услуги</p>
         </NavLink>
-        <p className={styles.section_name}>Сотрудничесвто</p>
+        <p className={`${styles.section_name} ${styles.section_coop}`}>
+          Сотрудничесвто
+        </p>
         <NavLink
           to="conversations"
-          className={`${styles.tab_link} ${
+          className={`${styles.tab_link} ${styles.conversations} ${
             active_section === "conversations" && styles.tab_link_active
           }`}
           onClick={() => handle_tab_link_click("conversations")}
@@ -227,7 +267,7 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
         </NavLink>
         <NavLink
           to="orders"
-          className={`${styles.tab_link} ${
+          className={`${styles.tab_link} ${styles.orders} ${
             active_section === "orders" && styles.tab_link_active
           }`}
           onClick={() => handle_tab_link_click("orders")}
@@ -239,10 +279,12 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
           />
           <p>Заказы</p>
         </NavLink>
-        <p className={styles.section_name}>Эффективность</p>
+        <p className={`${styles.section_name} ${styles.section_efficiency}`}>
+          Эффективность
+        </p>
         <NavLink
           to="statistics"
-          className={`${styles.tab_link} ${
+          className={`${styles.tab_link} ${styles.statistics} ${
             active_section === "statistics" && styles.tab_link_active
           }`}
           onClick={() => handle_tab_link_click("statistics")}
@@ -256,7 +298,7 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
         </NavLink>
         <NavLink
           to="earnings"
-          className={`${styles.tab_link} ${
+          className={`${styles.tab_link} ${styles.earnings} ${
             active_section === "earnings" && styles.tab_link_active
           }`}
           onClick={() => handle_tab_link_click("earnings")}
@@ -268,10 +310,12 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
           />
           <p>Заработок</p>
         </NavLink>
-        <p className={styles.section_name}>Аккаунт</p>
+        <p className={`${styles.section_name} ${styles.section_account}`}>
+          Аккаунт
+        </p>
         <NavLink
           to="settings"
-          className={`${styles.tab_link} ${
+          className={`${styles.tab_link} ${styles.settings} ${
             active_section === "settings" && styles.tab_link_active
           }`}
           onClick={() => handle_tab_link_click("settings")}
@@ -283,10 +327,12 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
           />
           <p>Настройки</p>
         </NavLink>
-        <p className={styles.section_name}>Общее</p>
+        <p className={`${styles.section_name} ${styles.section_general}`}>
+          Общее
+        </p>
         <NavLink
           to="notifications"
-          className={`${styles.tab_link} ${
+          className={`${styles.tab_link} ${styles.notifications} ${
             active_section === "notifications" && styles.tab_link_active
           }`}
           onClick={() => handle_tab_link_click("notifications")}
@@ -300,7 +346,7 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
         </NavLink>
         <NavLink
           to="help"
-          className={`${styles.tab_link} ${
+          className={`${styles.tab_link} ${styles.help} ${
             active_section === "help" && styles.tab_link_active
           }`}
           onClick={() => handle_tab_link_click("help")}
@@ -313,11 +359,6 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
           <p>Помощь</p>
         </NavLink>
       </div>
-      {/* <img
-        src={logo_account}
-        alt="logo"
-        className={styles.logo_icon}
-      /> */}
     </div>
   );
 };

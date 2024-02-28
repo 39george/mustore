@@ -1,13 +1,60 @@
 @import "../../colors.scss";
 @import "./GeneralStyles.scss";
 
+@mixin transition_width {
+  transition: width 0.2s ease-out;
+}
+
+@keyframes margin_top {
+  from {
+    margin-top: 1rem;
+  }
+  to {
+    margin-top: 0.125rem;
+  }
+}
+
+@keyframes fade_in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes roll_down {
+  from {
+    margin: 0.125rem 0 0;
+  }
+  to {
+    margin: 2rem 0 0;
+  }
+}
+
+@keyframes display {
+  from {
+    display: none;
+  }
+  to {
+    display: block;
+  }
+}
+
+$classes: products, services, conversations, orders, statistics, earnings,
+  settings, notifications, help;
+$delays: 0s, 0.1s, 0.15s, 0.2s, 0.25s, 0.3s, 0.35s, 0.4s, 0.45s;
+
 .sidebar {
   position: relative;
 
+  width: 16.125rem;
   height: 100vh;
 
   color: $main_bright;
   background-color: $account_dark;
+
+  @include transition_width;
 }
 
 .collapse_icon_container {
@@ -35,12 +82,27 @@
 
   &:first-child {
     opacity: 1;
-
     transition: transform 0.2s ease-out;
   }
 
   &:last-child {
     transition: opacity 0.2s ease-out;
+  }
+}
+
+.chevron_disabled {
+  opacity: 0.5;
+  cursor: default;
+  &:hover {
+    transform: none;
+
+    .collapse_icon:first-child {
+      transform: none;
+    }
+
+    .collapse_icon:last-child {
+      opacity: 0.6;
+    }
   }
 }
 
@@ -50,6 +112,8 @@
   font-size: 1.125rem;
   font-family: "Lexend", sans-serif;
 
+  opacity: 0;
+
   span {
     color: $account_accent;
   }
@@ -58,6 +122,7 @@
 .meta_info_container {
   display: flex;
   align-items: center;
+  height: 4.875rem;
   margin: 3.125rem 0 0 1rem;
 }
 
@@ -65,6 +130,7 @@
   @include image_wrapper(4.25rem);
 
   border: 2px solid $main_bright;
+  opacity: 0;
 
   img {
     width: 100%;
@@ -74,6 +140,7 @@
 
 .meta_text {
   margin-left: 1.375rem;
+  opacity: 0;
 
   & > p {
     margin-bottom: 0.5rem;
@@ -103,7 +170,6 @@
   display: flex;
   align-items: center;
 
-  margin: 0.125rem 0;
   padding: 0.75rem 2rem;
 
   font-weight: 600;
@@ -145,19 +211,84 @@
   }
 }
 
-.section_name {
-  width: fit-content;
-  margin: 0.625rem 0 0.625rem 1rem;
-  font-size: 0.625rem;
-  letter-spacing: 0;
-  color: rgba($color: $main_bright, $alpha: 0.7);
+.dashboard,
+.products,
+.services,
+.conversations,
+.orders,
+.statistics,
+.earnings,
+.settings,
+.notifications,
+.help {
+  margin: 0.125rem 0;
 }
 
-.logo_icon {
-  position: absolute;
-  bottom: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
+.section_name {
+  width: fit-content;
+  height: 0.75rem;
+
+  margin: 0.625rem 0 0.625rem 1rem;
+
+  font-size: 0.625rem;
+  letter-spacing: 0;
+
+  color: rgba($color: $main_bright, $alpha: 0.7);
+
+  display: none;
+  opacity: 0;
+}
+
+.products {
+  animation: roll_down 0.2s ease-out forwards;
+}
+
+.conversations {
+  animation: roll_down 0.2s ease-out 0.1s forwards;
+}
+
+.statistics {
+  animation: roll_down 0.2s ease-out 0.15s forwards;
+}
+
+.settings {
+  animation: roll_down 0.2s ease-out 0.2s forwards;
+}
+
+.notifications {
+  animation: roll_down 0.2s ease-out 0.25s forwards;
+}
+
+.after_rolldown {
+  .products,
+  .conversations,
+  .statistics,
+  .settings,
+  .notifications {
+    animation: none;
+    margin: 0.125rem 0 0;
+  }
+
+  .section_name {
+    display: block;
+  }
+
+  $sections: section_content, section_coop, section_efficiency, section_account,
+    section_general;
+  $delay_sections: 0s, 0.1s, 0.2s, 0.3s, 0.4s;
+  @each $section, $delay_section in zip($sections, $delay_sections) {
+    .#{$section} {
+      animation: fade_in 0.2s ease-out $delay_section forwards;
+    }
+  }
+}
+
+.class_fade_in {
+  animation: fade_in 0.3s ease-out 0.1s forwards;
+}
+
+.class_fade_in_image {
+  animation: fade_in 0.3s ease-out 0.2s forwards;
 }
 
 // Sidebar collapsed
@@ -171,17 +302,20 @@
 
   .h2 {
     margin: 1.5rem auto;
+    opacity: 1;
   }
 
   .image_wrapper {
     width: 2rem;
     height: 2rem;
     border: 1px solid $main_bright;
+    opacity: 1;
   }
 
   .meta_info_container {
     margin: 2rem auto;
     width: fit-content;
+    height: fit-content;
   }
 
   .meta_text {
@@ -191,11 +325,11 @@
   .tabs_container {
     height: calc(100vh - 12.5rem);
     margin-top: 0;
+    transition: margin 0.2s ease-out;
   }
 
   .tab_link {
     justify-content: center;
-    width: 3.75rem;
 
     padding: 0.875rem 1.375rem;
 
@@ -203,23 +337,27 @@
       display: none;
     }
 
-    ::before {
-      width: 3.75rem;
+    &:not(:first-child) {
+      margin-top: 1rem;
     }
   }
 
-  .tab_link_active::before {
-    width: 3.75rem;
+  @each $class, $delay in zip($classes, $delays) {
+    .#{$class} {
+      animation: margin_top 0.2s ease-out $delay forwards;
+    }
   }
 
   .section_name {
     display: none;
   }
 }
+
 .sidebar_collapsed {
   @include sidebar_collapsed;
 }
 
+// Media queries
 @media (max-width: 950px) {
   .sidebar {
     @include sidebar_collapsed;
