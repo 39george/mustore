@@ -27,8 +27,6 @@ const ToolbarPopUpMenu: FC<ToolbarPopUpMenuProps> = ({
     (state: RootState) => state.username_avatar.avatar
   );
 
-  console.log(avatar);
-
   useEffect(() => {
     const handle_click_outside_popup = (e: MouseEvent) => {
       if (user_avatar_container_ref?.contains(e.target as Node)) {
