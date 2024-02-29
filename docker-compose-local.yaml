@@ -117,27 +117,29 @@ services:
       retries: 2
       start_period: 2s
 
-  minio:
-    image: minio/minio
+  garage:
+    image: dxflrs/garage:v0.9.1
     secrets:
-      - object-storage-key-id
-      - object-storage-access-key
-    command: server /data --console-address ":9001"
+      - garage-config
+      # - object-storage-key-id
+      # - object-storage-access-key
+    # command: server /data --console-address ":9001"
     volumes:
       - minio_volume:/data
     ports:
-      - 9000:9000
-      - 9001:9001
+      - 3900:3900 # S3-api port
     networks:
       customnetwork:
         ipv4_address: 172.20.0.10
     environment:
-      MINIO_DOMAIN: minio
-      MINIO_SITE_REGION: ru-central1
-      MINIO_ROOT_USER_FILE: /run/secrets/object-storage-key-id
-      MINIO_ROOT_PASSWORD_FILE: /run/secrets/object-storage-access-key
+      GARAGE_CONFIG_FILE: /run/secrets/garage-config
+      # MINIO_DOMAIN: minio
+      # MINIO_SITE_REGION: ru-central1
+      # MINIO_ROOT_USER_FILE: /run/secrets/object-storage-key-id
+      # MINIO_ROOT_PASSWORD_FILE: /run/secrets/object-storage-access-key
     healthcheck:
-      test: timeout 5s bash -c ':> /dev/tcp/127.0.0.1/9000' || exit 1
+      # test: timeout 5s bash -c ':> /dev/tcp/127.0.0.1/9000' || exit 1
+      test: timeout 5s /garage status
       interval: 5s
       timeout: 5s
       retries: 2
@@ -182,6 +184,8 @@ secrets:
     file: secrets/object_storage_access_key.txt
   localhost-recaptcha-secret-key:
     file: secrets/localhost_recaptcha_secret_key.txt
+  garage-config:
+    file: secrets/garage.toml
 
 networks:
   customnetwork:

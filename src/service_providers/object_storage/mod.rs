@@ -4,7 +4,8 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use anyhow::Context;
-use aws_config::{BehaviorVersion, Region};
+use aws_config::BehaviorVersion;
+use aws_config::Region;
 use aws_sdk_s3::config::Credentials;
 use aws_sdk_s3::operation::head_object::HeadObjectOutput;
 use aws_sdk_s3::presigning::PresigningConfig;
@@ -56,15 +57,24 @@ impl ObjectStorage {
             "provided-statically", // This is an arbitrary name for the credential provider
         );
 
-        let config = aws_config::defaults(BehaviorVersion::latest())
+        let config = aws_sdk_s3::Config::builder()
             .region(Region::new(settings.region.clone()))
+            .behavior_version(BehaviorVersion::latest())
             .credentials_provider(credentials)
             .endpoint_url(settings.endpoint_url.clone())
-            .load()
-            .await;
+            .force_path_style(true)
+            .build();
+        let client = Client::from_conf(config);
 
-        // Construct a client for Yandex Object Storage using the custom endpoint.
-        let client = Client::new(&config);
+        // let config = aws_config::defaults(BehaviorVersion::latest())
+        //     .region(Region::new(settings.region.clone()))
+        //     .credentials_provider(credentials)
+        //     .endpoint_url(settings.endpoint_url.clone())
+        //     .load()
+        //     .await;
+
+        // // Construct a client for Yandex Object Storage using the custom endpoint.
+        // let client = Client::new(&config);
 
         match client
             .head_bucket()

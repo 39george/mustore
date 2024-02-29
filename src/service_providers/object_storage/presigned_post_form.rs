@@ -195,7 +195,8 @@ impl<'a> PresignedPostDataBuilder<'a> {
         map.insert("success_action_status".into(), "200".into());
         map.insert("X-Amz-Signature".into(), policy_signature.into());
         map.insert("key".into(), self.object_key.into());
-        map.insert("acl".into(), "private".into());
+        map.insert("bucket".into(), self.bucket.to_owned());
+        // map.insert("acl".into(), "private".into());
         map.insert("policy".into(), policy.into());
         map.insert("X-Amz-Credential".into(), x_amz_credential.into());
         map.insert("Content-Type".into(), mime.to_string());
@@ -229,7 +230,7 @@ impl<'a> PresignedPostDataBuilder<'a> {
                 {"X-Amz-Credential": x_amz_credential},
                 {"bucket": bucket},
                 {"key": object_key},
-                {"acl": "private"},
+                // {"acl": "private"},
                 {"success_action_status": "200"},
                 {"Content-Disposition": content_disposition},
                 ["starts-with", "$Content-Type", mime.ty.as_ref()],
