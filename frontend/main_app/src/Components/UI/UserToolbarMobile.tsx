@@ -1,11 +1,12 @@
 import styles from "./UserToolbarMobile.module.scss";
 import { FC, useEffect, useState } from "react";
-import avatar from "../../assets/HomePage/author_1.png";
 import { GoChevronDown } from "react-icons/go";
 import { FaRegHeart } from "react-icons/fa";
 import { PiShoppingCartFill } from "react-icons/pi";
 import useLogOutUserApi from "../../hooks/API/useLogOutUserApi";
 import useCheckPermissionsApi from "../../hooks/API/useCheckPermissionsApi";
+import { useSelector } from "react-redux";
+import { RootState } from "../../state/store";
 
 interface UserToolbarMobileProps {
   sidebar_open: boolean;
@@ -16,6 +17,12 @@ const UserToolbarMobile: FC<UserToolbarMobileProps> = ({ sidebar_open }) => {
   const { check_user_permissions } = useCheckPermissionsApi();
   const [options_visible, set_options_visible] = useState(false);
   const [chevron_styles, set_chevron_styles] = useState(`${styles.chevron}`);
+  const username = useSelector(
+    (state: RootState) => state.username_avatar.username
+  );
+  const avatar = useSelector(
+    (state: RootState) => state.username_avatar.avatar
+  );
 
   const try_to_logout = async () => {
     await logout();
@@ -49,7 +56,7 @@ const UserToolbarMobile: FC<UserToolbarMobileProps> = ({ sidebar_open }) => {
             className={styles.user_avatar}
           />
         </div>
-        <p className={styles.username}>Username</p>
+        <p className={styles.username}>{username}</p>
         <GoChevronDown className={chevron_styles} />
       </div>
       <ul

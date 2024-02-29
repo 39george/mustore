@@ -1,7 +1,6 @@
 import styles from "./UserToolbar.module.scss";
 import { FaRegHeart } from "react-icons/fa";
 import { PiShoppingCartFill } from "react-icons/pi";
-import avatar from "../../assets/HomePage/author_1.png";
 import { FC, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../state/store";
@@ -21,6 +20,9 @@ const UserToolbar: FC = () => {
     `${styles.wrapper}`
   );
   const user_avatar_container_ref = useRef<HTMLDivElement>(null);
+  const avatar = useSelector(
+    (state: RootState) => state.username_avatar.avatar
+  );
 
   useEffect(() => {
     switch (intersecting_section) {

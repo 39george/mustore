@@ -1,9 +1,10 @@
 import styles from "./ToolbarPopUpMenu.module.scss";
 import { FC, useEffect, useRef } from "react";
-import avatar from "../../assets/HomePage/author_1.png";
 import useLogOutUserApi from "../../hooks/API/useLogOutUserApi";
 import useCheckPermissionsApi from "../../hooks/API/useCheckPermissionsApi";
 import { NavLink } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { RootState } from "../../state/store";
 
 interface ToolbarPopUpMenuProps {
   visible: boolean;
@@ -19,6 +20,14 @@ const ToolbarPopUpMenu: FC<ToolbarPopUpMenuProps> = ({
   const toolbar_popup_menu_ref = useRef<HTMLDivElement>(null);
   const { logout } = useLogOutUserApi();
   const { check_user_permissions } = useCheckPermissionsApi();
+  const username = useSelector(
+    (state: RootState) => state.username_avatar.username
+  );
+  const avatar = useSelector(
+    (state: RootState) => state.username_avatar.avatar
+  );
+
+  console.log(avatar);
 
   useEffect(() => {
     const handle_click_outside_popup = (e: MouseEvent) => {
@@ -66,7 +75,7 @@ const ToolbarPopUpMenu: FC<ToolbarPopUpMenuProps> = ({
             />
           </div>
         </div>
-        <p className={styles.username}>Username</p>
+        <p className={styles.username}>{username}</p>
       </div>
       <hr className={styles.divider} />
       <ul className={styles.options}>
