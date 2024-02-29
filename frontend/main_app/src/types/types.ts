@@ -92,3 +92,8 @@ export type ActiveSections =
   | "notifications"
   | "help"
   | "none";
+
+export interface UsernameAvatar {
+  username: string;
+  avatar: string;
+}
