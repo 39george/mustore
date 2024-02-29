@@ -11,20 +11,28 @@ import { useEffect } from "react";
 import useCheckPermissionsApi from "./hooks/API/useCheckPermissionsApi";
 import PersonalAccount from "./PersonalAccount/PersonalAccount";
 import Dashboard from "./PersonalAccount/Pages/Dashboard";
+import useUsernameAvatarApi from "./hooks/API/useUsernameAvatarApi";
 import { useSelector } from "react-redux";
 import { RootState } from "./state/store";
 
 function App() {
   const { check_user_permissions } = useCheckPermissionsApi();
+  const { get_username_and_avatar } = useUsernameAvatarApi();
 
   useEffect(() => {
-    check_user_permissions();
+    const fetch_data = async () => {
+      await check_user_permissions();
+      await get_username_and_avatar();
+    };
+
+    fetch_data();
   }, []);
 
-  // const user_permissions = useSelector(
-  //   (state: RootState) => state.user_permissions.permissions
+  // const username = useSelector(
+  //   (state: RootState) => state.username_avatar.username
   // );
-  // console.log(user_permissions);
+
+  // console.log(username);
 
   return (
     <BrowserRouter>
