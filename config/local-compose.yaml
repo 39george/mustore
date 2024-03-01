@@ -14,7 +14,7 @@ email_client:
   sender_email: "anymail@anydomain.com"
   timeout: 10000
 object_storage:
-  endpoint_url: "http://garage:3900"
+  endpoint_url: "http://192.168.31.150:3900"
   region: "garage"
   bucket_name: "mustore-data"
 recaptcha:

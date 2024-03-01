@@ -107,11 +107,12 @@ async fn health_check() -> StatusCode {
 async fn user_permissions(
     auth_session: AuthSession,
 ) -> Result<Json<HashSet<Permission>>, ResponseError> {
-    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
-        anyhow::anyhow!("No such user in AuthSession!"),
-    ))?;
-    let all_permissions =
-        auth_session.backend.get_all_permissions(&user).await?;
+    let user = auth_session
+        .user
+        .ok_or(ResponseError::UnauthorizedError(anyhow::anyhow!(
+            "No such user in AuthSession!"
+        )))?;
+    let all_permissions = auth_session.backend.get_all_permissions(&user).await?;
     Ok(Json(all_permissions))
 }
 
@@ -142,14 +143,16 @@ async fn user_permissions(
     ),
     tag = "protected.users"
 )]
-#[tracing::instrument(name = "Get list of user permissions", skip_all)]
+#[tracing::instrument(name = "Get avatar url and username", skip_all)]
 async fn avatar_username(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
 ) -> Result<Json<user_access::GetUserAvatarUsername>, ResponseError> {
-    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
-        anyhow::anyhow!("No such user in AuthSession!"),
-    ))?;
+    let user = auth_session
+        .user
+        .ok_or(ResponseError::UnauthorizedError(anyhow::anyhow!(
+            "No such user in AuthSession!"
+        )))?;
 
     let db_client = app_state
         .pg_pool
@@ -209,9 +212,11 @@ async fn request_obj_storage_upload(
     State(app_state): State<AppState>,
     Query(params): Query<UploadFileRequest>,
 ) -> Result<Json<PresignedPostData>, ResponseError> {
-    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
-        anyhow::anyhow!("No such user in AuthSession!"),
-    ))?;
+    let user = auth_session
+        .user
+        .ok_or(ResponseError::UnauthorizedError(anyhow::anyhow!(
+            "No such user in AuthSession!"
+        )))?;
     tracing::Span::current().record("username", &user.username);
 
     params.validate(&())?;
@@ -237,12 +242,11 @@ async fn request_obj_storage_upload(
     .context("Failed to build object key")
     .map_err(ResponseError::BadRequest)?;
 
-    let presigned_post_data =
-        app_state.object_storage.generate_presigned_post_form(
-            &object_key,
-            params.media_type,
-            max_size,
-        )?;
+    let presigned_post_data = app_state.object_storage.generate_presigned_post_form(
+        &object_key,
+        params.media_type,
+        max_size,
+    )?;
 
     store_upload_request_data(&app_state.redis_pool, &object_key, user.id)
         .await
@@ -282,18 +286,16 @@ async fn request_obj_storage_upload(
     ),
     tag = "protected.users"
 )]
-#[tracing::instrument(
-    name = "Get ordinary conversations list",
-    skip_all,
-    fields(username)
-)]
+#[tracing::instrument(name = "Get ordinary conversations list", skip_all, fields(username))]
 async fn get_conversations(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
 ) -> Result<Json<Vec<GetConversationsEntries>>, ResponseError> {
-    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
-        anyhow::anyhow!("No such user in AuthSession!"),
-    ))?;
+    let user = auth_session
+        .user
+        .ok_or(ResponseError::UnauthorizedError(anyhow::anyhow!(
+            "No such user in AuthSession!"
+        )))?;
     tracing::Span::current().record("username", &user.username);
 
     let db_client = app_state
@@ -366,13 +368,14 @@ async fn get_dialog_id(
         with_user: with_username,
     }): Query<GetConversationRequest>,
 ) -> Result<Json<DialogId>, ResponseError> {
-    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
-        anyhow::anyhow!("No such user in AuthSession!"),
-    ))?;
+    let user = auth_session
+        .user
+        .ok_or(ResponseError::UnauthorizedError(anyhow::anyhow!(
+            "No such user in AuthSession!"
+        )))?;
     tracing::Span::current().record("username", &user.username);
     tracing::Span::current().record("dialog_with", &with_username);
-    let _ =
-        UserName::parse(&with_username).map_err(ResponseError::BadRequest)?;
+    let _ = UserName::parse(&with_username).map_err(ResponseError::BadRequest)?;
 
     let db_client = app_state
         .pg_pool
@@ -380,8 +383,7 @@ async fn get_dialog_id(
         .await
         .context("Failed to get connection from postgres pool")?;
 
-    let id =
-        get_dialog_by_username(&db_client, &user.id, &with_username).await?;
+    let id = get_dialog_by_username(&db_client, &user.id, &with_username).await?;
 
     Ok(Json(DialogId { id }))
 }
@@ -421,16 +423,15 @@ async fn get_dialog_id(
 async fn create_new_conversation(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
-    Query(CreateConversationRequest { with_username }): Query<
-        CreateConversationRequest,
-    >,
+    Query(CreateConversationRequest { with_username }): Query<CreateConversationRequest>,
 ) -> Result<(StatusCode, Json<DialogId>), ResponseError> {
-    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
-        anyhow::anyhow!("No such user in AuthSession!"),
-    ))?;
+    let user = auth_session
+        .user
+        .ok_or(ResponseError::UnauthorizedError(anyhow::anyhow!(
+            "No such user in AuthSession!"
+        )))?;
     tracing::Span::current().record("username", &user.username);
-    let _ =
-        UserName::parse(&with_username).map_err(ResponseError::BadRequest)?;
+    let _ = UserName::parse(&with_username).map_err(ResponseError::BadRequest)?;
 
     let mut db_client = app_state
         .pg_pool
@@ -530,9 +531,11 @@ async fn send_message(
     State(app_state): State<AppState>,
     Json(params): Json<SendMessageRequest>,
 ) -> Result<StatusCode, ResponseError> {
-    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
-        anyhow::anyhow!("No such user in AuthSession!"),
-    ))?;
+    let user = auth_session
+        .user
+        .ok_or(ResponseError::UnauthorizedError(anyhow::anyhow!(
+            "No such user in AuthSession!"
+        )))?;
     tracing::Span::current().record("username", &user.username);
 
     params.validate(&())?;
@@ -573,13 +576,9 @@ async fn send_message(
         .context("Failed to insert a new message into pg")?;
 
     let attachments = params.attachments.iter().collect::<Vec<_>>();
-    remove_attachments_data_from_redis(
-        &app_state.redis_pool,
-        &attachments,
-        user.id,
-    )
-    .await
-    .context("Failed to remove attachments from redis")?;
+    remove_attachments_data_from_redis(&app_state.redis_pool, &attachments, user.id)
+        .await
+        .context("Failed to remove attachments from redis")?;
 
     for attachment in &params.attachments {
         // Move attachments into `received` folder
@@ -630,9 +629,11 @@ async fn list_conversation(
         offset,
     }): Query<ListConversationRequest>,
 ) -> Result<Json<ConversationDataResponse>, ResponseError> {
-    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
-        anyhow::anyhow!("No such user in AuthSession!"),
-    ))?;
+    let user = auth_session
+        .user
+        .ok_or(ResponseError::UnauthorizedError(anyhow::anyhow!(
+            "No such user in AuthSession!"
+        )))?;
     tracing::Span::current().record("username", &user.username);
 
     let db_client = app_state
@@ -642,13 +643,7 @@ async fn list_conversation(
         .context("Failed to get connection from postgres pool")?;
 
     check_conversation_exists(&db_client, &conversation_id).await?;
-    check_conversation_access(
-        &db_client,
-        &user.id,
-        &user.username,
-        &conversation_id,
-    )
-    .await?;
+    check_conversation_access(&db_client, &user.id, &user.username, &conversation_id).await?;
 
     let conversations = user_access::list_conversation_by_id()
         .bind(&db_client, &conversation_id, &offset)
@@ -656,23 +651,16 @@ async fn list_conversation(
         .await
         .context("Failed to fetch conversations from db")?;
 
-    let response = ConversationDataResponse::new(
-        conversations,
-        &app_state.object_storage,
-        user.id,
-    )
-    .await
-    .context("Failed to build conversation response")?;
+    let response = ConversationDataResponse::new(conversations, &app_state.object_storage, user.id)
+        .await
+        .context("Failed to build conversation response")?;
 
     Ok(Json(response))
 }
 
 // ───── Functions ────────────────────────────────────────────────────────── //
 
-#[tracing::instrument(
-    name = "Store upload request data in the redis",
-    skip_all
-)]
+#[tracing::instrument(name = "Store upload request data in the redis", skip_all)]
 async fn store_upload_request_data(
     con: &RedisPool,
     object_key: &ObjectKey,
@@ -688,29 +676,21 @@ async fn store_upload_request_data(
 }
 
 #[tracing::instrument(name = "Check current user uploads redis", skip_all)]
-async fn check_current_user_uploads(
-    con: &RedisPool,
-    user_id: i32,
-) -> Result<(), ResponseError> {
+async fn check_current_user_uploads(con: &RedisPool, user_id: i32) -> Result<(), ResponseError> {
     let pattern = format!("upload_request:{}*", user_id);
     let mut scan = con.next().scan(pattern, None, None);
     while let Ok(Some(mut page)) = scan.try_next().await {
         if let Some(keys) = page.take_results() {
             if keys.len() > 15 {
-                tracing::error!(
-                    "User {} already have 15 current uploads",
-                    user_id
-                );
+                tracing::error!("User {} already have 15 current uploads", user_id);
                 return Err(ResponseError::TooManyUploadsError);
             }
             if keys.len() > 5 {
-                tracing::warn!(
-                    "User {} already have 5 current uploads",
-                    user_id
-                );
+                tracing::warn!("User {} already have 5 current uploads", user_id);
             }
         }
-        page.next().context("Failed to move on to the next page of results from the SCAN operation")?;
+        page.next()
+            .context("Failed to move on to the next page of results from the SCAN operation")?;
     }
     Ok(())
 }
@@ -722,8 +702,7 @@ async fn remove_attachments_data_from_redis(
     user_id: i32,
 ) -> RedisResult<()> {
     for obj_key in keys.into_iter() {
-        let upload_request =
-            UploadRequest::new(user_id, (*obj_key).clone()).to_string();
+        let upload_request = UploadRequest::new(user_id, (*obj_key).clone()).to_string();
         // Check that there are such upload is
         let _created_at: String = con.get(&upload_request).await?;
 
@@ -764,9 +743,7 @@ async fn check_conversation_exists<T: cornucopia_async::GenericClient>(
         .await
         .context("Failed to fetch conversation access from db")?
         .ok_or(ResponseError::NotFoundError(
-            anyhow::anyhow!(
-                "Conversation with id {conversation_id} not exists",
-            ),
+            anyhow::anyhow!("Conversation with id {conversation_id} not exists",),
             "conversation_id",
         ))
 }
