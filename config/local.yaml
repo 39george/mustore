@@ -14,8 +14,8 @@ email_client:
   sender_email: "anymail@anydomain.com"
   timeout: 10000
 object_storage:
-  endpoint_url: "http://minio.orb.local:9000"
-  region: "ru-central1"
+  endpoint_url: "http://garage.orb.local:3900"
+  region: "garage"
   bucket_name: "mustore-data"
 recaptcha:
   endpoint_url: "http://ghashytest.com"
