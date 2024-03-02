@@ -1,3 +1,6 @@
+import { UserPermissions } from "../state/user_permissions_slice";
+import { UserRole } from "../types/types";
+
 // Wait function
 export const wait = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -18,5 +21,25 @@ export const handle_enter_key_down = (
         input_refs[idx + 1].current?.focus();
       }
     }
+  }
+};
+
+// Find and translate user role
+export const find_user_role_index = (
+  arr: UserPermissions[],
+  role: UserRole
+) => {
+  switch (role) {
+    case "creator":
+      return arr.findIndex((obj) => obj.name === "creator");
+    case "consumer":
+      return arr.findIndex((obj) => obj.name === "consumer");
+  }
+};
+export const translate_user_role = (role: string) => {
+  if (role === "creator") {
+    return "Автор";
+  } else {
+    return "Покупатель";
   }
 };
