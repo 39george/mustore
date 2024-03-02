@@ -21,6 +21,7 @@ import {
   set_sidebar_title,
 } from "../../state/sidebar_actions_slice";
 import { ActiveSections } from "../../types/types";
+import { set_product_status } from "../../state/product_status_slice";
 
 const class_fade_in = `${styles.class_fade_in}`;
 const class_fade_in_image = `${styles.class_fade_in_image}`;
@@ -107,6 +108,7 @@ const Sidebar: FC<SidebarProps> = ({ username, user_role, avatar }) => {
   }, []);
 
   const handle_tab_link_click = (tab_name: ActiveSections) => {
+    // Disable functionality of sidebar collapsed icon if path's "conversations"
     if (tab_name === "conversations") {
       dispatch(set_sidebar_collapsed(true));
       dispatch(set_sidebar_title("H.S"));
@@ -121,6 +123,11 @@ const Sidebar: FC<SidebarProps> = ({ username, user_role, avatar }) => {
       if (window.innerWidth > 950) {
         dispatch(set_sidebar_chevron_display("block"));
       }
+    }
+
+    // Custom settings for path "products"
+    if (tab_name !== "products") {
+      dispatch(set_product_status(null));
     }
   };
 

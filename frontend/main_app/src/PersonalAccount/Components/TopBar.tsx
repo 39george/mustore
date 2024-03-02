@@ -3,6 +3,9 @@ import { NavLink, useLocation } from "react-router-dom";
 import { FC, useEffect, useState } from "react";
 import { FaRegBell } from "react-icons/fa6";
 import conversations from "../../assets/icons/conversations_outline.svg";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../state/store";
+import { set_product_status } from "../../state/product_status_slice";
 
 interface TopBarProps {
   username: string;
@@ -10,9 +13,13 @@ interface TopBarProps {
 }
 
 const TopBar: FC<TopBarProps> = ({ username, avatar }) => {
-  const [header_name, set_header_name] = useState("");
   const location = useLocation();
+  const dispatch = useDispatch();
+  const [header_name, set_header_name] = useState("");
   const current_pathname = location.pathname.replace("/personal-account/", "");
+  const product_status = useSelector(
+    (state: RootState) => state.product_status.product_status
+  );
 
   useEffect(() => {
     switch (current_pathname) {
@@ -21,6 +28,7 @@ const TopBar: FC<TopBarProps> = ({ username, avatar }) => {
         break;
       case "products":
         set_header_name("Товары");
+        dispatch(set_product_status("active"));
         break;
       case "services":
         set_header_name("Услуги");
@@ -54,6 +62,7 @@ const TopBar: FC<TopBarProps> = ({ username, avatar }) => {
   return (
     <div className={styles.top_bar}>
       <h2 className={styles.h2}>{header_name}</h2>
+      <p>{product_status}</p>
       <div className={styles.interactions_container}>
         <div className={styles.notifications}>
           <FaRegBell className={styles.notifications_icon} />
