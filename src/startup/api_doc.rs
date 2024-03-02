@@ -10,11 +10,11 @@ use utoipa::{
     Modify, OpenApi, ToResponse, ToSchema,
 };
 
-use crate::routes::protected;
 use crate::{
     auth::{self, users::Permission},
     domain::responses::user_access::DialogId,
 };
+use crate::{domain::general_types::ProductStatus, routes::protected};
 use crate::{
     domain::requests::user_access::SendMessageRequest, routes::development,
 };
@@ -160,6 +160,48 @@ pub struct GetCreatorMarksAvg {
     pub count: i64,
 }
 
+#[derive(ToResponse)]
+#[response(
+    description = "Get creator's songs",
+    content_type = "application/json",
+    example = json!({
+    "song_id": "5",
+    "name": "pretty song",
+    "price": "1200",
+    "key": "http://some_url_to_cover.png",
+    "primary_genre": "jazz",
+    "secondary_genre": "pop",
+    "tempo": "110",
+    "music_key": "a_major",
+    "sex": "female",
+    "duration": "2.25",
+    "lyric": "Lalalalaaaa, la",
+    "moods": [
+        "kind",
+        "lovely"
+    ],
+    "likes_count": "1210",
+    "listenings_count": "12346",
+    }),
+)]
+pub struct GetCreatorSongs {
+    pub song_id: i32,
+    pub status: ProductStatus,
+    pub name: String,
+    pub price: rust_decimal::Decimal,
+    pub key: String,
+    pub primary_genre: i32,
+    pub secondary_genre: i32,
+    pub tempo: i16,
+    pub music_key: Musickey,
+    pub sex: String,
+    pub duration: i16,
+    pub lyric: String,
+    pub moods: Vec<String>,
+    pub likes_count: i64,
+    pub listenings_count: i64,
+}
+
 // ───── TypeWrappers ─────────────────────────────────────────────────────── //
 
 #[derive(ToSchema)]
@@ -176,6 +218,10 @@ pub struct MediaType(String);
     example = "received/Lisa:21C960E7-5CA8-4974-98D7-6501DCCCAFD7:file.ext"
 )]
 pub struct ObjectKey(String);
+
+#[derive(ToSchema)]
+#[schema(as = MusicKey)]
+pub struct Musickey;
 
 // ───── Addons ───────────────────────────────────────────────────────────── //
 
@@ -224,6 +270,7 @@ impl Modify for ServerAddon {
         protected::creator::submit_service,
         protected::creator::create_offer,
         protected::creator::marks_avg,
+        protected::creator::songs,
         protected::consumer::status_bar_info,
         protected::user::user_permissions,
         protected::user::avatar_username,
@@ -245,6 +292,7 @@ impl Modify for ServerAddon {
                 crate::domain::music_parameters::SortBy,
                 crate::domain::music_parameters::Sex,
                 crate::domain::music_parameters::MusicKey,
+                crate::domain::general_types::ProductStatus,
                 crate::domain::user_role::UserRole,
                 crate::auth::signup::UserSignupData,
                 crate::auth::login::Credentials,
@@ -263,6 +311,7 @@ impl Modify for ServerAddon {
                 MediaType,
                 SendMessageRequest,
                 ObjectKey,
+                Musickey,
                 crate::domain::responses::user_access::Entry,
                 crate::domain::responses::user_access::Interlocutor,
                 crate::domain::responses::user_access::Message,
@@ -289,7 +338,8 @@ impl Modify for ServerAddon {
                 Permission,
                 NotFoundResponse,
                 ConversationDataResponse,
-                ConflictErrorResponse
+                ConflictErrorResponse,
+                GetCreatorSongs
             )
         ),
         modifiers(&ServerAddon),

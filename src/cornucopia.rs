@@ -2,6 +2,55 @@
 
 #[allow(clippy :: all, clippy :: pedantic)] #[allow(unused_variables)]
 #[allow(unused_imports)] #[allow(dead_code)] pub mod types { pub mod public { #[derive(serde::Serialize, Debug, Clone, Copy, PartialEq, Eq)]
+#[allow(non_camel_case_types)] pub enum Productstatus { moderation,denied,active,hidden,sold,}impl < 'a > postgres_types :: ToSql for Productstatus
+{
+    fn
+    to_sql(& self, ty : & postgres_types :: Type, buf : & mut postgres_types
+    :: private :: BytesMut,) -> Result < postgres_types :: IsNull, Box < dyn
+    std :: error :: Error + Sync + Send >, >
+    {
+        let s = match * self { Productstatus :: moderation => "moderation",Productstatus :: denied => "denied",Productstatus :: active => "active",Productstatus :: hidden => "hidden",Productstatus :: sold => "sold",}
+        ; buf.extend_from_slice(s.as_bytes()) ; std :: result :: Result ::
+        Ok(postgres_types :: IsNull :: No)
+    } fn accepts(ty : & postgres_types :: Type) -> bool
+    {
+        if ty.name() != "productstatus" { return false ; } match * ty.kind()
+        {
+            postgres_types :: Kind :: Enum(ref variants) =>
+            {
+                if variants.len() != 5 { return false ; }
+                variants.iter().all(| v | match & * * v
+                { "moderation" => true,"denied" => true,"active" => true,"hidden" => true,"sold" => true,_ => false, })
+            } _ => false,
+        }
+    } fn
+    to_sql_checked(& self, ty : & postgres_types :: Type, out : & mut
+    postgres_types :: private :: BytesMut,) -> Result < postgres_types ::
+    IsNull, Box < dyn std :: error :: Error + Sync + Send >>
+    { postgres_types :: __to_sql_checked(self, ty, out) }
+} impl < 'a > postgres_types :: FromSql < 'a > for Productstatus
+{
+    fn from_sql(ty : & postgres_types :: Type, buf : & 'a [u8],) -> Result <
+    Productstatus, Box < dyn std :: error :: Error + Sync + Send >, >
+    {
+        match std :: str :: from_utf8(buf) ?
+        {
+            "moderation" => Ok(Productstatus :: moderation),"denied" => Ok(Productstatus :: denied),"active" => Ok(Productstatus :: active),"hidden" => Ok(Productstatus :: hidden),"sold" => Ok(Productstatus :: sold),s => Result ::
+            Err(Into :: into(format! ("invalid variant `{}`", s))),
+        }
+    } fn accepts(ty : & postgres_types :: Type) -> bool
+    {
+        if ty.name() != "productstatus" { return false ; } match * ty.kind()
+        {
+            postgres_types :: Kind :: Enum(ref variants) =>
+            {
+                if variants.len() != 5 { return false ; }
+                variants.iter().all(| v | match & * * v
+                { "moderation" => true,"denied" => true,"active" => true,"hidden" => true,"sold" => true,_ => false, })
+            } _ => false,
+        }
+    }
+}#[derive(serde::Serialize, Debug, Clone, Copy, PartialEq, Eq)]
 #[allow(non_camel_case_types)] pub enum Musickey { a_minor,a_major,b_flat_minor,b_flat_major,b_minor,b_major,c_minor,c_major,c_sharp_minor,c_sharp_major,d_minor,d_major,e_flat_minor,e_flat_major,e_minor,e_major,f_minor,f_major,f_sharp_minor,f_sharp_major,g_minor,g_major,a_flat_minor,a_flat_major,}impl < 'a > postgres_types :: ToSql for Musickey
 {
     fn
@@ -162,7 +211,7 @@ LEFT JOIN lyrics ON products.id = lyrics.products_id
 LEFT JOIN covers ON products.id = covers.products_id
 JOIN likes ON songs.id = likes.songs_id OR beats.id = likes.beats_id OR lyrics.id = likes.lyrics_id OR covers.id = likes.covers_id AND likes.users_id = $1
 JOIN objects ON products.id = objects.cover_products_id
-JOIN users author ON products.owner_id = author.id")) } pub
+JOIN users author ON products.author_id = author.id")) } pub
 struct GetLikedProductsStmt(cornucopia_async :: private :: Stmt) ; impl
 GetLikedProductsStmt { pub fn bind < 'a, C : GenericClient, >
 (& 'a mut self, client : & 'a  C,
@@ -188,7 +237,7 @@ LEFT JOIN beats ON products.id = beats.products_id
 LEFT JOIN lyrics ON products.id = lyrics.products_id
 LEFT JOIN covers ON products.id = covers.products_id
 JOIN objects ON products.id = objects.cover_products_id
-JOIN users author ON products.owner_id = author.id")) } pub
+JOIN users author ON products.author_id = author.id")) } pub
 struct GetProductOrdersStmt(cornucopia_async :: private :: Stmt) ; impl
 GetProductOrdersStmt { pub fn bind < 'a, C : GenericClient, >
 (& 'a mut self, client : & 'a  C,
@@ -201,7 +250,7 @@ Products, 1 >
         | row | { ProductsBorrowed { product_name : row.get(0),author_username : row.get(1),price : row.get(2),product_cover : row.get(3),} }, mapper : | it | { <Products>::from(it) },
     }
 } }}pub mod creator_access
-{ use futures::{{StreamExt, TryStreamExt}};use futures; use cornucopia_async::GenericClient;#[derive( Debug)] pub struct InsertProductAndGetProductIdParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,> { pub owher_id : i32,pub name : T1,pub description : Option<T2>,pub price : rust_decimal::Decimal,}#[derive( Debug)] pub struct InsertProductCoverObjectKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub product_id : i32,}#[derive( Debug)] pub struct InsertProductMoodByNameParams < T1 : cornucopia_async::StringSql,> { pub product_id : i32,pub mood_name : T1,}#[derive( Debug)] pub struct InsertSongAndGetSongIdParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,T3 : cornucopia_async::StringSql,T4 : cornucopia_async::StringSql,> { pub product_id : i32,pub primary_genre : T1,pub secondary_genre : Option<T2>,pub sex : T3,pub tempo : i16,pub key : super::super::types::public::Musickey,pub duration : i16,pub lyric : T4,}#[derive( Debug)] pub struct InsertBeatAndGetBeatIdParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,> { pub product_id : i32,pub primary_genre : T1,pub secondary_genre : Option<T2>,pub tempo : i16,pub key : super::super::types::public::Musickey,pub duration : i16,}#[derive( Debug)] pub struct InsertMusicProductMasterObjectKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub song_id : Option<i32>,pub beat_id : Option<i32>,}#[derive( Debug)] pub struct InsertMusicProductMasterTaggedObjectKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub song_id : Option<i32>,pub beat_id : Option<i32>,}#[derive( Debug)] pub struct InsertMusicProductMultitrackObjectKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub song_id : Option<i32>,pub beat_id : Option<i32>,}#[derive( Debug)] pub struct InsertLyricParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,> { pub product_id : i32,pub text : T1,pub sex : Option<T2>,}#[derive( Debug)] pub struct InsertServiceGetIdParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,> { pub creator_id : i32,pub name : T1,pub description : Option<T2>,pub display_price : rust_decimal::Decimal,}#[derive( Debug)] pub struct InsertGhostWritingParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::ArraySql<Item = T1>,> { pub service_id : i32,pub ghost_credits : Option<T2>,}#[derive( Debug)] pub struct InsertServiceCoverObjectKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub service_id : i32,}#[derive( Debug)] pub struct InsertMixingCreditObjectKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub object_type : super::super::types::public::Objecttype,pub credit_mixing_id : i32,}#[derive( Debug)] pub struct InsertSongWritingCreditObjectKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub object_type : super::super::types::public::Objecttype,pub credit_song_writing_id : i32,}#[derive( Debug)] pub struct InsertBeatWritingCreditObjectKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub object_type : super::super::types::public::Objecttype,pub credit_beat_writing_id : i32,}#[derive( Debug)] pub struct InsertCoverDesignCreditObjectKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub object_type : super::super::types::public::Objecttype,pub credit_cover_design_id : i32,}#[derive( Debug)] pub struct InsertMusicServiceGenreParams < T1 : cornucopia_async::StringSql,> { pub genre : T1,pub beat_writing_id : Option<i32>,pub song_writing_id : Option<i32>,pub mixing_id : Option<i32>,}#[derive( Debug)] pub struct CreateOfferParams < T1 : cornucopia_async::StringSql,> { pub conversations_id : i32,pub services_id : i32,pub text : T1,pub price : rust_decimal::Decimal,pub delivery_date : time::OffsetDateTime,pub free_refisions : i32,pub revision_price : rust_decimal::Decimal,}#[derive(serde::Serialize, Debug, Clone, PartialEq, Copy)] pub struct GetCreatorMarksAvg
+{ use futures::{{StreamExt, TryStreamExt}};use futures; use cornucopia_async::GenericClient;#[derive(Clone,Copy, Debug)] pub struct GetCreatorSongsParams < > { pub user_id : i32,pub product_status : super::super::types::public::Productstatus,}#[derive( Debug)] pub struct InsertProductAndGetProductIdParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,> { pub owher_id : i32,pub name : T1,pub description : Option<T2>,pub price : rust_decimal::Decimal,}#[derive( Debug)] pub struct InsertProductCoverObjectKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub product_id : i32,}#[derive( Debug)] pub struct InsertProductMoodByNameParams < T1 : cornucopia_async::StringSql,> { pub product_id : i32,pub mood_name : T1,}#[derive( Debug)] pub struct InsertSongAndGetSongIdParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,T3 : cornucopia_async::StringSql,T4 : cornucopia_async::StringSql,> { pub product_id : i32,pub primary_genre : T1,pub secondary_genre : Option<T2>,pub sex : T3,pub tempo : i16,pub key : super::super::types::public::Musickey,pub duration : i16,pub lyric : T4,}#[derive( Debug)] pub struct InsertBeatAndGetBeatIdParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,> { pub product_id : i32,pub primary_genre : T1,pub secondary_genre : Option<T2>,pub tempo : i16,pub key : super::super::types::public::Musickey,pub duration : i16,}#[derive( Debug)] pub struct InsertMusicProductMasterObjectKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub song_id : Option<i32>,pub beat_id : Option<i32>,}#[derive( Debug)] pub struct InsertMusicProductMasterTaggedObjectKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub song_id : Option<i32>,pub beat_id : Option<i32>,}#[derive( Debug)] pub struct InsertMusicProductMultitrackObjectKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub song_id : Option<i32>,pub beat_id : Option<i32>,}#[derive( Debug)] pub struct InsertLyricParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,> { pub product_id : i32,pub text : T1,pub sex : Option<T2>,}#[derive( Debug)] pub struct InsertServiceGetIdParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,> { pub creator_id : i32,pub name : T1,pub description : Option<T2>,pub display_price : rust_decimal::Decimal,}#[derive( Debug)] pub struct InsertGhostWritingParams < T1 : cornucopia_async::StringSql,T2 : cornucopia_async::ArraySql<Item = T1>,> { pub service_id : i32,pub ghost_credits : Option<T2>,}#[derive( Debug)] pub struct InsertServiceCoverObjectKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub service_id : i32,}#[derive( Debug)] pub struct InsertMixingCreditObjectKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub object_type : super::super::types::public::Objecttype,pub credit_mixing_id : i32,}#[derive( Debug)] pub struct InsertSongWritingCreditObjectKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub object_type : super::super::types::public::Objecttype,pub credit_song_writing_id : i32,}#[derive( Debug)] pub struct InsertBeatWritingCreditObjectKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub object_type : super::super::types::public::Objecttype,pub credit_beat_writing_id : i32,}#[derive( Debug)] pub struct InsertCoverDesignCreditObjectKeyParams < T1 : cornucopia_async::StringSql,> { pub key : T1,pub object_type : super::super::types::public::Objecttype,pub credit_cover_design_id : i32,}#[derive( Debug)] pub struct InsertMusicServiceGenreParams < T1 : cornucopia_async::StringSql,> { pub genre : T1,pub beat_writing_id : Option<i32>,pub song_writing_id : Option<i32>,pub mixing_id : Option<i32>,}#[derive( Debug)] pub struct CreateOfferParams < T1 : cornucopia_async::StringSql,> { pub conversations_id : i32,pub services_id : i32,pub text : T1,pub price : rust_decimal::Decimal,pub delivery_date : time::OffsetDateTime,pub free_refisions : i32,pub revision_price : rust_decimal::Decimal,}#[derive(serde::Serialize, Debug, Clone, PartialEq, Copy)] pub struct GetCreatorMarksAvg
 { pub avg : rust_decimal::Decimal,pub count : i64,}pub struct GetCreatorMarksAvgQuery < 'a, C : GenericClient, T, const N : usize >
 {
     client : & 'a  C, params :
@@ -327,6 +376,53 @@ where C : GenericClient
         res.map(| row | (self.mapper) ((self.extractor) (& row)))) .into_stream() ;
         Ok(it)
     }
+}#[derive(serde::Serialize, Debug, Clone, PartialEq, )] pub struct GetCreatorSongs
+{ pub song_id : i32,pub name : String,pub price : rust_decimal::Decimal,pub key : String,pub primary_genre : i32,pub secondary_genre : i32,pub tempo : i16,pub music_key : super::super::types::public::Musickey,pub sex : String,pub duration : i16,pub lyric : String,pub moods : Vec<String>,pub likes_count : i64,pub listenings_count : i64,}pub struct GetCreatorSongsBorrowed < 'a >
+{ pub song_id : i32,pub name : &'a str,pub price : rust_decimal::Decimal,pub key : &'a str,pub primary_genre : i32,pub secondary_genre : i32,pub tempo : i16,pub music_key : super::super::types::public::Musickey,pub sex : &'a str,pub duration : i16,pub lyric : &'a str,pub moods : cornucopia_async::ArrayIterator<'a, &'a str>,pub likes_count : i64,pub listenings_count : i64,} impl < 'a > From < GetCreatorSongsBorrowed <
+'a >> for GetCreatorSongs
+{
+    fn
+    from(GetCreatorSongsBorrowed { song_id,name,price,key,primary_genre,secondary_genre,tempo,music_key,sex,duration,lyric,moods,likes_count,listenings_count,} : GetCreatorSongsBorrowed < 'a >)
+    -> Self { Self { song_id,name: name.into(),price,key: key.into(),primary_genre,secondary_genre,tempo,music_key,sex: sex.into(),duration,lyric: lyric.into(),moods: moods.map(|v| v.into()).collect(),likes_count,listenings_count,} }
+}pub struct GetCreatorSongsQuery < 'a, C : GenericClient, T, const N : usize >
+{
+    client : & 'a  C, params :
+    [& 'a (dyn postgres_types :: ToSql + Sync) ; N], stmt : & 'a mut cornucopia_async
+    :: private :: Stmt, extractor : fn(& tokio_postgres :: Row) -> GetCreatorSongsBorrowed,
+    mapper : fn(GetCreatorSongsBorrowed) -> T,
+} impl < 'a, C, T : 'a, const N : usize > GetCreatorSongsQuery < 'a, C, T, N >
+where C : GenericClient
+{
+    pub fn map < R > (self, mapper : fn(GetCreatorSongsBorrowed) -> R) -> GetCreatorSongsQuery
+    < 'a, C, R, N >
+    {
+        GetCreatorSongsQuery
+        {
+            client : self.client, params : self.params, stmt : self.stmt,
+            extractor : self.extractor, mapper,
+        }
+    } pub async fn one(self) -> Result < T, tokio_postgres :: Error >
+    {
+        let stmt = self.stmt.prepare(self.client) .await ? ; let row =
+        self.client.query_one(stmt, & self.params) .await ? ;
+        Ok((self.mapper) ((self.extractor) (& row)))
+    } pub async fn all(self) -> Result < Vec < T >, tokio_postgres :: Error >
+    { self.iter() .await ?.try_collect().await } pub async fn opt(self) -> Result
+    < Option < T >, tokio_postgres :: Error >
+    {
+        let stmt = self.stmt.prepare(self.client) .await ? ;
+        Ok(self.client.query_opt(stmt, & self.params) .await
+        ?.map(| row | (self.mapper) ((self.extractor) (& row))))
+    } pub async fn iter(self,) -> Result < impl futures::Stream < Item = Result
+    < T, tokio_postgres :: Error >> + 'a, tokio_postgres :: Error >
+    {
+        let stmt = self.stmt.prepare(self.client) .await ? ; let it =
+        self.client.query_raw(stmt, cornucopia_async :: private ::
+        slice_iter(& self.params)) .await ?
+        .map(move | res |
+        res.map(| row | (self.mapper) ((self.extractor) (& row)))) .into_stream() ;
+        Ok(it)
+    }
 }pub fn get_creator_marks_avg() -> GetCreatorMarksAvgStmt
 { GetCreatorMarksAvgStmt(cornucopia_async :: private :: Stmt :: new("SELECT AVG(mark), COUNT(mark)
 FROM service_reviews
@@ -363,10 +459,10 @@ ConversationResponses AS (
     SELECT
         conversations.id,
         (CASE
-            WHEN frt.first_response_time IS NOT NULL AND 
-                 frt.first_response_time - conversations.created_at < INTERVAL '1 day' 
+            WHEN frt.first_response_time IS NOT NULL AND
+                 frt.first_response_time - conversations.created_at < INTERVAL '1 day'
             THEN 1
-            ELSE 0 
+            ELSE 0
          END) AS is_responded,
         frt.first_response_time - conversations.created_at AS response_time
     FROM conversations
@@ -399,7 +495,7 @@ GetCreatorInboxResponseRateAndTime, 1 >
         | row | { GetCreatorInboxResponseRateAndTimeBorrowed { response_rate_percentage : row.get(0),average_response_time : row.get(1),} }, mapper : | it | { <GetCreatorInboxResponseRateAndTime>::from(it) },
     }
 } }pub fn get_profile_completion_value() -> GetProfileCompletionValueStmt
-{ GetProfileCompletionValueStmt(cornucopia_async :: private :: Stmt :: new("SELECT 
+{ GetProfileCompletionValueStmt(cornucopia_async :: private :: Stmt :: new("SELECT
     CASE
         WHEN bio IS NULL THEN 80
         ELSE 100
@@ -417,8 +513,56 @@ i32, 1 >
         client, params : [user_id,], stmt : & mut self.0, extractor :
         | row | { row.get(0) }, mapper : | it | { it },
     }
-} }pub fn insert_product_and_get_product_id() -> InsertProductAndGetProductIdStmt
-{ InsertProductAndGetProductIdStmt(cornucopia_async :: private :: Stmt :: new("INSERT INTO products(owner_id, name, description, price)
+} }pub fn get_creator_songs() -> GetCreatorSongsStmt
+{ GetCreatorSongsStmt(cornucopia_async :: private :: Stmt :: new("SELECT
+    songs.id AS song_id,
+    products.name,
+    products.price,
+    objects.key,
+    primary_genre,
+    secondary_genre,
+    songs.tempo,
+    songs.key AS music_key,
+    songs.sex,
+    songs.duration,
+    songs.lyric,
+    ARRAY_AGG(moods.name) AS moods,
+    COUNT(likes) AS likes_count,
+    COUNT(listenings) AS listenings_count
+FROM products
+JOIN songs ON products.id = songs.products_id
+JOIN objects ON products.id = objects.cover_products_id
+JOIN genres primary_genre ON songs.primary_genre = primary_genre.id
+JOIN genres secondary_genre ON songs.secondary_genre = secondary_genre.id
+JOIN products_moods ON products.id = products_moods.products_id
+JOIN moods ON products_moods.moods_id = moods.id
+JOIN likes ON songs.id = likes.songs_id
+JOIN listenings ON songs.id = listenings.songs_id
+WHERE products.author_id = $1 AND products.status = $2
+GROUP BY songs.id, products.status, products.name, products.price, objects.key, primary_genre,
+        secondary_genre, songs.tempo, songs.key, songs.sex, songs.duration, songs.lyric")) } pub
+struct GetCreatorSongsStmt(cornucopia_async :: private :: Stmt) ; impl
+GetCreatorSongsStmt { pub fn bind < 'a, C : GenericClient, >
+(& 'a mut self, client : & 'a  C,
+user_id : & 'a i32,product_status : & 'a super::super::types::public::Productstatus,) -> GetCreatorSongsQuery < 'a, C,
+GetCreatorSongs, 2 >
+{
+    GetCreatorSongsQuery
+    {
+        client, params : [user_id,product_status,], stmt : & mut self.0, extractor :
+        | row | { GetCreatorSongsBorrowed { song_id : row.get(0),name : row.get(1),price : row.get(2),key : row.get(3),primary_genre : row.get(4),secondary_genre : row.get(5),tempo : row.get(6),music_key : row.get(7),sex : row.get(8),duration : row.get(9),lyric : row.get(10),moods : row.get(11),likes_count : row.get(12),listenings_count : row.get(13),} }, mapper : | it | { <GetCreatorSongs>::from(it) },
+    }
+} }impl < 'a, C : GenericClient, > cornucopia_async ::
+Params < 'a, GetCreatorSongsParams < >, GetCreatorSongsQuery < 'a,
+C, GetCreatorSongs, 2 >, C > for GetCreatorSongsStmt
+{
+    fn
+    params(& 'a mut self, client : & 'a  C, params : & 'a
+    GetCreatorSongsParams < >) -> GetCreatorSongsQuery < 'a, C,
+    GetCreatorSongs, 2 >
+    { self.bind(client, & params.user_id,& params.product_status,) }
+}pub fn insert_product_and_get_product_id() -> InsertProductAndGetProductIdStmt
+{ InsertProductAndGetProductIdStmt(cornucopia_async :: private :: Stmt :: new("INSERT INTO products(author_id, name, description, price)
 VALUES ($1, $2, $3, $4) returning id")) } pub
 struct InsertProductAndGetProductIdStmt(cornucopia_async :: private :: Stmt) ; impl
 InsertProductAndGetProductIdStmt { pub fn bind < 'a, C : GenericClient, T1 : cornucopia_async::StringSql,T2 : cornucopia_async::StringSql,>
@@ -1868,29 +2012,29 @@ i32, 1 >
     serv.id as service_id,
     serv.name as service_name,
     obj2.key as service_cover_key,
-    off.id as offer_id,
-    off.text as offer_text,
-    off.price as offer_price,
-    off.delivery_date as offer_delivery_date,
-    off.free_revisions as offer_free_revisions,
-    off.revision_price as offer_revision_price
+    offers.id as offer_id,
+    offers.text as offer_text,
+    offers.price as offer_price,
+    offers.delivery_date as offer_delivery_date,
+    offers.free_revisions as offer_free_revisions,
+    offers.revision_price as offer_revision_price
 FROM 
     conversations conv
 LEFT JOIN participants part ON part.conversations_id = conv.id
 LEFT JOIN users usr ON part.users_id = usr.id
 LEFT JOIN messages msg ON msg.conversations_id = conv.id AND msg.users_id = part.users_id
-LEFT JOIN offers off ON off.conversations_id = conv.id
-LEFT JOIN services serv ON serv.id = COALESCE(msg.services_id, off.services_id)
+LEFT JOIN offers ON offers.conversations_id = conv.id
+LEFT JOIN services serv ON serv.id = COALESCE(msg.services_id, offers.services_id)
 LEFT JOIN objects obj ON obj.avatar_users_id = usr.id
 LEFT JOIN objects obj2 ON obj.cover_services_id = serv.id
 LEFT JOIN objects obj3 ON obj.message_attachment = msg.id
 WHERE 
     conv.id = $1
 GROUP BY 
-    msg.id, conv.id, part.users_id, usr.username, obj.key, serv.id, serv.name, obj2.key, off.id, off.text, off.price, off.delivery_date, off.free_revisions, off.revision_price
+    msg.id, conv.id, part.users_id, usr.username, obj.key, serv.id, serv.name, obj2.key, offers.id, offers.text, offers.price, offers.delivery_date, offers.free_revisions, offers.revision_price
 ORDER BY 
     msg.created_at ASC, 
-    off.created_at ASC
+    offers.created_at ASC
 OFFSET $2
 LIMIT 30")) } pub
 struct ListConversationByIdStmt(cornucopia_async :: private :: Stmt) ; impl

@@ -182,7 +182,7 @@ CREATE MATERIALIZED VIEW available_songs AS (
     FROM songs s
     JOIN products p ON s.products_id = p.id
     JOIN genres pg ON s.primary_genre = pg.id
-    JOIN users u ON p.owner_id = users.id
+    JOIN users u ON p.author_id = users.id
     LEFT JOIN genres sg ON s.secondary_genre = sg.id
     LEFT JOIN objects o ON o.cover_products_id = s.id
     LEFT JOIN likes l ON l.songs_id = s.id

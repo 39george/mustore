@@ -1,5 +1,6 @@
 //! src/domain/mod.rs
 
+pub mod general_types;
 pub mod music_parameters;
 pub mod object_key;
 pub mod requests;

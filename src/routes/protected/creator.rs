@@ -1,4 +1,7 @@
+use std::time::Duration;
+
 use anyhow::Context;
+use axum::extract::Path;
 use axum::extract::State;
 use axum::response::IntoResponse;
 use axum::routing;
@@ -9,6 +12,7 @@ use fred::clients::RedisPool;
 use fred::error::RedisError;
 use fred::interfaces::KeysInterface;
 use fred::prelude::RedisResult;
+use futures::future::try_join_all;
 use garde::Validate;
 use http::StatusCode;
 
@@ -17,6 +21,7 @@ use http::StatusCode;
 use crate::auth::users::AuthSession;
 use crate::cornucopia::queries::creator_access;
 use crate::cornucopia::types::public::Objecttype;
+use crate::domain::general_types::ProductStatus;
 use crate::domain::object_key::ObjectKey;
 use crate::domain::requests::creator_access::CreateOfferRequest;
 use crate::domain::requests::creator_access::SubmitProductRequest;
@@ -25,6 +30,7 @@ use crate::domain::upload_request::UploadRequest;
 use crate::error_chain_fmt;
 use crate::routes::ResponseError;
 use crate::startup::api_doc::BadRequestResponse;
+use crate::startup::api_doc::GetCreatorSongs;
 use crate::startup::api_doc::InternalErrorResponse;
 use crate::startup::AppState;
 
@@ -65,6 +71,7 @@ pub fn creator_router() -> Router<AppState> {
         .route("/submit_product", routing::post(submit_product))
         .route("/submit_service", routing::post(submit_service))
         .route("/create_offer", routing::post(create_offer))
+        .route("/songs/:status", routing::get(songs))
         .layer(permission_required!(crate::auth::users::Backend, "creator"))
 }
 
@@ -679,6 +686,71 @@ async fn create_offer(
 
     Ok(StatusCode::CREATED)
 }
+
+/// Retrieve list of creator's songs.
+#[utoipa::path(
+    get,
+    path = "/api/protected/creator/songs/{status}",
+    params(
+        ("status" = String, Path,
+            description = "Song's status",
+            example = "sold"
+        )
+    ),
+    responses(
+        (status = 200, response = GetCreatorSongs),
+        (status = 403, description = "Forbidden"),
+        (status = 500, response = InternalErrorResponse)
+    ),
+    security(
+        ("api_key" = [])
+    ),
+    tag = "protected.creators"
+)]
+#[tracing::instrument(name = "Create a new offer", skip_all)]
+async fn songs(
+    auth_session: AuthSession,
+    State(app_state): State<AppState>,
+    Path(status): Path<ProductStatus>,
+) -> Result<Json<Vec<creator_access::GetCreatorSongs>>, ResponseError> {
+    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
+        anyhow::anyhow!("No such user in AuthSession!"),
+    ))?;
+
+    let db_client = app_state
+        .pg_pool
+        .get()
+        .await
+        .context("Failed to get connection from postgres pool")
+        .map_err(ResponseError::UnexpectedError)?;
+
+    let songs = creator_access::get_creator_songs()
+        .bind(&db_client, &user.id, &status.into())
+        .all()
+        .await
+        .context("Failed to retrieve songs from pg")?
+        .into_iter()
+        .map(|mut song| {
+            let obj_storage = app_state.object_storage.clone();
+            async move {
+                let object_key: ObjectKey =
+                    song.key.parse().context("Failed to parse object key")?;
+                let result = obj_storage
+                    .generate_presigned_url(
+                        &object_key,
+                        Duration::from_secs(120),
+                    ) // 2 minutes expiration
+                    .await?;
+                song.key = result;
+                Ok::<creator_access::GetCreatorSongs, ResponseError>(song)
+            }
+        });
+
+    let songs = try_join_all(songs).await?;
+
+    Ok(Json(songs))
+}
+
 // ───── Functions ────────────────────────────────────────────────────────── //
 
 /// Verify upload requests of a given music product, and if all is ok, delete all requests.

@@ -26,10 +26,10 @@ ConversationResponses AS (
     SELECT
         conversations.id,
         (CASE
-            WHEN frt.first_response_time IS NOT NULL AND 
-                 frt.first_response_time - conversations.created_at < INTERVAL '1 day' 
+            WHEN frt.first_response_time IS NOT NULL AND
+                 frt.first_response_time - conversations.created_at < INTERVAL '1 day'
             THEN 1
-            ELSE 0 
+            ELSE 0
          END) AS is_responded,
         frt.first_response_time - conversations.created_at AS response_time
     FROM conversations
@@ -53,7 +53,7 @@ FROM ConversationResponses;
 
 -- FIXME: we should return list of uncompleted values, or frontend should understand that himself.
 --! get_profile_completion_value
-SELECT 
+SELECT
     CASE
         WHEN bio IS NULL THEN 80
         ELSE 100
@@ -61,12 +61,41 @@ SELECT
 FROM users
 WHERE users.id = :user_id;
 
+--! get_creator_songs
+SELECT
+    songs.id AS song_id,
+    products.name,
+    products.price,
+    objects.key,
+    primary_genre,
+    secondary_genre,
+    songs.tempo,
+    songs.key AS music_key,
+    songs.sex,
+    songs.duration,
+    songs.lyric,
+    ARRAY_AGG(moods.name) AS moods,
+    COUNT(likes) AS likes_count,
+    COUNT(listenings) AS listenings_count
+FROM products
+JOIN songs ON products.id = songs.products_id
+JOIN objects ON products.id = objects.cover_products_id
+JOIN genres primary_genre ON songs.primary_genre = primary_genre.id
+JOIN genres secondary_genre ON songs.secondary_genre = secondary_genre.id
+JOIN products_moods ON products.id = products_moods.products_id
+JOIN moods ON products_moods.moods_id = moods.id
+JOIN likes ON songs.id = likes.songs_id
+JOIN listenings ON songs.id = listenings.songs_id
+WHERE products.author_id = :user_id AND products.status = :product_status
+GROUP BY songs.id, products.status, products.name, products.price, objects.key, primary_genre,
+        secondary_genre, songs.tempo, songs.key, songs.sex, songs.duration, songs.lyric;
+
 -- UPDATING CONTENT --
 
 -- Products
 
 --! insert_product_and_get_product_id (description?)
-INSERT INTO products(owner_id, name, description, price)
+INSERT INTO products(author_id, name, description, price)
 VALUES (:owher_id, :name, :description, :price) returning id;
 
 --! insert_product_cover_object_key

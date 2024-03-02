@@ -15,7 +15,7 @@ LEFT JOIN lyrics ON products.id = lyrics.products_id
 LEFT JOIN covers ON products.id = covers.products_id
 JOIN likes ON songs.id = likes.songs_id OR beats.id = likes.beats_id OR lyrics.id = likes.lyrics_id OR covers.id = likes.covers_id AND likes.users_id = :user_id
 JOIN objects ON products.id = objects.cover_products_id
-JOIN users author ON products.owner_id = author.id;
+JOIN users author ON products.author_id = author.id;
 
 --! get_product_orders : Products
 SELECT
@@ -31,4 +31,4 @@ LEFT JOIN beats ON products.id = beats.products_id
 LEFT JOIN lyrics ON products.id = lyrics.products_id
 LEFT JOIN covers ON products.id = covers.products_id
 JOIN objects ON products.id = objects.cover_products_id
-JOIN users author ON products.owner_id = author.id;
+JOIN users author ON products.author_id = author.id;

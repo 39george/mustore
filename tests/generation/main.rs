@@ -84,7 +84,7 @@ async fn fill_with_test_data() {
             let product_id: i32 = client
                 .query_one(
                     "
-                INSERT INTO products (owner_id, name, price, status)
+                INSERT INTO products (author_id, name, price, status)
                 VALUES ($1, $2, $3, $4) returning id",
                     &[&user_id, &song.name, &song.price, &song.status],
                 )
