@@ -6,6 +6,8 @@ import conversations from "../../assets/icons/conversations_outline.svg";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../state/store";
 import { set_product_status } from "../../state/product_status_slice";
+import { FiPlus } from "react-icons/fi";
+import { GoChevronDown } from "react-icons/go";
 
 interface TopBarProps {
   username: string;
@@ -20,6 +22,8 @@ const TopBar: FC<TopBarProps> = ({ username, avatar }) => {
   const product_status = useSelector(
     (state: RootState) => state.product_status.product_status
   );
+  const [translated_product_status, set_translated_product_status] =
+    useState("");
 
   useEffect(() => {
     switch (current_pathname) {
@@ -59,10 +63,48 @@ const TopBar: FC<TopBarProps> = ({ username, avatar }) => {
     }
   }, [current_pathname]);
 
+  // Translate product status
+  useEffect(() => {
+    if (product_status) {
+      switch (product_status) {
+        case "active":
+          set_translated_product_status("аткуальные");
+          break;
+        case "denied":
+          set_translated_product_status("отклоненные");
+          break;
+        case "hidden":
+          set_translated_product_status("скрытые");
+          break;
+        case "moderation":
+          set_translated_product_status("на модерации");
+          break;
+        case "sold":
+          set_translated_product_status("проданные");
+          break;
+      }
+    }
+  }, [product_status]);
+
   return (
     <div className={styles.top_bar}>
-      <h2 className={styles.h2}>{header_name}</h2>
-      <p>{product_status}</p>
+      <div className={styles.header_and_widgets}>
+        <h2 className={styles.h2}>{header_name}</h2>
+        {product_status && (
+          <div className={styles.products_widgets}>
+            <div className={styles.product_status}>
+              <p className={styles.product_status_p}>
+                {translated_product_status} <span>(5)</span>
+              </p>
+              <GoChevronDown className={styles.chevron} />
+            </div>
+            <div className={styles.upload_product}>
+              <p className={styles.upload_product_p}>загрузить новый товар</p>
+              <FiPlus className={styles.plus_icon} />
+            </div>
+          </div>
+        )}
+      </div>
       <div className={styles.interactions_container}>
         <div className={styles.notifications}>
           <FaRegBell className={styles.notifications_icon} />
@@ -79,7 +121,10 @@ const TopBar: FC<TopBarProps> = ({ username, avatar }) => {
         <div className={styles.meta_info_container}>
           <p className={styles.username}>{username}</p>
           <div className={styles.avatar_container}>
-            <NavLink to="/">
+            <NavLink
+              to="/"
+              onClick={() => dispatch(set_product_status(null))}
+            >
               <div className={styles.image_wrapper}>
                 <img
                   src={avatar}
