@@ -100,3 +100,11 @@ export interface UsernameAvatar {
 }
 
 export type UserRole = "creator" | "consumer";
+
+export type ProductStatus =
+  | "moderation"
+  | "denied"
+  | "active"
+  | "hidden"
+  | "sold"
+  | null;
