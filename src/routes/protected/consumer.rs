@@ -95,7 +95,7 @@ async fn status_bar_info(
                 .parse()
                 .context("Failed to parse object key")?;
             let result = obj_storage
-                .generate_presigned_url(&object_key, Duration::from_secs(1))
+                .generate_presigned_url(&object_key, Duration::from_secs(120)) // 2 minutes expiration
                 .await?;
             entry.product_cover = result;
             Ok::<consumer_access::Products, ResponseError>(entry)
