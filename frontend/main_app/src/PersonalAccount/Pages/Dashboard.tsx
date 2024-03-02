@@ -46,7 +46,8 @@ const Dashboard: FC = () => {
         />
         <div className={styles.welcome}>
           <h2 className={styles.h2}>
-            Добро пожаловать, <span>{username}</span>!
+            Добро пожаловать, <br />
+            <span>{username}</span>!
           </h2>
           <WelcomeWidget />
           <h2 className={`${styles.h2} ${styles.h2_workbench}`}>
