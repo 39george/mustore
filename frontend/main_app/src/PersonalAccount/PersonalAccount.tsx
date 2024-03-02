@@ -1,46 +1,84 @@
 import styles from "./PersonalAccount.module.scss";
-import { Outlet } from "react-router-dom";
-import { FC, useEffect, useState } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
+import { FC } from "react";
 import Sidebar from "./Components/Sidebar";
 import TopBar from "./Components/TopBar";
 import { useSelector } from "react-redux";
 import { RootState } from "../state/store";
+import Dashboard from "./Pages/Dashboard";
+import { find_user_role_index, translate_user_role } from "../helpers/helpers";
 
 const PersonalAccount: FC = () => {
-  const username = useSelector(
-    (state: RootState) => state.username_avatar.username
-  );
-  const avatar = useSelector(
-    (state: RootState) => state.username_avatar.avatar
+  const username_avatar = useSelector(
+    (state: RootState) => state.username_avatar
   );
   const user_permissions = useSelector(
     (state: RootState) => state.user_permissions
   );
-  const [user_role, set_user_role] = useState("...");
-
-  useEffect(() => {
-    const index_creator = user_permissions.permissions.findIndex(
-      (obj) => obj.name === "creator"
-    );
-    if (user_permissions.permissions[index_creator]?.name === "creator") {
-      set_user_role("Автор");
-    }
-  }, [user_permissions]);
 
   return (
     <div className={styles.personal_account}>
       <Sidebar
-        username={username}
-        user_role={user_role}
-        avatar={avatar}
+        username={username_avatar.is_loading ? "..." : username_avatar.username}
+        user_role={
+          user_permissions.is_loading
+            ? "..."
+            : translate_user_role(
+                user_permissions.permissions[
+                  find_user_role_index(user_permissions.permissions, "creator")
+                ].name
+              )
+        }
+        avatar={username_avatar.is_loading ? "..." : username_avatar.avatar}
       />
       <div className={styles.main_view}>
         <TopBar
-          username={username}
-          avatar={avatar}
+          username={
+            username_avatar.is_loading ? "..." : username_avatar.username
+          }
+          avatar={username_avatar.is_loading ? "..." : username_avatar.avatar}
         />
         <hr className={styles.top_border} />
-        <Outlet />
+        <Routes>
+          <Route
+            path="dashboard"
+            element={
+              <Dashboard
+                username={
+                  username_avatar.is_loading ? "..." : username_avatar.username
+                }
+                user_role={
+                  user_permissions.is_loading
+                    ? "..."
+                    : translate_user_role(
+                        user_permissions.permissions[
+                          find_user_role_index(
+                            user_permissions.permissions,
+                            "creator"
+                          )
+                        ].name
+                      )
+                }
+                avatar={
+                  username_avatar.is_loading ? "..." : username_avatar.avatar
+                }
+              />
+            }
+          />
+          <Route
+            path="*"
+            element={<div>page in development</div>}
+          />
+          <Route
+            index
+            element={
+              <Navigate
+                to="dashboard"
+                replace
+              />
+            }
+          />
+        </Routes>
       </div>
       <div className={styles.filler_main}></div>
     </div>

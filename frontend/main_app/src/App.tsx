@@ -10,7 +10,6 @@ import LogIn from "./Components/LogIn";
 import { useEffect } from "react";
 import useCheckPermissionsApi from "./hooks/API/useCheckPermissionsApi";
 import PersonalAccount from "./PersonalAccount/PersonalAccount";
-import Dashboard from "./PersonalAccount/Pages/Dashboard";
 import useUsernameAvatarApi from "./hooks/API/useUsernameAvatarApi";
 import { useSelector } from "react-redux";
 import { RootState } from "./state/store";
@@ -44,27 +43,9 @@ function App() {
           element={<LogIn />}
         />
         <Route
-          path="personal-account"
+          path="personal-account/*"
           element={<PersonalAccount />}
-        >
-          <Route
-            path="dashboard"
-            element={<Dashboard />}
-          />
-          <Route
-            path="*"
-            element={<div>page in development</div>}
-          />
-          <Route
-            index
-            element={
-              <Navigate
-                to="dashboard"
-                replace
-              />
-            }
-          />
-        </Route>
+        />
         <Route
           path="/"
           element={<MainLayout />}
