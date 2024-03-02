@@ -148,6 +148,10 @@ $delays: 0s, 0.1s, 0.15s, 0.2s, 0.25s, 0.3s, 0.35s, 0.4s, 0.45s;
 }
 
 .username {
+  @include text_overflow;
+
+  max-width: 7.5rem;
+
   font-family: "Geologica", sans-serif;
   font-size: 1.125rem;
   font-weight: 300;

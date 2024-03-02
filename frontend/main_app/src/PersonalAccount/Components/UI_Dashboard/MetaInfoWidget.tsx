@@ -1,11 +1,20 @@
 import styles from "./MetaInfoWidget.module.scss";
 import { FC, useEffect, useState } from "react";
-import avatar from "../../../assets/HomePage/author_1.png";
 import { FaStar } from "react-icons/fa6";
 
 const month = new Date().getMonth();
 
-const MetainfoWidget: FC = () => {
+interface MetaInfoWidgetProps {
+  username: string;
+  user_role: string;
+  avatar: string;
+}
+
+const MetainfoWidget: FC<MetaInfoWidgetProps> = ({
+  username,
+  user_role,
+  avatar,
+}) => {
   const [current_month, set_current_month] = useState("");
 
   useEffect(() => {
@@ -61,8 +70,8 @@ const MetainfoWidget: FC = () => {
           </div>
           <div className={styles.text_info}>
             <div className={styles.name_and_role}>
-              <p className={styles.username}>Alena NAI</p>
-              <p className={styles.user_role}>Автор</p>
+              <p className={styles.username}>{username}</p>
+              <p className={styles.user_role}>{user_role}</p>
             </div>
             <div className={styles.rating_container}>
               <FaStar className={styles.star_icon} />

@@ -29,12 +29,16 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-left: 1.5rem;
   width: 100%;
+  margin-left: 1.25rem;
 }
 
 .username {
+  @include text_overflow;
+  width: 100%;
+  max-width: 13rem;
   margin-bottom: 0.625rem;
+
   font-family: "Geologica", sans-serif;
   font-size: 1.125rem;
   font-weight: 400;
@@ -42,10 +46,6 @@
 
 .user_role {
   color: rgba($color: $main_dark, $alpha: 0.8);
-}
-
-.rating_container {
-  margin-left: 1rem;
 }
 
 .divider {
@@ -121,6 +121,22 @@
   color: $account_green;
 }
 
+.earnings_amount {
+  margin-left: 0.5rem;
+}
+
+// Media queries
+@media (max-width: 1280px) {
+  .username {
+    flex-shrink: 1;
+    max-width: clamp(
+      8rem,
+      calc(8rem + (208 - 128) * ((100vw - 1200px) / (1280 - 1200))),
+      13rem
+    );
+  }
+}
+
 @media (max-width: 1200px) {
   .metainfo_widget {
     max-width: 100%;
@@ -150,7 +166,16 @@
   }
 
   .username {
+    max-width: clamp(
+      8rem,
+      calc(8rem + (208 - 128) * ((100vw - 1026px) / (1200 - 1026))),
+      13rem
+    );
     margin-bottom: 1.5rem;
+  }
+
+  .rating_container {
+    margin-left: 0.5rem;
   }
 
   .earnings {
@@ -160,6 +185,36 @@
 
   .earnings_text {
     max-width: fit-content;
+  }
+}
+
+@media (max-width: 1026px) {
+  .text_info {
+    flex-direction: column;
+  }
+
+  .username {
+    max-width: clamp(
+      10rem,
+      calc(10rem + (192 - 160) * ((100vw - 950px) / (1026 - 950))),
+      12rem
+    );
+    margin-bottom: 1rem;
+  }
+
+  .rating_container {
+    margin-top: 1rem;
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 950px) {
+  .username {
+    max-width: clamp(
+      10rem,
+      calc(10rem + (244 - 160) * ((100vw - 760px) / (950 - 760))),
+      15.25rem
+    );
   }
 }
 
@@ -185,8 +240,22 @@
     @include image_wrapper(4.25rem);
   }
 
+  .text_info {
+    flex-direction: row;
+  }
+
   .username {
+    max-width: clamp(
+      11rem,
+      calc(11rem + (420 - 176) * ((100vw - 520px) / (760 - 520))),
+      26.25rem
+    );
     margin-bottom: 0.625rem;
+  }
+
+  .rating_container {
+    margin-top: 0;
+    margin-left: 0.25rem;
   }
 
   .earnings {
@@ -199,13 +268,36 @@
   }
 }
 
+@media (max-width: 520px) {
+  .username {
+    max-width: clamp(
+      9rem,
+      calc(9rem + (224 - 144) * ((100vw - 450px) / (520 - 450))),
+      14rem
+    );
+  }
+}
+
 @media (max-width: 450px) {
+  .image_wrapper {
+    width: 3rem;
+    height: 3rem;
+  }
   .text_info {
     margin-left: 1.25rem;
   }
 
   .username {
+    max-width: clamp(
+      7rem,
+      calc(6rem + (192 - 112) * ((100vw - 390px) / (450 - 390))),
+      12rem
+    );
     font-size: 1rem;
+  }
+
+  .rating_container {
+    margin-left: 0;
   }
 
   .user_role,
@@ -220,10 +312,27 @@
   .text_info {
     flex-direction: column;
     align-items: flex-end;
+    margin-left: 0.5rem;
+  }
+
+  .username {
+    max-width: clamp(
+      8.125rem,
+      calc(8.125rem + (200 - 130) * ((100vw - 320px) / (390 - 320))),
+      12.5rem
+    );
+  }
+
+  .user_role {
+    text-align: end;
   }
 
   .rating_container {
-    width: 5.625rem;
+    max-width: clamp(
+      8.125rem,
+      calc(8.125rem + (200 - 130) * ((100vw - 320px) / (390 - 320))),
+      12.5rem
+    );
     margin-left: 0;
     margin-top: 0.75rem;
   }
