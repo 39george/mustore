@@ -4,21 +4,24 @@ import { UsernameAvatar } from "../types/types";
 const initialState: UsernameAvatar = {
   username: "",
   avatar: "",
+  is_loading: true,
 };
 
 const username_avatar_slice = createSlice({
   name: "username_avatar",
   initialState: initialState,
   reducers: {
-    set_username: (state: UsernameAvatar, action: PayloadAction<string>) => {
-      state.username = action.payload;
-    },
-    set_avatar: (state: UsernameAvatar, action: PayloadAction<string>) => {
-      state.avatar = action.payload;
+    set_username_avatar: (
+      state: UsernameAvatar,
+      action: PayloadAction<UsernameAvatar>
+    ) => {
+      state.username = action.payload.username;
+      state.avatar = action.payload.avatar;
+      state.is_loading = action.payload.is_loading;
     },
   },
 });
 
-export const { set_username, set_avatar } = username_avatar_slice.actions;
+export const { set_username_avatar } = username_avatar_slice.actions;
 
 export default username_avatar_slice.reducer;
