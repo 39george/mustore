@@ -21,6 +21,7 @@ impl std::fmt::Display for Sex {
 
 #[derive(Serialize, Deserialize, Debug, Clone, utoipa::ToSchema)]
 #[allow(non_camel_case_types)]
+#[schema(example = "a_major")]
 pub enum MusicKey {
     a_minor,
     a_major,
