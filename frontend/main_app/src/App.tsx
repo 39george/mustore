@@ -18,21 +18,24 @@ import { RootState } from "./state/store";
 function App() {
   const { check_user_permissions } = useCheckPermissionsApi();
   const { get_username_and_avatar } = useUsernameAvatarApi();
+  const user_permissions = useSelector(
+    (state: RootState) => state.user_permissions.permissions
+  );
+  const username_avatar = useSelector(
+    (state: RootState) => state.username_avatar
+  );
+
+  // console.log(user_permissions);
 
   useEffect(() => {
-    const fetch_data = async () => {
-      await check_user_permissions();
-      await get_username_and_avatar();
-    };
-
-    fetch_data();
+    check_user_permissions();
   }, []);
 
-  // const username = useSelector(
-  //   (state: RootState) => state.username_avatar.username
-  // );
-
-  // console.log(username);
+  useEffect(() => {
+    if (user_permissions.length !== 0) {
+      get_username_and_avatar();
+    }
+  }, [user_permissions]);
 
   return (
     <BrowserRouter>

@@ -22,14 +22,16 @@ import {
 } from "../../state/sidebar_actions_slice";
 import { ActiveSections } from "../../types/types";
 
-interface SidebarProps {
-  avatar: string;
-}
-
 const class_fade_in = `${styles.class_fade_in}`;
 const class_fade_in_image = `${styles.class_fade_in_image}`;
 
-const Sidebar: FC<SidebarProps> = ({ avatar }) => {
+interface SidebarProps {
+  username: string;
+  user_role: string;
+  avatar: string;
+}
+
+const Sidebar: FC<SidebarProps> = ({ username, user_role, avatar }) => {
   const [active_section, set_active_section] = useState<ActiveSections>("none");
   const location = useLocation();
   const current_pathname = location.pathname.replace("/personal-account/", "");
@@ -188,8 +190,8 @@ const Sidebar: FC<SidebarProps> = ({ avatar }) => {
             !sidebar_collapsed && class_fade_in
           }`}
         >
-          <p className={styles.username}>Alena NAI</p>
-          <p className={styles.user_role}>Автор</p>
+          <p className={styles.username}>{username}</p>
+          <p className={styles.user_role}>{user_role}</p>
           <div className={styles.rating_container}>
             <FaStar className={styles.star_icon} />
             <p className={styles.rating}>

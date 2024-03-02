@@ -2,7 +2,7 @@ import styles from "./Dashboard.module.scss";
 import { NavLink } from "react-router-dom";
 import MetainfoWidget from "../Components/UI_Dashboard/MetaInfoWidget";
 import WelcomeWidget from "../Components/UI_Dashboard/WelcomeWidget";
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 import ConversationsWidget from "../Components/UI_Dashboard/ConversationsWidget";
 import OrdersWidget from "../Components/UI_Dashboard/OrdersWidget";
 import { useSelector } from "react-redux";
@@ -12,6 +12,26 @@ const Dashboard: FC = () => {
   const sidebar_collapsed = useSelector(
     (state: RootState) => state.sidebar_actions.sidebar_collapsed
   );
+  const username = useSelector(
+    (state: RootState) => state.username_avatar.username
+  );
+  const avatar = useSelector(
+    (state: RootState) => state.username_avatar.avatar
+  );
+  const [user_role, set_user_role] = useState("...");
+  const user_permissions = useSelector(
+    (state: RootState) => state.user_permissions
+  );
+
+  useEffect(() => {
+    const index_creator = user_permissions.permissions.findIndex(
+      (obj) => obj.name === "creator"
+    );
+    if (user_permissions.permissions[index_creator]?.name === "creator") {
+      set_user_role("Автор");
+    }
+  }, [user_permissions]);
+
   return (
     <div className={styles.dashboard}>
       <div
@@ -19,10 +39,14 @@ const Dashboard: FC = () => {
           sidebar_collapsed && styles.margin_sidebar_collapsed
         }`}
       >
-        <MetainfoWidget />
+        <MetainfoWidget
+          username={username}
+          user_role={user_role}
+          avatar={avatar}
+        />
         <div className={styles.welcome}>
           <h2 className={styles.h2}>
-            Добро пожаловать, <span>Alena NAI</span>!
+            Добро пожаловать, <span>{username}</span>!
           </h2>
           <WelcomeWidget />
           <h2 className={`${styles.h2} ${styles.h2_workbench}`}>

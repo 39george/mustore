@@ -1,14 +1,15 @@
 import styles from "./TopBar.module.scss";
-import { useLocation } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { FC, useEffect, useState } from "react";
 import { FaRegBell } from "react-icons/fa6";
 import conversations from "../../assets/icons/conversations_outline.svg";
 
 interface TopBarProps {
+  username: string;
   avatar: string;
 }
 
-const TopBar: FC<TopBarProps> = ({ avatar }) => {
+const TopBar: FC<TopBarProps> = ({ username, avatar }) => {
   const [header_name, set_header_name] = useState("");
   const location = useLocation();
   const current_pathname = location.pathname.replace("/personal-account/", "");
@@ -67,15 +68,17 @@ const TopBar: FC<TopBarProps> = ({ avatar }) => {
         </div>
         <hr className={styles.divider} />
         <div className={styles.meta_info_container}>
-          <p className={styles.username}>Alena NAI</p>
+          <p className={styles.username}>{username}</p>
           <div className={styles.avatar_container}>
-            <div className={styles.image_wrapper}>
-              <img
-                src={avatar}
-                alt="users's avatar"
-                className={styles.avatar}
-              />
-            </div>
+            <NavLink to="/">
+              <div className={styles.image_wrapper}>
+                <img
+                  src={avatar}
+                  alt="users's avatar"
+                  className={styles.avatar}
+                />
+              </div>
+            </NavLink>
           </div>
         </div>
       </div>
