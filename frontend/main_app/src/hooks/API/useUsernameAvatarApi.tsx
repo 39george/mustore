@@ -3,7 +3,7 @@ import { API_URL, MAX_RETRIES, RETRY_DELAY_MS } from "../../config";
 import axios from "axios";
 import { wait } from "../../helpers/helpers";
 import { useDispatch } from "react-redux";
-import { set_avatar, set_username } from "../../state/username_avatar_slice";
+import { set_username_avatar } from "../../state/username_avatar_slice";
 import { UsernameAvatar } from "../../types/types";
 
 const useUsernameAvatarApi = () => {
@@ -15,8 +15,13 @@ const useUsernameAvatarApi = () => {
       const response = await axios.get<UsernameAvatar>(
         `${API_URL}/protected/user/avatar_username`
       );
-      dispatch(set_username(response.data.username));
-      dispatch(set_avatar(response.data.avatar));
+      dispatch(
+        set_username_avatar({
+          username: response.data.username,
+          avatar: response.data.avatar,
+          is_loading: false,
+        })
+      );
     } catch (error) {
       if (axios.isAxiosError(error)) {
         if (error.response) {
@@ -29,6 +34,13 @@ const useUsernameAvatarApi = () => {
                 set_error_data(
                   "Что-то не так с нашим сервером, мы уже работаем над этим. Пожалуйста, попробуйте обновить страницу"
                 );
+                dispatch(
+                  set_username_avatar({
+                    username: "Username",
+                    avatar: "Avatar",
+                    is_loading: false,
+                  })
+                );
               }
               break;
             default:
@@ -36,6 +48,13 @@ const useUsernameAvatarApi = () => {
                 "API error: ",
                 error.response.status,
                 error.response.data
+              );
+              dispatch(
+                set_username_avatar({
+                  username: "Username",
+                  avatar: "Avatar",
+                  is_loading: false,
+                })
               );
               break;
           }
@@ -47,12 +66,33 @@ const useUsernameAvatarApi = () => {
             set_error_data(
               "Нет ответа от сервера, пожалуйста, проверьте соединение с интернетом и попробуйте еще раз"
             );
+            dispatch(
+              set_username_avatar({
+                username: "Username",
+                avatar: "Avatar",
+                is_loading: false,
+              })
+            );
           }
         } else {
           console.error("API Error: Reqest setup error:", error.message);
+          dispatch(
+            set_username_avatar({
+              username: "Username",
+              avatar: "Avatar",
+              is_loading: false,
+            })
+          );
         }
       } else {
         console.error("Non-Axios:", error);
+        dispatch(
+          set_username_avatar({
+            username: "Username",
+            avatar: "Avatar",
+            is_loading: false,
+          })
+        );
       }
     }
   };
