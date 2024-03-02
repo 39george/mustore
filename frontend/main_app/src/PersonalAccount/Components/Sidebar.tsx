@@ -150,6 +150,7 @@ const Sidebar: FC<SidebarProps> = ({ username, user_role, avatar }) => {
         sidebar_collapsed && styles.sidebar_collapsed
       }`}
     >
+      <div className={styles.filler_sidebar}></div>
       <div
         className={`${styles.collapse_icon_container} ${chevron_disabled}`}
         style={{ display: `${chevron_display_style}` }}

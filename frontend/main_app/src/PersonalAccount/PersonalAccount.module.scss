@@ -16,3 +16,13 @@
   background-color: $account_border;
   margin: 0;
 }
+
+.filler_main {
+  position: fixed;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  background-color: $account_bg;
+  z-index: -2;
+}

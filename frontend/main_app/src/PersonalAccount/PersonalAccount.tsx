@@ -42,6 +42,7 @@ const PersonalAccount: FC = () => {
         <hr className={styles.top_border} />
         <Outlet />
       </div>
+      <div className={styles.filler_main}></div>
     </div>
   );
 };

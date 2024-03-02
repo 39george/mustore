@@ -48,6 +48,8 @@ $delays: 0s, 0.1s, 0.15s, 0.2s, 0.25s, 0.3s, 0.35s, 0.4s, 0.45s;
 .sidebar {
   position: relative;
 
+  flex-shrink: 0;
+
   width: 16.125rem;
   height: 100vh;
 
@@ -295,6 +297,16 @@ $delays: 0s, 0.1s, 0.15s, 0.2s, 0.25s, 0.3s, 0.35s, 0.4s, 0.45s;
   animation: fade_in 0.3s ease-out 0.2s forwards;
 }
 
+.filler_sidebar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  width: 16.125rem;
+  height: 100%;
+  background-color: $account_dark;
+  z-index: -1;
+}
+
 // Sidebar collapsed
 @mixin sidebar_collapsed {
   width: 3.75rem;
@@ -354,6 +366,10 @@ $delays: 0s, 0.1s, 0.15s, 0.2s, 0.25s, 0.3s, 0.35s, 0.4s, 0.45s;
 
   .section_name {
     display: none;
+  }
+
+  .filler_sidebar {
+    width: 3.75rem;
   }
 }
 
