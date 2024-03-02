@@ -96,4 +96,7 @@ export type ActiveSections =
 export interface UsernameAvatar {
   username: string;
   avatar: string;
+  is_loading: boolean;
 }
+
+export type UserRole = "creator" | "consumer";
