@@ -1,5 +1,5 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import "./App.scss";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
 import HomePage from "./Pages/Home/HomePage";
 import Footer from "./Components/Footer";
@@ -21,11 +21,6 @@ function App() {
   const user_permissions = useSelector(
     (state: RootState) => state.user_permissions.permissions
   );
-  const username_avatar = useSelector(
-    (state: RootState) => state.username_avatar
-  );
-
-  // console.log(user_permissions);
 
   useEffect(() => {
     check_user_permissions();
