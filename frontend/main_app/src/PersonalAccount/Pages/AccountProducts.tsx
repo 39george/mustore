@@ -319,6 +319,7 @@ const AccountProducts: FC = () => {
         new_declension="новую"
         products={mock_songs}
       />
+      <hr className={styles.divider} />
     </div>
   );
 };

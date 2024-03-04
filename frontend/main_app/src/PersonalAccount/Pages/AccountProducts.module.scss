@@ -5,10 +5,10 @@
   @include disable_scrollbar;
 
   height: calc(100vh - 4.75rem - 0.125rem);
-  padding: 0 2rem;
+  padding: 0 $padding_account_page 2rem;
   overflow-y: scroll;
 }
 
-.upload_product {
-  @include upload_product_widget;
+.divider {
+  @include account_border(100%, 1px, 2rem 0);
 }
