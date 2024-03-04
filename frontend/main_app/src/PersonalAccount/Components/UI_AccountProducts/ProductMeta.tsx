@@ -1,5 +1,5 @@
 import { MusicKey } from "../../../types/types";
-import styles from "./ProudctMeta.module.scss";
+import styles from "./ProductMeta.module.scss";
 import { FC } from "react";
 
 interface ProudctMetaProps {

@@ -5,6 +5,7 @@
   @include disable_scrollbar;
 
   height: calc(100vh - 4.75rem - 0.125rem);
+  padding: 0 2rem;
   overflow-y: scroll;
 }
 
