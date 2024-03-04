@@ -1,2 +1,31 @@
 @import "../../../colors.scss";
 @import "../GeneralStyles.scss";
+
+.product_section {
+  padding: 2rem $padding_account_page 0;
+}
+
+.product_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0 2rem;
+}
+
+.h2 {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.upload_product {
+  @include upload_product_widget;
+}
+
+.product_content {
+  margin-top: 2.25rem;
+}
+
+.select_product {
+  width: 20rem;
+  margin-left: 4.25rem;
+}

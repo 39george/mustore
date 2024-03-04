@@ -1,13 +1,13 @@
 import styles from "./ProductSection.module.scss";
 import { FiPlus } from "react-icons/fi";
 import { FC, useState } from "react";
-import { GoChevronLeft, GoChevronRight } from "react-icons/go";
 import {
   IProduct,
   ProductSectionType,
   TypeDeclension,
 } from "../../../types/types";
 import ProductMeta from "./ProductMeta";
+import ProductCoversContainer from "./ProductCoversContainer";
 
 type NewDeclension = "новый" | "новую";
 
@@ -38,29 +38,7 @@ const ProductSection: FC<ProductSectionProps> = ({
       </div>
       <div className={styles.product_content}>
         <div className={styles.select_product}>
-          <div className={styles.covers_container}>
-            <div className={styles.nav_button}>
-              <GoChevronLeft className={styles.nav_chevron} />
-            </div>
-            {products.map((product, idx) => {
-              return (
-                <div
-                  className={`${styles.image_wrapper} ${styles.product}${
-                    idx + 1
-                  }`}
-                  key={idx}
-                >
-                  <img
-                    src={product.key}
-                    alt={`product${idx + 1}`}
-                  />
-                </div>
-              );
-            })}
-            <div className={styles.nav_button}>
-              <GoChevronRight className={styles.nav_chevron} />
-            </div>
-          </div>
+          <ProductCoversContainer products={products} />
           <ol className={styles.product_list}>
             {products.map((product, idx) => {
               return (
