@@ -1,0 +1,13 @@
+@import "../../colors.scss";
+@import "../Components/GeneralStyles.scss";
+
+.products {
+  @include disable_scrollbar;
+
+  height: calc(100vh - 4.75rem - 0.125rem);
+  overflow-y: scroll;
+}
+
+.upload_product {
+  @include upload_product_widget;
+}
