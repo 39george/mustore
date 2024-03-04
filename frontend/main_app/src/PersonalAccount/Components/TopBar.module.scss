@@ -16,8 +16,7 @@
 // Product page's widgets ----------------------------------------------------//
 .header_and_widgets,
 .product_status,
-.products_widgets,
-.upload_product {
+.products_widgets {
   display: flex;
   align-items: center;
 }
@@ -26,8 +25,7 @@
   margin-left: 3.25rem;
 }
 
-.product_status,
-.upload_product {
+.product_status {
   @include widget(0.5rem);
 
   width: fit-content;
@@ -53,23 +51,10 @@
 }
 
 .upload_product {
-  height: 2.25rem;
-
+  @include upload_product_widget;
   margin-left: 1.5rem;
-
-  color: $main_bright;
-  background-color: $account_green;
-
-  transition: filter 0.1s ease-out;
-
-  &:hover {
-    filter: brightness(105%);
-  }
 }
 
-.plus_icon {
-  margin-left: 0.25rem;
-}
 //----------------------------------------------------------------------------//
 
 .h2 {
