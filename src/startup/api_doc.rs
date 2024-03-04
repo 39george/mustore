@@ -15,12 +15,8 @@ use crate::{
     domain::responses::user_access::DialogId,
 };
 use crate::{domain::general_types::ProductStatus, routes::protected};
-use crate::{
-    domain::requests::user_access::SendMessageRequest, routes::development,
-};
-use crate::{
-    domain::responses::user_access::ConversationDataResponse, routes::open,
-};
+use crate::{domain::requests::user_access::SendMessageRequest, routes::development};
+use crate::{domain::responses::user_access::ConversationDataResponse, routes::open};
 
 // ───── ErrorResponses ───────────────────────────────────────────────────── //
 
@@ -173,7 +169,7 @@ pub struct GetCreatorMarksAvg {
     "secondary_genre": "pop",
     "tempo": "110",
     "music_key": "a_major",
-    "sex": "female",
+    "sex": "Female",
     "duration": "2.25",
     "lyric": "Lalalalaaaa, la",
     "moods": [
