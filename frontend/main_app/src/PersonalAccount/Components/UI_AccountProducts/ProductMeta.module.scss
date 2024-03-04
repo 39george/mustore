@@ -1,2 +1,57 @@
 @import "../../../colors.scss";
 @import "../GeneralStyles.scss";
+
+.product_meta {
+  margin-left: auto;
+  margin-right: 2rem;
+}
+
+.meta_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.name {
+  font-family: "Geologica", sans-serif;
+  font-size: 1.875rem;
+  font-weight: 400;
+}
+
+.edit {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgba($color: $main_dark, $alpha: 0.5);
+
+  letter-spacing: 0.1em;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.meta_list {
+  width: 100%;
+  max-width: 40rem;
+  margin-top: 1.75rem;
+}
+
+.meta_item {
+  display: flex;
+  align-items: baseline;
+
+  font-family: "Geologica", sans-serif;
+  font-size: 0.875rem;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+
+  &:not(:last-child) {
+    margin-bottom: 1em;
+  }
+}
+
+.meta_type {
+  color: rgba($color: $main_dark, $alpha: 0.5);
+  margin-right: 1em;
+}

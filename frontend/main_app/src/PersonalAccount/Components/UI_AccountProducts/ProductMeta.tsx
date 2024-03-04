@@ -79,42 +79,42 @@ const ProductMeta: FC<ProudctMetaProps> = ({
       </div>
       <ul className={styles.meta_list}>
         <li className={styles.meta_item}>
-          <p className={styles.meta_type}>Жанр</p>
+          <p className={styles.meta_type}>Жанр: </p>
           <p className={styles.meta_value}>
             {primary_genre}
             {secondary_genre ? `, ${secondary_genre}` : ""}
           </p>
         </li>
         <li className={styles.meta_item}>
-          <p className={styles.meta_type}>Mood</p>
+          <p className={styles.meta_type}>Mood: </p>
           <p className={styles.meta_value}>{arr_to_string(moods)}</p>
         </li>
         <li className={styles.meta_item}>
-          <p className={styles.meta_type}>Лайки</p>
+          <p className={styles.meta_type}>Лайки: </p>
           <p className={styles.meta_value}>{likes_count}</p>
         </li>
         <li className={styles.meta_item}>
-          <p className={styles.meta_type}>Прослушивания</p>
+          <p className={styles.meta_type}>Прослушивания: </p>
           <p className={styles.meta_value}>{listenings_count}</p>
         </li>
         <li className={styles.meta_item}>
-          <p className={styles.meta_type}>Цена</p>
-          <p className={styles.meta_value}>{format_price(price)}</p>
+          <p className={styles.meta_type}>Цена: </p>
+          <p className={styles.meta_value}>{format_price(price)} ₽</p>
         </li>
         <li className={styles.meta_item}>
-          <p className={styles.meta_type}>Темп</p>
+          <p className={styles.meta_type}>Темп: </p>
           <p className={styles.meta_value}>{tempo} BPM</p>
         </li>
         <li className={styles.meta_item}>
-          <p className={styles.meta_type}>Тональность</p>
+          <p className={styles.meta_type}>Тональность: </p>
           <p className={styles.meta_value}>{format_music_key(music_key)}</p>
         </li>
         <li className={styles.meta_item}>
-          <p className={styles.meta_type}>Вокал</p>
+          <p className={styles.meta_type}>Вокал: </p>
           <p className={styles.meta_value}>{format_sex(sex)}</p>
         </li>
-        <li className={styles.meta_item}>
-          <p className={styles.meta_type}>Текст</p>
+        <li className={`${styles.meta_item} ${styles.meta_text}`}>
+          <p className={styles.meta_type}>Текст: </p>
           <p className={styles.meta_value}>{lyric}</p>
         </li>
       </ul>
