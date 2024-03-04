@@ -2,7 +2,7 @@
 @import "../GeneralStyles.scss";
 
 .product_section {
-  padding: 2rem $padding_account_page 0;
+  padding-top: 2rem;
 }
 
 .product_header {
@@ -28,4 +28,46 @@
 .select_product {
   width: 20rem;
   margin-left: 4.25rem;
+}
+
+.product_list {
+  margin-top: 4.5rem;
+  font-family: "Geologica", sans-serif;
+  font-weight: 400;
+  font-size: 0.875rem;
+}
+
+.product_list_item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+
+  padding: 0.5rem;
+
+  cursor: pointer;
+
+  &:not(:last-child) {
+    margin-bottom: 0.25rem;
+  }
+
+  &:hover {
+    background-color: rgba($color: $account_offline_status, $alpha: 0.1);
+  }
+}
+
+.active_product {
+  background-color: rgba($color: $account_accent, $alpha: 0.15);
+
+  &:hover {
+    background-color: rgba($color: $account_accent, $alpha: 0.15);
+  }
+}
+
+.product_name {
+  word-break: break-all;
+}
+
+.duration {
+  margin-left: 0.25rem;
+  color: rgba($color: $main_dark, $alpha: 0.5);
 }

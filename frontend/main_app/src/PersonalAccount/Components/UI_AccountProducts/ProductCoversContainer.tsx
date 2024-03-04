@@ -20,6 +20,7 @@ const ProductCoversContainer: FC<ProductCoversContainerProps> = ({
           const translate_amount = 3 * idx;
           const cover_opacity = idx < 3 ? 1 : 0;
           const overlay_opacity = 0.3 * idx;
+          const desaturate = 1 - idx * 0.3;
           return (
             <div
               className={`${styles.image_wrapper}`}
@@ -28,6 +29,7 @@ const ProductCoversContainer: FC<ProductCoversContainerProps> = ({
                 height: `calc(16rem - 2rem * ${idx})`,
                 transform: `translateX(${translate_amount}rem)`,
                 opacity: `${cover_opacity}`,
+                filter: `saturate(${desaturate})`,
                 zIndex: `${products.length - idx}`,
               }}
               key={idx}
