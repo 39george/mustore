@@ -43,6 +43,34 @@
   text-overflow: ellipsis;
 }
 
+@mixin upload_product_widget {
+  @include widget(0.5rem);
+
+  display: flex;
+  align-items: center;
+
+  width: fit-content;
+  height: 2.25rem;
+
+  font-size: 0.875rem;
+  font-weight: 500;
+
+  border-radius: 0.25rem;
+  color: $main_bright;
+  background-color: $account_green;
+
+  cursor: pointer;
+  transition: filter 0.1s ease-out;
+
+  &:hover {
+    filter: brightness(105%);
+  }
+
+  .plus_icon {
+    margin-left: 0.25rem;
+  }
+}
+
 .rating_container {
   display: flex;
   align-items: center;
