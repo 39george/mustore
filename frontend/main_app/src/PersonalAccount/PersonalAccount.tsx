@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../state/store";
 import Dashboard from "./Pages/Dashboard";
 import { find_user_role_index, translate_user_role } from "../helpers/helpers";
+import AccountProducts from "./Pages/AccountProducts";
 
 const PersonalAccount: FC = () => {
   const username_avatar = useSelector(
@@ -64,6 +65,10 @@ const PersonalAccount: FC = () => {
                 }
               />
             }
+          />
+          <Route
+            path="products"
+            element={<AccountProducts />}
           />
           <Route
             path="*"
