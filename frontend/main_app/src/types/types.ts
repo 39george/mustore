@@ -108,3 +108,61 @@ export type ProductStatus =
   | "hidden"
   | "sold"
   | null;
+
+export enum MusicKey {
+  a_minor = "a_minor",
+  a_major = "a_major",
+  b_flat_minor = "b_flat_minor",
+  b_flat_major = "b_flat_major",
+  b_minor = "b_minor",
+  b_major = "b_major",
+  c_minor = "c_minor",
+  c_major = "c_major",
+  c_sharp_minor = "c_sharp_minor",
+  c_sharp_major = "c_sharp_major",
+  d_minor = "d_minor",
+  d_major = "d_major",
+  e_flat_minor = "e_flat_minor",
+  e_flat_major = "e_flat_major",
+  e_minor = "e_minor",
+  e_major = "e_major",
+  f_minor = "f_minor",
+  f_major = "f_major",
+  f_sharp_minor = "f_sharp_minor",
+  f_sharp_major = "f_sharp_major",
+  g_minor = "g_minor",
+  g_major = "g_major",
+  a_flat_minor = "a_flat_minor",
+  a_flat_major = "a_flat_major",
+}
+
+export interface IProduct {
+  duration: string;
+  key: string;
+  likes_count: string;
+  listenings_count: string;
+  lyric: string;
+  moods: string[];
+  music_key: MusicKey;
+  name: string;
+  price: string;
+  primary_genre: string;
+  secondary_genre?: string;
+  sex: string;
+  song_id: string;
+  tempo: string;
+}
+
+export enum ProductSectionType {
+  songs = "Песни",
+  covers = "Обложки",
+  beats = "Биты",
+  texts = "Тексты",
+}
+
+export enum TypeDeclension {
+  song = "песню",
+  cover = "обложку",
+  beat = "бит",
+  text = "текст",
+}
