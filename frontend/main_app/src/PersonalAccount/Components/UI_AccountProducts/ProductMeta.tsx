@@ -1,6 +1,6 @@
 import { MusicKey } from "../../../types/types";
 import styles from "./ProductMeta.module.scss";
-import { FC } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 
 interface ProudctMetaProps {
   likes_count: string;
@@ -47,16 +47,44 @@ const format_music_key = (music_key: string) => {
 const format_sex = (sex: string) => {
   let result = "";
   switch (sex) {
-    case "male":
+    case "Male":
       result = "Мужской";
       break;
-    case "female":
+    case "Female":
       result = "Женский";
       break;
   }
 
   return result;
 };
+
+const format_lyric = (lyric: string) => {
+  const regex = /^[A-Za-zА-Яа-я]+$/u;
+  let substrings: string[] = [];
+  let current_substring = "";
+
+  for (let i = 0; i < lyric.length; i++) {
+    if (regex.test(lyric.charAt(i))) {
+      if (lyric.charAt(i) === lyric.charAt(i).toUpperCase()) {
+        if (!current_substring) {
+          current_substring = lyric.charAt(i);
+        } else {
+          substrings.push(current_substring);
+          current_substring = lyric.charAt(i);
+        }
+      } else {
+        current_substring += lyric.charAt(i);
+      }
+    } else {
+      current_substring += lyric.charAt(i);
+    }
+  }
+
+  substrings.push(current_substring);
+  return substrings;
+};
+
+type ExpandCollapse = "развернуть" | "свернуть";
 
 const ProductMeta: FC<ProudctMetaProps> = ({
   likes_count,
@@ -71,6 +99,26 @@ const ProductMeta: FC<ProudctMetaProps> = ({
   sex,
   tempo,
 }) => {
+  const lyric_ref = useRef<HTMLDivElement>(null);
+  const [lyric_height, set_lyric_height] = useState("20.5rem");
+  const [expand_collapse, set_expand_collapse] =
+    useState<ExpandCollapse>("развернуть");
+
+  const handle_expand_collapse = () => {
+    if (expand_collapse === "развернуть") {
+      set_expand_collapse("свернуть");
+      set_lyric_height(`${lyric_ref.current?.clientHeight.toString()}px`);
+    } else {
+      set_expand_collapse("развернуть");
+      set_lyric_height("20.5rem");
+    }
+  };
+
+  useEffect(() => {
+    if (expand_collapse === "свернуть") {
+      set_lyric_height(`${lyric_ref.current?.clientHeight.toString()}px`);
+    }
+  }, [name, expand_collapse]);
   return (
     <div className={styles.product_meta}>
       <div className={styles.meta_header}>
@@ -113,9 +161,30 @@ const ProductMeta: FC<ProudctMetaProps> = ({
           <p className={styles.meta_type}>Вокал: </p>
           <p className={styles.meta_value}>{format_sex(sex)}</p>
         </li>
-        <li className={`${styles.meta_item} ${styles.meta_text}`}>
+        <li
+          className={`${styles.meta_item} ${styles.meta_text}`}
+          style={{ height: lyric_height }}
+        >
           <p className={styles.meta_type}>Текст: </p>
-          <p className={styles.meta_value}>{lyric}</p>
+          <div
+            ref={lyric_ref}
+            className={styles.meta_value}
+          >
+            {format_lyric(lyric).map((string, idx) => {
+              return (
+                <p key={idx}>
+                  {string}
+                  <br />
+                </p>
+              );
+            })}
+          </div>
+          <p
+            className={styles.expand_collapse}
+            onClick={handle_expand_collapse}
+          >
+            {expand_collapse}
+          </p>
         </li>
       </ul>
     </div>

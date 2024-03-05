@@ -2,7 +2,9 @@
 @import "../GeneralStyles.scss";
 
 .product_meta {
-  margin-left: auto;
+  width: 100%;
+
+  margin-left: 10rem;
   margin-right: 2rem;
 }
 
@@ -16,11 +18,15 @@
   font-family: "Geologica", sans-serif;
   font-size: 1.875rem;
   font-weight: 400;
+  word-break: break-all;
 }
 
 .edit {
+  margin-left: 0.25rem;
+
   font-size: 0.875rem;
   font-weight: 500;
+
   color: rgba($color: $main_dark, $alpha: 0.5);
 
   letter-spacing: 0.1em;
@@ -32,8 +38,8 @@
 }
 
 .meta_list {
+  position: relative;
   width: 100%;
-  max-width: 40rem;
   margin-top: 1.75rem;
 }
 
@@ -54,4 +60,30 @@
 .meta_type {
   color: rgba($color: $main_dark, $alpha: 0.5);
   margin-right: 1em;
+}
+
+.meta_text {
+  position: relative;
+  width: 30rem;
+  overflow: hidden;
+  transition: height 0.3s ease-out;
+  // outline: 1px solid red;
+}
+
+.expand_collapse {
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  font-family: "Raleway", sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+
+  color: rgba($color: $main_dark, $alpha: 0.5);
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }

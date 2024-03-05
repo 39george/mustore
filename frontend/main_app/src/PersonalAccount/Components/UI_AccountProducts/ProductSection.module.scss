@@ -23,11 +23,11 @@
 
 .product_content {
   display: flex;
-  flex-wrap: wrap;
   margin-top: 2.25rem;
 }
 
 .select_product {
+  flex-shrink: 0;
   width: 20rem;
   margin-left: 4.25rem;
 }
