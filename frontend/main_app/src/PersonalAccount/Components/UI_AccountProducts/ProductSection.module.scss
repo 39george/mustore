@@ -28,12 +28,13 @@
 
 .select_product {
   flex-shrink: 0;
-  width: 20rem;
-  margin-left: 4.25rem;
+  margin-left: 2.25rem;
 }
 
 .product_list {
-  margin-top: 4.5rem;
+  margin: 4.5rem auto 0;
+  width: 100%;
+  max-width: 24rem;
   font-family: "Geologica", sans-serif;
   font-weight: 400;
   font-size: 0.875rem;
@@ -48,6 +49,8 @@
 
   letter-spacing: 0.05em;
   cursor: pointer;
+
+  @include disable_selection;
 
   &:not(:last-child) {
     margin-bottom: 0.25rem;

@@ -1,8 +1,55 @@
 @import "../../../colors.scss";
 @import "../GeneralStyles.scss";
 
+$translate_y_amount: -10rem;
+
+@mixin init_render_animation($translate_amount, $animation_delay) {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY($translate_amount);
+  animation: slide_from_top 0.3s ease-out $animation_delay forwards;
+}
+
+@keyframes slide_from_top {
+  from {
+    transform: translateY($translate_y_amount);
+    opacity: 0;
+    visibility: hidden;
+  }
+  to {
+    transform: translateY(0px);
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
 .covers_carousel {
+  width: 32rem;
+  height: 16.75rem;
+  overflow-x: hidden;
+  // outline: 1px solid blue;
+}
+
+.content_container {
+  width: 24rem;
+  margin: 0 auto;
   position: relative;
+}
+
+.product0 {
+  @include init_render_animation($translate_y_amount, 0.2s);
+}
+.product1 {
+  @include init_render_animation($translate_y_amount, 0.1s);
+}
+.product2 {
+  @include init_render_animation($translate_y_amount, 0s);
+}
+
+.product_after_animation {
+  animation: none;
+  transform: translateY(0);
+  visibility: visible;
 }
 
 .nav_button {
@@ -22,16 +69,17 @@
   background-color: $widget_bg;
   box-shadow: 0 0 1.5rem rgba(#000, 0.06);
 
+  user-select: none;
   cursor: pointer;
   z-index: 999;
 }
 
 .button_left {
-  left: -3rem;
+  left: -3.5rem;
 }
 
 .button_right {
-  right: -3rem;
+  right: -3.5rem;
 }
 
 .nav_chevron {
@@ -40,12 +88,16 @@
 }
 
 .product_covers_container {
+  position: relative;
+
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative;
-  width: 16rem;
+
+  width: 20rem;
   height: 16rem;
+
+  margin-left: auto;
 }
 
 .image_wrapper {
@@ -62,6 +114,9 @@
     width: 100%;
     height: 100%;
   }
+
+  transition: left 0.3s cubic-bezier(0.28, -0.29, 0.69, 1.23),
+    opacity 0.1s ease-out, width 0.3s ease-out, height 0.3s ease-out;
 }
 
 .overlay {

@@ -26,7 +26,7 @@ const ProductSection: FC<ProductSectionProps> = ({
 }) => {
   const [product_idx, set_product_idx] = useState(0);
   const [active_product, set_active_product] = useState(
-    `product${product_idx + 1}`
+    `product${product_idx}`
   );
 
   const handle_change_active_product = (product: string, idx: number) => {
@@ -47,18 +47,21 @@ const ProductSection: FC<ProductSectionProps> = ({
       </div>
       <div className={styles.product_content}>
         <div className={styles.select_product}>
-          <ProductCoversContainer products={products} />
+          <ProductCoversContainer
+            products={products}
+            product_idx={product_idx}
+            change_active_product={handle_change_active_product}
+          />
           <ol className={styles.product_list}>
             {products.map((product, idx) => {
               return (
                 <li
                   className={`${styles.product_list_item} ${
-                    active_product === `product${idx + 1}` &&
-                    styles.active_product
+                    active_product === `product${idx}` && styles.active_product
                   }`}
                   key={idx}
                   onClick={() =>
-                    handle_change_active_product(`product${idx + 1}`, idx)
+                    handle_change_active_product(`product${idx}`, idx)
                   }
                 >
                   <p className={styles.product_name}>
