@@ -13,25 +13,25 @@ const define_opacity = (idx: number, product_idx: number) => {
   if (idx < product_idx) {
     return product_idx - idx > 2 ? 0 : 1;
   } else {
-    return idx - product_idx < 3 ? 1 : 0;
   }
+  return idx - product_idx < 3 ? 1 : 0;
 };
 
-const define_z_index = (
-  idx: number,
-  product_idx: number,
-  products: IProduct[]
-) => {
-  const default_z_index = products.length - idx;
-  let current_z_index: number = 0;
-  current_z_index =
-    product_idx === 0
-      ? default_z_index
-      : idx < product_idx
-      ? default_z_index + (idx - product_idx)
-      : default_z_index + product_idx;
-  return current_z_index;
-};
+// const define_z_index = (
+//   idx: number,
+//   product_idx: number,
+//   products: IProduct[]
+// ) => {
+//   const default_z_index = products.length - idx;
+//   let current_z_index: number = 0;
+//   current_z_index =
+//     product_idx === 0
+//       ? default_z_index
+//       : idx < product_idx
+//       ? default_z_index + (idx - product_idx)
+//       : default_z_index + product_idx;
+//   return current_z_index;
+// };
 
 const ProductCoversContainer: FC<ProductCoversContainerProps> = ({
   products,
@@ -39,6 +39,9 @@ const ProductCoversContainer: FC<ProductCoversContainerProps> = ({
   change_active_product,
 }) => {
   const [after_init_render, set_after_init_render] = useState(``);
+  const [z_index, set_z_index] = useState(
+    products.map((_, idx) => products.length - idx)
+  );
 
   useEffect(() => {
     setTimeout(() => {
@@ -65,15 +68,33 @@ const ProductCoversContainer: FC<ProductCoversContainerProps> = ({
         break;
     }
   };
+
+  useEffect(() => {
+    setTimeout(() => {
+      set_z_index(
+        products.map((_, idx) => {
+          if (product_idx === 0) {
+            return products.length - idx;
+          }
+          if (idx < product_idx) {
+            return products.length - idx + (idx - product_idx);
+          } else {
+            return products.length - idx + product_idx;
+          }
+        })
+      );
+    }, 100);
+  }, [product_idx]);
+
   return (
     <div className={styles.covers_carousel}>
       <div className={styles.content_container}>
         {product_idx !== 0 && (
           <div
             className={`${styles.nav_button} ${styles.button_left}`}
-            onClick={() =>
-              handle_carousel_shift("left", `product${product_idx - 1}`)
-            }
+            onClick={() => {
+              handle_carousel_shift("left", `product${product_idx - 1}`);
+            }}
           >
             <GoChevronLeft className={styles.nav_chevron} />
           </div>
@@ -108,7 +129,8 @@ const ProductCoversContainer: FC<ProductCoversContainerProps> = ({
                   } `,
                   left: `${left_shift}rem`,
                   opacity: `${cover_opacity}`,
-                  zIndex: `${define_z_index(idx, product_idx, products)}`,
+                  // zIndex: `${define_z_index(idx, product_idx, products)}`,
+                  zIndex: `${z_index[idx]}`,
                 }}
                 key={idx}
               >
@@ -128,9 +150,9 @@ const ProductCoversContainer: FC<ProductCoversContainerProps> = ({
         {product_idx < products.length - 1 && (
           <div
             className={`${styles.nav_button} ${styles.button_right}`}
-            onClick={() =>
-              handle_carousel_shift("right", `product${product_idx + 1}`)
-            }
+            onClick={() => {
+              handle_carousel_shift("right", `product${product_idx + 1}`);
+            }}
           >
             <GoChevronRight className={styles.nav_chevron} />
           </div>

@@ -308,6 +308,21 @@ const mock_songs: IProduct[] = [
     song_id: "456789",
     tempo: "102",
   },
+  {
+    duration: "3:10",
+    key: cover4,
+    likes_count: "120",
+    listenings_count: "800",
+    lyric: `Я не кидал никого никогда`,
+    moods: ["Вдохновляющий", "Уверенный"],
+    music_key: MusicKey.f_sharp_minor,
+    name: "Путь к вершине",
+    price: "90000",
+    primary_genre: "Рэп",
+    sex: "Male",
+    song_id: "456789",
+    tempo: "102",
+  },
 ];
 
 const AccountProducts: FC = () => {
