@@ -98,27 +98,33 @@ const ProductMeta: FC<ProudctMetaProps> = ({
   secondary_genre,
   sex,
   tempo,
+  song_id,
 }) => {
   const lyric_ref = useRef<HTMLDivElement>(null);
-  const [lyric_height, set_lyric_height] = useState("20.5rem");
+  const [visible_lyric_height, set_visible_lyric_height] = useState("20.5rem");
   const [expand_collapse, set_expand_collapse] =
     useState<ExpandCollapse>("развернуть");
 
   const handle_expand_collapse = () => {
     if (expand_collapse === "развернуть") {
       set_expand_collapse("свернуть");
-      set_lyric_height(`${lyric_ref.current?.clientHeight.toString()}px`);
+      set_visible_lyric_height(
+        `${lyric_ref.current?.clientHeight.toString()}px`
+      );
     } else {
       set_expand_collapse("развернуть");
-      set_lyric_height("20.5rem");
+      set_visible_lyric_height("20.5rem");
     }
   };
 
   useEffect(() => {
     if (expand_collapse === "свернуть") {
-      set_lyric_height(`${lyric_ref.current?.clientHeight.toString()}px`);
+      set_visible_lyric_height(
+        `${lyric_ref.current?.clientHeight.toString()}px`
+      );
     }
-  }, [name, expand_collapse]);
+  }, [song_id, expand_collapse]);
+
   return (
     <div className={styles.product_meta}>
       <div className={styles.meta_header}>
@@ -155,15 +161,20 @@ const ProductMeta: FC<ProudctMetaProps> = ({
         </li>
         <li className={styles.meta_item}>
           <p className={styles.meta_type}>Тональность: </p>
-          <p className={styles.meta_value}>{format_music_key(music_key)}</p>
+          <p
+            className={styles.meta_value}
+            style={{ height: "1.375rem" }}
+          >
+            {format_music_key(music_key)}
+          </p>
         </li>
         <li className={styles.meta_item}>
           <p className={styles.meta_type}>Вокал: </p>
           <p className={styles.meta_value}>{format_sex(sex)}</p>
         </li>
         <li
-          className={`${styles.meta_item} ${styles.meta_text}`}
-          style={{ height: lyric_height }}
+          className={`${styles.meta_item} ${styles.meta_lyric}`}
+          style={{ height: visible_lyric_height }}
         >
           <p className={styles.meta_type}>Текст: </p>
           <div
