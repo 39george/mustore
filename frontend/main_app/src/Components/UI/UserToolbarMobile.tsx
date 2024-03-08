@@ -7,6 +7,7 @@ import useLogOutUserApi from "../../hooks/API/useLogOutUserApi";
 import useCheckPermissionsApi from "../../hooks/API/useCheckPermissionsApi";
 import { useSelector } from "react-redux";
 import { RootState } from "../../state/store";
+import { NavLink } from "react-router-dom";
 
 interface UserToolbarMobileProps {
   sidebar_open: boolean;
@@ -63,7 +64,14 @@ const UserToolbarMobile: FC<UserToolbarMobileProps> = ({ sidebar_open }) => {
         className={styles.options}
         style={{ display: `${options_visible ? "block" : "none"}` }}
       >
-        <li className={styles.option}>Личный кабинет</li>
+        <li className={styles.option}>
+          <NavLink
+            to="personal-account/dashboard"
+            className={styles.option}
+          >
+            Личный кабинет
+          </NavLink>
+        </li>
         <li
           className={styles.option}
           onClick={try_to_logout}
