@@ -102,6 +102,10 @@ const TopBar: FC<TopBarProps> = ({ username, avatar }) => {
               <p className={styles.upload_product_p}>загрузить новый товар</p>
               <FiPlus className={styles.plus_icon} />
             </div>
+            <div className={styles.actions_button}>
+              <p className={styles.actions_text}>действия</p>
+              <GoChevronDown className={styles.chevron} />
+            </div>
           </div>
         )}
       </div>
