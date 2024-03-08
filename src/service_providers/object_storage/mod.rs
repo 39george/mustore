@@ -48,9 +48,9 @@ pub struct ObjectStorage {
 
 impl ObjectStorage {
     pub async fn new(settings: ObjectStorageSettings) -> Self {
-        // let c = reqwest::Client::new();
-        // let response = c.get(&settings.endpoint_url).send().await;
-        // dbg!(response);
+        let c = reqwest::Client::new();
+        let response = c.get(&settings.endpoint_url).send().await;
+        dbg!(response);
         // Create Credentials object directly.
         let credentials = Credentials::new(
             settings.access_key_id.expose_secret(),
