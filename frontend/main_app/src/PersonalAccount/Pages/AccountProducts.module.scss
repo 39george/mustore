@@ -12,3 +12,9 @@
 .divider {
   @include account_border(100%, 1px, 2rem 0);
 }
+
+.products_default_layout {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

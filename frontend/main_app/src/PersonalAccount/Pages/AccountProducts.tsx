@@ -11,6 +11,7 @@ import cover2 from "../../assets/HomePage/album_covers/ablum_cover_2.png";
 import cover3 from "../../assets/HomePage/album_covers/ablum_cover_3.png";
 import cover4 from "../../assets/HomePage/album_covers/ablum_cover_4.png";
 import ProductSection from "../Components/UI_AccountProducts/ProductSection";
+import ProductDefault from "../Components/UI_AccountProducts/ProductDefault";
 
 const mock_songs: IProduct[] = [
   {
@@ -56,7 +57,7 @@ const mock_songs: IProduct[] = [
     Папиросы, расспросы.
     Спроси меня:
     -Где ты?
-    -Нигде, я иду в никуда.Да,
+    -Нигде, я иду в никуда. Да,
     Горят провода, это правда.
     Сухая вода – бесконечная нота.
     Спроси меня:
@@ -310,16 +311,29 @@ const mock_songs: IProduct[] = [
   },
 ];
 
+const products = [];
+// products.push(mock_songs);
+
 const AccountProducts: FC = () => {
   return (
-    <div className={styles.products}>
-      <ProductSection
-        type={ProductSectionType.songs}
-        type_declension={TypeDeclension.song}
-        new_declension="новую"
-        products={mock_songs}
-      />
-      <hr className={styles.divider} />
+    <div
+      className={`${styles.products} ${
+        products.length === 0 && styles.products_default_layout
+      }`}
+    >
+      {products.length === 0 ? (
+        <ProductDefault />
+      ) : (
+        <>
+          <ProductSection
+            type={ProductSectionType.songs}
+            type_declension={TypeDeclension.song}
+            new_declension="новую"
+            products={mock_songs}
+          />
+          <hr className={styles.divider} />
+        </>
+      )}
     </div>
   );
 };
