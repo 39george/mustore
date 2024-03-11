@@ -1,5 +1,5 @@
-import { GoChevronLeft, GoChevronRight } from "react-icons/go";
 import styles from "./ProductCoversContainer.module.scss";
+import { GoChevronLeft, GoChevronRight } from "react-icons/go";
 import { FC, useEffect, useState } from "react";
 import { IProduct } from "../../../types/types";
 
@@ -17,21 +17,18 @@ const define_opacity = (idx: number, product_idx: number) => {
   return idx - product_idx < 3 ? 1 : 0;
 };
 
-// const define_z_index = (
-//   idx: number,
-//   product_idx: number,
-//   products: IProduct[]
-// ) => {
-//   const default_z_index = products.length - idx;
-//   let current_z_index: number = 0;
-//   current_z_index =
-//     product_idx === 0
-//       ? default_z_index
-//       : idx < product_idx
-//       ? default_z_index + (idx - product_idx)
-//       : default_z_index + product_idx;
-//   return current_z_index;
-// };
+const define_width_height = (
+  idx: number,
+  product_idx: number,
+  cover_size: number
+) => {
+  let result: string = "";
+  idx < product_idx
+    ? (result = `calc(${cover_size}rem + 2rem * (${idx} - ${product_idx}))`)
+    : (result = `calc(${cover_size}rem - 2rem * ${idx - product_idx})`);
+
+  return result;
+};
 
 const ProductCoversContainer: FC<ProductCoversContainerProps> = ({
   products,
@@ -42,6 +39,14 @@ const ProductCoversContainer: FC<ProductCoversContainerProps> = ({
   const [z_index, set_z_index] = useState(
     products.map((_, idx) => products.length - idx)
   );
+  const [left_shift, set_left_shift] = useState({
+    idx_less_than_product_idx: window.innerWidth < 685 ? 1 : 2,
+    idx_greater_than_product_idx: window.innerWidth < 685 ? 3 : 4,
+  });
+  const [cover_size, set_cover_size] = useState(
+    window.innerWidth < 685 ? 12 : 16
+  );
+  const [small_sreen, set_small_screen] = useState(window.innerWidth < 531);
 
   useEffect(() => {
     setTimeout(() => {
@@ -86,6 +91,34 @@ const ProductCoversContainer: FC<ProductCoversContainerProps> = ({
     }, 100);
   }, [product_idx]);
 
+  useEffect(() => {
+    const handle_resize = () => {
+      set_small_screen(window.innerWidth < 531);
+
+      if (!small_sreen) {
+        set_left_shift({
+          idx_less_than_product_idx: window.innerWidth < 685 ? 1 : 2,
+          idx_greater_than_product_idx: window.innerWidth < 685 ? 3 : 4,
+        });
+        set_cover_size(window.innerWidth < 685 ? 12 : 16);
+      }
+    };
+
+    window.addEventListener("resize", handle_resize);
+
+    return () => {
+      window.removeEventListener("resize", handle_resize);
+    };
+  }, [small_sreen]);
+
+  useEffect(() => {
+    if (small_sreen) {
+      set_cover_size(8);
+    } else {
+      set_cover_size(window.innerWidth < 685 ? 12 : 16);
+    }
+  }, [small_sreen, window.innerWidth]);
+
   return (
     <div className={styles.covers_carousel}>
       <div className={styles.content_container}>
@@ -101,10 +134,10 @@ const ProductCoversContainer: FC<ProductCoversContainerProps> = ({
         )}
         <div className={styles.product_covers_container}>
           {products.map((product, idx) => {
-            const left_shift =
+            const calculated_left_shift =
               idx < product_idx
-                ? 2 * (idx - product_idx)
-                : 4 * (idx - product_idx);
+                ? left_shift.idx_less_than_product_idx * (idx - product_idx)
+                : left_shift.idx_greater_than_product_idx * (idx - product_idx);
             const cover_opacity = define_opacity(idx, product_idx);
             const overlay_opacity =
               idx < product_idx
@@ -117,19 +150,18 @@ const ProductCoversContainer: FC<ProductCoversContainerProps> = ({
                   idx < 3 && styles[init_render_class]
                 } ${after_init_render}`}
                 style={{
-                  width: `${
-                    idx < product_idx
-                      ? `calc(16rem + 2rem * (${idx} - ${product_idx}))`
-                      : `calc(16rem - 2rem * ${idx - product_idx})`
-                  } `,
-                  height: `${
-                    idx < product_idx
-                      ? `calc(16rem + 2rem * (${idx} - ${product_idx}))`
-                      : `calc(16rem - 2rem * ${idx - product_idx})`
-                  } `,
-                  left: `${left_shift}rem`,
+                  width: `${define_width_height(
+                    idx,
+                    product_idx,
+                    cover_size
+                  )} `,
+                  height: `${define_width_height(
+                    idx,
+                    product_idx,
+                    cover_size
+                  )} `,
+                  left: `${calculated_left_shift}rem`,
                   opacity: `${cover_opacity}`,
-                  // zIndex: `${define_z_index(idx, product_idx, products)}`,
                   zIndex: `${z_index[idx]}`,
                 }}
                 key={idx}

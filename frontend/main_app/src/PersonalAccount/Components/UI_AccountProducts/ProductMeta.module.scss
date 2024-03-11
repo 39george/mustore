@@ -3,9 +3,9 @@
 
 .product_meta {
   width: 100%;
-
-  margin-left: 10rem;
-  margin-right: 2rem;
+  max-width: 81.25rem;
+  padding-left: 10rem;
+  padding-right: 2rem;
 }
 
 .meta_header {
@@ -15,14 +15,20 @@
 }
 
 .name {
+  width: 100%;
+  max-width: 40rem;
+
   font-family: "Geologica", sans-serif;
   font-size: 1.875rem;
   font-weight: 400;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
   word-break: break-all;
 }
 
 .edit {
-  margin-left: 0.25rem;
+  margin-left: 0.5rem;
 
   font-size: 0.875rem;
   font-weight: 500;
@@ -37,9 +43,15 @@
   }
 }
 
+.edit_icon {
+  flex-shrink: 0;
+  display: none;
+  color: rgba($color: $main_dark, $alpha: 0.5);
+  cursor: pointer;
+}
+
 .meta_list {
   position: relative;
-  width: 100%;
   margin-top: 1.75rem;
 }
 
@@ -64,6 +76,7 @@
 
 .meta_lyric {
   position: relative;
+  align-items: self-start;
   width: 30rem;
   overflow: hidden;
   transition: height 0.3s ease-out;
@@ -84,5 +97,67 @@
 
   &:hover {
     text-decoration: underline;
+  }
+}
+
+.chevron {
+  flex-shrink: 0;
+
+  width: 1.125rem;
+  height: 1.125rem;
+
+  margin-left: auto;
+
+  color: rgba($color: $main_dark, $alpha: 0.5);
+
+  transition: transform 0.2s ease-out;
+  display: none;
+}
+
+// Media queries
+@media (max-width: 1490px) {
+  .product_meta {
+    padding-left: clamp(
+      2rem,
+      calc(2rem + (160 - 32) * ((100vw - 1360px) / (1490 - 1360))),
+      10rem
+    );
+  }
+}
+
+@media (max-width: 1360px) {
+  .product_meta {
+    width: 100%;
+    padding-top: 2rem;
+    padding-left: 5rem;
+  }
+}
+
+@media (max-width: 1130px) {
+  .product_meta {
+    padding-top: 3rem;
+    padding-left: 2rem;
+  }
+}
+
+@media (max-width: 684px) {
+  .edit,
+  .expand_collapse {
+    display: none;
+  }
+
+  .edit_icon,
+  .chevron {
+    display: block;
+  }
+
+  .meta_lyric {
+    width: 100%;
+  }
+}
+
+@media (max-width: 530px) {
+  .product_meta {
+    padding: 2rem 1rem 0;
   }
 }

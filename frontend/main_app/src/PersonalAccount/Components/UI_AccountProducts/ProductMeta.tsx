@@ -1,6 +1,8 @@
 import { MusicKey } from "../../../types/types";
 import styles from "./ProductMeta.module.scss";
 import { FC, useEffect, useRef, useState } from "react";
+import { FiEdit3 } from "react-icons/fi";
+import { GoChevronDown } from "react-icons/go";
 
 interface ProudctMetaProps {
   likes_count: string;
@@ -84,6 +86,10 @@ const format_lyric = (lyric: string) => {
   return substrings;
 };
 
+const format_title = (title: string) => {
+  return title.split(" ");
+};
+
 type ExpandCollapse = "развернуть" | "свернуть";
 
 const ProductMeta: FC<ProudctMetaProps> = ({
@@ -128,7 +134,19 @@ const ProductMeta: FC<ProudctMetaProps> = ({
   return (
     <div className={styles.product_meta}>
       <div className={styles.meta_header}>
-        <p className={styles.name}>{name}</p>
+        <p className={styles.name}>
+          {format_title(name).map((word, idx) => {
+            return idx === 0 ? (
+              <span key={idx}>
+                <span>{word}&nbsp;</span>
+                <br />
+              </span>
+            ) : (
+              <span key={idx}>{word}&nbsp;</span>
+            );
+          })}
+        </p>
+        <FiEdit3 className={styles.edit_icon} />
         <p className={styles.edit}>редактировать</p>
       </div>
       <ul className={styles.meta_list}>
@@ -196,6 +214,15 @@ const ProductMeta: FC<ProudctMetaProps> = ({
           >
             {expand_collapse}
           </p>
+          <GoChevronDown
+            className={styles.chevron}
+            style={{
+              transform: `rotate(${
+                expand_collapse === "развернуть" ? "0" : "-180deg"
+              })`,
+            }}
+            onClick={handle_expand_collapse}
+          />
         </li>
       </ul>
     </div>
