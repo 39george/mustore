@@ -60,32 +60,6 @@ const format_sex = (sex: string) => {
   return result;
 };
 
-const format_lyric = (lyric: string) => {
-  const regex = /^[A-Za-zА-Яа-я]+$/u;
-  let substrings: string[] = [];
-  let current_substring = "";
-
-  for (let i = 0; i < lyric.length; i++) {
-    if (regex.test(lyric.charAt(i))) {
-      if (lyric.charAt(i) === lyric.charAt(i).toUpperCase()) {
-        if (!current_substring) {
-          current_substring = lyric.charAt(i);
-        } else {
-          substrings.push(current_substring);
-          current_substring = lyric.charAt(i);
-        }
-      } else {
-        current_substring += lyric.charAt(i);
-      }
-    } else {
-      current_substring += lyric.charAt(i);
-    }
-  }
-
-  substrings.push(current_substring);
-  return substrings;
-};
-
 const format_title = (title: string) => {
   return title.split(" ");
 };
@@ -199,14 +173,11 @@ const ProductMeta: FC<ProudctMetaProps> = ({
             ref={lyric_ref}
             className={styles.meta_value}
           >
-            {format_lyric(lyric).map((string, idx) => {
-              return (
-                <p key={idx}>
-                  {string}
-                  <br />
-                </p>
-              );
-            })}
+            {lyric.split("\n").map((line, idx) => (
+              <p key={idx}>
+                {line} <br />
+              </p>
+            ))}
           </div>
           <p
             className={styles.expand_collapse}
