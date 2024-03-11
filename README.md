@@ -13,6 +13,7 @@ Testing a backend application for user signup and login involves several layers 
 
    - With user's permissions I need *username*, *likes amount and likes type (meaning on which product is the like)*, *cart amount and type*, *avatar* - DONE
    - Check the backend for the info in personal account. I need username, user rating, user role, notifications info, orders info
+   - I want to add a value "canceled" to a ENUM ServiceOrderStatus
 
 ### Unit Tests:
 
