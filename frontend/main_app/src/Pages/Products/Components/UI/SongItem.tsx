@@ -1,11 +1,11 @@
 import styles from "./SongItem.module.scss";
-import { FC } from "react";
+import { FC, memo } from "react";
 import { SongItem } from "../../../../types/types";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { FaRegHeart } from "react-icons/fa";
 import { PiHeadphonesFill, PiShoppingCartFill } from "react-icons/pi";
 
-const SongItem: FC<SongItem> = (props) => {
+const SongItem: FC<SongItem> = memo((props) => {
   const formatted_price = props.price.toLocaleString("ru-RU");
 
   return (
@@ -38,6 +38,6 @@ const SongItem: FC<SongItem> = (props) => {
       </div>
     </div>
   );
-};
+});
 
 export default SongItem;
