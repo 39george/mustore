@@ -691,6 +691,8 @@ BEGIN
         END IF;
     END IF;
 
+    -- TODO: Implement minimum mood count (1)
+
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
