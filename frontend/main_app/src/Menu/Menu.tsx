@@ -155,6 +155,7 @@ const Menu: FC = () => {
             <img
               src={is_nav_dark ? logo_bright : logo}
               alt="logo"
+              draggable={false}
             />
           </NavLink>
         </li>

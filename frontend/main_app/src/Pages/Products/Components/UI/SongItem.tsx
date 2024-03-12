@@ -14,6 +14,7 @@ const SongItem: FC<SongItem> = memo((props) => {
         <img
           src={props.cover_url}
           alt="album cover"
+          draggable={false}
         />
       </div>
       <div className={styles.title}>

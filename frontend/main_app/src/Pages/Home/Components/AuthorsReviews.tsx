@@ -14,6 +14,7 @@ const AuthorsReviews: FC = () => {
             <img
               src={author_1}
               alt="author avatar"
+              draggable={false}
             />
           </div>
           <div className={styles.text_content}>
@@ -28,6 +29,7 @@ const AuthorsReviews: FC = () => {
             <img
               src={author_2}
               alt="author avatar"
+              draggable={false}
             />
           </div>
           <div className={styles.text_content}>
@@ -43,6 +45,7 @@ const AuthorsReviews: FC = () => {
             <img
               src={author_3}
               alt="author avatar"
+              draggable={false}
             />
           </div>
           <div className={styles.text_content}>

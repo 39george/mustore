@@ -69,6 +69,7 @@ const CarouselItem: FC<CarouselItemProps> = ({
         <img
           src={carousel_items.cover_url}
           alt="album cover"
+          draggable={false}
         />
       </div>
       <div className={class_names.text_info}>

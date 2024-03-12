@@ -343,6 +343,7 @@ const Footer: FC = () => {
               <img
                 src={logo}
                 alt="logo"
+                draggable={false}
               />
             </NavLink>
           </li>
