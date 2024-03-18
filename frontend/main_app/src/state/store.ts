@@ -5,6 +5,7 @@ import user_permissions_reducer from "./user_permissions_slice";
 import sidebar_actions_reducer from "./sidebar_actions_slice";
 import username_avatar_reducer from "./username_avatar_slice";
 import product_status_reducer from "./product_status_slice";
+import active_tab_account_creator_reducer from "./active_tab_account_creator_slice";
 
 const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ const store = configureStore({
     sidebar_actions: sidebar_actions_reducer,
     username_avatar: username_avatar_reducer,
     product_status: product_status_reducer,
+    active_tab_account_creator: active_tab_account_creator_reducer,
   },
 });
 
