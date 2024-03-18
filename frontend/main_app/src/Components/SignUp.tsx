@@ -868,7 +868,7 @@ const SignUp: FC = () => {
                           : ""
                       }`}
                     >
-                      Автор
+                      &nbsp;&nbsp;Автор
                     </label>
                   </div>
                   <div className={styles.option}>
@@ -887,13 +887,13 @@ const SignUp: FC = () => {
                           : ""
                       }`}
                     >
-                      Покупатель
+                      &nbsp;&nbsp;Покупатель
                     </label>
                   </div>
                 </div>
                 <hr className={styles.divider} />
                 <p className={styles.additional_info}>
-                  *Вы всегда сможете расширить свои возможности позже,
+                  * Вы всегда сможете расширить свои возможности позже,
                   воспользовавшись функцией обновления аккаунта в личном
                   кабинете
                 </p>
