@@ -571,6 +571,20 @@ const SignUp: FC = () => {
     navigate(previous_path);
   };
 
+  useEffect(() => {
+    const handle_esc_key_press = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        navigate(previous_path);
+      }
+    };
+
+    document.addEventListener("keydown", handle_esc_key_press);
+
+    return () => {
+      document.removeEventListener("keydown", handle_esc_key_press);
+    };
+  }, []);
+
   // Rendering component
   return (
     <div className={styles.sign_up_window}>

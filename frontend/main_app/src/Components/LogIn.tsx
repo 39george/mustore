@@ -112,6 +112,20 @@ const LogIn: FC = () => {
     navigate(previous_path);
   };
 
+  useEffect(() => {
+    const handle_esc_key_press = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        navigate(previous_path);
+      }
+    };
+
+    document.addEventListener("keydown", handle_esc_key_press);
+
+    return () => {
+      document.removeEventListener("keydown", handle_esc_key_press);
+    };
+  }, []);
+
   return (
     <div className={styles.login_window}>
       {login_error && <ErrorWindow error_message={login_error} />}
