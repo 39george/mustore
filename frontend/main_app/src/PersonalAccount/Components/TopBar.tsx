@@ -1,5 +1,5 @@
 import styles from "./TopBar.module.scss";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { FC, useEffect, useState } from "react";
 import { FaRegBell } from "react-icons/fa6";
 import conversations from "../../assets/icons/conversations_outline.svg";
@@ -15,18 +15,19 @@ interface TopBarProps {
 }
 
 const TopBar: FC<TopBarProps> = ({ username, avatar }) => {
-  const location = useLocation();
   const dispatch = useDispatch();
   const [header_name, set_header_name] = useState("");
-  const current_pathname = location.pathname.replace("/personal-account/", "");
   const product_status = useSelector(
     (state: RootState) => state.product_status.product_status
+  );
+  const active_tab = useSelector(
+    (state: RootState) => state.active_tab_account_creator.active_tab
   );
   const [translated_product_status, set_translated_product_status] =
     useState("");
 
   useEffect(() => {
-    switch (current_pathname) {
+    switch (active_tab) {
       case "dashboard":
         set_header_name("Главная");
         break;
@@ -61,7 +62,7 @@ const TopBar: FC<TopBarProps> = ({ username, avatar }) => {
       default:
         set_header_name("Страница не найдена");
     }
-  }, [current_pathname]);
+  }, [active_tab]);
 
   // Translate product status
   useEffect(() => {

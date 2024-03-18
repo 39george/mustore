@@ -20,8 +20,9 @@ import {
   set_sidebar_collapsed,
   set_sidebar_title,
 } from "../../state/sidebar_actions_slice";
-import { ActiveSections } from "../../types/types";
+import { ActiveTabsAccountCreator } from "../../types/types";
 import { set_product_status } from "../../state/product_status_slice";
+import { set_active_tab_account_creator } from "../../state/active_tab_account_creator_slice";
 
 const class_fade_in = `${styles.class_fade_in}`;
 const class_fade_in_image = `${styles.class_fade_in_image}`;
@@ -33,7 +34,6 @@ interface SidebarProps {
 }
 
 const Sidebar: FC<SidebarProps> = ({ username, user_role, avatar }) => {
-  const [active_section, set_active_section] = useState<ActiveSections>("none");
   const location = useLocation();
   const current_pathname = location.pathname.replace("/personal-account/", "");
   const dispatch = useDispatch();
@@ -43,6 +43,9 @@ const Sidebar: FC<SidebarProps> = ({ username, user_role, avatar }) => {
   const title = useSelector(
     (state: RootState) => state.sidebar_actions.sidebar_title
   );
+  const active_tab = useSelector(
+    (state: RootState) => state.active_tab_account_creator.active_tab
+  );
   const chevron_display_style = useSelector(
     (state: RootState) => state.sidebar_actions.sidebar_chevron_display
   );
@@ -51,43 +54,6 @@ const Sidebar: FC<SidebarProps> = ({ username, user_role, avatar }) => {
   const [chevron_disabled, set_chevron_disabled] = useState(
     current_pathname === "conversations" ? `${styles.chevron_disabled}` : ``
   );
-
-  useEffect(() => {
-    switch (current_pathname) {
-      case "dashboard":
-        set_active_section("dashboard");
-        break;
-      case "products":
-        set_active_section("products");
-        break;
-      case "services":
-        set_active_section("services");
-        break;
-      case "conversations":
-        set_active_section("conversations");
-        break;
-      case "orders":
-        set_active_section("orders");
-        break;
-      case "statistics":
-        set_active_section("statistics");
-        break;
-      case "earnings":
-        set_active_section("earnings");
-        break;
-      case "settings":
-        set_active_section("settings");
-        break;
-      case "notifications":
-        set_active_section("notifications");
-        break;
-      case "help":
-        set_active_section("help");
-        break;
-      default:
-        set_active_section("none");
-    }
-  }, [current_pathname]);
 
   useEffect(() => {
     const handle_resize = () => {
@@ -107,9 +73,13 @@ const Sidebar: FC<SidebarProps> = ({ username, user_role, avatar }) => {
     };
   }, []);
 
-  const handle_tab_link_click = (tab_name: ActiveSections) => {
+  const handle_tab_link_click = (tab_name: ActiveTabsAccountCreator) => {
+    dispatch(set_active_tab_account_creator(tab_name));
+  };
+
+  useEffect(() => {
     // Disable functionality of sidebar collapsed icon if path's "conversations"
-    if (tab_name === "conversations") {
+    if (active_tab === "conversations") {
       dispatch(set_sidebar_collapsed(true));
       dispatch(set_sidebar_title("H.S"));
 
@@ -126,10 +96,10 @@ const Sidebar: FC<SidebarProps> = ({ username, user_role, avatar }) => {
     }
 
     // Custom settings for path "products"
-    if (tab_name !== "products") {
+    if (active_tab !== "products") {
       dispatch(set_product_status(null));
     }
-  };
+  }, [active_tab]);
 
   const handle_collapse_icon_click = () => {
     if (chevron_disabled) {
@@ -216,7 +186,7 @@ const Sidebar: FC<SidebarProps> = ({ username, user_role, avatar }) => {
         <NavLink
           to="dashboard"
           className={`${styles.tab_link} ${styles.dashboard} ${
-            active_section === "dashboard" && styles.tab_link_active
+            active_tab === "dashboard" && styles.tab_link_active
           }`}
           onClick={() => handle_tab_link_click("dashboard")}
         >
@@ -233,7 +203,7 @@ const Sidebar: FC<SidebarProps> = ({ username, user_role, avatar }) => {
         <NavLink
           to="products"
           className={`${styles.tab_link} ${styles.products} ${
-            active_section === "products" && styles.tab_link_active
+            active_tab === "products" && styles.tab_link_active
           }`}
           onClick={() => handle_tab_link_click("products")}
         >
@@ -247,7 +217,7 @@ const Sidebar: FC<SidebarProps> = ({ username, user_role, avatar }) => {
         <NavLink
           to="services"
           className={`${styles.tab_link} ${styles.services} ${
-            active_section === "services" && styles.tab_link_active
+            active_tab === "services" && styles.tab_link_active
           }`}
           onClick={() => handle_tab_link_click("services")}
         >
@@ -264,7 +234,7 @@ const Sidebar: FC<SidebarProps> = ({ username, user_role, avatar }) => {
         <NavLink
           to="conversations"
           className={`${styles.tab_link} ${styles.conversations} ${
-            active_section === "conversations" && styles.tab_link_active
+            active_tab === "conversations" && styles.tab_link_active
           }`}
           onClick={() => handle_tab_link_click("conversations")}
         >
@@ -278,7 +248,7 @@ const Sidebar: FC<SidebarProps> = ({ username, user_role, avatar }) => {
         <NavLink
           to="orders"
           className={`${styles.tab_link} ${styles.orders} ${
-            active_section === "orders" && styles.tab_link_active
+            active_tab === "orders" && styles.tab_link_active
           }`}
           onClick={() => handle_tab_link_click("orders")}
         >
@@ -295,7 +265,7 @@ const Sidebar: FC<SidebarProps> = ({ username, user_role, avatar }) => {
         <NavLink
           to="statistics"
           className={`${styles.tab_link} ${styles.statistics} ${
-            active_section === "statistics" && styles.tab_link_active
+            active_tab === "statistics" && styles.tab_link_active
           }`}
           onClick={() => handle_tab_link_click("statistics")}
         >
@@ -309,7 +279,7 @@ const Sidebar: FC<SidebarProps> = ({ username, user_role, avatar }) => {
         <NavLink
           to="earnings"
           className={`${styles.tab_link} ${styles.earnings} ${
-            active_section === "earnings" && styles.tab_link_active
+            active_tab === "earnings" && styles.tab_link_active
           }`}
           onClick={() => handle_tab_link_click("earnings")}
         >
@@ -326,7 +296,7 @@ const Sidebar: FC<SidebarProps> = ({ username, user_role, avatar }) => {
         <NavLink
           to="settings"
           className={`${styles.tab_link} ${styles.settings} ${
-            active_section === "settings" && styles.tab_link_active
+            active_tab === "settings" && styles.tab_link_active
           }`}
           onClick={() => handle_tab_link_click("settings")}
         >
@@ -343,7 +313,7 @@ const Sidebar: FC<SidebarProps> = ({ username, user_role, avatar }) => {
         <NavLink
           to="notifications"
           className={`${styles.tab_link} ${styles.notifications} ${
-            active_section === "notifications" && styles.tab_link_active
+            active_tab === "notifications" && styles.tab_link_active
           }`}
           onClick={() => handle_tab_link_click("notifications")}
         >
@@ -357,7 +327,7 @@ const Sidebar: FC<SidebarProps> = ({ username, user_role, avatar }) => {
         <NavLink
           to="help"
           className={`${styles.tab_link} ${styles.help} ${
-            active_section === "help" && styles.tab_link_active
+            active_tab === "help" && styles.tab_link_active
           }`}
           onClick={() => handle_tab_link_click("help")}
         >
