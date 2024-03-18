@@ -80,7 +80,7 @@ export interface IOrderUnit {
   status: Status;
 }
 
-export type ActiveSections =
+export type ActiveTabsAccountCreator =
   | "dashboard"
   | "products"
   | "services"
