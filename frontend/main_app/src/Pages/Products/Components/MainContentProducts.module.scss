@@ -31,6 +31,7 @@
 .main_seciton {
   position: relative;
   display: flex;
+  align-items: flex-start;
 }
 
 .left_bar_wrapper {
@@ -241,7 +242,6 @@
 }
 
 // Genres & moods
-
 .genres_content,
 .moods_content {
   height: fit-content;
@@ -262,8 +262,6 @@
   display: flex;
   justify-content: flex-end;
   align-items: center;
-
-  // outline: 2px solid red;
 
   input {
     width: 37%;
@@ -316,7 +314,7 @@ input[type="search"]::-webkit-search-cancel-button {
   margin-top: 2rem;
   margin-left: 1.25rem;
 
-  overflow-y: auto;
+  // overflow-y: auto;
 }
 
 // Media queries

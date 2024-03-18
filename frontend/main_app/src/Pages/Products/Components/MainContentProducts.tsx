@@ -429,21 +429,6 @@ const MainContentProducts: FC = () => {
     checked_moods,
   ]);
 
-  useEffect(() => {
-    if (left_bar_ref.current) {
-      const rect = left_bar_ref.current.getBoundingClientRect();
-      if (
-        rect.top >= 0 &&
-        rect.left >= 0 &&
-        rect.bottom <=
-          (window.innerHeight || document.documentElement.clientHeight) &&
-        rect.right <=
-          (window.innerWidth || document.documentElement.clientWidth)
-      ) {
-      }
-    }
-  }, [left_bar_ref.current]);
-
   return (
     <div
       ref={main_section_ref}
