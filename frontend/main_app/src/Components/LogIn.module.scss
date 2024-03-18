@@ -4,7 +4,6 @@
 .login_window {
   width: 100vw;
   height: 100vh;
-  // min-height: 570px;
   padding-top: 1.065rem;
 
   background-color: $main_bright;
@@ -191,7 +190,7 @@
   height: 30%;
 
   transform: translateY(4px);
-  background-image: url("../assets/svg/waves_decor2.svg");
+  background-image: url("../assets/svg/waves_decor.svg");
   background-size: cover;
   background-repeat: no-repeat;
 }
