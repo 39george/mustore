@@ -215,12 +215,13 @@ const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
             } as React.CSSProperties
           }
         >
-          {carousel_items.map((item) => {
+          {carousel_items.map((item, idx) => {
             return (
               <React.Fragment key={item.id}>
                 <CarouselItem
                   carousel_items={item}
                   carousel_type={carousel_type}
+                  index={idx}
                 />
               </React.Fragment>
             );
