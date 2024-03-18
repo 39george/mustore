@@ -1,5 +1,12 @@
 import styles from "./PersonalAccount.module.scss";
-import { Navigate, Route, Routes } from "react-router-dom";
+import {
+  BrowserRouter,
+  Link,
+  Navigate,
+  Outlet,
+  Route,
+  Routes,
+} from "react-router-dom";
 import { FC } from "react";
 import Sidebar from "./Components/Sidebar";
 import TopBar from "./Components/TopBar";
@@ -8,6 +15,7 @@ import { RootState } from "../state/store";
 import Dashboard from "./Pages/Dashboard";
 import { find_user_role_index, translate_user_role } from "../helpers/helpers";
 import AccountProducts from "./Pages/AccountProducts";
+import UploadNewProduct from "./Components/UI_AccountProducts/UploadNewProduct";
 
 const PersonalAccount: FC = () => {
   const username_avatar = useSelector(
@@ -69,6 +77,10 @@ const PersonalAccount: FC = () => {
           <Route
             path="products"
             element={<AccountProducts />}
+          />
+          <Route
+            path="products/upload_new_product"
+            element={<UploadNewProduct />}
           />
           <Route
             path="*"
