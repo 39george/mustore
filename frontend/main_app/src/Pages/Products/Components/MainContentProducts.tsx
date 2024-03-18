@@ -516,7 +516,7 @@ const MainContentProducts: FC = () => {
                         checked_sex["any"] ? styles.checked_label : ""
                       }`}
                     >
-                      Любой
+                      &nbsp;&nbsp;&nbsp;&nbsp;Любой
                     </label>
                   </li>
                   <li className={styles.li_item}>
@@ -540,7 +540,7 @@ const MainContentProducts: FC = () => {
                         checked_sex["male"] ? styles.checked_label : ""
                       }`}
                     >
-                      Мужской
+                      &nbsp;&nbsp;&nbsp;&nbsp;Мужской
                     </label>
                   </li>
                   <li className={styles.li_item}>
@@ -564,7 +564,7 @@ const MainContentProducts: FC = () => {
                         checked_sex["female"] ? styles.checked_label : ""
                       }`}
                     >
-                      Женский
+                      &nbsp;&nbsp;&nbsp;&nbsp;Женский
                     </label>
                   </li>
                 </ul>
@@ -643,7 +643,7 @@ const MainContentProducts: FC = () => {
                               checked_genres[genre] ? styles.checked_label : ""
                             }`}
                           >
-                            {genre}
+                            &nbsp;&nbsp;&nbsp;&nbsp;{genre}
                           </label>
                         </li>
                       );
@@ -726,7 +726,7 @@ const MainContentProducts: FC = () => {
                             checked_music_key[key] ? styles.checked_label : ""
                           }`}
                         >
-                          {format_key_with_symbols(key)}
+                          &nbsp;&nbsp;&nbsp;&nbsp;{format_key_with_symbols(key)}
                         </label>
                       </li>
                     );
@@ -817,7 +817,7 @@ const MainContentProducts: FC = () => {
                               checked_moods[mood] ? styles.checked_label : ""
                             }`}
                           >
-                            {mood}
+                            &nbsp;&nbsp;&nbsp;&nbsp;{mood}
                           </label>
                         </li>
                       );
