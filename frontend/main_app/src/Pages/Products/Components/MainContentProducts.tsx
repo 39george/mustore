@@ -68,7 +68,9 @@ const MainContentProducts: FC = () => {
   const last_scroll_top = useRef(0);
   const last_scroll_direction = useRef<ScrollDirection>("down");
   const last_offset = useRef(0);
-  const [nav_bar_height, set_nav_bar_height] = useState(83);
+  const [nav_bar_height, set_nav_bar_height] = useState(
+    window.innerWidth <= 1010 ? 70 : 83
+  );
   const scroll_consts = useRef<ScrollConsts>({
     height_diff_viewport_main_content: 0,
     height_diff_viewport_left_bar: 0,
