@@ -22,6 +22,7 @@ import Dashboard from "./PersonalAccount/Pages/Dashboard";
 import { find_user_role_index, translate_user_role } from "./helpers/helpers";
 import AccountProducts from "./PersonalAccount/Pages/AccountProducts";
 import UploadNewProduct from "./PersonalAccount/Components/UI_AccountProducts/UploadNewProduct";
+import LoadingScreen from "./Components/LoadingScreen";
 
 function App() {
   const { check_user_permissions } = useCheckPermissionsApi();
@@ -61,7 +62,9 @@ function App() {
         <Route
           path="personal-account"
           element={
-            user_permissions.permissions.length === 0 ? (
+            user_permissions.is_loading ? (
+              <LoadingScreen />
+            ) : user_permissions.permissions.length === 0 ? (
               <Navigate to="/login" />
             ) : (
               <PersonalAccount />
