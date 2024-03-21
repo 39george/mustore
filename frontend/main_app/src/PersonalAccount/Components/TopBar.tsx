@@ -33,7 +33,6 @@ const TopBar: FC<TopBarProps> = ({ username, avatar }) => {
         break;
       case "products":
         set_header_name("Товары");
-        dispatch(set_product_status("active"));
         break;
       case "services":
         set_header_name("Услуги");
