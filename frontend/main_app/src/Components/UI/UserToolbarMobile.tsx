@@ -5,9 +5,10 @@ import { FaRegHeart } from "react-icons/fa";
 import { PiShoppingCartFill } from "react-icons/pi";
 import useLogOutUserApi from "../../hooks/API/useLogOutUserApi";
 import useCheckPermissionsApi from "../../hooks/API/useCheckPermissionsApi";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../state/store";
 import { NavLink } from "react-router-dom";
+import { set_active_tab_account_creator } from "../../state/active_tab_account_creator_slice";
 
 interface UserToolbarMobileProps {
   sidebar_open: boolean;
@@ -24,10 +25,15 @@ const UserToolbarMobile: FC<UserToolbarMobileProps> = ({ sidebar_open }) => {
   const avatar = useSelector(
     (state: RootState) => state.username_avatar.avatar
   );
+  const dispatch = useDispatch();
 
   const try_to_logout = async () => {
     await logout();
     await check_user_permissions();
+  };
+
+  const handle_account_link_click = () => {
+    dispatch(set_active_tab_account_creator("dashboard"));
   };
 
   useEffect(() => {
@@ -68,6 +74,7 @@ const UserToolbarMobile: FC<UserToolbarMobileProps> = ({ sidebar_open }) => {
           <NavLink
             to="personal-account/dashboard"
             className={styles.option}
+            onClick={handle_account_link_click}
           >
             Личный кабинет
           </NavLink>

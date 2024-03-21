@@ -3,8 +3,9 @@ import { FC, useEffect, useRef } from "react";
 import useLogOutUserApi from "../../hooks/API/useLogOutUserApi";
 import useCheckPermissionsApi from "../../hooks/API/useCheckPermissionsApi";
 import { NavLink } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../state/store";
+import { set_active_tab_account_creator } from "../../state/active_tab_account_creator_slice";
 
 interface ToolbarPopUpMenuProps {
   visible: boolean;
@@ -26,6 +27,7 @@ const ToolbarPopUpMenu: FC<ToolbarPopUpMenuProps> = ({
   const avatar = useSelector(
     (state: RootState) => state.username_avatar.avatar
   );
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const handle_click_outside_popup = (e: MouseEvent) => {
@@ -47,6 +49,10 @@ const ToolbarPopUpMenu: FC<ToolbarPopUpMenuProps> = ({
       document.removeEventListener("mousedown", handle_click_outside_popup);
     };
   }, [user_avatar_container_ref]);
+
+  const handle_account_link_click = () => {
+    dispatch(set_active_tab_account_creator("dashboard"));
+  };
 
   const try_to_logout = async () => {
     await logout();
@@ -81,6 +87,7 @@ const ToolbarPopUpMenu: FC<ToolbarPopUpMenuProps> = ({
           <NavLink
             to="personal-account/dashboard"
             className={styles.option}
+            onClick={handle_account_link_click}
           >
             Личный кабинет
           </NavLink>
