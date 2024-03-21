@@ -4,15 +4,26 @@ import {
   IProduct,
   TypeDeclension,
 } from "../../types/types";
-import { FC } from "react";
+import { FC, useEffect } from "react";
 import ProductSection from "../Components/UI_AccountProducts/ProductSection";
-import ProductDefault from "../Components/UI_AccountProducts/ProductDefault";
 import { mock_songs } from "./mock_products";
+import ProductDefault from "../Components/AccountProducts/ProductDefault";
+import { useDispatch } from "react-redux";
+import { set_product_status } from "../../state/product_status_slice";
 
 const products: IProduct[][] = [];
 // products.push(mock_songs);
 
 const AccountProducts: FC = () => {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (products.length !== 0) {
+      dispatch(set_product_status("active"));
+    } else {
+      dispatch(set_product_status(null));
+    }
+  }, [products]);
   return (
     <div
       className={`${styles.products} ${
