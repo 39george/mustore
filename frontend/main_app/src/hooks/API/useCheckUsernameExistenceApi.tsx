@@ -9,11 +9,13 @@ const useCheckUsernameExistneceApi = () => {
 
   const fetch_data = async (
     username: string,
+    signal: AbortSignal,
     attempts: number = 1
   ): Promise<UsernameExistence | null | undefined> => {
     try {
       const response = await axios.get<UsernameExistence>(
-        `${API_URL}/username_status?username=${username}`
+        `${API_URL}/username_status?username=${username}`,
+        { signal: signal }
       );
       return response.data;
     } catch (error) {
@@ -26,7 +28,7 @@ const useCheckUsernameExistneceApi = () => {
             case 500:
               if (attempts < MAX_RETRIES) {
                 await wait(RETRY_DELAY_MS);
-                return fetch_data(username, attempts + 1);
+                return fetch_data(username, signal, attempts + 1);
               } else {
                 set_error_data(
                   "Что-то не так с нашим сервером, мы уже работаем над этим. Пожалуйста, попробуйте обновить страницу"
@@ -44,13 +46,15 @@ const useCheckUsernameExistneceApi = () => {
         } else if (error.request) {
           if (attempts < MAX_RETRIES) {
             await wait(RETRY_DELAY_MS);
-            return fetch_data(username, attempts + 1);
+            return fetch_data(username, signal, attempts + 1);
           } else {
             console.error("Server is not responding, ", error.message);
             return null;
           }
         } else {
-          console.error("API Error: Reqest setup error:", error.message);
+          if (error.name !== "CanceledError") {
+            console.error("API Error: Reqest setup error:", error.message);
+          }
           return null;
         }
       } else {

@@ -93,8 +93,16 @@ const MainContentProducts: FC = () => {
     moods: false,
   });
   // Data consts
-  const { data: genres, error: genres_error } = useGenresMoodsApi("genres");
-  const { data: moods, error: moods_error } = useGenresMoodsApi("moods");
+  const {
+    data: genres,
+    error: genres_error,
+    fetch_data: fetch_genres,
+  } = useGenresMoodsApi();
+  const {
+    data: moods,
+    error: moods_error,
+    fetch_data: fetch_moods,
+  } = useGenresMoodsApi();
   const [filtered_results, set_filtered_results] = useState<FilteredResults>({
     filtered_genres: [],
     filtered_moods: [],
@@ -171,6 +179,27 @@ const MainContentProducts: FC = () => {
   };
 
   // Set initial filtered genres
+  useEffect(() => {
+    const controller = new AbortController();
+    const fetch_genres_moods = async () => {
+      try {
+        await Promise.all([
+          fetch_genres("genres", controller.signal),
+          fetch_moods("moods", controller.signal),
+        ]);
+      } catch (eroor) {
+        console.error("An error occured while fetching data");
+      }
+    };
+    fetch_genres_moods();
+
+    return () => {
+      if (controller) {
+        controller.abort();
+      }
+    };
+  }, []);
+
   useEffect(() => {
     set_filtered_results({
       filtered_genres: genres,

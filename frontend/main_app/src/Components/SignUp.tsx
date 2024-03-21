@@ -217,7 +217,6 @@ const SignUp: FC = () => {
 
     if (signup_error) {
       set_sign_up_in_porgress(false);
-      // console.error(signup_error);
     }
   }, [signup_status, signup_error]);
 
@@ -237,6 +236,7 @@ const SignUp: FC = () => {
   // Checking username validity
   useEffect(() => {
     let timer: NodeJS.Timeout | undefined;
+    const controller = new AbortController();
 
     if (form_data.username !== "") {
       if (timer) {
@@ -250,7 +250,8 @@ const SignUp: FC = () => {
         timer = setTimeout(() => {
           const check_existence = async () => {
             const username_data = await check_is_username_exists(
-              form_data.username
+              form_data.username,
+              controller.signal
             );
 
             if (ref_username_check_progress.current !== "pending") {
@@ -306,6 +307,9 @@ const SignUp: FC = () => {
     }
 
     return () => {
+      if (controller) {
+        controller.abort();
+      }
       if (timer) {
         clearTimeout(timer);
       }
