@@ -1,8 +1,13 @@
 import "./App.scss";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import {
+  BrowserRouter,
+  Navigate,
+  Outlet,
+  Route,
+  Routes,
+} from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
 import HomePage from "./Pages/Home/HomePage";
-import Footer from "./Components/Footer";
 import ProductsPage from "./Pages/Products/ProductsPage";
 import ContentSection from "./Pages/Products/Components/ContentSection";
 import SignUp from "./Components/SignUp";
@@ -13,20 +18,31 @@ import PersonalAccount from "./PersonalAccount/PersonalAccount";
 import useUsernameAvatarApi from "./hooks/API/useUsernameAvatarApi";
 import { useSelector } from "react-redux";
 import { RootState } from "./state/store";
+import Dashboard from "./PersonalAccount/Pages/Dashboard";
+import { find_user_role_index, translate_user_role } from "./helpers/helpers";
+import AccountProducts from "./PersonalAccount/Pages/AccountProducts";
+import UploadNewProduct from "./PersonalAccount/Components/UI_AccountProducts/UploadNewProduct";
 
 function App() {
   const { check_user_permissions } = useCheckPermissionsApi();
   const { get_username_and_avatar } = useUsernameAvatarApi();
   const user_permissions = useSelector(
-    (state: RootState) => state.user_permissions.permissions
+    (state: RootState) => state.user_permissions
   );
+  const username_avatar = useSelector(
+    (state: RootState) => state.username_avatar
+  );
+  // console.log(user_permissions);
 
   useEffect(() => {
     check_user_permissions();
   }, []);
 
   useEffect(() => {
-    if (user_permissions.length !== 0) {
+    if (
+      !user_permissions.is_loading &&
+      user_permissions.permissions.length !== 0
+    ) {
       get_username_and_avatar();
     }
   }, [user_permissions]);
@@ -43,9 +59,69 @@ function App() {
           element={<LogIn />}
         />
         <Route
-          path="personal-account/*"
-          element={<PersonalAccount />}
-        />
+          path="personal-account"
+          element={
+            user_permissions.permissions.length === 0 ? (
+              <Navigate to="/login" />
+            ) : (
+              <PersonalAccount />
+            )
+          }
+        >
+          <Route
+            path="dashboard"
+            element={
+              <Dashboard
+                username={
+                  username_avatar.is_loading ? "..." : username_avatar.username
+                }
+                user_role={
+                  user_permissions.permissions.length !== 0
+                    ? user_permissions.is_loading
+                      ? "..."
+                      : translate_user_role(
+                          user_permissions.permissions[
+                            find_user_role_index(
+                              user_permissions.permissions,
+                              "creator"
+                            )
+                          ].name
+                        )
+                    : ""
+                }
+                avatar={
+                  username_avatar.is_loading ? "..." : username_avatar.avatar
+                }
+              />
+            }
+          />
+          <Route
+            path="products"
+            element={<Outlet />}
+          >
+            <Route
+              index
+              element={<AccountProducts />}
+            />
+            <Route
+              path="upload_new_product"
+              element={<UploadNewProduct />}
+            />
+          </Route>
+          <Route
+            path="*"
+            element={<div>page in development</div>}
+          />
+          <Route
+            index
+            element={
+              <Navigate
+                to="dashboard"
+                replace
+              />
+            }
+          />
+        </Route>
         <Route
           path="/"
           element={<MainLayout />}
@@ -92,7 +168,6 @@ function App() {
                   Services page
                 </h1>
                 <div style={{ height: "100vh" }}></div>
-                <Footer />
               </div>
             }
           />
@@ -104,7 +179,6 @@ function App() {
                   Help page
                 </h1>
                 <div style={{ height: "100vh" }}></div>
-                <Footer />
               </div>
             }
           />
@@ -116,7 +190,6 @@ function App() {
                   About page
                 </h1>
                 <div style={{ height: "100vh" }}></div>
-                <Footer />
               </div>
             }
           />
@@ -128,7 +201,6 @@ function App() {
                   Page not found
                 </h1>
                 <div style={{ height: "100vh" }}></div>
-                <Footer />
               </div>
             }
           />
