@@ -1,0 +1,67 @@
+@import "../../../colors.scss";
+@import "../GeneralStyles.scss";
+
+.upload_new_product {
+  @include disable_scrollbar;
+
+  height: calc(100vh - 4.75rem - 0.125rem);
+  overflow-y: scroll;
+
+  padding: 1rem;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  width: 100%;
+  max-width: 36.75rem;
+  height: 60vh;
+  max-height: 42rem;
+
+  margin: 8rem auto 0;
+}
+
+.h2 {
+  font-size: 1.875rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.product_widgets_container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 2rem;
+
+  width: 100%;
+
+  margin: 2rem auto;
+}
+
+.product_widget {
+  @include widget(1.5rem);
+  width: fit-content;
+}
+
+.return_link {
+  display: block;
+
+  width: fit-content;
+
+  margin-left: auto;
+
+  font-size: 0.875rem;
+  font-weight: 600;
+
+  color: rgba($color: $main_dark, $alpha: 0.5);
+  letter-spacing: 0.1em;
+
+  transition: 0.15s ease-out;
+
+  &:hover {
+    text-decoration: underline;
+    color: $account_green;
+  }
+}

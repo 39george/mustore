@@ -21,7 +21,7 @@ import { RootState } from "./state/store";
 import Dashboard from "./PersonalAccount/Pages/Dashboard";
 import { find_user_role_index, translate_user_role } from "./helpers/helpers";
 import AccountProducts from "./PersonalAccount/Pages/AccountProducts";
-import UploadNewProduct from "./PersonalAccount/Components/UI_AccountProducts/UploadNewProduct";
+import UploadNewProduct from "./PersonalAccount/Components/AccountProducts/UploadNewProduct";
 import LoadingScreen from "./Components/LoadingScreen";
 
 function App() {
