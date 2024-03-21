@@ -91,7 +91,7 @@ export type ActiveTabsAccountCreator =
   | "settings"
   | "notifications"
   | "help"
-  | "none";
+  | "";
 
 export interface UsernameAvatar {
   username: string;
