@@ -1,0 +1,62 @@
+@import "../colors.scss";
+@import "../loaders.scss";
+
+.loading_screen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 100vw;
+  height: 100vh;
+
+  background-color: #f6f6f6;
+}
+
+.loader_small {
+  width: 2rem;
+  height: 2rem;
+  margin: 0 auto 5.5rem;
+  border-top: 2px solid $accent_red;
+}
+
+.p_loading {
+  width: fit-content;
+  margin: 0 auto;
+  font-weight: 600;
+}
+
+.title {
+  margin: 0.65em 0 1.9em;
+
+  font-family: "Lexend", sans-serif;
+  font-size: 2.5rem;
+  letter-spacing: 0.4rem;
+  text-align: center;
+
+  span {
+    font-family: "Inter", sans-serif;
+    color: $accent_red;
+    letter-spacing: 0.2em;
+  }
+}
+
+@media (max-width: 600px) {
+  .loader_small {
+    margin-bottom: 4rem;
+  }
+
+  .p_loading {
+    font-size: 0.875rem;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 440px) {
+  .title {
+    font-size: 1.5rem;
+    letter-spacing: 0.1em;
+  }
+}
