@@ -110,6 +110,10 @@ function App() {
               path="upload_new_product"
               element={<UploadNewProduct />}
             />
+            <Route
+              path="upload_song"
+              element={<div>upload song</div>}
+            />
           </Route>
           <Route
             path="*"
