@@ -166,3 +166,9 @@ export enum TypeDeclension {
   beat = "бит",
   text = "текст",
 }
+
+export type UploadProductLinks =
+  | "upload_song"
+  | "upload_beat"
+  | "upload_text"
+  | "upload_cover";
