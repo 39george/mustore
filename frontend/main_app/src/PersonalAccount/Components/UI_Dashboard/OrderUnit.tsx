@@ -1,14 +1,21 @@
-import { IOrderUnit } from "../../../types/types";
+import { ActiveTabsAccountCreator, IOrderUnit } from "../../../types/types";
 import styles from "./OrderUnit.module.scss";
 import { FC, useEffect, useState } from "react";
 import order_photo from "../../../assets/HomePage/album_covers/ablum_cover_9.png";
 import avatar from "../../../assets/HomePage/author_2.png";
 import { NavLink } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { set_active_tab_account_creator } from "../../../state/active_tab_account_creator_slice";
 
 const OrderUnit: FC<IOrderUnit> = ({ consumer, deliver_to, price, status }) => {
   const [status_class_names, set_status_class_names] = useState(
     `${styles.info_status}`
   );
+  const dispatch = useDispatch();
+
+  const handle_link_click = (active_tab: ActiveTabsAccountCreator) => {
+    dispatch(set_active_tab_account_creator(active_tab));
+  };
 
   useEffect(() => {
     switch (status) {
@@ -61,6 +68,7 @@ const OrderUnit: FC<IOrderUnit> = ({ consumer, deliver_to, price, status }) => {
       <NavLink
         to="../orders"
         className={styles.to_order_link}
+        onClick={() => handle_link_click("orders")}
       >
         к заказу
       </NavLink>

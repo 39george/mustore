@@ -1,5 +1,8 @@
 import { NavLink } from "react-router-dom";
-import { IConversationUnit } from "../../../types/types";
+import {
+  ActiveTabsAccountCreator,
+  IConversationUnit,
+} from "../../../types/types";
 import styles from "./ConversationsWidget.module.scss";
 import { FC } from "react";
 import ConversationUnit from "./ConversationUnit";
@@ -9,6 +12,7 @@ import {
   set_sidebar_collapsed,
   set_sidebar_title,
 } from "../../../state/sidebar_actions_slice";
+import { set_active_tab_account_creator } from "../../../state/active_tab_account_creator_slice";
 
 const mock_conversations: IConversationUnit[] = [
   {
@@ -95,10 +99,11 @@ const mock_conversations: IConversationUnit[] = [
 
 const ConversationsWidget: FC = () => {
   const dispatch = useDispatch();
-  const handle_tab_link_click = () => {
+  const handle_tab_link_click = (active_tab: ActiveTabsAccountCreator) => {
     dispatch(set_sidebar_collapsed(true));
     dispatch(set_sidebar_title("H.S"));
     dispatch(set_sidebar_chevron_display("none"));
+    dispatch(set_active_tab_account_creator(active_tab));
   };
   return (
     <div className={styles.conversations_widget}>
@@ -109,7 +114,7 @@ const ConversationsWidget: FC = () => {
         <NavLink
           to="../conversations"
           className={styles.show_all}
-          onClick={handle_tab_link_click}
+          onClick={() => handle_tab_link_click("conversations")}
         >
           показать все
         </NavLink>

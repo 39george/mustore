@@ -5,8 +5,10 @@ import WelcomeWidget from "../Components/UI_Dashboard/WelcomeWidget";
 import { FC } from "react";
 import ConversationsWidget from "../Components/UI_Dashboard/ConversationsWidget";
 import OrdersWidget from "../Components/UI_Dashboard/OrdersWidget";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../state/store";
+import { ActiveTabsAccountCreator } from "../../types/types";
+import { set_active_tab_account_creator } from "../../state/active_tab_account_creator_slice";
 
 interface DashboardProps {
   username: string;
@@ -18,6 +20,11 @@ const Dashboard: FC<DashboardProps> = ({ username, user_role, avatar }) => {
   const sidebar_collapsed = useSelector(
     (state: RootState) => state.sidebar_actions.sidebar_collapsed
   );
+  const dispatch = useDispatch();
+
+  const handle_link_click = (active_tab: ActiveTabsAccountCreator) => {
+    dispatch(set_active_tab_account_creator(active_tab));
+  };
 
   return (
     <div className={styles.dashboard}>
@@ -44,6 +51,7 @@ const Dashboard: FC<DashboardProps> = ({ username, user_role, avatar }) => {
             <NavLink
               to="../products"
               className={styles.workbench_widget}
+              onClick={() => handle_link_click("products")}
             >
               <p className={styles.workbench_widget_text}>
                 Управление товарами
@@ -52,6 +60,7 @@ const Dashboard: FC<DashboardProps> = ({ username, user_role, avatar }) => {
             <NavLink
               to="../services"
               className={styles.workbench_widget}
+              onClick={() => handle_link_click("services")}
             >
               <p className={styles.workbench_widget_text}>
                 Управление услугами
