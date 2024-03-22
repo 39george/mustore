@@ -10,13 +10,19 @@ interface ProductWidget {
   name: "Песню" | "Бит" | "Текст" | "Обложку";
   upload_amount: number;
   icon: string;
+  link: string;
 }
 
 const product_widgets: ProductWidget[] = [
-  { name: "Песню", upload_amount: 2, icon: song_icon },
-  { name: "Бит", upload_amount: 3, icon: beat_icon },
-  { name: "Текст", upload_amount: 0, icon: text_icon },
-  { name: "Обложку", upload_amount: 1, icon: cover_icon },
+  { name: "Песню", upload_amount: 2, icon: song_icon, link: "../upload_song" },
+  { name: "Бит", upload_amount: 3, icon: beat_icon, link: "../upload_song" },
+  { name: "Текст", upload_amount: 0, icon: text_icon, link: "../upload_song" },
+  {
+    name: "Обложку",
+    upload_amount: 1,
+    icon: cover_icon,
+    link: "../upload_song",
+  },
 ];
 
 const UploadNewProduct: FC = () => {
@@ -27,22 +33,26 @@ const UploadNewProduct: FC = () => {
         <div className={styles.product_widgets_container}>
           {product_widgets.map((widget, idx) => {
             return (
-              <div
+              <Link
+                to={widget.link}
                 className={styles.product_widget}
                 key={idx}
               >
                 <div className={styles.widget_text_content}>
                   <p className={styles.widget_name}>{widget.name}</p>
                   <p className={styles.widget_upload_amount}>
-                    всего загружено: <span>{widget.upload_amount}</span>
+                    всего
+                    <br className={styles.br} />
+                    загружено: <span>{widget.upload_amount}</span>
                   </p>
                 </div>
                 <img
                   src={widget.icon}
                   alt="widget icon"
                   draggable={false}
+                  className={styles.widget_icon}
                 />
-              </div>
+              </Link>
             );
           })}
         </div>

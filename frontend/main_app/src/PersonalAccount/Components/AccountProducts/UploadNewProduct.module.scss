@@ -19,6 +19,7 @@
   max-width: 36.75rem;
   height: 60vh;
   max-height: 42rem;
+  min-height: 28.125rem;
 
   margin: 8rem auto 0;
 }
@@ -42,7 +43,46 @@
 
 .product_widget {
   @include widget(1.5rem);
-  width: fit-content;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+
+  width: 13.25rem;
+  height: fit-content;
+
+  outline: 1px solid $widget_bg;
+
+  cursor: pointer;
+  transition: 0.15s ease-out;
+
+  &:hover {
+    outline: 1px solid $account_green;
+    box-shadow: 0 0 1.5rem rgba($color: #000000, $alpha: 0.1);
+  }
+}
+
+.widget_name {
+  margin-bottom: 2em;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.widget_upload_amount {
+  font-size: 0.725rem;
+  font-weight: 600;
+  color: rgba($color: $main_dark, $alpha: 0.5);
+  letter-spacing: 0.1em;
+
+  span {
+    font-family: "Geologica", sans-serif;
+    font-weight: 400;
+    color: $main_dark;
+  }
+}
+
+.widget_icon {
+  flex-shrink: 0;
 }
 
 .return_link {
@@ -63,5 +103,31 @@
   &:hover {
     text-decoration: underline;
     color: $account_green;
+  }
+}
+
+@media (max-height: 750px) {
+  .content {
+    margin-top: clamp(
+      2rem,
+      calc(2rem + (128 - 32) * ((100vh - 650px) / (750 - 650))),
+      8rem
+    );
+  }
+}
+
+@media (max-width: 547px) {
+  .content {
+    min-height: 52rem;
+  }
+}
+
+@media (max-width: 450px) {
+  .content {
+    margin-top: 2rem;
+  }
+
+  .h2 {
+    font-size: 1.75rem;
   }
 }
