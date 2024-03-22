@@ -71,7 +71,13 @@ $translate_y_amount: -10rem;
 
   user-select: none;
   cursor: pointer;
+  transition: 0.2s ease-out;
   z-index: 999;
+
+  &:hover {
+    color: $widget_bg;
+    background-color: #b2c2e7;
+  }
 }
 
 .button_left {
