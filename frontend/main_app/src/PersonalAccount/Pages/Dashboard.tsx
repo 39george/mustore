@@ -33,7 +33,7 @@ const Dashboard: FC<DashboardProps> = ({ username, user_role, avatar }) => {
         />
         <div className={styles.welcome}>
           <h2 className={styles.h2}>
-            Добро пожаловать, <br />
+            Добро пожаловать, <br className={styles.br} />
             <span>{username}</span>!
           </h2>
           <WelcomeWidget />

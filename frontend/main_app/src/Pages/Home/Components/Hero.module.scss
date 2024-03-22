@@ -85,7 +85,7 @@
     letter-spacing: 0.2em;
   }
 
-  br {
+  .br {
     display: none;
   }
 }
@@ -140,7 +140,6 @@
   user-select: none;
 
   -webkit-user-drag: none;
-  // user-drag: none;
 
   opacity: 1;
 }
@@ -402,7 +401,7 @@ hr {
     font-size: 3rem;
     text-align: center;
 
-    br {
+    .br {
       display: block;
     }
   }

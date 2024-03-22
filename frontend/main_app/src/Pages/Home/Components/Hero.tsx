@@ -62,7 +62,7 @@ const Hero: FC<HeroProps> = ({ scroll_to_why_us }) => {
           <div className={styles.empty_space}></div>
           <h1 className={styles.title}>
             HARMONY<span>.</span>
-            <br />
+            <br className={styles.br} />
             SPHERE
           </h1>
           <h2 className={styles.tagline}>
