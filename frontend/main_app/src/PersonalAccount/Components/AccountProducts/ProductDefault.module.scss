@@ -21,3 +21,9 @@
 .upload_product {
   @include upload_product_widget;
 }
+
+@media (max-width: 450px) {
+  .h2 {
+    font-size: 1.75rem;
+  }
+}
