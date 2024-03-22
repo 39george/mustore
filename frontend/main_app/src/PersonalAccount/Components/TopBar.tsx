@@ -1,5 +1,5 @@
 import styles from "./TopBar.module.scss";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { FC, useEffect, useState } from "react";
 import { FaRegBell } from "react-icons/fa6";
 import conversations from "../../assets/icons/conversations_outline.svg";
@@ -98,10 +98,14 @@ const TopBar: FC<TopBarProps> = ({ username, avatar }) => {
               </p>
               <GoChevronDown className={styles.chevron} />
             </div>
-            <div className={styles.upload_product}>
+            <Link
+              to="products/upload_new_product"
+              className={styles.upload_product}
+              onClick={() => dispatch(set_product_status(null))}
+            >
               <p className={styles.upload_product_p}>загрузить новый товар</p>
               <FiPlus className={styles.plus_icon} />
-            </div>
+            </Link>
             <div className={styles.actions_button}>
               <p className={styles.actions_text}>действия</p>
               <GoChevronDown className={styles.chevron} />

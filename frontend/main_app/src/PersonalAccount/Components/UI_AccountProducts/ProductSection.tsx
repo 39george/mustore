@@ -5,9 +5,13 @@ import {
   IProduct,
   ProductSectionType,
   TypeDeclension,
+  UploadProductLinks,
 } from "../../../types/types";
 import ProductMeta from "./ProductMeta";
 import ProductCoversContainer from "./ProductCoversContainer";
+import { Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { set_product_status } from "../../../state/product_status_slice";
 
 type NewDeclension = "новый" | "новую";
 
@@ -16,6 +20,7 @@ interface ProductSectionProps {
   type_declension: TypeDeclension;
   new_declension: NewDeclension;
   products: IProduct[];
+  link: UploadProductLinks;
 }
 
 const ProductSection: FC<ProductSectionProps> = ({
@@ -23,11 +28,13 @@ const ProductSection: FC<ProductSectionProps> = ({
   type_declension,
   new_declension,
   products,
+  link,
 }) => {
   const [product_idx, set_product_idx] = useState(0);
   const [active_product, set_active_product] = useState(
     `product${product_idx}`
   );
+  const dispatch = useDispatch();
 
   const handle_change_active_product = (product: string, idx: number) => {
     set_active_product(product);
@@ -38,12 +45,16 @@ const ProductSection: FC<ProductSectionProps> = ({
     <div className={styles.product_section}>
       <div className={styles.product_header}>
         <h2 className={styles.h2}>{type}</h2>
-        <div className={styles.upload_product}>
+        <Link
+          to={link}
+          className={styles.upload_product}
+          onClick={() => dispatch(set_product_status(null))}
+        >
           <p className={styles.upload_product_p}>
             загрузить {new_declension} {type_declension}
           </p>
           <FiPlus className={styles.plus_icon} />
-        </div>
+        </Link>
       </div>
       <div className={styles.product_content}>
         <div className={styles.select_product}>

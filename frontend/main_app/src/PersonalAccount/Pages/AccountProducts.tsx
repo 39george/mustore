@@ -12,7 +12,7 @@ import { useDispatch } from "react-redux";
 import { set_product_status } from "../../state/product_status_slice";
 
 const products: IProduct[][] = [];
-// products.push(mock_songs);
+products.push(mock_songs);
 
 const AccountProducts: FC = () => {
   const dispatch = useDispatch();
@@ -39,6 +39,7 @@ const AccountProducts: FC = () => {
             type_declension={TypeDeclension.song}
             new_declension="новую"
             products={products[0]}
+            link="upload_song"
           />
           <hr className={styles.divider} />
         </>

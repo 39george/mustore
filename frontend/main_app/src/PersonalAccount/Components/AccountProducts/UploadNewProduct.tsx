@@ -5,23 +5,24 @@ import beat_icon from "../../../assets/icons/beat_account.svg";
 import text_icon from "../../../assets/icons/text_account.svg";
 import cover_icon from "../../../assets/icons/cover_account.svg";
 import { Link } from "react-router-dom";
+import { UploadProductLinks } from "../../../types/types";
 
 interface ProductWidget {
   name: "Песню" | "Бит" | "Текст" | "Обложку";
   upload_amount: number;
   icon: string;
-  link: string;
+  link: UploadProductLinks;
 }
 
 const product_widgets: ProductWidget[] = [
-  { name: "Песню", upload_amount: 2, icon: song_icon, link: "../upload_song" },
-  { name: "Бит", upload_amount: 3, icon: beat_icon, link: "../upload_song" },
-  { name: "Текст", upload_amount: 0, icon: text_icon, link: "../upload_song" },
+  { name: "Песню", upload_amount: 2, icon: song_icon, link: "upload_song" },
+  { name: "Бит", upload_amount: 3, icon: beat_icon, link: "upload_beat" },
+  { name: "Текст", upload_amount: 0, icon: text_icon, link: "upload_text" },
   {
     name: "Обложку",
     upload_amount: 1,
     icon: cover_icon,
-    link: "../upload_song",
+    link: "upload_cover",
   },
 ];
 
@@ -34,7 +35,7 @@ const UploadNewProduct: FC = () => {
           {product_widgets.map((widget, idx) => {
             return (
               <Link
-                to={widget.link}
+                to={`../${widget.link}`}
                 className={styles.product_widget}
                 key={idx}
               >
