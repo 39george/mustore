@@ -27,7 +27,7 @@ use crate::domain::requests::creator_access::CreateOfferRequest;
 use crate::domain::requests::creator_access::SubmitProductRequest;
 use crate::domain::requests::creator_access::SubmitServiceRequest;
 use crate::domain::upload_request::UploadRequest;
-use crate::error_chain_fmt;
+use crate::impl_debug;
 use crate::routes::ResponseError;
 use crate::startup::api_doc::BadRequestResponse;
 use crate::startup::api_doc::GetCreatorSongs;
@@ -44,11 +44,7 @@ pub enum CreatorResponseError {
     NoUploadInfoInCacheError(#[from] RedisError),
 }
 
-impl std::fmt::Debug for CreatorResponseError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        error_chain_fmt(self, f)
-    }
-}
+impl_debug!(CreatorResponseError);
 
 impl IntoResponse for CreatorResponseError {
     fn into_response(self) -> axum::response::Response {

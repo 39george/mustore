@@ -7,7 +7,7 @@ use axum::response::Response;
 use http::StatusCode;
 
 use crate::auth::AuthError;
-use crate::error_chain_fmt;
+use crate::impl_debug;
 use crate::routes::protected::user::MAX_SIZES;
 use crate::service_providers::object_storage::ObjectStorageError;
 
@@ -45,11 +45,7 @@ pub enum ResponseError {
     ConflictError(#[source] anyhow::Error),
 }
 
-impl std::fmt::Debug for ResponseError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        error_chain_fmt(self, f)
-    }
-}
+impl_debug!(ResponseError);
 
 impl IntoResponse for ResponseError {
     fn into_response(self) -> Response {

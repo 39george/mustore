@@ -7,7 +7,7 @@ use axum::response::Response;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
-use crate::error_chain_fmt;
+use crate::impl_debug;
 use crate::service_providers::captcha_verifier::RecaptchaError;
 use crate::service_providers::object_storage::ObjectStorageError;
 
@@ -40,11 +40,7 @@ pub enum AuthError {
     RecaptchaFailed(#[from] RecaptchaError),
 }
 
-impl std::fmt::Debug for AuthError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        error_chain_fmt(self, f)
-    }
-}
+impl_debug!(AuthError);
 
 impl IntoResponse for AuthError {
     fn into_response(self) -> Response {

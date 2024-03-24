@@ -1,6 +1,6 @@
 use serde::{de::Visitor, Serialize, Serializer};
 
-use crate::error_chain_fmt;
+use crate::impl_debug;
 use std::{fmt::Display, str::FromStr};
 
 use super::{
@@ -24,11 +24,7 @@ pub enum ObjectKeyError {
     ContainsForbiddenCharsError,
 }
 
-impl std::fmt::Debug for ObjectKeyError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        error_chain_fmt(self, f)
-    }
-}
+impl_debug!(ObjectKeyError);
 
 #[derive(Debug, Clone)]
 pub struct ObjectKey {

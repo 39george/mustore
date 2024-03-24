@@ -4,7 +4,7 @@ use reqwest::Url;
 use secrecy::{ExposeSecret, Secret};
 use serde::Deserialize;
 
-use crate::error_chain_fmt;
+use crate::impl_debug;
 
 #[derive(thiserror::Error, Debug, Deserialize)]
 pub enum GoogleCaptchaError {
@@ -36,11 +36,7 @@ pub enum RecaptchaError {
     VerificationFailed,
 }
 
-impl std::fmt::Debug for RecaptchaError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        error_chain_fmt(self, f)
-    }
-}
+impl_debug!(RecaptchaError);
 
 #[derive(Clone, Debug)]
 pub struct CaptchaVerifier {

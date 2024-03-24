@@ -1,6 +1,6 @@
 use std::{fmt::Display, num::ParseIntError, str::FromStr};
 
-use crate::error_chain_fmt;
+use crate::impl_debug;
 
 use super::object_key::{ObjectKey, ObjectKeyError};
 
@@ -14,11 +14,7 @@ pub enum UploadRequestError {
     ObjectKeyError(#[from] ObjectKeyError),
 }
 
-impl std::fmt::Debug for UploadRequestError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        error_chain_fmt(self, f)
-    }
-}
+impl_debug!(UploadRequestError);
 
 #[derive(Debug)]
 pub struct UploadRequest {

@@ -9,7 +9,7 @@ use time::macros::format_description;
 use time::{Duration, OffsetDateTime};
 
 use crate::types::data_size::DataSizes;
-use crate::{error_chain_fmt, MAX_DEFAULT_SIZE_MB};
+use crate::{impl_debug, MAX_DEFAULT_SIZE_MB};
 
 type HmacSha256 = Hmac<Sha256>;
 
@@ -23,11 +23,7 @@ pub enum Error {
     JsonSerError(#[from] serde_json::Error),
 }
 
-impl std::fmt::Debug for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        error_chain_fmt(self, f)
-    }
-}
+impl_debug!(Error);
 
 #[derive(
     Serialize, Deserialize, Debug, utoipa::ToSchema, utoipa::ToResponse,

@@ -7,7 +7,7 @@ use utoipa::{ToResponse, ToSchema};
 use crate::{
     cornucopia::queries::user_access::ListConversationById,
     domain::object_key::{ObjectKey, ObjectKeyError},
-    error_chain_fmt,
+    impl_debug,
     service_providers::object_storage::{ObjectStorage, ObjectStorageError},
 };
 
@@ -175,11 +175,7 @@ pub enum ConversationDataError {
     ObjectKeyError(#[from] ObjectKeyError),
 }
 
-impl std::fmt::Debug for ConversationDataError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        error_chain_fmt(self, f)
-    }
-}
+impl_debug!(ConversationDataError);
 
 impl ConversationDataResponse {
     #[tracing::instrument(name = "Create conversation list", skip_all)]

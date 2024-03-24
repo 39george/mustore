@@ -16,7 +16,7 @@ use secrecy::ExposeSecret;
 
 use crate::config::ObjectStorageSettings;
 use crate::domain::object_key::ObjectKey;
-use crate::error_chain_fmt;
+use crate::impl_debug;
 
 use self::presigned_post_form::PresignedPostData;
 
@@ -32,11 +32,7 @@ pub enum ObjectStorageError {
     BadObjectKeyError(String),
 }
 
-impl std::fmt::Debug for ObjectStorageError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        error_chain_fmt(self, f)
-    }
-}
+impl_debug!(ObjectStorageError);
 
 /// Handle to work with object storage.
 /// Client internally uses Arc, so clone is ok.

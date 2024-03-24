@@ -63,3 +63,15 @@ pub fn error_chain_fmt(
     }
     Ok(())
 }
+
+#[macro_export]
+macro_rules! impl_debug {
+    ($type:ident) => {
+        use crate::error_chain_fmt;
+        impl std::fmt::Debug for $type {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                error_chain_fmt(self, f)
+            }
+        }
+    };
+}
