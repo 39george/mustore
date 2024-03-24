@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+docker run -v ~/.garage/garage.toml:/etc/garage.toml --name garage -v garage-data:/tmp -p 3900:3900 -d dxflrs/garage:v0.9.1

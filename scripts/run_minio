@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+docker run -d -p 9000:9000 -p 9001:9001  -p 8900:8900 --name minio -e "MINIO_DOMAIN=minio.orb.local" -v minio_volume:/data minio/minio server /data --console-address ":8900"

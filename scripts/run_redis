@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+redis_pass=$(cat "../secrets/redis_password.txt")
+
+docker run --name myredis -d -v myredis_volume:/data -p 6379:6379 redis redis-server --requirepass "$redis_pass"
