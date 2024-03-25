@@ -210,7 +210,7 @@ pub mod get {
         Query(Username { username }): Query<Username>,
     ) -> Result<Json<HashMap<&'static str, bool>>, AuthError> {
         tokio::time::sleep(Duration::from_millis(300)).await;
-        let key = format!("username_status_req:{}", address.ip());
+        let key = format!("username_status_req_limit:{}", address.ip());
         let con = app_state.redis_pool.next();
         con.incr::<(), _>(&key).await.unwrap();
         con.expire::<(), _>(&key, 60) // 1 minute

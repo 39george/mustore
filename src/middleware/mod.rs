@@ -217,15 +217,14 @@ pub mod ban_by_ip {
         }
 
         fn call(&mut self, request: Request) -> Self::Future {
-            let addr = request
-                .extensions()
-                .get::<ConnectInfo<SocketAddr>>()
-                .cloned();
+            let addr =
+                request.extensions().get::<ConnectInfo<SocketAddr>>().cloned();
             let state = self.state.clone();
             let future = self.inner.call(request);
             Box::pin(async move {
                 if let Some(ConnectInfo(addr)) = addr {
-                    let key = format!("username_status_req:{}", addr.ip());
+                    let key =
+                        format!("username_status_req_limit:{}", addr.ip());
                     let con = state.redis_pool.next();
                     if let Ok(count) = con.get::<u16, _>(&key).await {
                         if count > 30 {
