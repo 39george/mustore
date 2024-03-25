@@ -1,0 +1,91 @@
+@import "./colors.scss";
+
+@mixin widget($padding_size) {
+  padding: $padding_size;
+  width: 100%;
+  border-radius: 0.75rem;
+  background-color: $widget_bg;
+  box-shadow: 0 0 1.5rem rgba(#000, 0.06);
+}
+
+@mixin image_wrapper($size) {
+  width: $size;
+  height: $size;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+@mixin account_border($width, $height, $margin) {
+  border: none;
+  margin: $margin;
+  width: $width;
+  height: $height;
+  background-color: $account_border;
+}
+
+@mixin disable_selection {
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+@mixin disable_scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@mixin text_overflow {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@mixin upload_product_widget {
+  @include widget(0.5rem);
+
+  display: flex;
+  align-items: center;
+
+  width: fit-content;
+  height: 2.25rem;
+
+  font-size: 0.875rem;
+  font-weight: 500;
+
+  border-radius: 0.25rem;
+  color: $main_bright;
+  background-color: $account_green;
+
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: filter 0.1s ease-out;
+
+  &:hover {
+    filter: brightness(105%);
+  }
+
+  .plus_icon {
+    flex-shrink: 0;
+    margin-left: 0.25rem;
+  }
+}
+
+.rating_container {
+  display: flex;
+  align-items: center;
+}
+
+.star_icon {
+  color: $account_star;
+}
+
+.rating {
+  margin-left: 0.625em;
+  font-family: "Geologica", sans-serif;
+  font-weight: 200;
+}
+
+$padding_account_page: clamp(0px, (100vw - 95rem) / 2, 9999px);
