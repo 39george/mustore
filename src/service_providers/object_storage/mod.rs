@@ -66,7 +66,12 @@ impl ObjectStorage {
             .build();
         let client = Client::from_conf(config);
 
-        match client.head_bucket().bucket(&settings.bucket_name).send().await {
+        match client
+            .head_bucket()
+            .bucket(&settings.bucket_name)
+            .send()
+            .await
+        {
             Ok(_) => {
                 println!("Bucket '{}' already exists!", settings.bucket_name)
             }

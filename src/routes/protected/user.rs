@@ -476,7 +476,10 @@ async fn create_new_conversation(
         .await
         .context("Failed to add participants to the conversation")?;
 
-    transaction.commit().await.context("Failed to commit a pg transaction")?;
+    transaction
+        .commit()
+        .await
+        .context("Failed to commit a pg transaction")?;
 
     if count != 2 {
         Err(ResponseError::InternalError(anyhow::anyhow!(
@@ -595,7 +598,10 @@ async fn send_message(
             .context("Failed to insert message attachment into pg.")?;
     }
 
-    transaction.commit().await.context("Failed to commit a pg transaction")?;
+    transaction
+        .commit()
+        .await
+        .context("Failed to commit a pg transaction")?;
 
     Ok(StatusCode::CREATED)
 }

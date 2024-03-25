@@ -117,8 +117,9 @@ pub async fn store_upload_request_data(
     object_key: &ObjectKey,
     user_id: i32,
 ) -> RedisResult<()> {
-    let created_at =
-        OffsetDateTime::now_utc().format(&crate::DEFAULT_TIME_FORMAT).unwrap();
+    let created_at = OffsetDateTime::now_utc()
+        .format(&crate::DEFAULT_TIME_FORMAT)
+        .unwrap();
     let upload_request = UploadRequest::new(user_id, object_key.clone());
     con.set(&upload_request.to_string(), &created_at, None, None, false)
         .await?;

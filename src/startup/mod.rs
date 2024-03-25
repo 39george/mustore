@@ -91,8 +91,10 @@ impl Application {
         configuration: Settings,
     ) -> Result<Application, anyhow::Error> {
         let pg_pool = get_postgres_connection_pool(&configuration.database);
-        let pg_client =
-            pg_pool.get().await.expect("Failed to get pg client for scheduler");
+        let pg_client = pg_pool
+            .get()
+            .await
+            .expect("Failed to get pg client for scheduler");
         let redis_pool =
             get_redis_connection_pool(&configuration.redis).await?;
         let redis_pool_tower_sessions =
@@ -154,7 +156,9 @@ impl Application {
 
     /// This function only returns when the application is stopped.
     pub async fn run_until_stopped(self) -> Result<(), std::io::Error> {
-        self.server.with_graceful_shutdown(shutdown_signal()).await?;
+        self.server
+            .with_graceful_shutdown(shutdown_signal())
+            .await?;
         Ok(())
     }
 
@@ -361,10 +365,15 @@ async fn run_scheduler(
     let redis_client = std::sync::Arc::new(redis_client);
     let object_storage = std::sync::Arc::new(object_storage);
     sched
-        .add(tasks::update_available_songs_materialized_view_task(pg_client)?)
+        .add(tasks::update_available_songs_materialized_view_task(
+            pg_client,
+        )?)
         .await?;
     sched
-        .add(tasks::check_current_user_uploads(object_storage, redis_client)?)
+        .add(tasks::check_current_user_uploads(
+            object_storage,
+            redis_client,
+        )?)
         .await?;
 
     if let Err(e) = sched.start().await {

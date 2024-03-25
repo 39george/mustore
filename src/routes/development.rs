@@ -116,8 +116,10 @@ async fn upload_file(
     let response = client.post(url).multipart(multipart).send().await.unwrap();
     let status =
         StatusCode::from_u16(response.status().as_u16()).context("")?;
-    let text =
-        response.text().await.context("Failed to get text from response")?;
+    let text = response
+        .text()
+        .await
+        .context("Failed to get text from response")?;
     Ok((status, text))
 }
 

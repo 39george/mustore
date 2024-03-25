@@ -20,11 +20,7 @@ pub struct Lyric(
         custom(contains_no_control_characters)
     )]
     /// Should contain no control characters
-    #[schema(
-        example = "Some lyrics",
-        min_length = 1,
-        max_length = 5000,
-    )]
+    #[schema(example = "Some lyrics", min_length = 1, max_length = 5000)]
     String,
 );
 
@@ -35,7 +31,8 @@ impl AsRef<str> for Lyric {
 }
 
 impl<T> From<T> for Lyric
-where T: std::fmt::Display
+where
+    T: std::fmt::Display,
 {
     fn from(value: T) -> Self {
         Lyric(value.to_string())
@@ -61,10 +58,14 @@ pub struct Product {
             custom(contains_no_control_characters)
         )
     )]
-    #[schema(min_length = 15, max_length = 400, pattern = r#"[^/()"<>\\{};:]*"#)]
+    #[schema(
+        min_length = 15,
+        max_length = 400,
+        pattern = r#"[^/()"<>\\{};:]*"#
+    )]
     pub description: Option<String>,
     #[garde(inner(
-        length(min=MOOD_MIN_LEN, max=MOOD_MAX_LEN), 
+        length(min=MOOD_MIN_LEN, max=MOOD_MAX_LEN),
         custom(forbidden_characters),
         custom(contains_no_control_characters)
     ))]
@@ -91,10 +92,7 @@ pub struct MusicProduct {
         custom(forbidden_characters),
         custom(contains_no_control_characters)
     )]
-    #[schema(
-        example = "pop",
-        pattern = r#"[^/()"<>\\{};:]*"#
-    )]
+    #[schema(example = "pop", pattern = r#"[^/()"<>\\{};:]*"#)]
     pub primary_genre: String,
     #[garde(
         length(min=GENRE_MIN_LEN, max=GENRE_MAX_LEN),
@@ -125,25 +123,25 @@ pub enum SubmitProductRequest {
     Song {
         #[garde(dive)]
         product: Product,
-        #[garde(dive)] 
+        #[garde(dive)]
         music_product: MusicProduct,
         #[garde(dive)]
         lyric: Lyric,
         #[garde(skip)]
-        sex: Sex
+        sex: Sex,
     },
     Lyric {
         #[garde(dive)]
         product: Product,
         #[garde(dive)]
         lyric: Lyric,
-        #[garde(skip)] 
-        sex: Option<Sex>
+        #[garde(skip)]
+        sex: Option<Sex>,
     },
     Cover {
         #[garde(dive)]
         product: Product,
-    }
+    },
 }
 
 #[derive(Serialize, Deserialize, Debug, Validate, ToSchema)]
@@ -157,7 +155,7 @@ pub struct Service {
         min_length = 2,
         max_length = 30,
         pattern = r#"[^/()"<>\\{};:]*"#,
-        example = "Mixing",
+        example = "Mixing"
     )]
     pub name: String,
     #[garde(inner(
@@ -168,7 +166,7 @@ pub struct Service {
     #[schema(
         min_length = 15,
         max_length = 400,
-        pattern = r#"[^/()"<>\\{};:]*"#,
+        pattern = r#"[^/()"<>\\{};:]*"#
     )]
     pub description: Option<String>,
     #[garde(skip)]
@@ -191,10 +189,8 @@ pub struct Service {
 pub struct MusicService {
     #[garde(dive)]
     pub service: Service,
-    #[garde(inner(inner(
-        custom(contains_no_control_characters)
-    )))]
-    pub genres: Option<Vec<String>>
+    #[garde(inner(inner(custom(contains_no_control_characters))))]
+    pub genres: Option<Vec<String>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Validate, ToSchema)]
@@ -214,11 +210,8 @@ pub enum SubmitServiceRequest {
                 custom(contains_no_control_characters)
             )
         ))]
-        #[schema(
-            min_items = 1,
-            max_items = 5,
-        )]
-        credits: Option<Vec<String>>
+        #[schema(min_items = 1, max_items = 5)]
+        credits: Option<Vec<String>>,
     },
     CoverDesign(#[garde(dive)] Service),
 }

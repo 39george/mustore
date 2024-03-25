@@ -80,7 +80,11 @@ impl TestUser {
             }
             _ => unreachable!(),
         }
-        client.post(format!("{}/api/signup", host)).form(&form).send().await
+        client
+            .post(format!("{}/api/signup", host))
+            .form(&form)
+            .send()
+            .await
     }
 }
 

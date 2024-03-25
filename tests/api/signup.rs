@@ -82,7 +82,12 @@ async fn wrong_confirmation_link_should_redirect_to_specific_route() {
         .unwrap();
     assert_eq!(response.status().as_u16(), 303);
     assert_eq!(
-        response.headers().get("location").unwrap().to_str().unwrap(),
+        response
+            .headers()
+            .get("location")
+            .unwrap()
+            .to_str()
+            .unwrap(),
         "react-router/accountconfirmationfailed"
     );
 }

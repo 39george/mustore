@@ -32,7 +32,7 @@ pub struct SongsAmount {
     /// Amount of songs
     #[param(minimum = 1, maximum = 50)]
     #[garde(range(min = 1, max = 50))]
-    pub amount: i64
+    pub amount: i64,
 }
 
 impl TryFrom<Vec<open_access::GetStats>> for Stats {
@@ -78,7 +78,7 @@ pub struct GetSongsListRequest {
     /// Filter by genres
     #[serde(default)]
     #[garde(inner(
-        length(min=MOOD_MIN_LEN, max=MOOD_MAX_LEN), 
+        length(min=MOOD_MIN_LEN, max=MOOD_MAX_LEN),
         custom(forbidden_characters),
         custom(contains_no_control_characters)
     ))]
@@ -86,7 +86,7 @@ pub struct GetSongsListRequest {
     /// Filter by moods (vibes)
     #[serde(default)]
     #[garde(inner(
-        length(min=MOOD_MIN_LEN, max=MOOD_MAX_LEN), 
+        length(min=MOOD_MIN_LEN, max=MOOD_MAX_LEN),
         custom(forbidden_characters),
         custom(contains_no_control_characters)
     ))]
@@ -112,7 +112,9 @@ fn validate_tempo_bounds(tempos: &[i16], _: &()) -> garde::Result {
     {
         Err(garde::Error::new("Tempo is out of bounds"))
     } else if tempos[0] > tempos[1] {
-        Err(garde::Error::new("First tempo marker can't be less than second"))
+        Err(garde::Error::new(
+            "First tempo marker can't be less than second",
+        ))
     } else {
         Ok(())
     }

@@ -104,7 +104,10 @@ pub async fn confirm(
     {
         Ok(id) => id,
         Err(e) => {
-            app_state.object_storage.delete_object_by_key(&avatar_key).await?;
+            app_state
+                .object_storage
+                .delete_object_by_key(&avatar_key)
+                .await?;
             transaction
                 .rollback()
                 .await
@@ -149,7 +152,10 @@ pub async fn confirm(
             }
         }
     {
-        app_state.object_storage.delete_object_by_key(&avatar_key).await?;
+        app_state
+            .object_storage
+            .delete_object_by_key(&avatar_key)
+            .await?;
         transaction
             .rollback()
             .await
@@ -164,7 +170,10 @@ pub async fn confirm(
         .context("Failed to insert a new user to the pg")
         .map_err(AuthError::AccountConfirmationFailed)
     {
-        app_state.object_storage.delete_object_by_key(&avatar_key).await?;
+        app_state
+            .object_storage
+            .delete_object_by_key(&avatar_key)
+            .await?;
         transaction
             .rollback()
             .await
@@ -179,7 +188,10 @@ pub async fn confirm(
         .context("Failed to commit a pg transaction")
         .map_err(AuthError::AccountConfirmationFailed)
     {
-        app_state.object_storage.delete_object_by_key(&avatar_key).await?;
+        app_state
+            .object_storage
+            .delete_object_by_key(&avatar_key)
+            .await?;
 
         return Err(e);
     }

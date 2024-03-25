@@ -170,12 +170,15 @@ async fn connect_card(
     ))?;
 
     let base: Url = app_state.settings.app_base_url.parse().unwrap();
-    let success_url =
-        base.join("/notification_center/card_connect_success").unwrap();
-    let fail_url =
-        base.join("/notification_center/card_connect_failed").unwrap();
-    let notification_url =
-        base.join("/notification_center/card_connect_notification").unwrap();
+    let success_url = base
+        .join("/notification_center/card_connect_success")
+        .unwrap();
+    let fail_url = base
+        .join("/notification_center/card_connect_failed")
+        .unwrap();
+    let notification_url = base
+        .join("/notification_center/card_connect_notification")
+        .unwrap();
     let cashbox_pass = &app_state.settings.payments.cashbox_password;
     let req_id = uuid::Uuid::new_v4();
     let request = RegisterCardTokenRequest::new(
@@ -184,8 +187,10 @@ async fn connect_card(
         fail_url,
         cashbox_pass,
     );
-    let response =
-        app_state.payments_client.execute(RegisterCardToken, request).await?;
+    let response = app_state
+        .payments_client
+        .execute(RegisterCardToken, request)
+        .await?;
 
     let result = match response.status {
         banksim_api::OperationStatus::Success => {
@@ -441,8 +446,10 @@ async fn submit_product(
             .map_err(ResponseError::UnexpectedError)?;
     }
 
-    if let Err(e) =
-        transaction.commit().await.context("Failed to commit a pg transaction")
+    if let Err(e) = transaction
+        .commit()
+        .await
+        .context("Failed to commit a pg transaction")
     {
         return Err(ResponseError::UnexpectedError(e).into());
     }
@@ -684,8 +691,10 @@ async fn submit_service(
             .map_err(ResponseError::UnexpectedError)?;
     }
 
-    if let Err(e) =
-        transaction.commit().await.context("Failed to commit a pg transaction")
+    if let Err(e) = transaction
+        .commit()
+        .await
+        .context("Failed to commit a pg transaction")
     {
         return Err(ResponseError::UnexpectedError(e).into());
     }

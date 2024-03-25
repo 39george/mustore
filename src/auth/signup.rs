@@ -113,7 +113,10 @@ pub async fn signup(
     .context("Failed to join thread")
     .map_err(AuthError::InternalError)??;
 
-    app_state.captcha_verifier.validate(recaptcha_token, addr.ip()).await?;
+    app_state
+        .captcha_verifier
+        .validate(recaptcha_token, addr.ip())
+        .await?;
 
     let pg_client = app_state
         .pg_pool
