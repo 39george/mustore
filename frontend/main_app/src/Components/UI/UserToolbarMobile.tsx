@@ -2,7 +2,7 @@ import styles from "./UserToolbarMobile.module.scss";
 import { FC, useEffect, useState } from "react";
 import { GoChevronDown } from "react-icons/go";
 import { FaRegHeart } from "react-icons/fa";
-import { PiShoppingCartFill } from "react-icons/pi";
+// import { PiShoppingCartFill } from "react-icons/pi";
 import useLogOutUserApi from "../../hooks/API/useLogOutUserApi";
 import useCheckPermissionsApi from "../../hooks/API/useCheckPermissionsApi";
 import { useDispatch, useSelector } from "react-redux";
@@ -91,7 +91,7 @@ const UserToolbarMobile: FC<UserToolbarMobileProps> = ({ sidebar_open }) => {
           <FaRegHeart className={styles.like_icon} />
           <div className={styles.likes_amount}>2</div>
         </div>
-        <PiShoppingCartFill className={styles.cart_icon} />
+        {/* <PiShoppingCartFill className={styles.cart_icon} /> */}
       </div>
     </div>
   );

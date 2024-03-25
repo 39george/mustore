@@ -26,6 +26,18 @@ li {
   z-index: 998;
 }
 
+.nav_bar_not_home {
+  background-color: rgba($color: $widget_bg, $alpha: 0.7);
+
+  .submenu {
+    background-color: $widget_bg;
+
+    &::before {
+      border-color: transparent transparent $widget_bg transparent;
+    }
+  }
+}
+
 .nav_bar_dark_default {
   background-color: rgba(#010816, 0.7);
 

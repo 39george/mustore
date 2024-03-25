@@ -21,6 +21,8 @@ import { PermissionsState } from "../state/user_permissions_slice";
 import UserToolbar from "../Components/UI/UserToolbar";
 import UserToolbarMobile from "../Components/UI/UserToolbarMobile";
 
+const regex = /^\/products\/([^\/]+)$/;
+
 const Menu: FC = () => {
   const [link_toggled, set_link_toggled] = useState<ToggledLinks>({
     products: false,
@@ -64,38 +66,43 @@ const Menu: FC = () => {
     switch (intersecting_section) {
       case "hero":
         set_nav_bar_class_names(`${styles.nav_bar}`);
+        set_is_nav_dark(false);
         break;
       case "why_us":
         set_nav_bar_class_names(
           `${styles.nav_bar} ${styles.nav_bar_dark_default}`
         );
+        set_is_nav_dark(true);
         break;
       case "group":
         set_nav_bar_class_names(`${styles.nav_bar}`);
+        set_is_nav_dark(false);
         break;
       case "authors_reviews":
         set_nav_bar_class_names(
           `${styles.nav_bar} ${styles.nav_bar_dark_default} ${styles.nav_bar_dark_black}`
         );
+        set_is_nav_dark(true);
         break;
       case "footer":
         set_nav_bar_class_names(`${styles.nav_bar}`);
+        set_is_nav_dark(false);
+        break;
+      case null:
+        set_nav_bar_class_names(`${styles.nav_bar}`);
+        set_is_nav_dark(false);
         break;
     }
   }, [intersecting_section]);
 
+  // Define class names based on location.pathname
   useEffect(() => {
-    if (
-      intersecting_section === "hero" ||
-      intersecting_section === "group" ||
-      intersecting_section === "footer" ||
-      intersecting_section === null
-    ) {
-      set_is_nav_dark(false);
+    if (regex.test(location.pathname)) {
+      set_nav_bar_class_names((prev) => prev + ` ${styles.nav_bar_not_home}`);
     } else {
-      set_is_nav_dark(true);
+      set_nav_bar_class_names(`${styles.nav_bar}`);
     }
-  }, [intersecting_section]);
+  }, [location.pathname]);
 
   // Handle open / close state for nav links
   const toggle_link = (link_name: LinkName) => {
@@ -354,7 +361,9 @@ const Menu: FC = () => {
           className={styles.loader_small}
         ></div>
       ) : user_permissions.permissions.length !== 0 && !is_mobile ? (
-        <UserToolbar />
+        <UserToolbar
+          location={regex.test(location.pathname) ? "products" : "other"}
+        />
       ) : (
         <div className={styles.logging}>
           <NavLink

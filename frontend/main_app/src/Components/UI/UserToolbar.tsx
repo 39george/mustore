@@ -1,6 +1,6 @@
 import styles from "./UserToolbar.module.scss";
 import { FaRegHeart } from "react-icons/fa";
-import { PiShoppingCartFill } from "react-icons/pi";
+// import { PiShoppingCartFill } from "react-icons/pi";
 import { FC, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../state/store";
@@ -9,8 +9,13 @@ import {
   select_active_section,
 } from "../../state/active_section_slice";
 import ToolbarPopUpMenu from "./ToolbarPopUpMenu";
+import { LocationNavbar } from "../../types/types";
 
-const UserToolbar: FC = () => {
+interface UserToolbarProps {
+  location: LocationNavbar;
+}
+
+const UserToolbar: FC<UserToolbarProps> = ({ location }) => {
   const [light_colors, set_light_colors] = useState("");
   const intersecting_section = useSelector<RootState, ActiveSection>((state) =>
     select_active_section(state.active_section)
@@ -41,6 +46,9 @@ const UserToolbar: FC = () => {
       case "footer":
         set_light_colors(``);
         break;
+      case null:
+        set_light_colors(``);
+        break;
     }
   }, [intersecting_section]);
 
@@ -62,9 +70,9 @@ const UserToolbar: FC = () => {
           <div className={styles.likes_amount}>2</div>
         </div>
       </div>
-      <div className={`${styles.wrapper} ${light_colors}`}>
+      {/* <div className={`${styles.wrapper} ${light_colors}`}>
         <PiShoppingCartFill className={styles.cart_icon} />
-      </div>
+      </div> */}
       <div
         ref={user_avatar_container_ref}
         className={`${styles_user_avatar} ${light_colors}`}
@@ -81,6 +89,7 @@ const UserToolbar: FC = () => {
           visible={popup_visible}
           set_visible={set_popup_visible}
           user_avatar_container_ref={user_avatar_container_ref.current}
+          location={location}
         />
       </div>
     </div>

@@ -1,22 +1,25 @@
 import styles from "./ToolbarPopUpMenu.module.scss";
-import { FC, useEffect, useRef } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import useLogOutUserApi from "../../hooks/API/useLogOutUserApi";
 import useCheckPermissionsApi from "../../hooks/API/useCheckPermissionsApi";
 import { NavLink } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../state/store";
 import { set_active_tab_account_creator } from "../../state/active_tab_account_creator_slice";
+import { LocationNavbar } from "../../types/types";
 
 interface ToolbarPopUpMenuProps {
   visible: boolean;
   set_visible: (visible: boolean) => void;
   user_avatar_container_ref: HTMLDivElement | null;
+  location: LocationNavbar;
 }
 
 const ToolbarPopUpMenu: FC<ToolbarPopUpMenuProps> = ({
   visible,
   set_visible,
   user_avatar_container_ref,
+  location,
 }) => {
   const toolbar_popup_menu_ref = useRef<HTMLDivElement>(null);
   const { logout } = useLogOutUserApi();
@@ -28,6 +31,19 @@ const ToolbarPopUpMenu: FC<ToolbarPopUpMenuProps> = ({
     (state: RootState) => state.username_avatar.avatar
   );
   const dispatch = useDispatch();
+  const [toolbar_popup_class_names, set_toolbar_popup_class_names] = useState(
+    location === "other"
+      ? `${styles.toolbar_popup}`
+      : `${styles.toolbar_popup} ${styles.toolbar_popup_products}`
+  );
+
+  useEffect(() => {
+    location === "other"
+      ? set_toolbar_popup_class_names(`${styles.toolbar_popup}`)
+      : set_toolbar_popup_class_names(
+          `${styles.toolbar_popup} ${styles.toolbar_popup_products}`
+        );
+  }, [location]);
 
   useEffect(() => {
     const handle_click_outside_popup = (e: MouseEvent) => {
@@ -62,7 +78,7 @@ const ToolbarPopUpMenu: FC<ToolbarPopUpMenuProps> = ({
   return (
     <div
       ref={toolbar_popup_menu_ref}
-      className={styles.toolbar_popup}
+      className={toolbar_popup_class_names}
       style={{
         opacity: `${visible ? "1" : "0"}`,
         visibility: `${visible ? "visible" : "hidden"}`,
