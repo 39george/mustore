@@ -172,3 +172,5 @@ export type UploadProductLinks =
   | "upload_beat"
   | "upload_text"
   | "upload_cover";
+
+export type LocationNavbar = "products" | "other";
