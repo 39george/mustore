@@ -21,7 +21,7 @@ const usePageNavigation = () => {
       window.scrollTo({ top: 0, behavior: "auto" });
     }
 
-    change_section("hero");
+    change_section(null);
   };
 
   return handle_page_navigation;
