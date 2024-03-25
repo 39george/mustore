@@ -1,5 +1,5 @@
 @import "../../colors.scss";
-@import "./GeneralStyles.scss";
+@import "../../GeneralStyles.scss";
 
 @mixin transition_width {
   transition: width 0.2s ease-out;

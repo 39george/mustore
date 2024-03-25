@@ -1,5 +1,5 @@
 @import "../../colors.scss";
-@import "../Components/GeneralStyles.scss";
+@import "../../GeneralStyles.scss";
 
 .dashboard {
   @include disable_scrollbar;

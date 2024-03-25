@@ -1,5 +1,5 @@
 @import "../../colors.scss";
-@import "../Components/GeneralStyles.scss";
+@import "../../GeneralStyles.scss";
 
 .products {
   @include disable_scrollbar;
