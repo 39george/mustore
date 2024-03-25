@@ -87,6 +87,7 @@ const ContentSection: FC<ContentSectionProps> = ({ section_type }) => {
   }
 
   useEffect(() => {
+    let timer: NodeJS.Timeout;
     if (is_small_screen) {
       if (pop_up_active) {
         set_links_class_names({
@@ -94,12 +95,16 @@ const ContentSection: FC<ContentSectionProps> = ({ section_type }) => {
           link_2: `${styles.pop_up_item} ${styles.item_2}`,
           link_3: `${styles.pop_up_item} ${styles.item_3}`,
         });
+        set_pop_up_style({ display: "flex" });
       } else {
         set_links_class_names({
           link_1: `${styles.pop_up_item} ${styles.item_hidden}`,
           link_2: `${styles.pop_up_item} ${styles.item_hidden}`,
           link_3: `${styles.pop_up_item} ${styles.item_hidden}`,
         });
+        timer = setTimeout(() => {
+          set_pop_up_style({ display: "none" });
+        }, 200);
       }
     } else {
       if (is_section_name_hovered) {
@@ -108,33 +113,16 @@ const ContentSection: FC<ContentSectionProps> = ({ section_type }) => {
           link_2: `${styles.pop_up_item} ${styles.item_2}`,
           link_3: `${styles.pop_up_item} ${styles.item_3}`,
         });
+        set_pop_up_style({ display: "flex" });
       } else {
         set_links_class_names({
           link_1: `${styles.pop_up_item} ${styles.item_hidden}`,
           link_2: `${styles.pop_up_item} ${styles.item_hidden}`,
           link_3: `${styles.pop_up_item} ${styles.item_hidden}`,
         });
-      }
-    }
-  }, [pop_up_active, is_section_name_hovered]);
-
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (is_small_screen) {
-      if (!pop_up_active) {
         timer = setTimeout(() => {
           set_pop_up_style({ display: "none" });
         }, 200);
-      } else {
-        set_pop_up_style({ display: "flex" });
-      }
-    } else {
-      if (!is_section_name_hovered) {
-        timer = setTimeout(() => {
-          set_pop_up_style({ display: "none" });
-        }, 200);
-      } else {
-        set_pop_up_style({ display: "flex" });
       }
     }
 
