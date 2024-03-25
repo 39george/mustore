@@ -2,7 +2,8 @@
 /**/.DS_Store
 .DS_Store
 Cargo.lock
-scripts/
 secrets/
 refinery.toml
 local.env
+/doc/book
+/doc/mustore-pg-schema
