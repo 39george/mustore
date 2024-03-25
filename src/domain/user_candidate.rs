@@ -1,5 +1,9 @@
+use fred::clients::RedisPool;
+use fred::interfaces::HashesInterface;
+use fred::interfaces::KeysInterface;
 use fred::prelude::RedisError;
 use fred::prelude::RedisErrorKind;
+use fred::prelude::RedisResult;
 use serde::Deserialize;
 use serde::Serialize;
 use std::collections::HashMap;
@@ -107,4 +111,29 @@ impl From<UserCandidate> for HashMap<String, String> {
         map.insert("validation_token".to_string(), value.validation_token);
         map
     }
+}
+
+#[tracing::instrument(name = "Get user candidate data from redis", skip_all)]
+pub async fn get_user_candidate_data(
+    con: &RedisPool,
+    user_email: &str,
+) -> RedisResult<UserCandidate> {
+    let key = UserCandidate::key_from_email(user_email);
+    let result: HashMap<String, String> = con.hgetall(&key).await?;
+    con.del(&key).await?;
+    UserCandidate::try_from(result)
+}
+
+/// By default if the given `user_email` already exists,
+/// value will be overwritten.
+#[tracing::instrument(name = "Store candidate data in the redis", skip_all)]
+pub async fn store_user_candidate_data(
+    con: &RedisPool,
+    user_candidate: UserCandidate,
+) -> RedisResult<()> {
+    let key = user_candidate.redis_key();
+    let hash_map: HashMap<String, String> = user_candidate.into();
+    con.hset(&key, &hash_map.try_into().unwrap()).await?;
+    con.expire(&key, 60 * 30).await?; // 30 minutes
+    Ok(())
 }

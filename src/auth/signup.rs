@@ -1,6 +1,5 @@
 //! src/auth/user_signup.rs
 
-use std::collections::HashMap;
 use std::net::SocketAddr;
 
 use anyhow::Context;
@@ -10,10 +9,6 @@ use askama::Template;
 use axum::extract::ConnectInfo;
 use axum::extract::State;
 use axum::Form;
-use fred::clients::RedisPool;
-use fred::interfaces::HashesInterface;
-use fred::interfaces::KeysInterface;
-use fred::interfaces::RedisResult;
 use http::StatusCode;
 use secrecy::{ExposeSecret, Secret};
 use serde::Deserialize;
@@ -24,6 +19,7 @@ use utoipa::ToSchema;
 use super::AuthError;
 use crate::cornucopia::queries::user_auth_queries;
 use crate::domain::signup_token::SignupToken;
+use crate::domain::user_candidate::store_user_candidate_data;
 use crate::domain::user_candidate::UserCandidate;
 use crate::domain::user_email::UserEmail;
 use crate::domain::user_name::UserName;
@@ -176,20 +172,6 @@ pub async fn signup(
     .context("Failed to send confirmation email")?;
 
     Ok(StatusCode::CREATED)
-}
-
-/// By default if the given `user_email` already exists,
-/// value will be overwritten.
-#[tracing::instrument(name = "Store candidate data in the redis", skip_all)]
-async fn store_user_candidate_data(
-    con: &RedisPool,
-    user_candidate: UserCandidate,
-) -> RedisResult<()> {
-    let key = user_candidate.redis_key();
-    let hash_map: HashMap<String, String> = user_candidate.into();
-    con.hset(&key, &hash_map.try_into().unwrap()).await?;
-    con.expire(&key, 60 * 30).await?; // 30 minutes
-    Ok(())
 }
 
 #[tracing::instrument(name = "Performing hashing of password", skip_all)]

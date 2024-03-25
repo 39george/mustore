@@ -1,13 +1,13 @@
 # Redis Data Schema
 
-| Name                                               | Type                  | Key Example                             | Expiration    | Module                          |
-| -------------------------------------------------- | --------------------- | --------------------------------------- | ------------- | ------------------------------- |
-| [Cookie](#cookie)                                  | **String(string)**    | `{cookie_token}`                        | 1 day (redis) | `tower_sessions_redis_store`    |
-| [Upload request](#upload-request)                  | **String(timestamp)** | `upload_request:{user_id}:{object_key}` | 1 hour (cron) | `crate::domain::upload_request` |
-| [User candidate reg](#user-candidate-registration) | **HASH**              | `user_candidate:{email}`                | No            |                                 |
-| [Username status req limit](#request-limit)        | **String(int)**       | `username_status_req:{ip_addr}`         | No            |                                 |
-| [Payment](#payment)                                | **String(json)**      | `payment:{payment_id}`                  | No            |                                 |
-|                                                    |                       |                                         | No            |                                 |
+| Name                                               | Type                  | Key Example                             | Expiration     | Module                          |
+| -------------------------------------------------- | --------------------- | --------------------------------------- | -------------- | ------------------------------- |
+| [Cookie](#cookie)                                  | **String(string)**    | `{cookie_token}`                        | 1 day (redis)  | `tower_sessions_redis_store`    |
+| [Upload request](#upload-request)                  | **String(timestamp)** | `upload_request:{user_id}:{object_key}` | 1 hour (cron)  | `crate::domain::upload_request` |
+| [User candidate reg](#user-candidate-registration) | **HASH**              | `user_candidate:{email}`                | 30 min (redis) | `crate::domain::user_candidate` |
+| [Username status req limit](#request-limit)        | **String(int)**       | `username_status_req:{ip_addr}`         | No             |                                 |
+| [Payment](#payment)                                | **String(json)**      | `payment:{payment_id}`                  | No             |                                 |
+|                                                    |                       |                                         | No             |                                 |
 
 ### Cookie
 

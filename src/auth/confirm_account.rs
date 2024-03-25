@@ -2,14 +2,9 @@ use anyhow::Context;
 use axum::extract::Query;
 use axum::extract::State;
 use deadpool_postgres::Transaction;
-use fred::clients::RedisPool;
-use fred::interfaces::HashesInterface;
-use fred::interfaces::KeysInterface;
-use fred::interfaces::RedisResult;
 use http::StatusCode;
 use identicon_rs::Identicon;
 use serde::Deserialize;
-use std::collections::HashMap;
 use std::io::Cursor;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
@@ -17,7 +12,7 @@ use std::io::Cursor;
 use super::AuthError;
 use crate::cornucopia::queries::user_auth_queries;
 use crate::domain::object_key::ObjectKey;
-use crate::domain::user_candidate::UserCandidate;
+use crate::domain::user_candidate::get_user_candidate_data;
 use crate::startup::AppState;
 use crate::telemetry::spawn_blocking_with_tracing;
 
@@ -193,17 +188,6 @@ pub async fn confirm(
 }
 
 // ───── Functions ────────────────────────────────────────────────────────── //
-
-#[tracing::instrument(name = "Get user candidate data from redis", skip_all)]
-async fn get_user_candidate_data(
-    con: &RedisPool,
-    user_email: &str,
-) -> RedisResult<UserCandidate> {
-    let key = UserCandidate::key_from_email(user_email);
-    let result: HashMap<String, String> = con.hgetall(&key).await?;
-    con.del(&key).await?;
-    UserCandidate::try_from(result)
-}
 
 #[tracing::instrument(name = "Generate identicon")]
 fn generate_identicon_png(from_str: &str) -> Result<Vec<u8>, anyhow::Error> {

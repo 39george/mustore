@@ -42,10 +42,10 @@ impl Payment {
             beneficiaries,
         }
     }
-    fn redis_body(&self) -> serde_json::Result<String> {
+    pub fn redis_body(&self) -> serde_json::Result<String> {
         serde_json::to_string(&self)
     }
-    fn redis_key(id: Uuid) -> String {
+    pub fn redis_key(id: Uuid) -> String {
         format!("payment:{}", id)
     }
 }

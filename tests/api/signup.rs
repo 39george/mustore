@@ -18,7 +18,7 @@ async fn signup_with_correct_data_creates_a_new_candidate() {
     let response = test_user.post_signup(&app.address).await.unwrap();
     assert!(response.status().is_success());
 
-    let key = format!("user_candidate:{}", test_user.email);
+    let key = UserCandidate::key_from_email(&test_user.email);
     let candidate: HashMap<String, String> =
         app.redis_client.hgetall(&key).await.unwrap();
 
@@ -82,12 +82,7 @@ async fn wrong_confirmation_link_should_redirect_to_specific_route() {
         .unwrap();
     assert_eq!(response.status().as_u16(), 303);
     assert_eq!(
-        response
-            .headers()
-            .get("location")
-            .unwrap()
-            .to_str()
-            .unwrap(),
+        response.headers().get("location").unwrap().to_str().unwrap(),
         "react-router/accountconfirmationfailed"
     );
 }
