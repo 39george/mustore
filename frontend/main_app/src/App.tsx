@@ -23,6 +23,7 @@ import { find_user_role_index, translate_user_role } from "./helpers/helpers";
 import AccountProducts from "./PersonalAccount/Pages/AccountProducts";
 import UploadNewProduct from "./PersonalAccount/Components/AccountProducts/UploadNewProduct";
 import LoadingScreen from "./Components/LoadingScreen";
+import UploadProductTempl from "./PersonalAccount/Components/AccountProducts/UploadProductTempl";
 
 function App() {
   const { check_user_permissions } = useCheckPermissionsApi();
@@ -112,7 +113,33 @@ function App() {
             />
             <Route
               path="upload_song"
-              element={<div>upload song</div>}
+              element={<UploadProductTempl kind="song" />}
+            >
+              <Route
+                path="step_1"
+                element={<div>step 1</div>}
+              />
+              <Route
+                index
+                element={
+                  <Navigate
+                    to="step_1"
+                    replace
+                  />
+                }
+              />
+            </Route>
+            <Route
+              path="upload_beat"
+              element={<div>upload beat</div>}
+            />
+            <Route
+              path="upload_text"
+              element={<div>upload text</div>}
+            />
+            <Route
+              path="upload_cover"
+              element={<div>upload cover</div>}
             />
           </Route>
           <Route
