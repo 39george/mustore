@@ -1,11 +1,13 @@
 //! This is a module with common initialization functions.
 
 use std::collections::HashMap;
+use std::path::Path;
 
 use deadpool_postgres::Client;
 use fake::Fake;
 use fred::clients::RedisClient;
 use mustore::service_providers::object_storage::presigned_post_form::PresignedPostData;
+use mustore::service_providers::object_storage::ObjectStorage;
 use mustore::startup::get_redis_connection_pool;
 use reqwest::multipart::Form;
 use reqwest::multipart::Part;
@@ -78,11 +80,7 @@ impl TestUser {
             }
             _ => unreachable!(),
         }
-        client
-            .post(format!("{}/api/signup", host))
-            .form(&form)
-            .send()
-            .await
+        client.post(format!("{}/api/signup", host)).form(&form).send().await
     }
 }
 
@@ -131,7 +129,7 @@ impl TestApp {
 
         let pg_config_with_root_cred = config.database.clone();
         let (pg_config, pg_pool, pg_username) =
-            prepare_postgres(config.database.clone()).await;
+            prepare_postgres_with_rand_user(config.database.clone()).await;
         config.database = pg_config;
 
         let application = Application::build(config)
@@ -275,15 +273,24 @@ impl Drop for TestApp {
         // Clean pg
         let db_config = self.pg_config_with_root_cred.clone();
         let db_username = self.pg_username.clone();
-        // Spawn a new thread, because internally sync postgres client uses
+        // NOTE: Spawn a new thread, because internally sync postgres client uses
         // tokio runtime, but we are already in tokio runtime here. To
         // spawn a new tokio runtime, we should do it inside new thread.
         let _ = std::thread::spawn(move || {
-            let mut client = get_sync_postgres_client(&db_config);
-            let create_role = format!("DROP SCHEMA {0} CASCADE;", db_username);
-            let create_schema = format!("DROP ROLE {0};", db_username);
-            client.simple_query(&create_role).unwrap();
-            client.simple_query(&create_schema).unwrap();
+            // Create the runtime
+            let rt = tokio::runtime::Runtime::new().unwrap();
+            // Execute the future, blocking the current thread until completion
+            rt.block_on(async {
+                let pg_pool = get_postgres_connection_pool(&db_config);
+                let client = pg_pool.get().await.unwrap();
+                let create_role =
+                    format!("DROP SCHEMA {0} CASCADE;", db_username);
+                let create_schema = format!("DROP ROLE {0};", db_username);
+                println!("Executing: {create_role}");
+                client.simple_query(&create_role).await.unwrap();
+                println!("Executing: {create_schema}");
+                client.simple_query(&create_schema).await.unwrap();
+            });
         })
         .join();
     }
@@ -333,7 +340,7 @@ fn init_tracing() {
     }
 }
 
-async fn prepare_postgres(
+async fn prepare_postgres_with_rand_user(
     mut pg_config: DatabaseSettings,
 ) -> (DatabaseSettings, Client, String) {
     let pool = get_postgres_connection_pool(&pg_config);
@@ -353,24 +360,6 @@ async fn prepare_postgres(
     (pg_config, client, pg_username)
 }
 
-// Function to create a pool for database with index 100
-// fn create_pool() -> deadpool_redis::Pool {
-//     let mut cfg = deadpool_redis::Config::default();
-//     cfg.url = Some(format!("redis://127.0.0.1:6379/100")); // Database index 100
-//     cfg.pool = Some(deadpool::managed::PoolConfig::new(5));
-//     cfg.create_pool(Some(deadpool::Runtime::Tokio1))
-//         .expect("Pool creation failed")
-// }
-
-// // Function to clear the entire contents of the selected database (in this case database 100).
-// async fn clear_database(pool: &RedisPool) -> String {
-//     let mut conn = pool.get().await.unwrap();
-//     redis::cmd("FLUSHDB")
-//         .query_async::<_, String>(&mut *conn)
-//         .await
-//         .unwrap()
-// }
-
 // ───── Helpers ──────────────────────────────────────────────────────────── //
 
 pub fn generate_username() -> String {
@@ -384,14 +373,4 @@ pub fn generate_username() -> String {
         .take(5)
         .collect::<String>()
     )
-}
-
-pub fn get_sync_postgres_client(
-    configuration: &DatabaseSettings,
-) -> postgres::Client {
-    postgres::Client::connect(
-        configuration.connection_string().expose_secret(),
-        NoTls,
-    )
-    .unwrap()
 }

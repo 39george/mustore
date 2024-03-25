@@ -95,8 +95,6 @@ utoipa = { version = "4.2.0", features = ["axum_extras", "time", "decimal", "uui
 utoipa-swagger-ui = { version = "6.0.0", features = ["axum"] }
 
 [dev-dependencies]
-# Sync version for testing purposes
-postgres = "0.19.7"
 wiremock = "0.6.0"
 fake = "2.9.2"
 

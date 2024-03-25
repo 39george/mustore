@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+redis_pass=$(cat "secrets/redis_password.txt")
+
+aws s3 rm --recursive s3://mustore-test-data/
+docker exec myredis redis-cli -n 1 -a "$redis_pass" flushdb
