@@ -190,6 +190,7 @@ impl<'a> PresignedPostDataBuilder<'a> {
         map.insert("X-Amz-Signature".into(), policy_signature.into());
         map.insert("key".into(), self.object_key.into());
         map.insert("bucket".into(), self.bucket.to_owned());
+        // NOTE: Garage doesn't support S3 ACL access control mechanisms, uses its own system instead, built around a per-access-key-per-bucket logic
         // map.insert("acl".into(), "private".into());
         map.insert("policy".into(), policy.into());
         map.insert("X-Amz-Credential".into(), x_amz_credential.into());
@@ -224,6 +225,7 @@ impl<'a> PresignedPostDataBuilder<'a> {
                 {"X-Amz-Credential": x_amz_credential},
                 {"bucket": bucket},
                 {"key": object_key},
+                // NOTE: Garage doesn't support S3 ACL access control mechanisms, uses its own system instead, built around a per-access-key-per-bucket logic
                 // {"acl": "private"},
                 {"success_action_status": "200"},
                 {"Content-Disposition": content_disposition},
@@ -345,17 +347,18 @@ mod tests {
             presigned_post.fields.get("Content-Type").map(|t| t.as_str()),
             Some("image/png")
         );
-        assert_eq!(
-            presigned_post.fields.get("acl").map(|acl| acl.as_str()),
-            Some("private")
-        );
+        // NOTE: Garage doesn't support S3 ACL access control mechanisms, uses its own system instead, built around a per-access-key-per-bucket logic
+        // assert_eq!(
+        //     presigned_post.fields.get("acl").map(|acl| acl.as_str()),
+        //     Some("private")
+        // );
         assert_eq!(
             presigned_post.fields.get("policy").map(|p| p.as_str()),
-            Some("eyJjb25kaXRpb25zIjpbeyJYLUFtei1BbGdvcml0aG0iOiJBV1M0LUhNQUMtU0hBMjU2In0seyJYLUFtei1EYXRlIjoiMTk3MDAxMDFUMDAwMDAwWiJ9LHsiWC1BbXotQ3JlZGVudGlhbCI6InRlc3Rfa2V5X2lkLzE5NzAwMTAxL3J1LWNlbnRyYWwxL3MzL2F3czRfcmVxdWVzdCJ9LHsiYnVja2V0IjoidGVzdC1kYXRhIn0seyJrZXkiOiJpbWFnZS5wbmcifSx7ImFjbCI6InByaXZhdGUifSx7InN1Y2Nlc3NfYWN0aW9uX3N0YXR1cyI6IjIwMCJ9LHsiQ29udGVudC1EaXNwb3NpdGlvbiI6ImF0dGFjaG1lbnQ7IGZpbGVuYW1lPVwiaW1hZ2UucG5nXCIifSxbInN0YXJ0cy13aXRoIiwiJENvbnRlbnQtVHlwZSIsImltYWdlIl0sWyJjb250ZW50LWxlbmd0aC1yYW5nZSIsMCw1MDAwMDAwMDAwMDAwXV0sImV4cGlyYXRpb24iOiIxOTcwLTAxLTAxVDAwOjEwOjAwWiJ9")
+            Some("eyJjb25kaXRpb25zIjpbeyJYLUFtei1BbGdvcml0aG0iOiJBV1M0LUhNQUMtU0hBMjU2In0seyJYLUFtei1EYXRlIjoiMTk3MDAxMDFUMDAwMDAwWiJ9LHsiWC1BbXotQ3JlZGVudGlhbCI6InRlc3Rfa2V5X2lkLzE5NzAwMTAxL3J1LWNlbnRyYWwxL3MzL2F3czRfcmVxdWVzdCJ9LHsiYnVja2V0IjoidGVzdC1kYXRhIn0seyJrZXkiOiJpbWFnZS5wbmcifSx7InN1Y2Nlc3NfYWN0aW9uX3N0YXR1cyI6IjIwMCJ9LHsiQ29udGVudC1EaXNwb3NpdGlvbiI6ImF0dGFjaG1lbnQ7IGZpbGVuYW1lPVwiaW1hZ2UucG5nXCIifSxbInN0YXJ0cy13aXRoIiwiJENvbnRlbnQtVHlwZSIsImltYWdlIl0sWyJjb250ZW50LWxlbmd0aC1yYW5nZSIsMCw1MDAwMDAwMDAwMDAwXV0sImV4cGlyYXRpb24iOiIxOTcwLTAxLTAxVDAwOjEwOjAwWiJ9")
         );
         assert_eq!(
             presigned_post.fields.get("X-Amz-Signature").map(|s| s.as_str()),
-            Some("11cc2bce12bf97a53006f9f3d58891f5c1e002cd67f8579523c9427f1cbc1a46")
+            Some("731a9fb7beb797517bc6336c4a956e06daeb6dc6c1ddee3e64909e01212b0dba")
         );
         assert_eq!(
             presigned_post
