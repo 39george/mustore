@@ -24,13 +24,16 @@
   }
 }
 
+.products {
+  background-color: $account_bg;
+}
+
 .products_section {
   width: 100%;
   max-width: 72.75rem;
 
   margin: 0 auto;
-  margin-bottom: 2rem;
-  padding: 0 1rem;
+  padding: 0 1rem 2rem;
 
   overflow-y: hidden;
 }
@@ -39,13 +42,16 @@
   display: flex;
   align-items: first baseline;
   margin-top: 3.75rem;
+
+  // color: #3a3a3a;
+  color: #5f5c6d;
 }
 
 .h1 {
   padding-bottom: 3.75rem;
 
   font-size: 2rem;
-  font-weight: 600;
+  font-weight: 400;
   letter-spacing: 0.2rem;
 }
 
@@ -64,9 +70,12 @@
   font-weight: 600;
   letter-spacing: 0.2rem;
 
+  color: $accent_purple;
+
   cursor: pointer;
 
   .underline {
+    display: none;
     position: absolute;
     left: -0.5rem;
     bottom: -0.3rem;

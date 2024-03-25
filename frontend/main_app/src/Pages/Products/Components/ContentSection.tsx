@@ -188,75 +188,77 @@ const ContentSection: FC<ContentSectionProps> = ({ section_type }) => {
 
   return (
     <>
-      <section className={styles.products_section}>
-        <div className={styles.header}>
-          <h1 className={styles.h1}>Библиотека</h1>
-          <div
-            className={styles.name_and_links}
-            onMouseLeave={handle_mouse_leave}
-          >
+      <section className={styles.products}>
+        <div className={styles.products_section}>
+          <div className={styles.header}>
+            <h1 className={styles.h1}>Библиотека</h1>
             <div
-              className={styles.section_name}
-              ref={section_name_ref}
-              onClick={handle_section_name_click}
-              onMouseEnter={handle_mouse_enter}
+              className={styles.name_and_links}
+              onMouseLeave={handle_mouse_leave}
             >
-              {section_props.section_name}
-              <img
-                src={section_props.underline}
-                alt="underline"
-                className={styles.underline}
-              />
-            </div>
-            <div
-              className={styles.pop_up_menu}
-              style={pop_up_style}
-            >
-              <NavLink
-                to={pop_up_items[1].link}
-                className={links_class_names.link_1}
+              <div
+                className={styles.section_name}
+                ref={section_name_ref}
+                onClick={handle_section_name_click}
+                onMouseEnter={handle_mouse_enter}
               >
-                {pop_up_items[1].name}
-              </NavLink>
-              <NavLink
-                to={pop_up_items[2].link}
-                className={links_class_names.link_2}
+                {section_props.section_name}
+                <img
+                  src={section_props.underline}
+                  alt="underline"
+                  className={styles.underline}
+                />
+              </div>
+              <div
+                className={styles.pop_up_menu}
+                style={pop_up_style}
               >
-                {pop_up_items[2].name}
-              </NavLink>
-              <NavLink
-                to={pop_up_items[3].link}
-                className={links_class_names.link_3}
-              >
-                {pop_up_items[3].name}
-              </NavLink>
+                <NavLink
+                  to={pop_up_items[1].link}
+                  className={links_class_names.link_1}
+                >
+                  {pop_up_items[1].name}
+                </NavLink>
+                <NavLink
+                  to={pop_up_items[2].link}
+                  className={links_class_names.link_2}
+                >
+                  {pop_up_items[2].name}
+                </NavLink>
+                <NavLink
+                  to={pop_up_items[3].link}
+                  className={links_class_names.link_3}
+                >
+                  {pop_up_items[3].name}
+                </NavLink>
+              </div>
             </div>
           </div>
+          {section_type !== "songs" ? (
+            <div className={styles.template}>
+              Секция {section_props.section_name}
+            </div>
+          ) : (
+            <div className={styles.content}>
+              <div className={styles.recommendations_block}>
+                <Carousel
+                  carousel_type="recommended"
+                  carousel_items={carousel_items}
+                />
+              </div>
+              <div className={styles.new_block}>
+                <Carousel
+                  carousel_type="new"
+                  carousel_items={carousel_items}
+                />
+              </div>
+              <div className={styles.main_content}>
+                <h2 className={styles.h2}>Все песни</h2>
+                <MainContentProducts />
+              </div>
+            </div>
+          )}
         </div>
-        {section_type !== "songs" ? (
-          <div className={styles.template}>
-            Секция {section_props.section_name}
-          </div>
-        ) : (
-          <div className={styles.content}>
-            <div className={styles.recommendations_block}>
-              <Carousel
-                carousel_type="recommended"
-                carousel_items={carousel_items}
-              />
-            </div>
-            <div className={styles.new_block}>
-              <Carousel
-                carousel_type="new"
-                carousel_items={carousel_items}
-              />
-            </div>
-            <div className={styles.main_content}>
-              <h2 className={styles.h2}>Все песни</h2>
-              <MainContentProducts />
-            </div>
-          </div>
-        )}
       </section>
     </>
   );
