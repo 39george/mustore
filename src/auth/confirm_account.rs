@@ -109,10 +109,7 @@ pub async fn confirm(
     {
         Ok(id) => id,
         Err(e) => {
-            app_state
-                .object_storage
-                .delete_object_by_key(&avatar_key)
-                .await?;
+            app_state.object_storage.delete_object_by_key(&avatar_key).await?;
             transaction
                 .rollback()
                 .await
@@ -157,10 +154,7 @@ pub async fn confirm(
             }
         }
     {
-        app_state
-            .object_storage
-            .delete_object_by_key(&avatar_key)
-            .await?;
+        app_state.object_storage.delete_object_by_key(&avatar_key).await?;
         transaction
             .rollback()
             .await
@@ -175,10 +169,7 @@ pub async fn confirm(
         .context("Failed to insert a new user to the pg")
         .map_err(AuthError::AccountConfirmationFailed)
     {
-        app_state
-            .object_storage
-            .delete_object_by_key(&avatar_key)
-            .await?;
+        app_state.object_storage.delete_object_by_key(&avatar_key).await?;
         transaction
             .rollback()
             .await
@@ -193,10 +184,7 @@ pub async fn confirm(
         .context("Failed to commit a pg transaction")
         .map_err(AuthError::AccountConfirmationFailed)
     {
-        app_state
-            .object_storage
-            .delete_object_by_key(&avatar_key)
-            .await?;
+        app_state.object_storage.delete_object_by_key(&avatar_key).await?;
 
         return Err(e);
     }
@@ -211,7 +199,7 @@ async fn get_user_candidate_data(
     con: &RedisPool,
     user_email: &str,
 ) -> RedisResult<UserCandidate> {
-    let key = format!("user_candidate:{}", user_email);
+    let key = UserCandidate::key_from_email(user_email);
     let result: HashMap<String, String> = con.hgetall(&key).await?;
     con.del(&key).await?;
     UserCandidate::try_from(result)

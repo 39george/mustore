@@ -171,9 +171,7 @@ impl<'a> PresignedPostDataBuilder<'a> {
             &x_amz_credential,
             &iso8601_date,
             self.min_obj_length.unwrap_or(0),
-            self.max_obj_length
-                .unwrap_or(MAX_DEFAULT_SIZE_MB)
-                .mb_to_bytes(),
+            self.max_obj_length.unwrap_or(MAX_DEFAULT_SIZE_MB).mb_to_bytes(),
         )?;
 
         let signing_key = get_signing_key(
@@ -242,18 +240,16 @@ impl<'a> PresignedPostDataBuilder<'a> {
 
 fn get_date_yyyymmdd(date: OffsetDateTime) -> Result<String, Error> {
     let yyyymmdd_format = format_description!("[year][month][day]");
-    let yyyymmdd_date = date
-        .format(&yyyymmdd_format)
-        .map_err(Error::DateParsingError)?;
+    let yyyymmdd_date =
+        date.format(&yyyymmdd_format).map_err(Error::DateParsingError)?;
     Ok(yyyymmdd_date)
 }
 
 fn get_date_iso8601(date: OffsetDateTime) -> Result<String, Error> {
     let iso8601_format =
         format_description!("[year][month][day]T[hour][minute][second]Z");
-    let iso8601_date = date
-        .format(&iso8601_format)
-        .map_err(Error::DateParsingError)?;
+    let iso8601_date =
+        date.format(&iso8601_format).map_err(Error::DateParsingError)?;
     Ok(iso8601_date)
 }
 
@@ -338,10 +334,7 @@ mod tests {
             Some("200")
         );
         assert_eq!(
-            presigned_post
-                .fields
-                .get("X-Amz-Date")
-                .map(|date| date.as_str()),
+            presigned_post.fields.get("X-Amz-Date").map(|date| date.as_str()),
             Some("19700101T000000Z")
         );
         assert_eq!(
@@ -349,10 +342,7 @@ mod tests {
             Some("image.png")
         );
         assert_eq!(
-            presigned_post
-                .fields
-                .get("Content-Type")
-                .map(|t| t.as_str()),
+            presigned_post.fields.get("Content-Type").map(|t| t.as_str()),
             Some("image/png")
         );
         assert_eq!(

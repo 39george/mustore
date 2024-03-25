@@ -117,10 +117,7 @@ pub async fn signup(
     .context("Failed to join thread")
     .map_err(AuthError::InternalError)??;
 
-    app_state
-        .captcha_verifier
-        .validate(recaptcha_token, addr.ip())
-        .await?;
+    app_state.captcha_verifier.validate(recaptcha_token, addr.ip()).await?;
 
     let pg_client = app_state
         .pg_pool
@@ -163,14 +160,10 @@ pub async fn signup(
         admin_token,
     );
 
-    store_user_candidate_data(
-        &app_state.redis_pool,
-        email.as_ref(),
-        user_candidate,
-    )
-    .await
-    .context("Failed to store user candidate data in redis")
-    .map_err(AuthError::InternalError)?;
+    store_user_candidate_data(&app_state.redis_pool, user_candidate)
+        .await
+        .context("Failed to store user candidate data in redis")
+        .map_err(AuthError::InternalError)?;
 
     send_confirmation_email(
         &app_state.email_client,

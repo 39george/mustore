@@ -97,16 +97,13 @@ impl FromStr for ObjectKey {
             parts.get(0).ok_or(ObjectKeyError::PartNotFoundInStrError)?;
 
         let file_parts: Vec<&str> = parts[1].split(':').collect();
-        let owner = file_parts
-            .get(0)
-            .ok_or(ObjectKeyError::PartNotFoundInStrError)?;
-        let uuid_str = file_parts
-            .get(1)
-            .ok_or(ObjectKeyError::PartNotFoundInStrError)?;
+        let owner =
+            file_parts.get(0).ok_or(ObjectKeyError::PartNotFoundInStrError)?;
+        let uuid_str =
+            file_parts.get(1).ok_or(ObjectKeyError::PartNotFoundInStrError)?;
         let uuid = uuid::Uuid::from_str(uuid_str)?;
-        let filename = file_parts
-            .get(2)
-            .ok_or(ObjectKeyError::PartNotFoundInStrError)?;
+        let filename =
+            file_parts.get(2).ok_or(ObjectKeyError::PartNotFoundInStrError)?;
         Ok(ObjectKey {
             directory: directory.to_string(),
             owner: owner.to_string(),
@@ -140,18 +137,14 @@ impl<'de> Visitor<'de> for ObjectKeyVisitor {
     where
         E: serde::de::Error,
     {
-        v.parse::<ObjectKey>()
-            .map_err(|e| serde::de::Error::custom(e))
+        v.parse::<ObjectKey>().map_err(|e| serde::de::Error::custom(e))
     }
 
     fn expecting(
         &self,
         formatter: &mut std::fmt::Formatter,
     ) -> std::fmt::Result {
-        write!(
-            formatter,
-            "a string containing folder, owner, uuid, filename"
-        )
+        write!(formatter, "a string containing folder, owner, uuid, filename")
     }
 }
 

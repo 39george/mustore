@@ -44,9 +44,10 @@ pub struct ObjectStorage {
 
 impl ObjectStorage {
     pub async fn new(settings: ObjectStorageSettings) -> Self {
+        // I don't know why without this it doesn't work
         let c = reqwest::Client::new();
-        let response = c.get(&settings.endpoint_url).send().await;
-        dbg!(response);
+        let _response = c.get(&settings.endpoint_url).send().await;
+
         // Create Credentials object directly.
         let credentials = Credentials::new(
             settings.access_key_id.expose_secret(),
@@ -65,22 +66,7 @@ impl ObjectStorage {
             .build();
         let client = Client::from_conf(config);
 
-        // let config = aws_config::defaults(BehaviorVersion::latest())
-        //     .region(Region::new(settings.region.clone()))
-        //     .credentials_provider(credentials)
-        //     .endpoint_url(settings.endpoint_url.clone())
-        //     .load()
-        //     .await;
-
-        // // Construct a client for Yandex Object Storage using the custom endpoint.
-        // let client = Client::new(&config);
-
-        match client
-            .head_bucket()
-            .bucket(&settings.bucket_name)
-            .send()
-            .await
-        {
+        match client.head_bucket().bucket(&settings.bucket_name).send().await {
             Ok(_) => {
                 println!("Bucket '{}' already exists!", settings.bucket_name)
             }
@@ -93,7 +79,10 @@ impl ObjectStorage {
                     .send()
                     .await
                 {
-                    Ok(_) => println!("Bucket '{}' created successfully.", settings.bucket_name),
+                    Ok(_) => println!(
+                        "Bucket '{}' created successfully.",
+                        settings.bucket_name
+                    ),
                     Err(err) => panic!("Failed to create bucket: {}", err),
                 }
             }
@@ -133,7 +122,10 @@ impl ObjectStorage {
     }
 
     /// Moves a file to `received` folder from 'upload', returns a new key.
-    pub async fn receive(&self, key: &ObjectKey) -> Result<ObjectKey, ObjectStorageError> {
+    pub async fn receive(
+        &self,
+        key: &ObjectKey,
+    ) -> Result<ObjectKey, ObjectStorageError> {
         if key.directory() != ("upload") {
             return Err(ObjectStorageError::BadObjectKeyError(format!(
                 "Key starts not with 'upload/', cant receive it: {}",
@@ -227,7 +219,10 @@ impl ObjectStorage {
     }
 
     /// Deletes an object from the bucket specified by the object's URI.
-    pub async fn delete_object_by_key(&self, key: &ObjectKey) -> Result<(), ObjectStorageError> {
+    pub async fn delete_object_by_key(
+        &self,
+        key: &ObjectKey,
+    ) -> Result<(), ObjectStorageError> {
         self.client
             .delete_object()
             .bucket(&self.settings.bucket_name)
