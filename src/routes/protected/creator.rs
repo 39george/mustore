@@ -8,12 +8,14 @@ use axum::routing;
 use axum::Json;
 use axum::Router;
 use axum_login::permission_required;
+use banksim_api::register_card_token::RegisterCardToken;
+use banksim_api::register_card_token::RegisterCardTokenRequest;
 use fred::error::RedisError;
 use fred::interfaces::KeysInterface;
-use fred::prelude::RedisResult;
 use futures::future::try_join_all;
 use garde::Validate;
 use http::StatusCode;
+use reqwest::Url;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
@@ -42,6 +44,8 @@ pub enum CreatorResponseError {
     ResponseError(#[from] ResponseError),
     #[error("No upload info in cache")]
     NoUploadInfoInCacheError(#[from] RedisError),
+    #[error("Error with payment api client")]
+    PaymentClientError(#[from] airactions::ClientError),
 }
 
 impl_debug!(CreatorResponseError);
@@ -53,6 +57,10 @@ impl IntoResponse for CreatorResponseError {
             CreatorResponseError::NoUploadInfoInCacheError(_) => {
                 tracing::error!("{:?}", self);
                 StatusCode::BAD_REQUEST.into_response()
+            }
+            CreatorResponseError::PaymentClientError(_) => {
+                tracing::error!("{:?}", self);
+                StatusCode::INTERNAL_SERVER_ERROR.into_response()
             }
         }
     }
@@ -67,6 +75,7 @@ pub fn creator_router() -> Router<AppState> {
         .route("/submit_product", routing::post(submit_product))
         .route("/submit_service", routing::post(submit_service))
         .route("/create_offer", routing::post(create_offer))
+        .route("/connect_card", routing::post(connect_card))
         .route("/songs/:status", routing::get(songs))
         .layer(permission_required!(crate::auth::users::Backend, "creator"))
 }
@@ -124,6 +133,74 @@ async fn marks_avg(
         .map_err(ResponseError::UnexpectedError)?;
 
     Ok(Json(data))
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/protected/creator/connect_card",
+    responses(
+        (
+            status = 200,
+            body = creator_access::GetCreatorMarksAvg,
+            content_type = "application/json",
+            description = "Marks avg for creator",
+            example = json!(
+                  {
+                    "avg": 4.7,
+                    "count": 15,
+                  }
+            )
+        ),
+        (status = 403, description = "Forbidden"),
+        (status = 500, response = InternalErrorResponse)
+    ),
+    security(
+        ("api_key" = [])
+    ),
+    tag = "protected.creators"
+)]
+#[tracing::instrument(name = "Initiate creator's card connection", skip_all)]
+#[axum::debug_handler]
+async fn connect_card(
+    auth_session: AuthSession,
+    State(app_state): State<AppState>,
+) -> Result<String, CreatorResponseError> {
+    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
+        anyhow::anyhow!("No such user in AuthSession!"),
+    ))?;
+
+    let base: Url = app_state.settings.app_base_url.parse().unwrap();
+    let success_url =
+        base.join("/notification_center/card_connect_success").unwrap();
+    let fail_url =
+        base.join("/notification_center/card_connect_failed").unwrap();
+    let notification_url =
+        base.join("/notification_center/card_connect_notification").unwrap();
+    let cashbox_pass = &app_state.settings.payments.cashbox_password;
+    let req_id = uuid::Uuid::new_v4();
+    let request = RegisterCardTokenRequest::new(
+        notification_url,
+        success_url,
+        fail_url,
+        cashbox_pass,
+    );
+    let response =
+        app_state.payments_client.execute(RegisterCardToken, request).await?;
+
+    let result = match response.status {
+        banksim_api::OperationStatus::Success => {
+            response.registration_url.unwrap().to_string()
+        }
+        banksim_api::OperationStatus::Fail(e) => {
+            return Err(CreatorResponseError::ResponseError(
+                ResponseError::InternalError(anyhow::Error::msg(e)),
+            ));
+        }
+        banksim_api::OperationStatus::Cancel => todo!(),
+    };
+
+    // let redis_client = app_state.redis_pool.next();
+    Ok(result)
 }
 
 /// Submit a new product.

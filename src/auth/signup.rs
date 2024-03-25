@@ -169,7 +169,7 @@ pub async fn signup(
         &app_state.email_client,
         &username,
         &email,
-        &app_state.base_url,
+        &app_state.settings.app_base_url,
         &validation_token,
     )
     .await
@@ -183,10 +183,9 @@ pub async fn signup(
 #[tracing::instrument(name = "Store candidate data in the redis", skip_all)]
 async fn store_user_candidate_data(
     con: &RedisPool,
-    user_email: &str,
     user_candidate: UserCandidate,
 ) -> RedisResult<()> {
-    let key = format!("user_candidate:{}", user_email);
+    let key = user_candidate.redis_key();
     let hash_map: HashMap<String, String> = user_candidate.into();
     con.hset(&key, &hash_map.try_into().unwrap()).await?;
     con.expire(&key, 60 * 30).await?; // 30 minutes

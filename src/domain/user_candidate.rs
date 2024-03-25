@@ -35,6 +35,12 @@ impl UserCandidate {
             admin_token,
         }
     }
+    pub fn redis_key(&self) -> String {
+        format!("user_candidate:{}", self.email)
+    }
+    pub fn key_from_email(email: &str) -> String {
+        format!("user_candidate:{}", email)
+    }
 }
 
 impl TryFrom<HashMap<String, String>> for UserCandidate {

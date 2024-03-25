@@ -1,4 +1,5 @@
 use std::net::SocketAddr;
+use std::sync::Arc;
 
 use axum::extract::connect_info::IntoMakeServiceWithConnectInfo;
 use axum::extract::ConnectInfo;
@@ -22,7 +23,6 @@ use tokio::net::TcpListener;
 use tokio_postgres::NoTls;
 use tower_http::trace::TraceLayer;
 use utoipa::OpenApi;
-
 use utoipa_swagger_ui::SwaggerUi;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
@@ -36,6 +36,7 @@ use crate::email_client::EmailClient;
 use crate::email_client::EmailDeliveryService;
 use crate::routes::development;
 use crate::routes::health_check::health_check;
+use crate::routes::notification_center::notification_center_router;
 use crate::routes::open::open_router;
 use crate::routes::protected::protected_router;
 use crate::service_providers::captcha_verifier::CaptchaVerifier;
@@ -71,13 +72,14 @@ pub struct Application {
 /// at the launch stage.
 #[derive(Clone, Debug)]
 pub struct AppState {
-    pub base_url: String,
     pub pg_pool: Pool,
     pub redis_pool: RedisPool,
     pub object_storage: ObjectStorage,
     pub email_client: EmailClient,
     pub argon2_obj: argon2::Argon2<'static>,
     pub captcha_verifier: CaptchaVerifier,
+    pub payments_client: airactions::Client,
+    pub settings: Arc<Settings>,
 }
 
 impl Application {
@@ -89,10 +91,8 @@ impl Application {
         configuration: Settings,
     ) -> Result<Application, anyhow::Error> {
         let pg_pool = get_postgres_connection_pool(&configuration.database);
-        let pg_client = pg_pool
-            .get()
-            .await
-            .expect("Failed to get pg client for scheduler");
+        let pg_client =
+            pg_pool.get().await.expect("Failed to get pg client for scheduler");
         let redis_pool =
             get_redis_connection_pool(&configuration.redis).await?;
         let redis_pool_tower_sessions =
@@ -103,16 +103,20 @@ impl Application {
         fred::interfaces::ClientLike::wait_for_connect(&redis_client).await?;
 
         let object_storage =
-            ObjectStorage::new(configuration.object_storage).await;
+            ObjectStorage::new(configuration.object_storage.clone()).await;
         let object_storage2 = object_storage.clone();
         let email_client = get_email_client(
             &configuration.email_client,
-            configuration.email_delivery_service,
+            configuration.email_delivery_service.clone(),
         )?;
         let captcha_verifier = CaptchaVerifier::new(
             configuration.recaptcha.endpoint_url.parse().unwrap(),
-            configuration.recaptcha.secret,
+            configuration.recaptcha.secret.clone(),
         );
+        let payments_client = airactions::Client::new(
+            configuration.payments.merchant_api_endpoint.clone(),
+        )
+        .unwrap();
         db_migration::run_migration(&pg_pool).await;
 
         let address =
@@ -122,7 +126,6 @@ impl Application {
         let port = listener.local_addr()?.port();
 
         let server = Self::build_server(
-            &configuration.app_base_url,
             listener,
             pg_pool,
             redis_pool,
@@ -130,6 +133,8 @@ impl Application {
             object_storage,
             email_client,
             captcha_verifier,
+            payments_client,
+            Arc::new(configuration),
         );
 
         tokio::spawn(async {
@@ -149,15 +154,12 @@ impl Application {
 
     /// This function only returns when the application is stopped.
     pub async fn run_until_stopped(self) -> Result<(), std::io::Error> {
-        self.server
-            .with_graceful_shutdown(shutdown_signal())
-            .await?;
+        self.server.with_graceful_shutdown(shutdown_signal()).await?;
         Ok(())
     }
 
     /// Configure `Server`.
     fn build_server(
-        base_url: &str,
         listener: TcpListener,
         pg_pool: Pool,
         redis_pool: RedisPool,
@@ -165,6 +167,8 @@ impl Application {
         object_storage: ObjectStorage,
         email_client: EmailClient,
         captcha_verifier: CaptchaVerifier,
+        payments_client: airactions::Client,
+        settings: Arc<Settings>,
     ) -> Server {
         let argon2_obj = argon2::Argon2::new(
             argon2::Algorithm::Argon2id,
@@ -180,9 +184,10 @@ impl Application {
             redis_pool,
             object_storage,
             email_client,
-            base_url: base_url.to_string(),
             argon2_obj,
             captcha_verifier,
+            payments_client,
+            settings,
         };
 
         // Set 'secure' attribute for cookies
@@ -201,7 +206,7 @@ impl Application {
         let session_store = tower_sessions_redis_store::RedisStore::new(
             redis_pool_tower_sessions,
         );
-        let mut session_layer =
+        let session_layer =
             axum_login::tower_sessions::SessionManagerLayer::new(session_store)
                 .with_secure(with_secure)
                 .with_expiry(axum_login::tower_sessions::Expiry::OnInactivity(
@@ -223,6 +228,7 @@ impl Application {
                 "/api/confirm_user_account",
                 routing::get(auth::confirm_account::confirm),
             )
+            .nest("/notification_center", notification_center_router())
             .with_state(app_state.clone())
             .merge(auth::login::login_router(app_state.clone()))
             .layer(crate::middleware::map_response::BadRequestIntoJsonLayer) // 3
@@ -355,15 +361,10 @@ async fn run_scheduler(
     let redis_client = std::sync::Arc::new(redis_client);
     let object_storage = std::sync::Arc::new(object_storage);
     sched
-        .add(tasks::update_available_songs_materialized_view_task(
-            pg_client,
-        )?)
+        .add(tasks::update_available_songs_materialized_view_task(pg_client)?)
         .await?;
     sched
-        .add(tasks::check_current_user_uploads(
-            object_storage,
-            redis_client,
-        )?)
+        .add(tasks::check_current_user_uploads(object_storage, redis_client)?)
         .await?;
 
     if let Err(e) = sched.start().await {

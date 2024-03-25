@@ -32,3 +32,8 @@ LEFT JOIN lyrics ON products.id = lyrics.products_id
 LEFT JOIN covers ON products.id = covers.products_id
 JOIN objects ON products.id = objects.cover_products_id
 JOIN users author ON products.author_id = author.id;
+
+-- INSERTING CONTENT --
+
+--! accept_offer
+INSERT INTO

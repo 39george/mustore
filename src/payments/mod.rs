@@ -1,3 +1,7 @@
+mod card_token;
+mod kopeck;
+mod payment;
+
 type Offer = i32;
 type Balance = i32;
 type Error = i32;

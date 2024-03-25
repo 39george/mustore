@@ -19,4 +19,6 @@ object_storage:
   bucket_name: "mustore-data"
 recaptcha:
   endpoint_url: "http://ghashytest.com"
+payments:
+  merchant_api_endpoint: "http://localhost:15100"
 

@@ -13,6 +13,7 @@ use crate::service_providers::object_storage::ObjectStorageError;
 
 pub mod development;
 pub mod health_check;
+pub mod notification_center;
 pub mod open;
 pub mod protected;
 

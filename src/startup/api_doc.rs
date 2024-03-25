@@ -15,8 +15,12 @@ use crate::{
     domain::responses::user_access::DialogId,
 };
 use crate::{domain::general_types::ProductStatus, routes::protected};
-use crate::{domain::requests::user_access::SendMessageRequest, routes::development};
-use crate::{domain::responses::user_access::ConversationDataResponse, routes::open};
+use crate::{
+    domain::requests::user_access::SendMessageRequest, routes::development,
+};
+use crate::{
+    domain::responses::user_access::ConversationDataResponse, routes::open,
+};
 
 // ───── ErrorResponses ───────────────────────────────────────────────────── //
 
@@ -24,6 +28,7 @@ use crate::{domain::responses::user_access::ConversationDataResponse, routes::op
 #[response(description = "Something happened on the server")]
 pub struct InternalErrorResponse;
 
+#[allow(dead_code)]
 #[derive(ToResponse)]
 #[response(
     description = "Request was formed erroneously",
@@ -39,6 +44,7 @@ pub struct BadRequestResponse(String);
 #[response(description = "Not acceptable error")]
 pub struct NotAcceptableErrorResponse;
 
+#[allow(dead_code)]
 #[derive(ToResponse)]
 #[response(
     description = "Unauthorized error",
@@ -114,6 +120,7 @@ pub struct GetRecommendedSongsResponse {
     pub is_user_liked: Option<bool>,
 }
 
+#[allow(dead_code)]
 #[derive(ToSchema, ToResponse)]
 #[response(
     description = "If value exists",
@@ -200,14 +207,17 @@ pub struct GetCreatorSongs {
 
 // ───── TypeWrappers ─────────────────────────────────────────────────────── //
 
+#[allow(dead_code)]
 #[derive(ToSchema)]
 #[schema(as = Secret)]
 pub struct Password(String);
 
+#[allow(dead_code)]
 #[derive(ToSchema)]
 #[schema(as = mediatype::MediaTypeBuf)]
 pub struct MediaType(String);
 
+#[allow(dead_code)]
 #[derive(ToSchema)]
 #[schema(
     value_type = String,
@@ -267,6 +277,7 @@ impl Modify for ServerAddon {
         protected::creator::create_offer,
         protected::creator::marks_avg,
         protected::creator::songs,
+        protected::creator::connect_card,
         protected::consumer::status_bar_info,
         protected::user::user_permissions,
         protected::user::avatar_username,

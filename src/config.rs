@@ -21,11 +21,13 @@ pub struct Settings {
     pub email_delivery_service: EmailDeliveryService,
     pub object_storage: ObjectStorageSettings,
     pub recaptcha: RecaptchaSettings,
+    pub payments: PaymentsSettings,
 }
 
 impl Settings {
     pub fn load_configuration() -> Result<Settings, anyhow::Error> {
-        let config_file = std::env::var("APP_CONFIG_FILE").expect("APP_CONFIG_FILE var is unset!");
+        let config_file = std::env::var("APP_CONFIG_FILE")
+            .expect("APP_CONFIG_FILE var is unset!");
 
         config::Config::builder()
             .add_source(config::File::new(&config_file, FileFormat::Yaml))
@@ -106,7 +108,7 @@ impl EmailClientSettings {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct ObjectStorageSettings {
     pub endpoint_url: String,
     pub region: String,
@@ -124,7 +126,16 @@ pub struct RecaptchaSettings {
     pub secret: Secret<String>,
 }
 
-fn load_value_from_file<T: AsRef<Path>>(path: T) -> Result<String, std::io::Error> {
+#[derive(Debug, Deserialize)]
+pub struct PaymentsSettings {
+    pub merchant_api_endpoint: String,
+    #[serde(default = "cashbox_password")]
+    pub cashbox_password: Secret<String>,
+}
+
+fn load_value_from_file<T: AsRef<Path>>(
+    path: T,
+) -> Result<String, std::io::Error> {
     Ok(std::fs::read_to_string(path)?.trim().to_string())
 }
 
@@ -139,7 +150,8 @@ fn pg_db_name() -> String {
 fn pg_password() -> Secret<String> {
     Secret::new(
         load_value_from_file(
-            std::env::var("POSTGRES_PASSWORD_FILE").expect("POSTGRES_PASSWORD_FILE var is unset!"),
+            std::env::var("POSTGRES_PASSWORD_FILE")
+                .expect("POSTGRES_PASSWORD_FILE var is unset!"),
         )
         .expect("Can't read postgres password file!"),
     )
@@ -148,7 +160,8 @@ fn pg_password() -> Secret<String> {
 fn redis_password() -> Secret<String> {
     Secret::new(
         load_value_from_file(
-            std::env::var("REDIS_PASSWORD_FILE").expect("REDIS_PASSWORD_FILE var is unset!"),
+            std::env::var("REDIS_PASSWORD_FILE")
+                .expect("REDIS_PASSWORD_FILE var is unset!"),
         )
         .expect("Can't read redis password file!"),
     )
@@ -191,5 +204,15 @@ fn recaptcha_secret_key() -> Secret<String> {
                 .expect("RECAPTCHA_SECRET_KEY_FILE var is unset!"),
         )
         .expect("Can't read recaptcha secret file!"),
+    )
+}
+
+fn cashbox_password() -> Secret<String> {
+    Secret::new(
+        load_value_from_file(
+            std::env::var("CASHBOX_PASSWORD_FILE")
+                .expect("CASHBOX_PASSWORD_FILE var is unset!"),
+        )
+        .expect("Can't read cashbox password file!"),
     )
 }
