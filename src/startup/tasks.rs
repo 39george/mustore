@@ -12,6 +12,7 @@ use tokio_cron_scheduler::JobSchedulerError;
 use tracing::Instrument;
 
 use crate::cornucopia::queries::internal;
+use crate::domain::upload_request::remove_outdated_uploads_from_redis;
 use crate::service_providers::object_storage::ObjectStorage;
 use crate::startup::MOSKOW_TIME_OFFSET;
 
@@ -30,7 +31,7 @@ pub fn update_available_songs_materialized_view_task(
                     tracing::error!("Failed to refresh available songs materialized view: {e}");
                 }
             }
-            next_time_for_job(l, uuid).await;
+            next_time_for_job(l, uuid, "available songs materialized view update").await;
         }.instrument(span))
     })?;
     Ok(job)
@@ -47,56 +48,22 @@ pub fn check_current_user_uploads(
         let obj_storage = object_storage.clone();
         Box::pin(
             async move {
-                let pattern = "upload_request*";
-                let mut scan = client.scan(pattern, None, None);
-                while let Ok(Some(mut page)) = scan.try_next().await {
-                    if let Some(keys) = page.take_results() {
-                        for key in keys.into_iter() {
-                            let date: String = match client.get(&key).await {
-                                Ok(d) => d,
-                                Err(e) => {
-                                    tracing::error!("Failed to get timestamp from upload request: {e}");
-                                    continue;
-                                }
-                            };
-                            let created_at = OffsetDateTime::parse(
-                                &date,
-                                &crate::DEFAULT_TIME_FORMAT,
-                            )
-                            .unwrap();
-                            let now = OffsetDateTime::now_utc();
-                            if (now - created_at) > time::Duration::HOUR {
-                                match client.del::<u32, &fred::types::RedisKey>(&key).await {
-                                    Ok(count) => {
-                                        tracing::info!("{:?} is outdated, and deleted", key);
-                                        if count != 1 {
-                                            tracing::error!("Strange deletion result, should be 1, but got {count}");
-                                        }
-                                    }
-                                    Err(e) => { tracing::error!("Failed to delete key from redis: {e}"); continue; },
-                                }
-                                if let Some(key) = key.into_string() {
-                                    match key.parse() {
-                                        Ok(key) => {
-                                            match obj_storage.delete_object_by_key(&key).await {
-                                                Ok(()) => tracing::info!("Object with key {key} is successfully deleted from obj storage"),
-                                                Err(e) => tracing::warn!("Failed to delete object with key {key} from object storage: {e}"),
-                                            }
-                                        },
-                                        Err(e) => {
-                                            tracing::error!("Failed to parse {key} as objet key: {e}");
-                                        },
-                                    }
-                                }
+                let now = OffsetDateTime::now_utc();
+                let removed_keys = remove_outdated_uploads_from_redis(&client, |created_at| (now - created_at) > time::Duration::HOUR).await;
+                for key in removed_keys {
+                    match key.parse() {
+                        Ok(key) => {
+                            match obj_storage.delete_object_by_key(&key).await {
+                                Ok(()) => tracing::info!("Object with key {key} is successfully deleted from obj storage"),
+                                Err(e) => tracing::warn!("Failed to delete object with key {key} from object storage: {e}"),
                             }
-                        }
-                    }
-                    if let Err(e) = page.next() {
-                        tracing::error!("Failed to get next page: {e}");
-                        break;
+                        },
+                        Err(e) => {
+                            tracing::error!("Failed to parse {key} as objet key: {e}");
+                        },
                     }
                 }
-                next_time_for_job(l, uuid).await;
+                next_time_for_job(l, uuid, "users uploads check").await;
             }
             .instrument(span),
         )
@@ -104,21 +71,18 @@ pub fn check_current_user_uploads(
     Ok(job)
 }
 
-async fn next_time_for_job(mut l: JobScheduler, uuid: uuid::Uuid) {
+async fn next_time_for_job(mut l: JobScheduler, uuid: uuid::Uuid, job: &str) {
     match l.next_tick_for_job(uuid).await {
         Ok(Some(ts)) => {
             if let Ok(utc_target) =
                 time::OffsetDateTime::from_unix_timestamp(ts.timestamp())
             {
                 let time = utc_target.to_offset(MOSKOW_TIME_OFFSET.clone());
-                tracing::info!(
-                        "Next time for available songs materialized view update: {:?}",
-                        time
-                    );
+                tracing::info!("Next time for {job}: {:?}", time);
             }
         }
         _ => {
-            tracing::warn!("Could not get next tick for 1h job")
+            tracing::warn!("Could not get next tick for job")
         }
     }
 }

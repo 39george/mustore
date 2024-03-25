@@ -256,7 +256,7 @@ impl Application {
                     SwaggerUi::new("/swagger-ui")
                         .url("/api-docs/openapi.json", ApiDoc::openapi()),
                 );
-                app = app.nest("/api", development::user_router(app_state));
+                app = app.nest("/api", development::dev_router(app_state));
             }
         }
 

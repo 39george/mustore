@@ -17,6 +17,7 @@ use utoipa::IntoParams;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
+use crate::domain::upload_request::remove_outdated_uploads_from_redis;
 use crate::domain::upload_request::UploadRequest;
 use crate::service_providers::object_storage::presigned_post_form::PresignedPostData;
 use crate::startup::AppState;
@@ -43,7 +44,7 @@ pub struct DbNumber {
 
 // ───── Handlers ─────────────────────────────────────────────────────────── //
 
-pub fn user_router(state: AppState) -> Router {
+pub fn dev_router(state: AppState) -> Router {
     Router::new()
         .route(
             "/upload",
@@ -115,10 +116,8 @@ async fn upload_file(
     let response = client.post(url).multipart(multipart).send().await.unwrap();
     let status =
         StatusCode::from_u16(response.status().as_u16()).context("")?;
-    let text = response
-        .text()
-        .await
-        .context("Failed to get text from response")?;
+    let text =
+        response.text().await.context("Failed to get text from response")?;
     Ok((status, text))
 }
 
@@ -143,37 +142,20 @@ async fn cleanup(
     let client = app_state.redis_pool.next();
     client.select(number).await.context("Failed to select db")?;
     let obj_storage = app_state.object_storage;
-    let pattern = "upload_request*";
-    let mut scan = client.scan(pattern, None, None);
-    while let Ok(Some(mut page)) = scan.try_next().await {
-        if let Some(keys) = page.take_results() {
-            for key in keys.into_iter() {
-                match client.del::<u32, &fred::types::RedisKey>(&key).await {
-                    Ok(count) => {
-                        tracing::info!("{:?} is deleted", key);
-                        if count != 1 {
-                            tracing::error!("Strange deletion result, should be 1, but got {count}");
-                        }
-                    }
-                    Err(e) => {
-                        tracing::error!("Failed to delete key from redis: {e}");
-                        continue;
-                    }
+    // Delete all upload requests from redis
+    let removed_keys =
+        remove_outdated_uploads_from_redis(&client, |_| true).await;
+    for key in removed_keys {
+        match key.parse() {
+            Ok(key) => {
+                match obj_storage.delete_object_by_key(&key).await {
+                    Ok(()) => tracing::info!("Object with key {key} is successfully deleted from obj storage"),
+                    Err(e) => tracing::warn!("Failed to delete object with key {key} from object storage: {e}"),
                 }
-                if let Some(upload_request_key) = key.into_string() {
-                    let upload_request = upload_request_key
-                        .parse::<UploadRequest>()
-                        .context(format!("Failed to parse upload request key: {upload_request_key}"))?;
-                    match obj_storage.delete_object_by_key(upload_request.object_key()).await {
-                        Ok(()) => tracing::info!("Object with key {upload_request} is successfully deleted from obj storage"),
-                        Err(e) => tracing::warn!("Failed to delete object with key {upload_request} from object storage: {e}"),
-                    }
-                }
-            }
-        }
-        if let Err(e) = page.next() {
-            tracing::error!("Failed to get next page: {e}");
-            break;
+            },
+            Err(e) => {
+                tracing::error!("Failed to parse {key} as objet key: {e}");
+            },
         }
     }
     Ok(StatusCode::OK)
@@ -192,7 +174,7 @@ async fn cleanup(
 #[tracing::instrument(name = "Reset ban in redis", skip_all)]
 async fn reset_ban(State(state): State<AppState>) -> StatusCode {
     let con = state.redis_pool.next();
-    let pattern = "username_status_req*";
+    let pattern = "username_status_req_limit*";
     let mut scan = con.scan(pattern, None, None);
     while let Ok(Some(mut page)) = scan.try_next().await {
         if let Some(keys) = page.take_results() {

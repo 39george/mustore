@@ -8,7 +8,6 @@ use axum::routing;
 use axum::Json;
 use axum::Router;
 use axum_login::permission_required;
-use fred::clients::RedisPool;
 use fred::error::RedisError;
 use fred::interfaces::KeysInterface;
 use fred::prelude::RedisResult;
@@ -26,7 +25,8 @@ use crate::domain::object_key::ObjectKey;
 use crate::domain::requests::creator_access::CreateOfferRequest;
 use crate::domain::requests::creator_access::SubmitProductRequest;
 use crate::domain::requests::creator_access::SubmitServiceRequest;
-use crate::domain::upload_request::UploadRequest;
+use crate::domain::upload_request::delete_upload_request_data_from_redis;
+use crate::domain::upload_request::verify_upload_request_data_in_redis;
 use crate::impl_debug;
 use crate::routes::ResponseError;
 use crate::startup::api_doc::BadRequestResponse;
@@ -364,10 +364,8 @@ async fn submit_product(
             .map_err(ResponseError::UnexpectedError)?;
     }
 
-    if let Err(e) = transaction
-        .commit()
-        .await
-        .context("Failed to commit a pg transaction")
+    if let Err(e) =
+        transaction.commit().await.context("Failed to commit a pg transaction")
     {
         return Err(ResponseError::UnexpectedError(e).into());
     }
@@ -609,10 +607,8 @@ async fn submit_service(
             .map_err(ResponseError::UnexpectedError)?;
     }
 
-    if let Err(e) = transaction
-        .commit()
-        .await
-        .context("Failed to commit a pg transaction")
+    if let Err(e) =
+        transaction.commit().await.context("Failed to commit a pg transaction")
     {
         return Err(ResponseError::UnexpectedError(e).into());
     }
@@ -745,39 +741,4 @@ async fn songs(
     let songs = try_join_all(songs).await?;
 
     Ok(Json(songs))
-}
-
-// ───── Functions ────────────────────────────────────────────────────────── //
-
-/// Verify upload requests of a given music product, and if all is ok, delete all requests.
-#[tracing::instrument(
-    name = "Verify upload requests for a given music product.",
-    skip_all
-)]
-async fn verify_upload_request_data_in_redis(
-    con: &RedisPool,
-    obj_keys: &[&ObjectKey],
-    user_id: i32,
-) -> RedisResult<()> {
-    for obj_key in obj_keys.into_iter() {
-        let upload_request = UploadRequest::new(user_id, (*obj_key).clone());
-        let _created_at: String = con.get(&upload_request.to_string()).await?;
-    }
-    Ok(())
-}
-
-#[tracing::instrument(
-    name = "Delete upload requests for a given music product.",
-    skip_all
-)]
-async fn delete_upload_request_data_from_redis(
-    con: &RedisPool,
-    obj_keys: &[&ObjectKey],
-    user_id: i32,
-) -> RedisResult<()> {
-    for obj_key in obj_keys.into_iter() {
-        let upload_request = UploadRequest::new(user_id, (*obj_key).clone());
-        con.del(&upload_request.to_string()).await?;
-    }
-    Ok(())
 }
