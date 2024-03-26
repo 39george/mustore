@@ -11,7 +11,7 @@ interface ClassNames {
 
 const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
   const [current_index, set_current_index] = useState(0);
-  const [container_width, set_container_widht] = useState(0);
+  const [container_width, set_container_width] = useState(0);
   const [items_per_slide, set_items_per_slide] = useState(1);
   const config = useMemo(() => {
     let config = {
@@ -70,10 +70,11 @@ const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
         return "Новинки";
     }
   }, [carousel_type]);
+  const [item_hover_hidden, set_item_hover_hidden] = useState(false);
 
   // Updating container_width
   const update_container_width = () => {
-    set_container_widht(carousel_ref.current?.offsetWidth || 0);
+    set_container_width(carousel_ref.current?.offsetWidth || 0);
   };
 
   useEffect(() => {
@@ -103,17 +104,26 @@ const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
   }, [container_width]);
 
   // Handling next/prev buttons
-  const handle_next = () => {
-    set_current_index((prev_index) =>
-      Math.min(prev_index + items_per_slide, config.MAX_INDEX)
-    );
+  const handle_nav = (direction: "next" | "previous") => {
+    if (direction === "next") {
+      set_current_index((prev_index) =>
+        Math.min(prev_index + items_per_slide, config.MAX_INDEX)
+      );
+    } else {
+      set_current_index((prev_index) =>
+        Math.max(prev_index - items_per_slide, 0)
+      );
+    }
+    set_item_hover_hidden(true);
   };
 
-  const handle_prev = () => {
-    set_current_index((prev_index) =>
-      Math.max(prev_index - items_per_slide, 0)
-    );
-  };
+  useEffect(() => {
+    if (item_hover_hidden) {
+      setTimeout(() => {
+        set_item_hover_hidden(false);
+      }, 720);
+    }
+  }, [item_hover_hidden]);
 
   useEffect(() => {
     current_index === config.MAX_INDEX ? set_is_next_hovered(false) : "";
@@ -148,7 +158,7 @@ const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
 
         if (touch_distance > 80) {
           if (!is_function_called.current && current_index !== 0) {
-            handle_prev();
+            handle_nav("previous");
             is_function_called.current = true;
           }
         } else if (touch_distance < -80) {
@@ -156,7 +166,7 @@ const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
             !is_function_called.current &&
             current_index !== config.MAX_INDEX
           ) {
-            handle_next();
+            handle_nav("next");
             is_function_called.current = true;
           }
         }
@@ -195,7 +205,7 @@ const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
       {current_index !== 0 && (
         <div
           className={styles.prev_button}
-          onClick={handle_prev}
+          onClick={() => handle_nav("previous")}
         >
           <GoChevronDown className={styles.prev_chevron} />
         </div>
@@ -222,6 +232,7 @@ const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
                   carousel_items={item}
                   carousel_type={carousel_type}
                   index={idx}
+                  hover_hidden={item_hover_hidden}
                 />
               </React.Fragment>
             );
@@ -231,7 +242,7 @@ const Carousel: FC<CarouselProps> = ({ carousel_type, carousel_items }) => {
       {current_index !== config.MAX_INDEX && (
         <div
           className={styles.next_button}
-          onClick={handle_next}
+          onClick={() => handle_nav("next")}
           onMouseEnter={() => set_is_next_hovered(true)}
           onMouseLeave={() => set_is_next_hovered(false)}
         >
