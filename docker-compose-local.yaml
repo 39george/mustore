@@ -137,8 +137,6 @@ volumes:
   postgres_volume:
 
 secrets:
-  local-compose-config:
-    file: secrets/local-compose.yaml
   postgres-password:
     file: secrets/postgres_password.txt
   redis-password:
