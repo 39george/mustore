@@ -1,6 +1,6 @@
 app_port: 8000
 app_addr: "0.0.0.0"
-app_base_url: "http://localhost:10000"
+app_base_url: "http://localhost:10000" # This is address of our nginx instance
 email_delivery_service: smtp
 database:
   host: "postgres"
