@@ -2,9 +2,6 @@ use std::sync::Arc;
 
 use deadpool_postgres::Client;
 use fred::clients::RedisClient;
-use fred::interfaces::KeysInterface;
-use fred::types::Scanner;
-use futures::TryStreamExt;
 use time::OffsetDateTime;
 use tokio_cron_scheduler::Job;
 use tokio_cron_scheduler::JobScheduler;

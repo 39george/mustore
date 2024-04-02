@@ -1,18 +1,15 @@
 //! This is a module with common initialization functions.
 
 use std::collections::HashMap;
-use std::path::Path;
 
 use deadpool_postgres::Client;
 use fake::Fake;
 use fred::clients::RedisClient;
 use mustore::service_providers::object_storage::presigned_post_form::PresignedPostData;
-use mustore::service_providers::object_storage::ObjectStorage;
 use mustore::startup::get_redis_connection_pool;
 use reqwest::multipart::Form;
 use reqwest::multipart::Part;
-use secrecy::{ExposeSecret, Secret};
-use tokio_postgres::NoTls;
+use secrecy::Secret;
 use tracing::Level;
 use wiremock::Mock;
 use wiremock::MockServer;
