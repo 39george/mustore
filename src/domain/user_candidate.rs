@@ -4,6 +4,7 @@ use fred::interfaces::KeysInterface;
 use fred::prelude::RedisError;
 use fred::prelude::RedisErrorKind;
 use fred::prelude::RedisResult;
+use fred::types::RedisMap;
 use serde::Deserialize;
 use serde::Serialize;
 use std::collections::HashMap;
@@ -133,7 +134,8 @@ pub async fn store_user_candidate_data(
 ) -> RedisResult<()> {
     let key = user_candidate.redis_key();
     let hash_map: HashMap<String, String> = user_candidate.into();
-    con.hset(&key, &hash_map.try_into().unwrap()).await?;
+    con.hset::<_, _, RedisMap>(&key, hash_map.try_into().unwrap())
+        .await?;
     con.expire(&key, 60 * 30).await?; // 30 minutes
     Ok(())
 }

@@ -3,7 +3,6 @@
 .DS_Store
 Cargo.lock
 secrets/
-refinery.toml
 local.env
 /doc/book
 /doc/mustore-pg-schema
