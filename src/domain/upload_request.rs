@@ -130,7 +130,7 @@ pub async fn store_upload_request_data(
 pub async fn check_current_user_uploads(
     con: &RedisPool,
     user_id: i32,
-) -> Result<(), crate::routes::ResponseError> {
+) -> Result<(), crate::routes::ErrorResponse> {
     let pattern = format!("upload_request:{}*", user_id);
     let mut scan = con.next().scan(pattern, None, None);
     while let Ok(Some(mut page)) = scan.try_next().await {
@@ -140,7 +140,7 @@ pub async fn check_current_user_uploads(
                     "User {} already have 15 current uploads",
                     user_id
                 );
-                return Err(crate::routes::ResponseError::TooManyUploadsError);
+                return Err(crate::routes::ErrorResponse::TooManyUploadsError);
             }
             if keys.len() > 5 {
                 tracing::warn!(

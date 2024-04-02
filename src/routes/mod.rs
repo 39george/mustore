@@ -13,12 +13,12 @@ use crate::service_providers::object_storage::ObjectStorageError;
 
 pub mod development;
 pub mod health_check;
-pub mod notification_center;
+pub mod notifications;
 pub mod open;
 pub mod protected;
 
 #[derive(thiserror::Error)]
-pub enum ResponseError {
+pub enum ErrorResponse {
     #[error(transparent)]
     ObjectStorageError(#[from] ObjectStorageError),
     #[error(transparent)]
@@ -46,27 +46,27 @@ pub enum ResponseError {
     ConflictError(#[source] anyhow::Error),
 }
 
-impl_debug!(ResponseError);
+impl_debug!(ErrorResponse);
 
-impl IntoResponse for ResponseError {
+impl IntoResponse for ErrorResponse {
     fn into_response(self) -> Response {
         tracing::error!("{:?}", self);
         match self {
-            ResponseError::UnexpectedError(_)
-            | ResponseError::ObjectStorageError(_) => {
+            ErrorResponse::UnexpectedError(_)
+            | ErrorResponse::ObjectStorageError(_) => {
                 StatusCode::INTERNAL_SERVER_ERROR.into_response()
             }
-            ResponseError::InternalError(_) => {
+            ErrorResponse::InternalError(_) => {
                 StatusCode::INTERNAL_SERVER_ERROR.into_response()
             }
-            ResponseError::BadRequest(e) => Response::builder()
+            ErrorResponse::BadRequest(e) => Response::builder()
                 .status(StatusCode::BAD_REQUEST)
                 .body(Body::from(e.to_string()))
                 .unwrap_or(StatusCode::BAD_REQUEST.into_response()),
-            ResponseError::UnauthorizedError(_) => {
+            ErrorResponse::UnauthorizedError(_) => {
                 StatusCode::UNAUTHORIZED.into_response()
             }
-            ResponseError::UnsupportedMediaTypeError => Response::builder()
+            ErrorResponse::UnsupportedMediaTypeError => Response::builder()
                 .status(StatusCode::UNSUPPORTED_MEDIA_TYPE)
                 .header("Content-Type", "application/json")
                 .body(Body::from(format!(
@@ -80,23 +80,23 @@ impl IntoResponse for ResponseError {
                     .unwrap(),
                 )))
                 .unwrap_or(StatusCode::UNSUPPORTED_MEDIA_TYPE.into_response()),
-            ResponseError::TooManyUploadsError => {
+            ErrorResponse::TooManyUploadsError => {
                 StatusCode::TOO_MANY_REQUESTS.into_response()
             }
-            ResponseError::ValidationError(e) => Response::builder()
+            ErrorResponse::ValidationError(e) => Response::builder()
                 .status(StatusCode::BAD_REQUEST)
                 .body(Body::from(e.to_string()))
                 .unwrap_or(StatusCode::BAD_REQUEST.into_response()),
-            ResponseError::AuthError(e) => e.into_response(),
-            ResponseError::NotFoundError(_, param) => Response::builder()
+            ErrorResponse::AuthError(e) => e.into_response(),
+            ErrorResponse::NotFoundError(_, param) => Response::builder()
                 .status(StatusCode::NOT_FOUND)
                 .header("Content-Type", "application/json")
                 .body(Body::from(format!("{{\"param\":{}}}", param)))
                 .unwrap_or(StatusCode::NOT_FOUND.into_response()),
-            ResponseError::ForbiddenError(_) => {
+            ErrorResponse::ForbiddenError(_) => {
                 StatusCode::FORBIDDEN.into_response()
             }
-            ResponseError::ConflictError(_) => {
+            ErrorResponse::ConflictError(_) => {
                 StatusCode::CONFLICT.into_response()
             }
         }

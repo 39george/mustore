@@ -35,7 +35,7 @@ use crate::domain::upload_request::delete_upload_request_data_from_redis;
 use crate::domain::upload_request::store_upload_request_data;
 use crate::domain::upload_request::verify_upload_request_data_in_redis;
 use crate::domain::user_name::UserName;
-use crate::routes::ResponseError;
+use crate::routes::ErrorResponse;
 use crate::service_providers::object_storage::presigned_post_form::PresignedPostData;
 use crate::startup::api_doc::BadRequestResponse;
 use crate::startup::api_doc::ConflictErrorResponse;
@@ -103,8 +103,8 @@ async fn health_check() -> StatusCode {
 #[tracing::instrument(name = "Get list of user permissions", skip_all)]
 async fn user_permissions(
     auth_session: AuthSession,
-) -> Result<Json<HashSet<Permission>>, ResponseError> {
-    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
+) -> Result<Json<HashSet<Permission>>, ErrorResponse> {
+    let user = auth_session.user.ok_or(ErrorResponse::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
     let all_permissions =
@@ -143,8 +143,8 @@ async fn user_permissions(
 async fn avatar_username(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
-) -> Result<Json<user_access::GetUserAvatarUsername>, ResponseError> {
-    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
+) -> Result<Json<user_access::GetUserAvatarUsername>, ErrorResponse> {
+    let user = auth_session.user.ok_or(ErrorResponse::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
 
@@ -205,8 +205,8 @@ async fn request_obj_storage_upload(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
     Query(params): Query<UploadFileRequest>,
-) -> Result<Json<PresignedPostData>, ResponseError> {
-    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
+) -> Result<Json<PresignedPostData>, ErrorResponse> {
+    let user = auth_session.user.ok_or(ErrorResponse::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
     tracing::Span::current().record("username", &user.username);
@@ -221,7 +221,7 @@ async fn request_obj_storage_upload(
         Some(&max_size) => max_size,
         None => {
             tracing::warn!("Wrong media type: {}", params.media_type);
-            return Err(ResponseError::UnsupportedMediaTypeError);
+            return Err(ErrorResponse::UnsupportedMediaTypeError);
         }
     };
 
@@ -232,7 +232,7 @@ async fn request_obj_storage_upload(
         &params.file_name,
     )
     .context("Failed to build object key")
-    .map_err(ResponseError::BadRequest)?;
+    .map_err(ErrorResponse::BadRequest)?;
 
     let presigned_post_data =
         app_state.object_storage.generate_presigned_post_form(
@@ -287,8 +287,8 @@ async fn request_obj_storage_upload(
 async fn get_conversations(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
-) -> Result<Json<Vec<GetConversationsEntries>>, ResponseError> {
-    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
+) -> Result<Json<Vec<GetConversationsEntries>>, ErrorResponse> {
+    let user = auth_session.user.ok_or(ErrorResponse::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
     tracing::Span::current().record("username", &user.username);
@@ -316,7 +316,7 @@ async fn get_conversations(
                     .generate_presigned_url(&object_key, Duration::from_secs(1))
                     .await?;
                 entry.image_url = result;
-                Ok::<GetConversationsEntries, ResponseError>(entry)
+                Ok::<GetConversationsEntries, ErrorResponse>(entry)
             }
         });
 
@@ -362,14 +362,14 @@ async fn get_dialog_id(
     Query(GetConversationRequest {
         with_user: with_username,
     }): Query<GetConversationRequest>,
-) -> Result<Json<DialogId>, ResponseError> {
-    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
+) -> Result<Json<DialogId>, ErrorResponse> {
+    let user = auth_session.user.ok_or(ErrorResponse::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
     tracing::Span::current().record("username", &user.username);
     tracing::Span::current().record("dialog_with", &with_username);
     let _ =
-        UserName::parse(&with_username).map_err(ResponseError::BadRequest)?;
+        UserName::parse(&with_username).map_err(ErrorResponse::BadRequest)?;
 
     let db_client = app_state
         .pg_pool
@@ -421,13 +421,13 @@ async fn create_new_conversation(
     Query(CreateConversationRequest { with_username }): Query<
         CreateConversationRequest,
     >,
-) -> Result<(StatusCode, Json<DialogId>), ResponseError> {
-    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
+) -> Result<(StatusCode, Json<DialogId>), ErrorResponse> {
+    let user = auth_session.user.ok_or(ErrorResponse::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
     tracing::Span::current().record("username", &user.username);
     let _ =
-        UserName::parse(&with_username).map_err(ResponseError::BadRequest)?;
+        UserName::parse(&with_username).map_err(ErrorResponse::BadRequest)?;
 
     let mut db_client = app_state
         .pg_pool
@@ -449,7 +449,7 @@ async fn create_new_conversation(
     {
         Some(id) => id,
         None => {
-            return Err(ResponseError::NotFoundError(
+            return Err(ErrorResponse::NotFoundError(
                 anyhow::anyhow!("Failed to get user id by username"),
                 "with_username",
             ))
@@ -460,7 +460,7 @@ async fn create_new_conversation(
         .await
         .is_ok()
     {
-        return Err(ResponseError::ConflictError(anyhow::anyhow!(
+        return Err(ErrorResponse::ConflictError(anyhow::anyhow!(
             "Can't create a new dialog: it is already exists!"
         )));
     }
@@ -482,7 +482,7 @@ async fn create_new_conversation(
         .context("Failed to commit a pg transaction")?;
 
     if count != 2 {
-        Err(ResponseError::InternalError(anyhow::anyhow!(
+        Err(ErrorResponse::InternalError(anyhow::anyhow!(
             "Count was equal {count}, but should be 2"
         )))
     } else {
@@ -526,8 +526,8 @@ async fn send_message(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
     Json(params): Json<SendMessageRequest>,
-) -> Result<StatusCode, ResponseError> {
-    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
+) -> Result<StatusCode, ErrorResponse> {
+    let user = auth_session.user.ok_or(ErrorResponse::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
     tracing::Span::current().record("username", &user.username);
@@ -590,7 +590,7 @@ async fn send_message(
         let new_key = s3
             .receive(&attachment)
             .await
-            .map_err(ResponseError::ObjectStorageError)?;
+            .map_err(ErrorResponse::ObjectStorageError)?;
 
         user_access::insert_message_attachment()
             .bind(&transaction, &new_key.as_ref(), &message_id)
@@ -633,8 +633,8 @@ async fn list_conversation(
         conversation_id,
         offset,
     }): Query<ListConversationRequest>,
-) -> Result<Json<ConversationDataResponse>, ResponseError> {
-    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
+) -> Result<Json<ConversationDataResponse>, ErrorResponse> {
+    let user = auth_session.user.ok_or(ErrorResponse::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
     tracing::Span::current().record("username", &user.username);
@@ -680,13 +680,13 @@ async fn check_conversation_access<T: cornucopia_async::GenericClient>(
     user_id: &i32,
     username: &str,
     conversation_id: &i32,
-) -> Result<i32, ResponseError> {
+) -> Result<i32, ErrorResponse> {
     user_access::user_has_access_to_conversation()
         .bind(db_client, user_id, conversation_id)
         .opt()
         .await
         .context("Failed to fetch conversation access from db")?
-        .ok_or(ResponseError::ForbiddenError(anyhow::anyhow!(
+        .ok_or(ErrorResponse::ForbiddenError(anyhow::anyhow!(
             "{} has no access to the requested conversation id: {}",
             username,
             conversation_id
@@ -698,13 +698,13 @@ async fn check_conversation_access<T: cornucopia_async::GenericClient>(
 async fn check_conversation_exists<T: cornucopia_async::GenericClient>(
     db_client: &T,
     conversation_id: &i32,
-) -> Result<i32, ResponseError> {
+) -> Result<i32, ErrorResponse> {
     user_access::conversation_exists()
         .bind(db_client, conversation_id)
         .opt()
         .await
         .context("Failed to fetch conversation access from db")?
-        .ok_or(ResponseError::NotFoundError(
+        .ok_or(ErrorResponse::NotFoundError(
             anyhow::anyhow!(
                 "Conversation with id {conversation_id} not exists",
             ),
@@ -716,13 +716,13 @@ async fn get_dialog_by_username<T: cornucopia_async::GenericClient>(
     client: &T,
     user_id: &i32,
     with_username: &str,
-) -> Result<i32, ResponseError> {
+) -> Result<i32, ErrorResponse> {
     user_access::get_dialog_by_username()
         .bind(client, user_id, &with_username)
         .opt()
         .await
         .context("Failed to get conversation id by user id")?
-        .ok_or(ResponseError::NotFoundError(
+        .ok_or(ErrorResponse::NotFoundError(
             anyhow::anyhow!("Optional from db was none"),
             "dialog_id",
         ))

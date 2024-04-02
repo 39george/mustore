@@ -23,7 +23,7 @@ use crate::service_providers::object_storage::presigned_post_form::PresignedPost
 use crate::startup::AppState;
 use crate::types::data_size::DataSizes;
 
-use super::ResponseError;
+use super::ErrorResponse;
 
 // ───── Types ────────────────────────────────────────────────────────────── //
 
@@ -77,7 +77,7 @@ pub fn dev_router(state: AppState) -> Router {
 #[tracing::instrument(name = "Upload file to object storage", skip_all)]
 async fn upload_file(
     mut multipart: Multipart,
-) -> Result<(StatusCode, String), ResponseError> {
+) -> Result<(StatusCode, String), ErrorResponse> {
     let mut file = None;
     let mut presigned_post_form = None;
 
@@ -140,7 +140,7 @@ async fn upload_file(
 async fn cleanup(
     Query(DbNumber { number }): Query<DbNumber>,
     State(app_state): State<AppState>,
-) -> Result<StatusCode, ResponseError> {
+) -> Result<StatusCode, ErrorResponse> {
     let client = app_state.redis_pool.next();
     client.select(number).await.context("Failed to select db")?;
     let obj_storage = app_state.object_storage;

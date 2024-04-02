@@ -17,7 +17,7 @@ use crate::auth::users::AuthSession;
 use crate::cornucopia::queries::consumer_access;
 use crate::domain::object_key::ObjectKey;
 use crate::domain::requests::consumer_access::AcceptOffer;
-use crate::routes::ResponseError;
+use crate::routes::ErrorResponse;
 use crate::startup::api_doc::BadRequestResponse;
 use crate::startup::api_doc::InternalErrorResponse;
 use crate::startup::AppState;
@@ -76,8 +76,8 @@ async fn status_bar_info(
     auth_session: AuthSession,
     Path(path): Path<String>,
     State(app_state): State<AppState>,
-) -> Result<Json<Vec<consumer_access::Products>>, ResponseError> {
-    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
+) -> Result<Json<Vec<consumer_access::Products>>, ErrorResponse> {
+    let user = auth_session.user.ok_or(ErrorResponse::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
     let db_client = app_state
@@ -85,7 +85,7 @@ async fn status_bar_info(
         .get()
         .await
         .context("Failed to get connection from postgres pool")
-        .map_err(ResponseError::UnexpectedError)?;
+        .map_err(ErrorResponse::UnexpectedError)?;
 
     let retrieve_urls = |mut entry: consumer_access::Products| {
         let obj_storage = app_state.object_storage.clone();
@@ -98,7 +98,7 @@ async fn status_bar_info(
                 .generate_presigned_url(&object_key, Duration::from_secs(120)) // 2 minutes expiration
                 .await?;
             entry.product_cover = result;
-            Ok::<consumer_access::Products, ResponseError>(entry)
+            Ok::<consumer_access::Products, ErrorResponse>(entry)
         }
     };
 
@@ -124,7 +124,7 @@ async fn status_bar_info(
             try_join_all(futures).await?
         }
         _ => {
-            return Err(ResponseError::BadRequest(anyhow::anyhow!(
+            return Err(ErrorResponse::BadRequest(anyhow::anyhow!(
                 "Only 'likes' or 'orders' allowed"
             )))
         }
@@ -139,8 +139,8 @@ async fn accept_offer(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
     Form(AcceptOffer { offer_id: _ }): Form<AcceptOffer>,
-) -> Result<StatusCode, ResponseError> {
-    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
+) -> Result<StatusCode, ErrorResponse> {
+    let user = auth_session.user.ok_or(ErrorResponse::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
     tracing::Span::current().record("username", &user.username);

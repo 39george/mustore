@@ -30,7 +30,7 @@ use crate::domain::requests::creator_access::SubmitServiceRequest;
 use crate::domain::upload_request::delete_upload_request_data_from_redis;
 use crate::domain::upload_request::verify_upload_request_data_in_redis;
 use crate::impl_debug;
-use crate::routes::ResponseError;
+use crate::routes::ErrorResponse;
 use crate::startup::api_doc::BadRequestResponse;
 use crate::startup::api_doc::GetCreatorSongs;
 use crate::startup::api_doc::InternalErrorResponse;
@@ -39,26 +39,26 @@ use crate::startup::AppState;
 // ───── Types ────────────────────────────────────────────────────────────── //
 
 #[derive(thiserror::Error)]
-pub enum CreatorResponseError {
+pub enum CreatorErrorResponse {
     #[error(transparent)]
-    ResponseError(#[from] ResponseError),
+    ErrorResponse(#[from] ErrorResponse),
     #[error("No upload info in cache")]
     NoUploadInfoInCacheError(#[from] RedisError),
     #[error("Error with payment api client")]
     PaymentClientError(#[from] airactions::ClientError),
 }
 
-impl_debug!(CreatorResponseError);
+impl_debug!(CreatorErrorResponse);
 
-impl IntoResponse for CreatorResponseError {
+impl IntoResponse for CreatorErrorResponse {
     fn into_response(self) -> axum::response::Response {
         match self {
-            CreatorResponseError::ResponseError(e) => e.into_response(),
-            CreatorResponseError::NoUploadInfoInCacheError(_) => {
+            CreatorErrorResponse::ErrorResponse(e) => e.into_response(),
+            CreatorErrorResponse::NoUploadInfoInCacheError(_) => {
                 tracing::error!("{:?}", self);
                 StatusCode::BAD_REQUEST.into_response()
             }
-            CreatorResponseError::PaymentClientError(_) => {
+            CreatorErrorResponse::PaymentClientError(_) => {
                 tracing::error!("{:?}", self);
                 StatusCode::INTERNAL_SERVER_ERROR.into_response()
             }
@@ -113,8 +113,8 @@ async fn health_check() -> StatusCode {
 async fn marks_avg(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
-) -> Result<Json<creator_access::GetCreatorMarksAvg>, CreatorResponseError> {
-    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
+) -> Result<Json<creator_access::GetCreatorMarksAvg>, CreatorErrorResponse> {
+    let user = auth_session.user.ok_or(ErrorResponse::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
 
@@ -123,14 +123,14 @@ async fn marks_avg(
         .get()
         .await
         .context("Failed to get connection from postgres pool")
-        .map_err(ResponseError::UnexpectedError)?;
+        .map_err(ErrorResponse::UnexpectedError)?;
 
     let data = creator_access::get_creator_marks_avg()
         .bind(&db_client, &user.id)
         .one()
         .await
         .context("Failed to get marks avg data from database")
-        .map_err(ResponseError::UnexpectedError)?;
+        .map_err(ErrorResponse::UnexpectedError)?;
 
     Ok(Json(data))
 }
@@ -164,8 +164,8 @@ async fn marks_avg(
 async fn connect_card(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
-) -> Result<String, CreatorResponseError> {
-    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
+) -> Result<Redirect, CreatorErrorResponse> {
+    let user = auth_session.user.ok_or(ErrorResponse::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
 
@@ -197,8 +197,8 @@ async fn connect_card(
             response.registration_url.unwrap().to_string()
         }
         banksim_api::OperationStatus::Fail(e) => {
-            return Err(CreatorResponseError::ResponseError(
-                ResponseError::InternalError(anyhow::Error::msg(e)),
+            return Err(CreatorErrorResponse::ErrorResponse(
+                ErrorResponse::InternalError(anyhow::Error::msg(e)),
             ));
         }
         banksim_api::OperationStatus::Cancel => todo!(),
@@ -236,13 +236,13 @@ async fn submit_product(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
     Json(req): Json<SubmitProductRequest>,
-) -> Result<StatusCode, CreatorResponseError> {
-    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
+) -> Result<StatusCode, CreatorErrorResponse> {
+    let user = auth_session.user.ok_or(ErrorResponse::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
     tracing::Span::current().record("username", &user.username);
 
-    req.validate(&()).map_err(ResponseError::ValidationError)?;
+    req.validate(&()).map_err(ErrorResponse::ValidationError)?;
 
     let s3 = app_state.object_storage;
 
@@ -287,7 +287,7 @@ async fn submit_product(
         let _meta = s3
             .get_object_meta(key)
             .await
-            .map_err(ResponseError::ObjectStorageError)?;
+            .map_err(ErrorResponse::ObjectStorageError)?;
     }
 
     let mut db_client = app_state
@@ -295,13 +295,13 @@ async fn submit_product(
         .get()
         .await
         .context("Failed to get connection from postgres pool")
-        .map_err(ResponseError::UnexpectedError)?;
+        .map_err(ErrorResponse::UnexpectedError)?;
 
     let transaction = db_client
         .transaction()
         .await
         .context("Failed to get a transaction from pg")
-        .map_err(ResponseError::UnexpectedError)?;
+        .map_err(ErrorResponse::UnexpectedError)?;
 
     let product_id = creator_access::insert_product_and_get_product_id()
         .bind(
@@ -314,20 +314,20 @@ async fn submit_product(
         .one()
         .await
         .context("Failed to insert music product into the pg")
-        .map_err(ResponseError::UnexpectedError)?;
+        .map_err(ErrorResponse::UnexpectedError)?;
 
     creator_access::insert_product_cover_object_key()
         .bind(
             &transaction,
             &s3.receive(&product.cover_object_key)
                 .await
-                .map_err(ResponseError::ObjectStorageError)?
+                .map_err(ErrorResponse::ObjectStorageError)?
                 .as_ref(),
             &product_id,
         )
         .await
         .context("Failed to insert cover_object_key into pg")
-        .map_err(ResponseError::UnexpectedError)?;
+        .map_err(ErrorResponse::UnexpectedError)?;
 
     let (beat_id, song_id) = match (&music_product, lyric, sex) {
         (None, None, None) => {
@@ -335,7 +335,7 @@ async fn submit_product(
                 .bind(&transaction, &product_id)
                 .await
                 .context("Failed to insert cover into pg")
-                .map_err(ResponseError::UnexpectedError)?;
+                .map_err(ErrorResponse::UnexpectedError)?;
             (None, None)
         }
         (None, Some(lyric), sex) => {
@@ -348,7 +348,7 @@ async fn submit_product(
                 )
                 .await
                 .context("Failed to insert lyric into pg")
-                .map_err(ResponseError::UnexpectedError)?;
+                .map_err(ErrorResponse::UnexpectedError)?;
             (None, None)
         }
         (Some(music_product), None, None) => {
@@ -365,7 +365,7 @@ async fn submit_product(
                 .one()
                 .await
                 .context("Failed to insert beat data into the pg")
-                .map_err(ResponseError::UnexpectedError)?;
+                .map_err(ErrorResponse::UnexpectedError)?;
             (Some(beat_id), None)
         }
         (Some(music_product), Some(lyric), Some(sex)) => {
@@ -384,7 +384,7 @@ async fn submit_product(
                 .one()
                 .await
                 .context("Failed to insert song data into the pg")
-                .map_err(ResponseError::UnexpectedError)?;
+                .map_err(ErrorResponse::UnexpectedError)?;
             (None, Some(song_id))
         }
         // Unreachable, because when we parse
@@ -398,14 +398,14 @@ async fn submit_product(
                 &transaction,
                 &s3.receive(&music_product.master_object_key)
                     .await
-                    .map_err(ResponseError::ObjectStorageError)?
+                    .map_err(ErrorResponse::ObjectStorageError)?
                     .as_ref(),
                 &song_id,
                 &beat_id,
             )
             .await
             .context("Failed to insert song_master_object_key into pg")
-            .map_err(ResponseError::UnexpectedError)?;
+            .map_err(ErrorResponse::UnexpectedError)?;
 
         if let Some(ref tagged_key) = music_product.master_tagged_object_key {
             creator_access::insert_music_product_master_tagged_object_key()
@@ -413,14 +413,14 @@ async fn submit_product(
                     &transaction,
                     &s3.receive(&tagged_key)
                         .await
-                        .map_err(ResponseError::ObjectStorageError)?
+                        .map_err(ErrorResponse::ObjectStorageError)?
                         .as_ref(),
                     &song_id,
                     &beat_id,
                 )
                 .await
                 .context("Failed to insert song_master_object_key into pg")
-                .map_err(ResponseError::UnexpectedError)?;
+                .map_err(ErrorResponse::UnexpectedError)?;
         }
 
         creator_access::insert_music_product_multitrack_object_key()
@@ -428,14 +428,14 @@ async fn submit_product(
                 &transaction,
                 &s3.receive(&music_product.multitrack_object_key)
                     .await
-                    .map_err(ResponseError::ObjectStorageError)?
+                    .map_err(ErrorResponse::ObjectStorageError)?
                     .as_ref(),
                 &song_id,
                 &beat_id,
             )
             .await
             .context("Failed to insert song_master_object_key into pg")
-            .map_err(ResponseError::UnexpectedError)?;
+            .map_err(ErrorResponse::UnexpectedError)?;
     }
 
     for mood in product.moods.iter() {
@@ -443,7 +443,7 @@ async fn submit_product(
             .bind(&transaction, &product_id, mood)
             .await
             .context("Failed to insert mood for product into pg")
-            .map_err(ResponseError::UnexpectedError)?;
+            .map_err(ErrorResponse::UnexpectedError)?;
     }
 
     if let Err(e) = transaction
@@ -451,7 +451,7 @@ async fn submit_product(
         .await
         .context("Failed to commit a pg transaction")
     {
-        return Err(ResponseError::UnexpectedError(e).into());
+        return Err(ErrorResponse::UnexpectedError(e).into());
     }
 
     // Now we can safely delete upload data from redis
@@ -489,13 +489,13 @@ async fn submit_service(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
     Json(req): Json<SubmitServiceRequest>,
-) -> Result<StatusCode, CreatorResponseError> {
-    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
+) -> Result<StatusCode, CreatorErrorResponse> {
+    let user = auth_session.user.ok_or(ErrorResponse::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
     tracing::Span::current().record("username", &user.username);
 
-    req.validate(&()).map_err(ResponseError::ValidationError)?;
+    req.validate(&()).map_err(ErrorResponse::ValidationError)?;
 
     let s3 = app_state.object_storage;
 
@@ -528,7 +528,7 @@ async fn submit_service(
         let _meta = s3
             .get_object_meta(key)
             .await
-            .map_err(ResponseError::ObjectStorageError)?;
+            .map_err(ErrorResponse::ObjectStorageError)?;
     }
 
     let mut db_client = app_state
@@ -536,13 +536,13 @@ async fn submit_service(
         .get()
         .await
         .context("Failed to get connection from postgres pool")
-        .map_err(ResponseError::UnexpectedError)?;
+        .map_err(ErrorResponse::UnexpectedError)?;
 
     let transaction = db_client
         .transaction()
         .await
         .context("Failed to get a transaction from pg")
-        .map_err(ResponseError::UnexpectedError)?;
+        .map_err(ErrorResponse::UnexpectedError)?;
 
     let service_id = creator_access::insert_service_get_id()
         .bind(
@@ -555,20 +555,20 @@ async fn submit_service(
         .one()
         .await
         .context("Failed to insert service data into the pg")
-        .map_err(ResponseError::UnexpectedError)?;
+        .map_err(ErrorResponse::UnexpectedError)?;
 
     creator_access::insert_service_cover_object_key()
         .bind(
             &transaction,
             &s3.receive(&service.cover_object_key)
                 .await
-                .map_err(ResponseError::ObjectStorageError)?
+                .map_err(ErrorResponse::ObjectStorageError)?
                 .as_ref(),
             &service_id,
         )
         .await
         .context("Failed to insert service cover object key into the pg")
-        .map_err(ResponseError::UnexpectedError)?;
+        .map_err(ErrorResponse::UnexpectedError)?;
 
     let (mixing_id, beat_writing_id, song_writing_id) = match req {
         SubmitServiceRequest::Mixing(_) => {
@@ -577,21 +577,21 @@ async fn submit_service(
                 .one()
                 .await
                 .context("Failed to insert mixing into the pg")
-                .map_err(ResponseError::UnexpectedError)?;
+                .map_err(ErrorResponse::UnexpectedError)?;
             for key in service.credits_object_keys.iter().flatten() {
                 creator_access::insert_mixing_credit_object_key()
                     .bind(
                         &transaction,
                         &s3.receive(key)
                             .await
-                            .map_err(ResponseError::ObjectStorageError)?
+                            .map_err(ErrorResponse::ObjectStorageError)?
                             .as_ref(),
                         &Objecttype::audio,
                         &id,
                     )
                     .await
                     .context("Failed to insert mixing credit into the pg")
-                    .map_err(ResponseError::UnexpectedError)?;
+                    .map_err(ErrorResponse::UnexpectedError)?;
             }
             (Some(id), None, None)
         }
@@ -601,21 +601,21 @@ async fn submit_service(
                 .one()
                 .await
                 .context("Failed to insert song writing into the pg")
-                .map_err(ResponseError::UnexpectedError)?;
+                .map_err(ErrorResponse::UnexpectedError)?;
             for key in service.credits_object_keys.iter().flatten() {
                 creator_access::insert_song_writing_credit_object_key()
                     .bind(
                         &transaction,
                         &s3.receive(key)
                             .await
-                            .map_err(ResponseError::ObjectStorageError)?
+                            .map_err(ErrorResponse::ObjectStorageError)?
                             .as_ref(),
                         &Objecttype::audio,
                         &id,
                     )
                     .await
                     .context("Failed to insert song writing credit into the pg")
-                    .map_err(ResponseError::UnexpectedError)?;
+                    .map_err(ErrorResponse::UnexpectedError)?;
             }
             (None, None, Some(id))
         }
@@ -625,21 +625,21 @@ async fn submit_service(
                 .one()
                 .await
                 .context("Failed to insert beat writing into the pg")
-                .map_err(ResponseError::UnexpectedError)?;
+                .map_err(ErrorResponse::UnexpectedError)?;
             for key in service.credits_object_keys.iter().flatten() {
                 creator_access::insert_beat_writing_credit_object_key()
                     .bind(
                         &transaction,
                         &s3.receive(key)
                             .await
-                            .map_err(ResponseError::ObjectStorageError)?
+                            .map_err(ErrorResponse::ObjectStorageError)?
                             .as_ref(),
                         &Objecttype::audio,
                         &id,
                     )
                     .await
                     .context("Failed to insert beat writing credit into the pg")
-                    .map_err(ResponseError::UnexpectedError)?;
+                    .map_err(ErrorResponse::UnexpectedError)?;
             }
             (None, Some(id), None)
         }
@@ -648,7 +648,7 @@ async fn submit_service(
                 .bind(&transaction, &service_id, &credits)
                 .await
                 .context("Failed to insert ghost writing into the pg")
-                .map_err(ResponseError::UnexpectedError)?;
+                .map_err(ErrorResponse::UnexpectedError)?;
             (None, None, None)
         }
         SubmitServiceRequest::CoverDesign(_) => {
@@ -657,21 +657,21 @@ async fn submit_service(
                 .one()
                 .await
                 .context("Failed to insert cover design into the pg")
-                .map_err(ResponseError::UnexpectedError)?;
+                .map_err(ErrorResponse::UnexpectedError)?;
             for key in service.credits_object_keys.iter().flatten() {
                 creator_access::insert_cover_design_credit_object_key()
                     .bind(
                         &transaction,
                         &s3.receive(key)
                             .await
-                            .map_err(ResponseError::ObjectStorageError)?
+                            .map_err(ErrorResponse::ObjectStorageError)?
                             .as_ref(),
                         &Objecttype::image,
                         &id,
                     )
                     .await
                     .context("Failed to insert cover design credit into the pg")
-                    .map_err(ResponseError::UnexpectedError)?;
+                    .map_err(ErrorResponse::UnexpectedError)?;
             }
             (None, None, None)
         }
@@ -688,7 +688,7 @@ async fn submit_service(
             )
             .await
             .context("Failed to insert mixing credit into the pg")
-            .map_err(ResponseError::UnexpectedError)?;
+            .map_err(ErrorResponse::UnexpectedError)?;
     }
 
     if let Err(e) = transaction
@@ -696,7 +696,7 @@ async fn submit_service(
         .await
         .context("Failed to commit a pg transaction")
     {
-        return Err(ResponseError::UnexpectedError(e).into());
+        return Err(ErrorResponse::UnexpectedError(e).into());
     }
 
     // Now we can safely delete upload data from redis
@@ -734,13 +734,13 @@ async fn create_offer(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
     Json(req): Json<CreateOfferRequest>,
-) -> Result<StatusCode, ResponseError> {
-    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
+) -> Result<StatusCode, ErrorResponse> {
+    let user = auth_session.user.ok_or(ErrorResponse::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
     tracing::Span::current().record("username", &user.username);
 
-    req.validate(&()).map_err(ResponseError::ValidationError)?;
+    req.validate(&()).map_err(ErrorResponse::ValidationError)?;
 
     let db_client = app_state
         .pg_pool
@@ -790,8 +790,8 @@ async fn songs(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
     Path(status): Path<ProductStatus>,
-) -> Result<Json<Vec<creator_access::GetCreatorSongs>>, ResponseError> {
-    let user = auth_session.user.ok_or(ResponseError::UnauthorizedError(
+) -> Result<Json<Vec<creator_access::GetCreatorSongs>>, ErrorResponse> {
+    let user = auth_session.user.ok_or(ErrorResponse::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
 
@@ -800,7 +800,7 @@ async fn songs(
         .get()
         .await
         .context("Failed to get connection from postgres pool")
-        .map_err(ResponseError::UnexpectedError)?;
+        .map_err(ErrorResponse::UnexpectedError)?;
 
     let songs = creator_access::get_creator_songs()
         .bind(&db_client, &user.id, &status.into())
@@ -820,7 +820,7 @@ async fn songs(
                     ) // 2 minutes expiration
                     .await?;
                 song.key = result;
-                Ok::<creator_access::GetCreatorSongs, ResponseError>(song)
+                Ok::<creator_access::GetCreatorSongs, ErrorResponse>(song)
             }
         });
 

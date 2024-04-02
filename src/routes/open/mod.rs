@@ -22,7 +22,7 @@ use crate::startup::AppState;
 use crate::startup::api_doc::BadRequestResponse;
 use crate::startup::api_doc::InternalErrorResponse;
 
-use super::ResponseError;
+use super::ErrorResponse;
 
 // ───── Handlers ─────────────────────────────────────────────────────────── //
 
@@ -47,7 +47,7 @@ pub fn open_router() -> Router<AppState> {
 #[tracing::instrument(name = "Get products counts (stats)", skip_all)]
 pub async fn stats(
     State(app_state): State<AppState>,
-) -> Result<Json<Stats>, ResponseError> {
+) -> Result<Json<Stats>, ErrorResponse> {
     let pg_pool = app_state
         .pg_pool
         .get()
@@ -86,7 +86,7 @@ pub async fn stats(
 async fn get_values_list(
     Path(path): Path<String>,
     State(app_state): State<AppState>,
-) -> Result<Json<Vec<String>>, ResponseError> {
+) -> Result<Json<Vec<String>>, ErrorResponse> {
     let pg_pool = app_state
         .pg_pool
         .get()
@@ -108,7 +108,7 @@ async fn get_values_list(
                 .await
                 .context("Failed to get genres list from pg")?,
         )),
-        _ => Err(ResponseError::BadRequest(anyhow::anyhow!(
+        _ => Err(ErrorResponse::BadRequest(anyhow::anyhow!(
             "Can't send values of {path}! Only 'genres' and 'moods' available!"
         ))),
     }
@@ -137,7 +137,7 @@ async fn get_songs(
     axum_extra::extract::Query(params): axum_extra::extract::Query<
         GetSongsListRequest,
     >,
-) -> Result<Json<Vec<GetSongsList>>, ResponseError> {
+) -> Result<Json<Vec<GetSongsList>>, ErrorResponse> {
     params.validate(&())?;
 
     let user_id = auth_session.user.map(|u| u.id);
@@ -195,7 +195,7 @@ async fn get_new_songs(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
     Query(amount): Query<SongsAmount>,
-) -> Result<Json<Vec<GetNewSongs>>, ResponseError> {
+) -> Result<Json<Vec<GetNewSongs>>, ErrorResponse> {
     amount.validate(&())?;
 
     let user_id = auth_session.user.map(|u| u.id);
@@ -239,7 +239,7 @@ async fn get_recommended_songs(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
     Query(amount): Query<SongsAmount>,
-) -> Result<Json<Vec<GetRecommendedSongs>>, ResponseError> {
+) -> Result<Json<Vec<GetRecommendedSongs>>, ErrorResponse> {
     amount.validate(&())?;
 
     let user_id = auth_session.user.map(|u| u.id);
