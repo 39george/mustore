@@ -36,7 +36,7 @@ use crate::email_client::EmailClient;
 use crate::email_client::EmailDeliveryService;
 use crate::routes::development;
 use crate::routes::health_check::health_check;
-use crate::routes::notification_center::notification_center_router;
+use crate::routes::notifications::notification_center_router;
 use crate::routes::open::open_router;
 use crate::routes::protected::protected_router;
 use crate::service_providers::captcha_verifier::CaptchaVerifier;
