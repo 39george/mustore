@@ -1,8 +1,8 @@
 use anyhow::Context;
 use axum::extract::Query;
 use axum::extract::State;
+use axum::response::Redirect;
 use deadpool_postgres::Transaction;
-use http::StatusCode;
 use identicon_rs::Identicon;
 use serde::Deserialize;
 use std::io::Cursor;
@@ -26,6 +26,7 @@ pub struct UserConfirmationQuery {
 
 // ───── Handlers ─────────────────────────────────────────────────────────── //
 
+// TODO: redirect on success to real address
 /// If error, we return here only an `AccountConfirmationFailed`
 /// to redirect user to a special page, because React app will not handle
 /// our `internal error` case.
@@ -33,7 +34,7 @@ pub struct UserConfirmationQuery {
 pub async fn confirm(
     State(app_state): State<AppState>,
     Query(UserConfirmationQuery { email, token }): Query<UserConfirmationQuery>,
-) -> Result<StatusCode, AuthError> {
+) -> Result<Redirect, AuthError> {
     let mut db_client = app_state
         .pg_pool
         .get()
@@ -196,7 +197,7 @@ pub async fn confirm(
         return Err(e);
     }
 
-    Ok(StatusCode::OK)
+    Ok(Redirect::to("https://google.com"))
 }
 
 // ───── Functions ────────────────────────────────────────────────────────── //
