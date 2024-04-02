@@ -35,5 +35,5 @@ JOIN users author ON products.author_id = author.id;
 
 -- INSERTING CONTENT --
 
---! accept_offer
-INSERT INTO
+-- accept_offer
+-- INSERT INTO
