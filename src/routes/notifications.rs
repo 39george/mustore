@@ -1,3 +1,4 @@
+use anyhow::Context;
 use axum::extract::State;
 use axum::response::IntoResponse;
 use axum::routing;
@@ -8,9 +9,11 @@ use banksim_api::notifications::TokenNotification;
 use banksim_api::session::webhook::Webhook;
 use banksim_api::session::webhook::WebhookRequest;
 use http::StatusCode;
+use uuid::Uuid;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
+use crate::cornucopia::queries::internal;
 use crate::domain::sessions::card_token_registration::CardTokenSession;
 use crate::domain::sessions::card_token_registration::CardTokenSessionError;
 use crate::impl_debug;
@@ -19,20 +22,20 @@ use crate::startup::AppState;
 use super::ErrorResponse;
 
 #[derive(thiserror::Error)]
-pub enum NotificationsErrorResponse {
+pub enum NotificationErrorResponse {
     #[error(transparent)]
     ErrorResponse(#[from] ErrorResponse),
     #[error("No upload info in cache")]
     CardTokenSessionError(#[from] CardTokenSessionError),
 }
 
-impl_debug!(NotificationsErrorResponse);
+impl_debug!(NotificationErrorResponse);
 
-impl IntoResponse for NotificationsErrorResponse {
+impl IntoResponse for NotificationErrorResponse {
     fn into_response(self) -> axum::response::Response {
         match self {
-            NotificationsErrorResponse::ErrorResponse(e) => e.into_response(),
-            NotificationsErrorResponse::CardTokenSessionError(_) => {
+            NotificationErrorResponse::ErrorResponse(e) => e.into_response(),
+            NotificationErrorResponse::CardTokenSessionError(_) => {
                 tracing::error!("{:?}", self);
                 StatusCode::INTERNAL_SERVER_ERROR.into_response()
             }
@@ -50,43 +53,62 @@ pub fn notification_center_router() -> Router<AppState> {
 async fn handle_notification(
     State(state): State<AppState>,
     Json(notification): Json<Notification>,
-) -> Result<StatusCode, NotificationsErrorResponse> {
-    use crate::domain::sessions::card_token_registration::Status as CTStatus;
+) -> Result<StatusCode, NotificationErrorResponse> {
+    let get_session = |session_id| {
+        CardTokenSession::from_redis_by_session_id(
+            state.redis_pool.next_connected(),
+            session_id,
+        )
+    };
     match notification {
         Notification::TokenNotification(t) => match t {
             TokenNotification::ReadyToConfirm { session_id } => {
-                let session = CardTokenSession::from_redis_by_session_id(
-                    state.redis_pool.next_connected(),
-                    session_id,
-                )
-                .await?;
-                let status = session.status();
-                if status.eq(&CTStatus::Active) {
-                    match state
-                        .airactions_c
-                        .execute(
-                            Webhook::Confirm,
-                            WebhookRequest::new(
-                                session_id,
-                                &state.settings.payments.cashbox_password,
-                            ),
-                        )
-                        .await
-                    {
-                        Ok(response) => tracing::info!(
-                            "Webhook confirmation response: {response:?}"
-                        ),
-                        Err(e) => {
-                            tracing::error!("Webhook confirmation error: {e}")
-                        }
-                    }
-                } else {
-                    tracing::warn!("Got ReadyToConfirm notification on session with status: {status:?}");
-                }
+                let session = get_session(session_id).await?;
+                let _ = check_status(&state, session_id, &session).await;
                 return Ok(StatusCode::OK);
             }
-            TokenNotification::Finished { .. } => {
-                //
+            TokenNotification::Finished {
+                card_token,
+                session_id,
+                status,
+            } => {
+                match status {
+                    banksim_api::OperationStatus::Success => {
+                        let db_client = state
+                            .pg_pool
+                            .get()
+                            .await
+                            .context(
+                                "Failed to get connection from postgres pool",
+                            )
+                            .map_err(ErrorResponse::UnexpectedError)?;
+                        let session = get_session(session_id).await?;
+                        if check_status(&state, session_id, &session)
+                            .await
+                            .is_ok()
+                        {
+                            internal::insert_card_token()
+                                .bind(
+                                    &db_client,
+                                    &session.user_id(),
+                                    &card_token.unwrap(),
+                                )
+                                .await
+                                .context("Failed to insert card token into pg")
+                                .map_err(ErrorResponse::UnexpectedError)?;
+                        }
+                    }
+                    banksim_api::OperationStatus::Cancel => {
+                        tracing::info!(
+                            "Card token registration operation was cancelled"
+                        );
+                    }
+                    banksim_api::OperationStatus::Fail(e) => {
+                        tracing::error!(
+                            "Card token registration operation failed: {e}"
+                        );
+                    }
+                }
                 return Ok(StatusCode::OK);
             }
         },
@@ -111,4 +133,39 @@ async fn handle_notification(
         // },
         _ => unimplemented!(),
     }
+}
+
+// ───── Helpers ──────────────────────────────────────────────────────────── //
+
+async fn check_status(
+    state: &AppState,
+    session_id: Uuid,
+    session: &CardTokenSession<'_>,
+) -> Result<(), ()> {
+    use crate::domain::sessions::card_token_registration::Status as CTStatus;
+    let status = session.status();
+    if status.eq(&CTStatus::Active) {
+        match state
+            .airactions_c
+            .execute(
+                Webhook::Confirm,
+                WebhookRequest::new(
+                    session_id,
+                    &state.settings.payments.cashbox_password,
+                ),
+            )
+            .await
+        {
+            Ok(response) => {
+                tracing::info!("Webhook confirmation response: {response:?}");
+                return Ok(());
+            }
+            Err(e) => {
+                tracing::error!("Webhook confirmation error: {e}");
+            }
+        }
+    } else {
+        tracing::warn!("Got ReadyToConfirm notification on session with status: {status:?}");
+    }
+    Err(())
 }

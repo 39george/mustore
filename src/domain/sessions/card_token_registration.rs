@@ -71,6 +71,9 @@ impl<'a> CardTokenSession<'a> {
     pub fn status(&self) -> Status {
         self.status.clone()
     }
+    pub fn user_id(&self) -> i32 {
+        self.user_id
+    }
     pub async fn update_status(
         &mut self,
         new: Status,
