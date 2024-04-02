@@ -4,6 +4,7 @@ use anyhow::Context;
 use axum::extract::Path;
 use axum::extract::State;
 use axum::response::IntoResponse;
+use axum::response::Redirect;
 use axum::routing;
 use axum::Json;
 use axum::Router;
@@ -11,7 +12,6 @@ use axum_login::permission_required;
 use banksim_api::register_card_token::RegisterCardToken;
 use banksim_api::register_card_token::RegisterCardTokenRequest;
 use fred::error::RedisError;
-use fred::interfaces::KeysInterface;
 use futures::future::try_join_all;
 use garde::Validate;
 use http::StatusCode;
@@ -27,6 +27,7 @@ use crate::domain::object_key::ObjectKey;
 use crate::domain::requests::creator_access::CreateOfferRequest;
 use crate::domain::requests::creator_access::SubmitProductRequest;
 use crate::domain::requests::creator_access::SubmitServiceRequest;
+use crate::domain::sessions::card_token_registration::CardTokenSession;
 use crate::domain::upload_request::delete_upload_request_data_from_redis;
 use crate::domain::upload_request::verify_upload_request_data_in_redis;
 use crate::impl_debug;
@@ -135,6 +136,7 @@ async fn marks_avg(
     Ok(Json(data))
 }
 
+/// Initialize card connection operation
 #[utoipa::path(
     post,
     path = "/api/protected/creator/connect_card",
@@ -160,7 +162,6 @@ async fn marks_avg(
     tag = "protected.creators"
 )]
 #[tracing::instrument(name = "Initiate creator's card connection", skip_all)]
-#[axum::debug_handler]
 async fn connect_card(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
@@ -180,7 +181,6 @@ async fn connect_card(
         .join("/notification_center/card_connect_notification")
         .unwrap();
     let cashbox_pass = &app_state.settings.payments.cashbox_password;
-    let req_id = uuid::Uuid::new_v4();
     let request = RegisterCardTokenRequest::new(
         notification_url,
         success_url,
@@ -192,10 +192,11 @@ async fn connect_card(
         .execute(RegisterCardToken, request)
         .await?;
 
-    let result = match response.status {
-        banksim_api::OperationStatus::Success => {
-            response.registration_url.unwrap().to_string()
-        }
+    let (operation_id, registration_url) = match response.status {
+        banksim_api::OperationStatus::Success => (
+            response.operation_id.unwrap(),
+            response.registration_url.unwrap().to_string(),
+        ),
         banksim_api::OperationStatus::Fail(e) => {
             return Err(CreatorErrorResponse::ErrorResponse(
                 ErrorResponse::InternalError(anyhow::Error::msg(e)),
@@ -204,8 +205,24 @@ async fn connect_card(
         banksim_api::OperationStatus::Cancel => todo!(),
     };
 
-    // let redis_client = app_state.redis_pool.next();
-    Ok(result)
+    let redis_client = app_state.redis_pool;
+    match CardTokenSession::new(
+        redis_client.next_connected(),
+        operation_id,
+        user.id,
+    )
+    .await
+    {
+        Ok(()) => (),
+        Err(e) => {
+            return Err(ErrorResponse::InternalError(anyhow::anyhow!(
+                "Failed to store card token session in redis: {e}"
+            ))
+            .into())
+        }
+    }
+
+    Ok(Redirect::to(&registration_url))
 }
 
 /// Submit a new product.
