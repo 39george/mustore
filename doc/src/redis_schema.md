@@ -1,12 +1,13 @@
 # Redis Data Schema
 
-| Name                                               | Type                  | Key Example                             | Expiration                | Module                                                                  |
-| -------------------------------------------------- | --------------------- | --------------------------------------- | ------------------------- | ----------------------------------------------------------------------- |
-| [Cookie](#cookie)                                  | **String(string)**    | `{cookie_token}`                        | 1 day (redis)             | `tower_sessions_redis_store`                                            |
-| [Upload request](#upload-request)                  | **String(timestamp)** | `upload_request:{user_id}:{object_key}` | 1 hour (cron)             | `crate::domain::upload_request`                                         |
-| [User candidate reg](#user-candidate-registration) | **HASH**              | `user_candidate:{email}`                | 30 min (redis)            | `crate::domain::user_candidate`                                         |
-| [Username status req limit](#request-limit)        | **String(int)**       | `username_status_req_limit:{ip_addr}`   | 1 min or 12 hours (redis) | `crate::routes::development`, `crate::auth::login`, `crate::middleware` |
-| [Payment](#payment)                                | **String(json)**      | `payment:{payment_id}`                  | No                        |                                                                         |
+| Name                                                                | Type                  | Key Example                             | Expiration                | Module                                                                  |
+| ------------------------------------------------------------------- | --------------------- | --------------------------------------- | ------------------------- | ----------------------------------------------------------------------- |
+| [Cookie](#cookie)                                                   | **String(string)**    | `{cookie_token}`                        | 1 day (redis)             | `tower_sessions_redis_store`                                            |
+| [Upload request](#upload-request)                                   | **String(timestamp)** | `upload_request:{user_id}:{object_key}` | 1 hour (cron)             | `crate::domain::upload_request`                                         |
+| [User candidate reg](#user-candidate-registration)                  | **HASH**              | `user_candidate:{email}`                | 30 min (redis)            | `crate::domain::user_candidate`                                         |
+| [Username status req limit](#request-limit)                         | **String(int)**       | `username_status_req_limit:{ip_addr}`   | 1 min or 12 hours (redis) | `crate::routes::development`, `crate::auth::login`, `crate::middleware` |
+| [Card token registration session](#card-token-registration-session) | **String(json)**      |                                         | 1 hour                    | `crate::domain::sessions::card_token_registration`                      |
+| [Payment](#payment)                                                 | **String(json)**      | `payment:{payment_id}`                  | No                        |                                                                         |
 
 ### Cookie
 
@@ -49,6 +50,18 @@ Body example:
 
 ```json
 16
+```
+
+### Card token registration session
+
+Description
+
+```json
+{
+  "operation_id": 1,
+  "user_id": 1,
+  "status": "pending"
+}
 ```
 
 ### Payment
