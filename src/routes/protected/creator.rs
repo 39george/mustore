@@ -188,7 +188,7 @@ async fn connect_card(
         cashbox_pass,
     );
     let response = app_state
-        .payments_client
+        .airactions_c
         .execute(RegisterCardToken, request)
         .await?;
 

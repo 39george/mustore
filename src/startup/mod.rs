@@ -78,7 +78,7 @@ pub struct AppState {
     pub email_client: EmailClient,
     pub argon2_obj: argon2::Argon2<'static>,
     pub captcha_verifier: CaptchaVerifier,
-    pub payments_client: airactions::Client,
+    pub airactions_c: airactions::Client,
     pub settings: Arc<Settings>,
 }
 
@@ -190,7 +190,7 @@ impl Application {
             email_client,
             argon2_obj,
             captcha_verifier,
-            payments_client,
+            airactions_c: payments_client,
             settings,
         };
 
