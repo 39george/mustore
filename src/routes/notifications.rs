@@ -16,6 +16,7 @@ use uuid::Uuid;
 use crate::cornucopia::queries::internal;
 use crate::domain::sessions::card_token_registration::CardTokenSession;
 use crate::domain::sessions::card_token_registration::CardTokenSessionError;
+use crate::domain::sessions::card_token_registration::Status as CTStatus;
 use crate::impl_debug;
 use crate::startup::AppState;
 
@@ -46,11 +47,11 @@ impl IntoResponse for NotificationErrorResponse {
 // ───── Handlers ─────────────────────────────────────────────────────────── //
 
 pub fn notification_center_router() -> Router<AppState> {
-    Router::new().route("/notification", routing::post(handle_notification))
+    Router::new().route("/bank", routing::post(bank_notification))
 }
 
 #[tracing::instrument(name = "Got notification", skip_all)]
-async fn handle_notification(
+async fn bank_notification(
     State(state): State<AppState>,
     Json(notification): Json<Notification>,
 ) -> Result<StatusCode, NotificationErrorResponse> {
@@ -64,7 +65,9 @@ async fn handle_notification(
         Notification::TokenNotification(t) => match t {
             TokenNotification::ReadyToConfirm { session_id } => {
                 let session = get_session(session_id).await?;
-                let _ = check_status(&state, session_id, &session).await;
+                let _ = check_status_and_confirm(&state, session_id, &session)
+                    .await;
+                // Return OK meaning that we handled notification
                 return Ok(StatusCode::OK);
             }
             TokenNotification::Finished {
@@ -74,7 +77,9 @@ async fn handle_notification(
             } => {
                 match status {
                     banksim_api::OperationStatus::Success => {
-                        let db_client = state
+                        let session = get_session(session_id).await?;
+                        if session.status().eq(&CTStatus::Active) {
+                            let db_client = state
                             .pg_pool
                             .get()
                             .await
@@ -82,11 +87,6 @@ async fn handle_notification(
                                 "Failed to get connection from postgres pool",
                             )
                             .map_err(ErrorResponse::UnexpectedError)?;
-                        let session = get_session(session_id).await?;
-                        if check_status(&state, session_id, &session)
-                            .await
-                            .is_ok()
-                        {
                             internal::insert_card_token()
                                 .bind(
                                     &db_client,
@@ -97,6 +97,7 @@ async fn handle_notification(
                                 .context("Failed to insert card token into pg")
                                 .map_err(ErrorResponse::UnexpectedError)?;
                         }
+                        tracing::info!("Successfully created card token!");
                     }
                     banksim_api::OperationStatus::Cancel => {
                         tracing::info!(
@@ -137,12 +138,11 @@ async fn handle_notification(
 
 // ───── Helpers ──────────────────────────────────────────────────────────── //
 
-async fn check_status(
+async fn check_status_and_confirm(
     state: &AppState,
     session_id: Uuid,
     session: &CardTokenSession<'_>,
 ) -> Result<(), ()> {
-    use crate::domain::sessions::card_token_registration::Status as CTStatus;
     let status = session.status();
     if status.eq(&CTStatus::Active) {
         match state
