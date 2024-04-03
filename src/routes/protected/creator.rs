@@ -33,6 +33,7 @@ use crate::domain::upload_request::verify_upload_request_data_in_redis;
 use crate::impl_debug;
 use crate::routes::ErrorResponse;
 use crate::startup::api_doc::BadRequestResponse;
+use crate::startup::api_doc::ForbiddenResponse;
 use crate::startup::api_doc::GetCreatorSongs;
 use crate::startup::api_doc::InternalErrorResponse;
 use crate::startup::AppState;
@@ -154,6 +155,7 @@ async fn marks_avg(
             )
         ),
         (status = 403, description = "Forbidden"),
+        (status = 403, response = ForbiddenResponse),
         (status = 500, response = InternalErrorResponse)
     ),
     security(
@@ -236,7 +238,7 @@ async fn connect_card(
     responses(
         (status = 201, description = "Product was submitted"),
         (status = 400, response = BadRequestResponse),
-        (status = 403, description = "Forbidden"),
+        (status = 403, response = ForbiddenResponse),
         (status = 500, response = InternalErrorResponse)
     ),
     security(

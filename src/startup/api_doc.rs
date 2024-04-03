@@ -28,6 +28,10 @@ use crate::{
 #[response(description = "Something happened on the server")]
 pub struct InternalErrorResponse;
 
+#[derive(ToResponse)]
+#[response(description = "You not allowed to access this method")]
+pub struct ForbiddenResponse;
+
 #[allow(dead_code)]
 #[derive(ToResponse)]
 #[response(
