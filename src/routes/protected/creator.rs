@@ -11,6 +11,8 @@ use axum::Router;
 use axum_login::permission_required;
 use banksim_api::register_card_token::RegisterCardToken;
 use banksim_api::register_card_token::RegisterCardTokenRequest;
+use banksim_api::token_info::TokenInfo;
+use banksim_api::token_info::TokenInfoRequest;
 use fred::error::RedisError;
 use futures::future::try_join_all;
 use garde::Validate;
@@ -21,6 +23,7 @@ use reqwest::Url;
 
 use crate::auth::users::AuthSession;
 use crate::cornucopia::queries::creator_access;
+use crate::cornucopia::queries::internal;
 use crate::cornucopia::types::public::Objecttype;
 use crate::domain::general_types::ProductStatus;
 use crate::domain::object_key::ObjectKey;
@@ -37,6 +40,7 @@ use crate::startup::api_doc::ForbiddenResponse;
 use crate::startup::api_doc::GetCreatorSongs;
 use crate::startup::api_doc::InternalErrorResponse;
 use crate::startup::AppState;
+use crate::trace_err;
 
 // ───── Types ────────────────────────────────────────────────────────────── //
 
@@ -48,6 +52,8 @@ pub enum CreatorErrorResponse {
     NoUploadInfoInCacheError(#[from] RedisError),
     #[error("Error with payment api client")]
     PaymentClientError(#[from] airactions::ClientError),
+    #[error("There are already existing token in db")]
+    TokenAlreadyExists,
 }
 
 impl_debug!(CreatorErrorResponse);
@@ -63,6 +69,10 @@ impl IntoResponse for CreatorErrorResponse {
             CreatorErrorResponse::PaymentClientError(_) => {
                 tracing::error!("{:?}", self);
                 StatusCode::INTERNAL_SERVER_ERROR.into_response()
+            }
+            CreatorErrorResponse::TokenAlreadyExists => {
+                tracing::error!("{:?}", self);
+                StatusCode::CONFLICT.into_response()
             }
         }
     }
@@ -142,20 +152,9 @@ async fn marks_avg(
     post,
     path = "/api/protected/creator/connect_card",
     responses(
-        (
-            status = 200,
-            body = creator_access::GetCreatorMarksAvg,
-            content_type = "application/json",
-            description = "Marks avg for creator",
-            example = json!(
-                  {
-                    "avg": 4.7,
-                    "count": 15,
-                  }
-            )
-        ),
-        (status = 403, description = "Forbidden"),
+        (status = 303, description = "You are being redirected to the bank"),
         (status = 403, response = ForbiddenResponse),
+        (status = 409, description = "Valid card token already exists"),
         (status = 500, response = InternalErrorResponse)
     ),
     security(
@@ -166,30 +165,59 @@ async fn marks_avg(
 #[tracing::instrument(name = "Initiate creator's card connection", skip_all)]
 async fn connect_card(
     auth_session: AuthSession,
-    State(app_state): State<AppState>,
+    State(state): State<AppState>,
 ) -> Result<Redirect, CreatorErrorResponse> {
     let user = auth_session.user.ok_or(ErrorResponse::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
 
-    let base: Url = app_state.settings.app_base_url.parse().unwrap();
-    let success_url = base
-        .join("/notification_center/card_connect_success")
-        .unwrap();
-    let fail_url = base
-        .join("/notification_center/card_connect_failed")
-        .unwrap();
-    let notification_url = base
-        .join("/notification_center/card_connect_notification")
-        .unwrap();
-    let cashbox_pass = &app_state.settings.payments.cashbox_password;
+    let db_client = state
+        .pg_pool
+        .get()
+        .await
+        .context("Failed to get connection from postgres pool")
+        .map_err(ErrorResponse::UnexpectedError)?;
+    if let Some(t) = internal::fetch_card_token_by_user_id()
+        .bind(&db_client, &user.id)
+        .opt()
+        .await
+        .context("Failed to fetch card token from db")
+        .map_err(ErrorResponse::UnexpectedError)?
+    {
+        let response = state
+            .airactions_c
+            .execute(
+                TokenInfo,
+                TokenInfoRequest::new(
+                    t.clone(),
+                    &state.settings.payments.cashbox_password,
+                ),
+            )
+            .await?;
+        tracing::warn!("Token for user already exists in db, checked it in bank: {response:?}");
+        if response.status.is_ok_and(|s| s) {
+            return Err(CreatorErrorResponse::TokenAlreadyExists);
+        } else {
+            let _ = trace_err!(internal::delete_card_token()
+                .bind(&db_client, &t)
+                .await
+                .context("Failed to delete card token from db")
+                .map_err(ErrorResponse::UnexpectedError));
+        }
+    }
+
+    let base: Url = state.settings.app_base_url.parse().unwrap();
+    let success_url = base.join("/notification_center/bank").unwrap();
+    let fail_url = base.join("/notification_center/bank").unwrap();
+    let notification_url = base.join("/notification_center/bank").unwrap();
+    let cashbox_pass = &state.settings.payments.cashbox_password;
     let request = RegisterCardTokenRequest::new(
         notification_url,
         success_url,
         fail_url,
         cashbox_pass,
     );
-    let response = app_state
+    let response = state
         .airactions_c
         .execute(RegisterCardToken, request)
         .await?;
@@ -207,7 +235,7 @@ async fn connect_card(
         banksim_api::OperationStatus::Cancel => todo!(),
     };
 
-    let redis_client = app_state.redis_pool;
+    let redis_client = state.redis_pool;
     match CardTokenSession::new(
         redis_client.next_connected(),
         operation_id,
@@ -224,6 +252,7 @@ async fn connect_card(
         }
     }
 
+    tracing::info!("Redirecting to: {registration_url}");
     Ok(Redirect::to(&registration_url))
 }
 
