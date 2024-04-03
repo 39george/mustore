@@ -33,7 +33,8 @@ pub enum Status {
 pub struct CardTokenSession<'a> {
     #[serde(skip)]
     redis_client: Option<&'a RedisClient>,
-    session_id: Uuid,
+    #[serde(skip)]
+    session_id: Option<Uuid>,
     user_id: UserId,
     status: Status,
 }
@@ -46,7 +47,7 @@ impl<'a> CardTokenSession<'a> {
     ) -> Result<(), CardTokenSessionError> {
         let s = CardTokenSession {
             redis_client: Some(client),
-            session_id: id,
+            session_id: Some(id),
             user_id,
             status: Status::default(),
         };
@@ -65,6 +66,7 @@ impl<'a> CardTokenSession<'a> {
             .ok_or(CardTokenSessionError::SessionNotFound)?
             .map(|mut s| {
                 s.redis_client = Some(client);
+                s.session_id = Some(session_id);
                 s
             })?)
     }
@@ -85,13 +87,13 @@ impl<'a> CardTokenSession<'a> {
     pub async fn remove(&self) -> Result<(), CardTokenSessionError> {
         self.redis_client
             .unwrap()
-            .del::<(), _>(Self::redis_key(self.session_id))
+            .del::<(), _>(Self::redis_key(self.session_id.unwrap()))
             .await?;
         Ok(())
     }
     async fn set(&self) -> Result<(), CardTokenSessionError> {
         let val = serde_json::to_string(&self)?;
-        let key = Self::redis_key(self.session_id);
+        let key = Self::redis_key(self.session_id.unwrap());
         self.redis_client
             .unwrap()
             .set(&key, val, None, None, false)
