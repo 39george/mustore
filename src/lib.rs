@@ -75,3 +75,29 @@ macro_rules! impl_debug {
         }
     };
 }
+
+/// This macro is for tracing error and returning Result if there are some
+/// meaningful Ok() case, and returning () if there are no meaningful result.
+/// It is useful to simply trace error message on fallible operations which doesn't
+/// return anything in the Ok() branch.
+#[macro_export]
+macro_rules! trace_err {
+    ($exp:expr) => {
+        match $exp {
+            Ok(v) => Ok(v),
+            Err(e) => {
+                tracing::error!("{e}");
+                Err(e)
+            }
+        }
+    };
+    ($exp:expr, ()) => {
+        match $exp {
+            Ok(()) => (),
+            Err(e) => {
+                tracing::error!("{e}");
+                ()
+            }
+        }
+    };
+}
