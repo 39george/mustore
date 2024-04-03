@@ -237,10 +237,10 @@ impl Application {
             .merge(auth::login::login_router(app_state.clone()))
             .layer(crate::middleware::map_response::BadRequestIntoJsonLayer) // 3
             .layer(auth_service)                                             // 2
-            .route("/api/health_check", routing::get(health_check))
             .layer(crate::middleware::ban_by_ip::BanLayer {                  // 1
                 state: app_state.clone(),
-            });
+            })
+            .route("/api/health_check", routing::get(health_check));
 
         if let Ok(_) = std::env::var("TEST_TRACING") {
             app = app.layer(
