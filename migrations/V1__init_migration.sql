@@ -22,7 +22,7 @@ CREATE TYPE ProductOrderStatus
 AS ENUM ('created', 'paid');
 
 CREATE TYPE ServiceOrderStatus
-AS ENUM ('paid', 'delivered', 'on_revision', 'dispute', 'rejected', 'fulfiled');
+AS ENUM ('paid', 'delivered', 'on_revision', 'dispute', 'rejected', 'fulfilled', 'cancelled');
 
 CREATE TYPE ObjectType
 AS ENUM ('image', 'audio', 'multitrack', 'video', 'attachment');
@@ -689,9 +689,15 @@ BEGIN
         IF mood_count >= 3 THEN
             RAISE EXCEPTION 'A product can have at most 3 moods.';
         END IF;
-    END IF;
+    ELSEIF TG_OP = 'DELETE' THEN
+        SELECT COUNT(*) INTO mood_count
+        FROM products_moods
+        WHERE products_id = OLD.products_id;
 
-    -- TODO: Implement minimum mood count (1)
+        IF mood_count <= 1 THEN
+            RAISE EXCEPTION 'A product should have at least 1 mood.';
+        END IF;
+    END IF;
 
     RETURN NEW;
 END;
