@@ -24,7 +24,7 @@ async fn main() {
     let config =
         Settings::load_configuration().expect("Failed to load configuration");
 
-    if let Err(e) = Application::build(config)
+    if let Err(e) = Application::build(config, false)
         .await
         .expect("Failed to build application")
         .run_until_stopped()

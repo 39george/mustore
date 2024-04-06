@@ -26,7 +26,6 @@ pub struct UserConfirmationQuery {
 
 // ───── Handlers ─────────────────────────────────────────────────────────── //
 
-// TODO: redirect on success to real address
 /// If error, we return here only an `AccountConfirmationFailed`
 /// to redirect user to a special page, because React app will not handle
 /// our `internal error` case.
@@ -197,7 +196,11 @@ pub async fn confirm(
         return Err(e);
     }
 
-    Ok(Redirect::to("https://google.com"))
+    // TODO: redirect on success to real address
+    let var_name =
+        format!("{}/api/health_check", app_state.settings.app_base_url);
+    dbg!(&var_name);
+    Ok(Redirect::to(&var_name))
 }
 
 // ───── Functions ────────────────────────────────────────────────────────── //

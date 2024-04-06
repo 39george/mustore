@@ -88,7 +88,8 @@ impl Application {
     /// This functions builds a new `Application` with given configuration.
     /// It also configures a pool of connections to the PostgreSQL database.
     pub async fn build(
-        configuration: Settings,
+        mut configuration: Settings,
+        is_test: bool,
     ) -> Result<Application, anyhow::Error> {
         let pg_pool = get_postgres_connection_pool(&configuration.database);
         let pg_client = pg_pool
@@ -126,6 +127,12 @@ impl Application {
         tracing::info!("running on {} address", address);
         let listener = TcpListener::bind(address).await?;
         let port = listener.local_addr()?.port();
+
+        // Override base url in tests (which use random ports)
+        if is_test {
+            configuration.app_base_url =
+                format!("http://{}:{}", configuration.app_addr, port);
+        }
 
         let server = Self::build_server(
             listener,
@@ -283,7 +290,6 @@ async fn shutdown_signal() {
             .await
             .expect("failed to install Ctrl+C handler");
     };
-    #[cfg(unix)]
     let terminate = async {
         tokio::signal::unix::signal(
             tokio::signal::unix::SignalKind::terminate(),
@@ -292,8 +298,6 @@ async fn shutdown_signal() {
         .recv()
         .await;
     };
-    #[cfg(not(unix))]
-    let terminate = std::future::pending::<()>();
     tokio::select! {
         () = ctrl_c => {},
         () = terminate => {},

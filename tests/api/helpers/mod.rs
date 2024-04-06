@@ -133,7 +133,7 @@ impl TestApp {
             prepare_postgres_with_rand_user(config.database.clone()).await;
         config.database = pg_config;
 
-        let application = Application::build(config)
+        let application = Application::build(config, true)
             .await
             .expect("Failed to build application");
 
