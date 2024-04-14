@@ -876,9 +876,9 @@ const MainContentProducts: FC = () => {
               name={item.name}
               cover_url={item.cover_url}
               author={item.author}
-              likes={item.likes}
-              listenings={item.listenings}
               price={item.price}
+              primary_genre={item.primary_genre}
+              moods={item.moods}
             />
           );
         })}
