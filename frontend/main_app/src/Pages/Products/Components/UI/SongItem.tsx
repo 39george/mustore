@@ -1,44 +1,56 @@
 import styles from "./SongItem.module.scss";
 import { FC, memo } from "react";
 import { SongItem } from "../../../../types/types";
-import { BsThreeDotsVertical } from "react-icons/bs";
 import { FaRegHeart } from "react-icons/fa";
-import { PiHeadphonesFill, PiShoppingCartFill } from "react-icons/pi";
+import { BsPlayCircle } from "react-icons/bs";
+import AudioWavesIcon from "../../../../UI/AudioWavesIcon";
+import { HiDotsHorizontal } from "react-icons/hi";
 
-const SongItem: FC<SongItem> = memo((props) => {
-  const formatted_price = props.price.toLocaleString("ru-RU");
+const SongItem: FC<SongItem> = memo(
+  ({ author, name, price, cover_url, primary_genre, moods }) => {
+    const formatted_price = price.toLocaleString("ru-RU");
 
-  return (
-    <div className={styles.song_item}>
-      <div className={styles.image_wrapper}>
-        <img
-          src={props.cover_url}
-          alt="album cover"
-          draggable={false}
-        />
-      </div>
-      <div className={styles.title}>
-        <p className={styles.name}>{props.name}</p>
-        <BsThreeDotsVertical className={styles.more_info_icon} />
-      </div>
-      <p className={styles.author}>{props.author}</p>
-      <div className={styles.likes_and_listenings}>
-        <div className={styles.likes}>
-          <FaRegHeart className={styles.like_icon} />
-          <p className={styles.likes_amount}>{props.likes}</p>
+    return (
+      <div className={styles.song_item}>
+        <div className={styles.image_wrapper}>
+          <img
+            src={cover_url}
+            alt="album cover"
+            draggable={false}
+          />
+          <div className={styles.image_hover}>
+            <div className={styles.decor_and_info}>
+              <AudioWavesIcon
+                width="25"
+                height="25"
+                fill="#FEFEFE"
+              />
+              <HiDotsHorizontal className={styles.more_info_icon} />
+            </div>
+            <BsPlayCircle className={styles.play_icon} />
+          </div>
         </div>
-        <div className={styles.listenings}>
-          <PiHeadphonesFill className={styles.listenings_icon} />
-          <p className={styles.listenings_amount}>{props.listenings}</p>
+        <p className={styles.name}>{name}</p>
+        <p className={styles.author}>by {author}</p>
+        <hr className={styles.divider} />
+        <div className={styles.price_container}>
+          <p className={styles.price_name}>цена</p>
+          <p className={styles.price}>{formatted_price} ₽</p>
+        </div>
+        <div className={styles.tags}>
+          <p className={styles.tag}>{primary_genre}</p>
+          <p className={styles.tag}>{moods[0]}</p>
+          <p className={styles.tag}>{moods[1]}</p>
+        </div>
+        <div className={styles.action_buttons}>
+          <div className={styles.buy_button}>купить</div>
+          <div className={styles.like_container}>
+            <FaRegHeart className={styles.like_icon} />
+          </div>
         </div>
       </div>
-      <hr className={styles.divider} />
-      <div className={styles.price_and_cart}>
-        <p className={styles.price}>{formatted_price} ₽</p>
-        <PiShoppingCartFill className={styles.cart_icon} />
-      </div>
-    </div>
-  );
-});
+    );
+  }
+);
 
 export default SongItem;
