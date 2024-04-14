@@ -98,9 +98,7 @@
 
 .name,
 .author {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  @include text_overflow;
 }
 
 .author,
@@ -111,7 +109,7 @@
 .author {
   margin-bottom: 0.5rem;
   font-weight: 600;
-  opacity: 0.2;
+  opacity: 0.3;
 }
 
 .price {
@@ -148,12 +146,12 @@
   transition: 0.15s ease-out;
 
   &:hover {
-    background-color: rgba($color: $accent_purple, $alpha: 0.12);
+    background-color: rgba($color: $light_pink, $alpha: 0.12);
   }
 }
 
 .like_icon {
-  color: $accent_purple;
+  color: $light_pink;
 }
 
 //--- Styles for type "new" --------------------------------------------------//
