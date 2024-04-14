@@ -140,6 +140,8 @@ export const song_items: SongItem[] = [
     price: 100_000,
     likes: 49,
     listenings: 399,
+    primary_genre: "поп",
+    moods: ["веселый", "энергичный"],
   },
   {
     id: 2,
@@ -149,6 +151,8 @@ export const song_items: SongItem[] = [
     price: 70_000,
     likes: 35,
     listenings: 399,
+    primary_genre: "поп",
+    moods: ["веселый", "энергичный"],
   },
   {
     id: 3,
@@ -158,6 +162,8 @@ export const song_items: SongItem[] = [
     price: 90_000,
     likes: 32,
     listenings: 399,
+    primary_genre: "поп",
+    moods: ["веселый", "энергичный"],
   },
   {
     id: 4,
@@ -167,6 +173,8 @@ export const song_items: SongItem[] = [
     price: 60_000,
     likes: 29,
     listenings: 399,
+    primary_genre: "поп",
+    moods: ["веселый", "энергичный"],
   },
   {
     id: 5,
@@ -176,6 +184,8 @@ export const song_items: SongItem[] = [
     price: 30_000,
     likes: 13,
     listenings: 399,
+    primary_genre: "поп",
+    moods: ["веселый", "энергичный"],
   },
   {
     id: 6,
@@ -185,6 +195,8 @@ export const song_items: SongItem[] = [
     price: 56_000,
     likes: 21,
     listenings: 399,
+    primary_genre: "поп",
+    moods: ["веселый", "энергичный"],
   },
   {
     id: 7,
@@ -194,6 +206,8 @@ export const song_items: SongItem[] = [
     price: 100_000,
     likes: 49,
     listenings: 399,
+    primary_genre: "поп",
+    moods: ["веселый", "энергичный"],
   },
   {
     id: 8,
@@ -203,6 +217,8 @@ export const song_items: SongItem[] = [
     price: 70_000,
     likes: 35,
     listenings: 399,
+    primary_genre: "поп",
+    moods: ["веселый", "энергичный"],
   },
   {
     id: 9,
@@ -212,6 +228,8 @@ export const song_items: SongItem[] = [
     price: 90_000,
     likes: 32,
     listenings: 399,
+    primary_genre: "поп",
+    moods: ["веселый", "энергичный"],
   },
   {
     id: 10,
@@ -221,6 +239,8 @@ export const song_items: SongItem[] = [
     price: 60_000,
     likes: 29,
     listenings: 399,
+    primary_genre: "поп",
+    moods: ["веселый", "энергичный"],
   },
   {
     id: 11,
@@ -230,6 +250,8 @@ export const song_items: SongItem[] = [
     price: 30_000,
     likes: 13,
     listenings: 399,
+    primary_genre: "поп",
+    moods: ["веселый", "энергичный"],
   },
   {
     id: 12,
@@ -239,6 +261,8 @@ export const song_items: SongItem[] = [
     price: 56_000,
     likes: 21,
     listenings: 399,
+    primary_genre: "поп",
+    moods: ["веселый", "энергичный"],
   },
   {
     id: 13,
@@ -248,6 +272,8 @@ export const song_items: SongItem[] = [
     price: 56_000,
     likes: 21,
     listenings: 399,
+    primary_genre: "поп",
+    moods: ["веселый", "энергичный"],
   },
   {
     id: 14,
@@ -257,6 +283,8 @@ export const song_items: SongItem[] = [
     price: 100_000,
     likes: 49,
     listenings: 399,
+    primary_genre: "поп",
+    moods: ["веселый", "энергичный"],
   },
   {
     id: 15,
@@ -266,6 +294,8 @@ export const song_items: SongItem[] = [
     price: 70_000,
     likes: 35,
     listenings: 399,
+    primary_genre: "поп",
+    moods: ["веселый", "энергичный"],
   },
   {
     id: 16,
@@ -275,6 +305,8 @@ export const song_items: SongItem[] = [
     price: 100_000,
     likes: 49,
     listenings: 399,
+    primary_genre: "поп",
+    moods: ["веселый", "энергичный"],
   },
   {
     id: 17,
@@ -284,6 +316,8 @@ export const song_items: SongItem[] = [
     price: 70_000,
     likes: 35,
     listenings: 399,
+    primary_genre: "поп",
+    moods: ["веселый", "энергичный"],
   },
   {
     id: 18,
@@ -293,6 +327,8 @@ export const song_items: SongItem[] = [
     price: 90_000,
     likes: 32,
     listenings: 399,
+    primary_genre: "поп",
+    moods: ["веселый", "энергичный"],
   },
   {
     id: 19,
@@ -302,6 +338,8 @@ export const song_items: SongItem[] = [
     price: 60_000,
     likes: 29,
     listenings: 399,
+    primary_genre: "поп",
+    moods: ["веселый", "энергичный"],
   },
   {
     id: 20,
@@ -311,6 +349,8 @@ export const song_items: SongItem[] = [
     price: 30_000,
     likes: 13,
     listenings: 399,
+    primary_genre: "поп",
+    moods: ["веселый", "энергичный"],
   },
   {
     id: 21,
@@ -320,6 +360,8 @@ export const song_items: SongItem[] = [
     price: 56_000,
     likes: 21,
     listenings: 399,
+    primary_genre: "поп",
+    moods: ["веселый", "энергичный"],
   },
   {
     id: 22,
@@ -329,6 +371,8 @@ export const song_items: SongItem[] = [
     price: 100_000,
     likes: 49,
     listenings: 399,
+    primary_genre: "поп",
+    moods: ["веселый", "энергичный"],
   },
   {
     id: 23,
@@ -338,6 +382,8 @@ export const song_items: SongItem[] = [
     price: 70_000,
     likes: 35,
     listenings: 399,
+    primary_genre: "поп",
+    moods: ["веселый", "энергичный"],
   },
   {
     id: 24,
@@ -347,6 +393,8 @@ export const song_items: SongItem[] = [
     price: 90_000,
     likes: 32,
     listenings: 399,
+    primary_genre: "поп",
+    moods: ["веселый", "энергичный"],
   },
   {
     id: 25,
@@ -356,6 +404,8 @@ export const song_items: SongItem[] = [
     price: 60_000,
     likes: 29,
     listenings: 399,
+    primary_genre: "поп",
+    moods: ["веселый", "энергичный"],
   },
   {
     id: 26,
@@ -365,6 +415,8 @@ export const song_items: SongItem[] = [
     price: 30_000,
     likes: 13,
     listenings: 399,
+    primary_genre: "поп",
+    moods: ["веселый", "энергичный"],
   },
   {
     id: 27,
@@ -374,6 +426,8 @@ export const song_items: SongItem[] = [
     price: 56_000,
     likes: 21,
     listenings: 399,
+    primary_genre: "поп",
+    moods: ["веселый", "энергичный"],
   },
   {
     id: 28,
@@ -383,6 +437,8 @@ export const song_items: SongItem[] = [
     price: 56_000,
     likes: 21,
     listenings: 399,
+    primary_genre: "поп",
+    moods: ["веселый", "энергичный"],
   },
   {
     id: 29,
@@ -392,6 +448,8 @@ export const song_items: SongItem[] = [
     price: 100_000,
     likes: 49,
     listenings: 399,
+    primary_genre: "поп",
+    moods: ["веселый", "энергичный"],
   },
   {
     id: 30,
@@ -401,5 +459,7 @@ export const song_items: SongItem[] = [
     price: 70_000,
     likes: 35,
     listenings: 399,
+    primary_genre: "поп",
+    moods: ["веселый", "энергичный"],
   },
 ];
