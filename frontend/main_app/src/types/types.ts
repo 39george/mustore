@@ -42,9 +42,11 @@ export interface SongItem {
   cover_url: string;
   name: string;
   author: string;
-  likes: number;
-  listenings: number;
+  likes?: number;
+  listenings?: number;
   price: number;
+  primary_genre: string;
+  moods: string[];
 }
 
 export interface CheckedItems {
