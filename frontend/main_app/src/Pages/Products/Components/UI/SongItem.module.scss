@@ -238,8 +238,8 @@
   .buy_button {
     padding: 0.5rem
       clamp(
-        1.5rem,
-        calc(1.5rem + (44 - 22) * ((100vw - 320px) / (460 - 320))),
+        1.25rem,
+        calc(1.25rem + (44 - 20) * ((100vw - 320px) / (460 - 320))),
         2.75rem
       );
   }
