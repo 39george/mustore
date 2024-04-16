@@ -4,10 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-banksim-api = { path = "../../crates/airactions/backends/banksim-api" }
-airactions = { path = "../../crates/airactions/airactions" }
-# banksim-api = { git = "https://github.com/ghashy/airactions.git" }
-# airactions = { git = "https://github.com/ghashy/airactions.git" }
+# banksim-api = { path = "../../crates/airactions/backends/banksim-api" }
+# airactions = { path = "../../crates/airactions/airactions" }
+banksim-api = { git = "https://github.com/ghashy/airactions.git" }
+airactions = { git = "https://github.com/ghashy/airactions.git" }
 # Database-related dependencies
 postgres-types = { version = "0.2.6", features = ["derive"] }
 tokio-postgres = { version = "0.7.10", features = [
