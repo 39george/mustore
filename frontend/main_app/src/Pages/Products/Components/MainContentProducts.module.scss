@@ -112,7 +112,7 @@
 
     .custom_checkbox {
       .checkmark {
-        border: 1px solid $light_pink;
+        border: 1px solid $accent_purple;
       }
     }
   }
@@ -134,7 +134,7 @@
   font-size: 0.875rem;
   font-weight: 300;
 
-  color: $light_pink;
+  color: $accent_purple;
   cursor: pointer;
 
   &:hover {
@@ -179,13 +179,13 @@
       width: 0.625rem;
       height: 0.625rem;
 
-      background-color: $light_pink;
+      background-color: $accent_purple;
       border-radius: 2px;
     }
   }
 
   input:checked ~ .checkmark {
-    border: 1px solid $light_pink;
+    border: 1px solid $accent_purple;
     &::after {
       display: block;
     }
@@ -231,7 +231,7 @@
 
 .chevron {
   font-size: 1.5rem;
-  color: $light_pink;
+  color: $accent_purple;
   transition: transform 0.2s ease-out;
 }
 
