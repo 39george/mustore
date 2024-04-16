@@ -78,7 +78,7 @@ pub struct GetSongsListRequest {
     /// Filter by genres
     #[serde(default)]
     #[garde(inner(
-        length(min=MOOD_MIN_LEN, max=MOOD_MAX_LEN),
+        length(chars, min=MOOD_MIN_LEN, max=MOOD_MAX_LEN),
         custom(forbidden_characters),
         custom(contains_no_control_characters)
     ))]
@@ -86,7 +86,7 @@ pub struct GetSongsListRequest {
     /// Filter by moods (vibes)
     #[serde(default)]
     #[garde(inner(
-        length(min=MOOD_MIN_LEN, max=MOOD_MAX_LEN),
+        length(chars, min=MOOD_MIN_LEN, max=MOOD_MAX_LEN),
         custom(forbidden_characters),
         custom(contains_no_control_characters)
     ))]

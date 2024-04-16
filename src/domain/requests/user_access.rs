@@ -12,7 +12,7 @@ pub struct UploadFileRequest {
     #[garde(skip)]
     pub media_type: mediatype::MediaTypeBuf,
     #[garde(
-        length(min = MIN_FILENAME_LEN, max = MAX_FILENAME_LEN),
+        length(chars, min = MIN_FILENAME_LEN, max = MAX_FILENAME_LEN),
         custom(forbidden_characters),
         custom(contains_no_control_characters)
     )]
@@ -39,8 +39,8 @@ pub struct SendMessageRequest {
     /// Id of conversation
     pub conversation_id: i32,
     /// Text of a message
+    #[garde(length(chars, min = MIN_MESSAGE_LEN, max = MAX_MESSAGE_LEN))]
     #[schema(min_length = 1, max_length = 2500)]
-    #[garde(length(min = MIN_MESSAGE_LEN, max = MAX_MESSAGE_LEN))]
     pub text: String,
     /// Optional service id
     pub service_id: Option<i32>,

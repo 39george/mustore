@@ -16,8 +16,7 @@ use self::object_key::ObjectKey;
 #[garde(transparent)]
 pub struct Lyric(
     #[garde(
-        length(min = MIN_LYRIC_LEN, max = MAX_LYRIC_LEN),
-        custom(contains_no_control_characters)
+        length(chars, min = MIN_LYRIC_LEN, max = MAX_LYRIC_LEN),
     )]
     /// Should contain no control characters
     #[schema(example = "Some lyrics", min_length = 1, max_length = 5000)]
@@ -44,7 +43,7 @@ where
 pub struct Product {
     /// Should contain no control characters
     #[garde(
-        length(min = PRDCT_NAME_MIN_LEN, max = PRDCT_NAME_MAX_LEN),
+        length(chars, min = PRDCT_NAME_MIN_LEN, max = PRDCT_NAME_MAX_LEN),
         custom(forbidden_characters),
         custom(contains_no_control_characters)
     )]
@@ -52,7 +51,7 @@ pub struct Product {
     pub name: String,
     /// Should contain no control characters
     #[garde(
-        length(min = PRDCT_DESC_MIN_LEN, max = PRDCT_DESC_MAX_LEN),
+        length(chars, min = PRDCT_DESC_MIN_LEN, max = PRDCT_DESC_MAX_LEN),
         inner(
             custom(forbidden_characters),
             custom(contains_no_control_characters)
@@ -65,7 +64,7 @@ pub struct Product {
     )]
     pub description: Option<String>,
     #[garde(inner(
-        length(min=MOOD_MIN_LEN, max=MOOD_MAX_LEN),
+        length(chars, min=MOOD_MIN_LEN, max=MOOD_MAX_LEN),
         custom(forbidden_characters),
         custom(contains_no_control_characters)
     ))]
@@ -88,14 +87,14 @@ pub struct MusicProduct {
     pub master_tagged_object_key: Option<ObjectKey>,
     pub multitrack_object_key: ObjectKey,
     #[garde(
-        length(min=GENRE_MIN_LEN, max=GENRE_MAX_LEN),
+        length(chars, min=GENRE_MIN_LEN, max=GENRE_MAX_LEN),
         custom(forbidden_characters),
         custom(contains_no_control_characters)
     )]
     #[schema(example = "pop", pattern = r#"[^/()"<>\\{};:]*"#)]
     pub primary_genre: String,
     #[garde(
-        length(min=GENRE_MIN_LEN, max=GENRE_MAX_LEN),
+        length(chars, min=GENRE_MIN_LEN, max=GENRE_MAX_LEN),
         inner(
             custom(forbidden_characters),
             custom(contains_no_control_characters)
@@ -147,7 +146,7 @@ pub enum SubmitProductRequest {
 #[derive(Serialize, Deserialize, Debug, Validate, ToSchema)]
 pub struct Service {
     #[garde(
-        length(min = PRDCT_NAME_MIN_LEN, max = PRDCT_NAME_MAX_LEN),
+        length(chars, min = PRDCT_NAME_MIN_LEN, max = PRDCT_NAME_MAX_LEN),
         custom(forbidden_characters),
         custom(contains_no_control_characters)
     )]
@@ -159,7 +158,7 @@ pub struct Service {
     )]
     pub name: String,
     #[garde(inner(
-        length(min = PRDCT_DESC_MIN_LEN, max = PRDCT_DESC_MAX_LEN),
+        length(chars, min = PRDCT_DESC_MIN_LEN, max = PRDCT_DESC_MAX_LEN),
         custom(forbidden_characters),
         custom(contains_no_control_characters)
     ))]
@@ -206,7 +205,7 @@ pub enum SubmitServiceRequest {
         #[garde(inner(
             length(min = MIN_LYRIC_COUNT, max = MAX_LYRIC_COUNT),
             inner(
-                length(min = MIN_LYRIC_LEN, max = MAX_LYRIC_LEN),
+                length(chars, min = MIN_LYRIC_LEN, max = MAX_LYRIC_LEN),
                 custom(contains_no_control_characters)
             )
         ))]
@@ -221,7 +220,7 @@ pub enum SubmitServiceRequest {
 pub struct CreateOfferRequest {
     pub conversation_id: i32,
     pub service_id: i32,
-    #[garde(length(min = MIN_MESSAGE_LEN, max = MAX_MESSAGE_LEN))]
+    #[garde(length(chars, min = MIN_MESSAGE_LEN, max = MAX_MESSAGE_LEN))]
     #[schema(
         min_length = 1,
         max_length = 2500,
