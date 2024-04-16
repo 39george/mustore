@@ -71,6 +71,19 @@ services:
       retries: 2
       start_period: 2s
 
+  banksim:
+    image: ghashy/banksim:0.1
+    expose:
+      - "15100"
+    networks:
+      - default
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:15100/healthcheck"]
+      interval: 5s
+      timeout: 5s
+      retries: 2
+      start_period: 2s
+
   postgres:
     image: postgres:16.1-alpine3.18
     restart: always

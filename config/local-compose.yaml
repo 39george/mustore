@@ -19,4 +19,5 @@ object_storage: # We run object storage manually on pc
   bucket_name: "mustore-data"
 recaptcha:
   endpoint_url: "https://www.google.com/recaptcha/api/siteverify"
-
+payments:
+  merchant_api_endpoint: "http://banksim:15100"
