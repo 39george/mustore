@@ -57,7 +57,7 @@ const Footer: FC = () => {
 
   return (
     <footer className={styles.footer}>
-      <hr className={styles.divider} />
+      {/* <hr className={styles.divider} /> */}
       <div className={styles.main_content}>
         <ul className={styles.nav_links}>
           <li
