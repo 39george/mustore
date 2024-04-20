@@ -32,6 +32,7 @@
   position: relative;
   display: flex;
   align-items: flex-start;
+  font-family: "Onset", sans-serif;
 }
 
 .left_bar_wrapper {
@@ -112,7 +113,7 @@
 
     .custom_checkbox {
       .checkmark {
-        border: 1px solid $accent_purple;
+        border: 1px solid $accent_red;
       }
     }
   }
@@ -134,7 +135,7 @@
   font-size: 0.875rem;
   font-weight: 300;
 
-  color: $accent_purple;
+  color: $accent_red;
   cursor: pointer;
 
   &:hover {
@@ -179,13 +180,13 @@
       width: 0.625rem;
       height: 0.625rem;
 
-      background-color: $accent_purple;
+      background-color: $accent_red;
       border-radius: 2px;
     }
   }
 
   input:checked ~ .checkmark {
-    border: 1px solid $accent_purple;
+    border: 1px solid $accent_red;
     &::after {
       display: block;
     }
@@ -231,7 +232,7 @@
 
 .chevron {
   font-size: 1.5rem;
-  color: $accent_purple;
+  color: $accent_red;
   transition: transform 0.2s ease-out;
 }
 

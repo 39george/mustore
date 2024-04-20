@@ -114,7 +114,7 @@
   margin: 0.625rem 0 0;
 
   border: 0;
-  background-color: $accent_purple;
+  background-color: $buy_button_black;
 }
 
 .price_container {
@@ -174,14 +174,14 @@
   transition: 0.15s ease-out;
 
   &:hover {
-    background-color: rgba($color: $light_pink, $alpha: 0.12);
+    background-color: rgba($color: $accent_red, $alpha: 0.06);
   }
 }
 
 .like_icon {
   width: 1.25rem;
   height: 1.25rem;
-  color: $light_pink;
+  color: $accent_red;
 }
 
 @media (max-width: 1200px) {

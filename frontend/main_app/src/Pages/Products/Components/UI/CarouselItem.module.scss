@@ -146,12 +146,12 @@
   transition: 0.15s ease-out;
 
   &:hover {
-    background-color: rgba($color: $light_pink, $alpha: 0.12);
+    background-color: rgba($color: $accent_red, $alpha: 0.06);
   }
 }
 
 .like_icon {
-  color: $light_pink;
+  color: $accent_red;
 }
 
 //--- Styles for type "new" --------------------------------------------------//

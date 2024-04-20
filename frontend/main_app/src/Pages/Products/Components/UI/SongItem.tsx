@@ -1,12 +1,12 @@
 import styles from "./SongItem.module.scss";
 import { FC, memo } from "react";
-import { SongItem } from "../../../../types/types";
 import { FaRegHeart } from "react-icons/fa";
 import { BsPlayCircle } from "react-icons/bs";
 import AudioWavesIcon from "../../../../UI/AudioWavesIcon";
 import { HiDotsHorizontal } from "react-icons/hi";
+import { ISongItem } from "../../../../types/types";
 
-const SongItem: FC<SongItem> = memo(
+const SongItem: FC<ISongItem> = memo(
   ({ author, name, price, cover_url, primary_genre, moods }) => {
     const formatted_price = price.toLocaleString("ru-RU");
 
