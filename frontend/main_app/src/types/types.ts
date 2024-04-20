@@ -155,6 +155,31 @@ export interface IProduct {
   tempo: string;
 }
 
+export interface FilteredResults {
+  filtered_genres: string[];
+  filtered_moods: string[];
+}
+
+export interface ExpandedBlocks {
+  sex: boolean;
+  genres: boolean;
+  tempo: boolean;
+  music_key: boolean;
+  moods: boolean;
+}
+
+export type ExpandingBlocks =
+  | "sex"
+  | "genres"
+  | "tempo"
+  | "music_key"
+  | "moods";
+
+export interface SearchTerms {
+  genres: string;
+  moods: string;
+}
+
 export enum ProductSectionType {
   songs = "Песни",
   covers = "Обложки",
