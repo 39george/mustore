@@ -120,21 +120,22 @@ a {
   left: 50%;
   transform: translateX(-50%);
 
-  z-index: 2;
-
   width: max-content;
   min-width: 11.25rem;
 
   padding: 1.25rem 1rem;
 
+  letter-spacing: 0.05em;
+
   background-color: $main_bright;
   border-radius: 3px;
   box-shadow: 0 0 8px 1px rgba($color: #000000, $alpha: 0.1);
 
+  transition: opacity 0.1s ease-out, top 0.2s ease-out;
   visibility: hidden;
   opacity: 0;
 
-  transition: opacity 0.1s ease-out, top 0.2s ease-out;
+  z-index: 2;
 
   &::before {
     content: "";
