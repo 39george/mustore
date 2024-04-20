@@ -36,7 +36,7 @@ export interface CarouselProps {
   carousel_items: CarouselItem[];
 }
 
-export interface SongItem {
+export interface ISongItem {
   id?: number;
   created_at?: Date;
   cover_url: string;
