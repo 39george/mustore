@@ -1,0 +1,396 @@
+@import "../../../colors.scss";
+
+@mixin custom_scrollbar(
+  $thumb-color,
+  $track-color: #fefefe,
+  $thumb-hover-color: null
+) {
+  &::-webkit-scrollbar {
+    width: 0.5rem;
+  }
+  &::-webkit-scrollbar-track {
+    background-color: $track-color;
+  }
+  &::-webkit-scrollbar-thumb {
+    width: 0.375rem;
+    height: 1.25rem;
+    background-color: $thumb-color;
+    border-radius: 0.375rem;
+
+    &:hover {
+      background-color: if(
+        $thumb-hover-color == null,
+        $thumb-color,
+        $thumb-hover-color
+      );
+    }
+  }
+}
+
+// General
+.left_bar_wrapper {
+  flex-shrink: 0;
+  width: 16.5rem;
+}
+
+.left_bar {
+  width: 100%;
+  max-width: 16.5rem;
+
+  margin-top: 2rem;
+
+  z-index: 2;
+}
+
+.block {
+  margin-bottom: 1rem;
+  padding: 1rem 0.875rem;
+
+  background-color: #fefefe;
+  border-radius: 0.625rem;
+  box-shadow: 0 0 1.5rem rgba($color: #000000, $alpha: 0.06);
+
+  letter-spacing: 0;
+}
+
+.block_title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 500;
+
+  p {
+    margin-right: 0.75rem;
+  }
+}
+
+.sex_content,
+.genres_content,
+.music_keys_content,
+.moods_content {
+  margin-top: 1.25rem;
+  margin-left: 1rem;
+
+  font-size: 0.875rem;
+
+  & .li_item:not(:last-child) {
+    margin-bottom: 1rem;
+  }
+}
+
+.li_item {
+  display: flex;
+  align-items: center;
+
+  width: fit-content;
+
+  cursor: pointer;
+
+  input {
+    cursor: pointer;
+  }
+
+  .label {
+    color: rgba($color: $main_dark, $alpha: 0.8);
+    cursor: pointer;
+  }
+
+  .checked_label {
+    color: $main_dark;
+  }
+
+  &:hover {
+    .label {
+      color: $main_dark;
+    }
+
+    .custom_checkbox {
+      .checkmark {
+        border: 1px solid $accent_red;
+      }
+    }
+  }
+}
+
+.music_symbol {
+  font-family: "JetBrains Mono", monospace;
+}
+
+.uncheck_all {
+  display: flex;
+  align-items: center;
+
+  width: fit-content;
+
+  margin-top: 1em;
+  margin-left: auto;
+
+  font-size: 0.875rem;
+  font-weight: 300;
+
+  color: $accent_red;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// Custom checkbox
+.checkbox {
+  position: absolute;
+  height: 0;
+  width: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.custom_checkbox {
+  .checkmark {
+    display: inline-block;
+    vertical-align: middle;
+
+    position: relative;
+    top: 0;
+    left: 0;
+
+    width: 1rem;
+    height: 1rem;
+
+    border-radius: 4px;
+    border: 1px solid rgba($color: $main_dark, $alpha: 0.5);
+
+    cursor: pointer;
+
+    &::after {
+      content: "";
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translateX(-50%) translateY(-50%);
+
+      width: 0.625rem;
+      height: 0.625rem;
+
+      background-color: $accent_red;
+      border-radius: 2px;
+    }
+  }
+
+  input:checked ~ .checkmark {
+    border: 1px solid $accent_red;
+    &::after {
+      display: block;
+    }
+  }
+}
+
+// Search & sort
+.search_block,
+.sort_block {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.global_search {
+  width: 90%;
+
+  font-family: "Raleway", sans-serif;
+  font-size: 0.875rem;
+
+  border: none;
+  border-bottom: 1px solid transparent;
+
+  text-overflow: ellipsis;
+
+  &::placeholder {
+    color: rgba($color: $main_dark, $alpha: 0.6);
+  }
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.search_icon {
+  color: rgba($color: $main_dark, $alpha: 0.6);
+  cursor: pointer;
+}
+
+.sort_block {
+  cursor: pointer;
+}
+
+.chevron {
+  font-size: 1.5rem;
+  color: $accent_red;
+  transition: transform 0.2s ease-out;
+}
+
+// Rest blocks
+.rest_blocks {
+  display: block;
+}
+
+// Genres & moods
+.genres_content,
+.moods_content {
+  height: fit-content;
+  max-height: 20.5rem;
+  overflow-y: scroll;
+
+  scrollbar-width: thin;
+  scrollbar-color: rgba($color: $main_dark, $alpha: 0.2) #fefefe;
+
+  @include custom_scrollbar(
+    rgba($main_dark, 0.2),
+    #fefefe,
+    rgba($main_dark, 0.6)
+  );
+}
+
+.form_search {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+
+  input {
+    width: 37%;
+
+    font-family: "Raleway", sans-serif;
+    font-size: 0.875rem;
+
+    border: none;
+    border-radius: 0;
+    border-bottom: 1px solid transparent;
+    color: rgba($color: $main_dark, $alpha: 0.8);
+    transition: width 0.2s ease-out, border-bottom 0.1s ease-out;
+
+    &::placeholder {
+      color: rgba($color: $main_dark, $alpha: 0.6);
+    }
+
+    &:focus {
+      width: 100%;
+      border-bottom: 1px solid rgba($color: $main_dark, $alpha: 0.6);
+      outline: none;
+    }
+  }
+
+  .search_icon {
+    margin-left: 0.5rem;
+  }
+}
+
+input[type="search"]::-webkit-search-cancel-button {
+  display: none;
+}
+
+// Error
+.error {
+  margin-top: 1.25rem;
+  margin-left: 1rem;
+  font-size: 0.875rem;
+  opacity: 0.8;
+}
+
+// Media queries
+@media (max-width: 768px) {
+  .left_bar_wrapper {
+    width: 100%;
+  }
+
+  .left_bar {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    max-width: 100%;
+  }
+
+  .search_and_sort,
+  .filters_container {
+    width: 16.5rem;
+    height: fit-content;
+  }
+
+  .rest_blocks_hidden {
+    display: none;
+  }
+
+  .block {
+    height: 3.375rem;
+    overflow: hidden;
+    cursor: pointer;
+
+    transition: height 0.2s ease-out;
+  }
+
+  .filters_block {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .moods_block {
+    margin-bottom: 0;
+  }
+
+  .form_search {
+    input {
+      &:focus {
+        width: 95%;
+      }
+    }
+  }
+
+  .sex_expanded,
+  .genres_moods_expanded,
+  .tempo_expanded,
+  .music_key_expanded {
+    .chevron {
+      transform: rotate(-180deg);
+    }
+  }
+
+  .sex_expanded {
+    height: 10rem;
+  }
+
+  .genres_moods_expanded {
+    height: 25.25rem;
+  }
+
+  .genres_moods_height_checked {
+    height: 27.125rem;
+  }
+
+  .tempo_expanded {
+    height: 8.625rem;
+  }
+
+  .music_key_expanded {
+    height: 29.25rem;
+  }
+
+  .music_key_height_checked {
+    height: 31rem;
+  }
+
+  .music_key_iphone {
+    height: 30.25rem;
+  }
+
+  .music_key_checked_iphone {
+    height: 32rem;
+  }
+}
+
+@media (max-width: 672px) {
+  .left_bar {
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+}
