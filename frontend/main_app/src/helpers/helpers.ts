@@ -1,5 +1,5 @@
 import { UserPermissions } from "../state/user_permissions_slice";
-import { UserRole } from "../types/types";
+import { CheckedItems, UserRole } from "../types/types";
 
 // Wait function
 export const wait = (ms: number) => {
@@ -42,4 +42,9 @@ export const translate_user_role = (role: string) => {
   } else {
     return "Покупатель";
   }
+};
+
+// Check if a checked object has any `true` value
+export const no_true_values = (obj: CheckedItems) => {
+  return Object.values(obj).every((value) => value === false);
 };
