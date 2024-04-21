@@ -14,7 +14,8 @@ email_client:
   sender_email: "anymail@anydomain.com"
   timeout: 10000
 object_storage: # We run object storage manually on pc
-  endpoint_url: "http://192.168.31.150:3900" # This is addres of computer in home network, on which object storage is run
+  # endpoint_url: "http://192.168.31.150:3900" # This is addres of computer in home network, on which object storage is run
+  endpoint_url: "http://garage.orb.local:3900"
   region: "garage"
   bucket_name: "mustore-data"
 recaptcha:
