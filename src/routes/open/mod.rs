@@ -5,6 +5,7 @@ use axum::extract::State;
 use axum::routing;
 use axum::Json;
 use axum::Router;
+use futures::future::try_join_all;
 use garde::Validate;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
@@ -21,6 +22,7 @@ use crate::startup::AppState;
 
 use crate::startup::api_doc::BadRequestResponse;
 use crate::startup::api_doc::InternalErrorResponse;
+use crate::PRESIGNED_IMAGE_EXP;
 
 use super::ErrorResponse;
 
@@ -147,9 +149,9 @@ async fn get_songs(
         .get()
         .await
         .context("Failed to get pool from pg")?;
+    let s3 = app_state.object_storage;
 
-    // TODO: fix cover url
-    let songs = open_access::get_songs()
+    let songs: Vec<_> = open_access::get_songs()
         .bind(
             &pg_pool,
             &user_id,
@@ -168,7 +170,22 @@ async fn get_songs(
         )
         .all()
         .await
-        .context("Failed to fetch songs data from pg")?;
+        .context("Failed to fetch songs data from pg")?
+        .into_iter()
+        .map(|mut song| async {
+            song.cover_url = s3
+                .generate_presigned_url(
+                    &song
+                        .cover_url
+                        .parse()
+                        .context("Failed to parse object key")?,
+                    PRESIGNED_IMAGE_EXP,
+                )
+                .await?;
+            Ok::<open_access::GetSongsList, ErrorResponse>(song)
+        })
+        .collect();
+    let songs = try_join_all(songs).await?;
     Ok(Json(songs))
 }
 
