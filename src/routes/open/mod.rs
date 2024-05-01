@@ -148,6 +148,7 @@ async fn get_songs(
         .await
         .context("Failed to get pool from pg")?;
 
+    // TODO: fix cover url
     let songs = open_access::get_songs()
         .bind(
             &pg_pool,
