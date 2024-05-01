@@ -2,4 +2,4 @@
 
 pgpass=$(cat "../secrets/postgres_password.txt")
 
-docker run --name mypg -d -v mypg_volume:/var/lib/postgresql/data -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_DB=mustore -e POSTGRES_PASSWORD="$pgpass" postgres:16.1-alpine3.18
+docker run --name mypg -d -v mypg_volume:/var/lib/postgresql/data -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_DB=mustore -e POSTGRES_PASSWORD="$pgpass" postgres:16.2-alpine3.19
