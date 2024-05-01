@@ -1,5 +1,7 @@
 //! src/lib.rs
 
+use std::time::Duration;
+
 use time::{
     format_description::well_known::{
         iso8601::{self, TimePrecision},
@@ -42,6 +44,8 @@ const SIMPLE_ISO: Iso8601<6651332276402088934156738804825718784> = Iso8601::<
 >;
 
 time::serde::format_description!(iso_format, OffsetDateTime, SIMPLE_ISO);
+
+pub const PRESIGNED_IMAGE_EXP: Duration = Duration::from_secs(10);
 
 pub const MAX_MP3_SIZE_MB: u64 = 15;
 pub const MAX_MULTITRACK_SIZE_GB: u64 = 5;

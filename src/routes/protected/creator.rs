@@ -1,5 +1,3 @@
-use std::time::Duration;
-
 use anyhow::Context;
 use axum::extract::Path;
 use axum::extract::State;
@@ -41,6 +39,7 @@ use crate::startup::api_doc::GetCreatorSongs;
 use crate::startup::api_doc::InternalErrorResponse;
 use crate::startup::AppState;
 use crate::trace_err;
+use crate::PRESIGNED_IMAGE_EXP;
 
 // ───── Types ────────────────────────────────────────────────────────────── //
 
@@ -849,6 +848,7 @@ async fn songs(
         .await
         .context("Failed to get connection from postgres pool")
         .map_err(ErrorResponse::UnexpectedError)?;
+    let s3 = app_state.object_storage;
 
     let songs = creator_access::get_creator_songs()
         .bind(&db_client, &user.id, &status.into())
@@ -856,20 +856,16 @@ async fn songs(
         .await
         .context("Failed to retrieve songs from pg")?
         .into_iter()
-        .map(|mut song| {
-            let obj_storage = app_state.object_storage.clone();
-            async move {
-                let object_key: ObjectKey =
-                    song.key.parse().context("Failed to parse object key")?;
-                let result = obj_storage
-                    .generate_presigned_url(
-                        &object_key,
-                        Duration::from_secs(120),
-                    ) // 2 minutes expiration
-                    .await?;
-                song.key = result;
-                Ok::<creator_access::GetCreatorSongs, ErrorResponse>(song)
-            }
+        .map(|mut song| async {
+            let object_key: ObjectKey = song
+                .cover_key
+                .parse()
+                .context("Failed to parse object key")?;
+            let result = s3
+                .generate_presigned_url(&object_key, PRESIGNED_IMAGE_EXP)
+                .await?;
+            song.cover_key = result;
+            Ok::<creator_access::GetCreatorSongs, ErrorResponse>(song)
         });
 
     let songs = try_join_all(songs).await?;
