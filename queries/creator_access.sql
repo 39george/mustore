@@ -66,7 +66,7 @@ SELECT
     songs.id AS song_id,
     products.name,
     products.price,
-    objects.key,
+    objects.key AS cover_key,
     primary_genre,
     secondary_genre,
     songs.tempo,
