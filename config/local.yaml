@@ -3,18 +3,18 @@ app_addr: "127.0.0.1"
 app_base_url: "http://127.0.0.1:8000"
 email_delivery_service: smtp
 database:
-  host: "mypg.orb.local"
+  host: "172.18.0.3"
   port: 5432
 redis:
-  host: "myredis.orb.local"
+  host: "172.18.0.4"
   port: 6379
   db_number: 0
 email_client:
-  base_url: "http://email-mock.orb.local:8001"
+  base_url: "http://172.18.0.7:8001"
   sender_email: "anymail@anydomain.com"
   timeout: 10000
 object_storage:
-  endpoint_url: "http://garage.orb.local"
+  endpoint_url: "http://172.18.0.2:3900"
   region: "garage"
   bucket_name: "mustore-data"
 recaptcha:
