@@ -206,7 +206,7 @@ async fn connect_card(
     }
 
     let base: Url = state.settings.app_base_url.parse().unwrap();
-    let success_url = base.join("/notification_center/bank").unwrap();
+    let success_url = "https://www.google.com".parse().unwrap();
     let fail_url = base.join("/notification_center/bank").unwrap();
     let notification_url = base.join("/notification_center/bank").unwrap();
     let cashbox_pass = &state.settings.payments.cashbox_password;
