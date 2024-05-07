@@ -1,4 +1,4 @@
-mod kopeck;
+pub mod kopeck;
 // mod payment;
 
 type Offer = i32;
