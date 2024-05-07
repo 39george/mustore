@@ -1,3 +1,4 @@
+use anyhow::Context;
 use axum::Router;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
@@ -7,7 +8,10 @@ use self::consumer::consumer_router;
 use self::creator::creator_router;
 use self::minio::minio_router;
 use self::user::user_router;
+use crate::cornucopia::queries::user_access;
 use crate::startup::AppState;
+
+use super::ErrorResponse;
 
 // ───── Submodules ───────────────────────────────────────────────────────── //
 
@@ -26,4 +30,24 @@ pub fn protected_router() -> Router<AppState> {
         .nest("/consumer", consumer_router())
         .nest("/admin", admin_router())
         .nest("/minio", minio_router())
+}
+
+/// Check that user has access to the conversation
+#[tracing::instrument(name = "Check conversation access", skip_all)]
+pub async fn check_conversation_access<T: cornucopia_async::GenericClient>(
+    db_client: &T,
+    user_id: &i32,
+    username: &str,
+    conversation_id: &i32,
+) -> Result<i32, ErrorResponse> {
+    user_access::user_has_access_to_conversation()
+        .bind(db_client, user_id, conversation_id)
+        .opt()
+        .await
+        .context("Failed to fetch conversation access from db")?
+        .ok_or(ErrorResponse::ForbiddenError(anyhow::anyhow!(
+            "{} has no access to the requested conversation id: {}",
+            username,
+            conversation_id
+        )))
 }

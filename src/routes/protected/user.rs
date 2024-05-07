@@ -548,7 +548,7 @@ async fn send_message(
         .context("Failed to get a transaction from pg")?;
 
     check_conversation_exists(&transaction, &params.conversation_id).await?;
-    check_conversation_access(
+    super::check_conversation_access(
         &transaction,
         &user.id,
         &user.username,
@@ -646,7 +646,7 @@ async fn list_conversation(
         .context("Failed to get connection from postgres pool")?;
 
     check_conversation_exists(&db_client, &conversation_id).await?;
-    check_conversation_access(
+    super::check_conversation_access(
         &db_client,
         &user.id,
         &user.username,
@@ -672,26 +672,6 @@ async fn list_conversation(
 }
 
 // ───── Functions ────────────────────────────────────────────────────────── //
-
-/// Check that user has access to the conversation
-#[tracing::instrument(name = "Check conversation access", skip_all)]
-async fn check_conversation_access<T: cornucopia_async::GenericClient>(
-    db_client: &T,
-    user_id: &i32,
-    username: &str,
-    conversation_id: &i32,
-) -> Result<i32, ErrorResponse> {
-    user_access::user_has_access_to_conversation()
-        .bind(db_client, user_id, conversation_id)
-        .opt()
-        .await
-        .context("Failed to fetch conversation access from db")?
-        .ok_or(ErrorResponse::ForbiddenError(anyhow::anyhow!(
-            "{} has no access to the requested conversation id: {}",
-            username,
-            conversation_id
-        )))
-}
 
 /// Check that conversation exists
 #[tracing::instrument(name = "Check conversation exists", skip_all)]
