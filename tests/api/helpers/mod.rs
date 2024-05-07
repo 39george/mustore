@@ -21,6 +21,8 @@ use mustore::startup::Application;
 use wiremock::matchers;
 use wiremock::ResponseTemplate;
 
+mod banksim;
+
 #[derive(Debug)]
 pub struct TestUser {
     pub username: String,
@@ -96,6 +98,7 @@ pub struct TestApp {
     pub redis_client: RedisClient,
     pub email_server: MockServer,
     pub port: u16,
+    pub banksim: banksim::Banksim,
 }
 
 /// Confirmation links embedded in the request to the email API.
@@ -133,13 +136,15 @@ impl TestApp {
             prepare_postgres_with_rand_user(config.database.clone()).await;
         config.database = pg_config;
 
-        let application = Application::build(config, true)
+        let application = Application::build(config.clone(), true)
             .await
             .expect("Failed to build application");
 
         let port = application.port();
 
-        let address = format!("http://127.0.0.1:{}", port);
+        let address = format!("http://{}:{}", config.app_addr, port);
+
+        let banksim = banksim::Banksim { app_config: config };
 
         // Very important step
         let _ = tokio::spawn(application.run_until_stopped());
@@ -160,6 +165,7 @@ impl TestApp {
             email_server,
             port,
             redis_client,
+            banksim,
         }
     }
 
