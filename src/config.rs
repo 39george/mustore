@@ -10,7 +10,7 @@ use serde::Deserialize;
 use crate::domain::user_email::UserEmail;
 use crate::email_client::EmailDeliveryService;
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct Settings {
     pub database: DatabaseSettings,
     pub redis: RedisSettings,
@@ -84,7 +84,7 @@ impl RedisSettings {
 
 /// This type describes configuration
 /// for client, sending emails.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct EmailClientSettings {
     /// Email delivery service we use to relay email
     pub base_url: String,
@@ -119,14 +119,14 @@ pub struct ObjectStorageSettings {
     pub secret_access_key: Secret<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct RecaptchaSettings {
     pub endpoint_url: String,
     #[serde(default = "recaptcha_secret_key")]
     pub secret: Secret<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct PaymentsSettings {
     pub merchant_api_endpoint: String,
     #[serde(default = "cashbox_password")]
