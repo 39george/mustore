@@ -129,6 +129,10 @@ ORDER BY
 OFFSET :offset
 LIMIT 30;
 
+--! get_offer_info_by_id
+SELECT * FROM offers
+WHERE id = :offer_id;
+
 -- UPDATING CONTENT --
 
 --! create_new_conversation

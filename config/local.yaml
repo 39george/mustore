@@ -1,6 +1,6 @@
 app_port: 8000
-app_addr: "127.0.0.1"
-app_base_url: "http://127.0.0.1:8000"
+app_addr: "192.168.31.150"
+app_base_url: "http://192.168.31.150:8000"
 email_delivery_service: smtp
 database:
   host: "172.18.0.3"
@@ -20,5 +20,5 @@ object_storage:
 recaptcha:
   endpoint_url: "http://ghashytest.com"
 payments:
-  merchant_api_endpoint: "http://localhost:15100"
+  merchant_api_endpoint: "http://172.18.0.6:15100"
 

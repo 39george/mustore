@@ -151,6 +151,56 @@
             } _ => false,
         }
     }
+} #[derive(serde::Serialize, Debug, Clone, Copy, PartialEq, Eq)]
+#[allow(non_camel_case_types)] pub enum Offerstatus { pending,accepted,} impl<'a> postgres_types::ToSql for Offerstatus
+{
+    fn
+    to_sql(&self, ty: &postgres_types::Type, buf: &mut
+    postgres_types::private::BytesMut,) -> Result<postgres_types::IsNull,
+    Box<dyn std::error::Error + Sync + Send>,>
+    {
+        let s = match *self
+        { Offerstatus::pending => "pending",Offerstatus::accepted => "accepted",};
+        buf.extend_from_slice(s.as_bytes());
+        std::result::Result::Ok(postgres_types::IsNull::No)
+    } fn accepts(ty: &postgres_types::Type) -> bool
+    {
+        if ty.name() != "offerstatus" { return false; } match *ty.kind()
+        {
+            postgres_types::Kind::Enum(ref variants) =>
+            {
+                if variants.len() != 2 { return false; }
+                variants.iter().all(|v| match &**v
+                { "pending" => true,"accepted" => true,_ => false, })
+            } _ => false,
+        }
+    } fn
+    to_sql_checked(&self, ty: &postgres_types::Type, out: &mut
+    postgres_types::private::BytesMut,) -> Result<postgres_types::IsNull,
+    Box<dyn std::error::Error + Sync + Send>>
+    { postgres_types::__to_sql_checked(self, ty, out) }
+} impl<'a> postgres_types::FromSql<'a> for Offerstatus
+{
+    fn from_sql(ty: &postgres_types::Type, buf: &'a [u8],) ->
+    Result<Offerstatus, Box<dyn std::error::Error + Sync + Send>,>
+    {
+        match std::str::from_utf8(buf)?
+        {
+            "pending" => Ok(Offerstatus::pending),"accepted" => Ok(Offerstatus::accepted),s
+            => Result::Err(Into::into(format!("invalid variant `{}`", s))),
+        }
+    } fn accepts(ty: &postgres_types::Type) -> bool
+    {
+        if ty.name() != "offerstatus" { return false; } match *ty.kind()
+        {
+            postgres_types::Kind::Enum(ref variants) =>
+            {
+                if variants.len() != 2 { return false; }
+                variants.iter().all(|v| match &**v
+                { "pending" => true,"accepted" => true,_ => false, })
+            } _ => false,
+        }
+    }
 } }} #[allow(clippy::all, clippy::pedantic)] #[allow(unused_variables)]
 #[allow(unused_imports)] #[allow(dead_code)] pub mod queries
 {  pub mod consumer_access
@@ -1659,6 +1709,12 @@ impl<'a> From<ListConversationByIdBorrowed<'a>> for ListConversationById
 {
     fn from(ListConversationByIdBorrowed { conversation_id,participant_user_id,participant_username,participant_avatar_key,message_id,message_text,message_created_at,message_updated_at,reply_message_id,message_attachments,service_id,service_name,service_cover_key,offer_id,offer_text,offer_price,offer_delivery_date,offer_free_revisions,offer_revision_price,}: ListConversationByIdBorrowed<'a>) ->
     Self { Self { conversation_id,participant_user_id,participant_username: participant_username.into(),participant_avatar_key: participant_avatar_key.into(),message_id,message_text: message_text.map(|v| v.into()),message_created_at,message_updated_at,reply_message_id,message_attachments: message_attachments.map(|v| v.map(|v| v.into()).collect()),service_id,service_name: service_name.map(|v| v.into()),service_cover_key: service_cover_key.map(|v| v.into()),offer_id,offer_text: offer_text.map(|v| v.into()),offer_price,offer_delivery_date,offer_free_revisions,offer_revision_price,} }
+} #[derive(serde::Serialize, Debug, Clone, PartialEq,)] pub struct GetOfferInfoById
+{ pub id : i32,pub created_at : time::OffsetDateTime,pub conversations_id : i32,pub services_id : i32,pub text : String,pub price : rust_decimal::Decimal,pub delivery_date : time::OffsetDateTime,pub free_revisions : i32,pub revision_price : rust_decimal::Decimal,pub status : super::super::types::public::Offerstatus,} pub struct GetOfferInfoByIdBorrowed<'a> { pub id : i32,pub created_at : time::OffsetDateTime,pub conversations_id : i32,pub services_id : i32,pub text : &'a str,pub price : rust_decimal::Decimal,pub delivery_date : time::OffsetDateTime,pub free_revisions : i32,pub revision_price : rust_decimal::Decimal,pub status : super::super::types::public::Offerstatus,}
+impl<'a> From<GetOfferInfoByIdBorrowed<'a>> for GetOfferInfoById
+{
+    fn from(GetOfferInfoByIdBorrowed { id,created_at,conversations_id,services_id,text,price,delivery_date,free_revisions,revision_price,status,}: GetOfferInfoByIdBorrowed<'a>) ->
+    Self { Self { id,created_at,conversations_id,services_id,text: text.into(),price,delivery_date,free_revisions,revision_price,status,} }
 }  use futures::{StreamExt, TryStreamExt};use futures; use cornucopia_async::GenericClient; pub struct GetUserSettingsQuery<'a, C: GenericClient, T, const N: usize>
 {
     client: &'a  C, params:
@@ -1867,6 +1923,45 @@ GenericClient
     ListConversationByIdQuery<'a,C,R,N>
     {
         ListConversationByIdQuery
+        {
+            client: self.client, params: self.params, stmt: self.stmt,
+            extractor: self.extractor, mapper,
+        }
+    } pub async fn one(self) -> Result<T, tokio_postgres::Error>
+    {
+        let stmt = self.stmt.prepare(self.client).await?; let row =
+        self.client.query_one(stmt, &self.params).await?;
+        Ok((self.mapper)((self.extractor)(&row)))
+    } pub async fn all(self) -> Result<Vec<T>, tokio_postgres::Error>
+    { self.iter().await?.try_collect().await } pub async fn opt(self) ->
+    Result<Option<T>, tokio_postgres::Error>
+    {
+        let stmt = self.stmt.prepare(self.client).await?;
+        Ok(self.client.query_opt(stmt, &self.params) .await?
+        .map(|row| (self.mapper)((self.extractor)(&row))))
+    } pub async fn iter(self,) -> Result<impl futures::Stream<Item = Result<T,
+    tokio_postgres::Error>> + 'a, tokio_postgres::Error>
+    {
+        let stmt = self.stmt.prepare(self.client).await?; let it =
+        self.client.query_raw(stmt,
+        cornucopia_async::private::slice_iter(&self.params)) .await?
+        .map(move |res|
+        res.map(|row| (self.mapper)((self.extractor)(&row)))) .into_stream();
+        Ok(it)
+    }
+} pub struct GetOfferInfoByIdQuery<'a, C: GenericClient, T, const N: usize>
+{
+    client: &'a  C, params:
+    [&'a (dyn postgres_types::ToSql + Sync); N], stmt: &'a mut
+    cornucopia_async::private::Stmt, extractor: fn(&tokio_postgres::Row) -> GetOfferInfoByIdBorrowed,
+    mapper: fn(GetOfferInfoByIdBorrowed) -> T,
+} impl<'a, C, T:'a, const N: usize> GetOfferInfoByIdQuery<'a, C, T, N> where C:
+GenericClient
+{
+    pub fn map<R>(self, mapper: fn(GetOfferInfoByIdBorrowed) -> R) ->
+    GetOfferInfoByIdQuery<'a,C,R,N>
+    {
+        GetOfferInfoByIdQuery
         {
             client: self.client, params: self.params, stmt: self.stmt,
             extractor: self.extractor, mapper,
@@ -2171,7 +2266,21 @@ ListConversationById, 2>, C> for ListConversationByIdStmt
     ListConversationByIdParams<>) -> ListConversationByIdQuery<'a, C,
     ListConversationById, 2>
     { self.bind(client, &params.conversation_id,&params.offset,) }
-} pub fn create_new_conversation() -> CreateNewConversationStmt
+} pub fn get_offer_info_by_id() -> GetOfferInfoByIdStmt
+{ GetOfferInfoByIdStmt(cornucopia_async::private::Stmt::new("SELECT * FROM offers
+WHERE id = $1")) } pub struct
+GetOfferInfoByIdStmt(cornucopia_async::private::Stmt); impl GetOfferInfoByIdStmt
+{  pub fn bind<'a, C:
+GenericClient,>(&'a mut self, client: &'a  C,
+offer_id: &'a i32,) -> GetOfferInfoByIdQuery<'a,C,
+GetOfferInfoById, 1>
+{
+    GetOfferInfoByIdQuery
+    {
+        client, params: [offer_id,], stmt: &mut self.0, extractor:
+        |row| {  GetOfferInfoByIdBorrowed { id: row.get(0),created_at: row.get(1),conversations_id: row.get(2),services_id: row.get(3),text: row.get(4),price: row.get(5),delivery_date: row.get(6),free_revisions: row.get(7),revision_price: row.get(8),status: row.get(9),} }, mapper: |it| { <GetOfferInfoById>::from(it) },
+    }
+} } pub fn create_new_conversation() -> CreateNewConversationStmt
 { CreateNewConversationStmt(cornucopia_async::private::Stmt::new("INSERT INTO conversations VALUES (DEFAULT) returning id")) } pub struct
 CreateNewConversationStmt(cornucopia_async::private::Stmt); impl CreateNewConversationStmt
 {  pub fn bind<'a, C:
