@@ -223,7 +223,9 @@ impl TestApp {
             let raw_link = links[1].as_str().to_string();
             let mut confirmation_link = reqwest::Url::parse(&raw_link).unwrap();
             // Let's make sure we don't call random APIs on the web
-            assert_eq!(confirmation_link.host_str().unwrap(), "127.0.0.1");
+            assert!(self
+                .address
+                .contains(confirmation_link.host_str().unwrap()));
             confirmation_link.set_port(Some(self.port)).unwrap();
             confirmation_link
         };
