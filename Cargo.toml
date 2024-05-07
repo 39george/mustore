@@ -99,6 +99,7 @@ utoipa-swagger-ui = { version = "6.0.0", features = ["axum"] }
 [dev-dependencies]
 wiremock = "0.6.0"
 fake = "2.9.2"
+fantoccini = "0.19.3"
 
 [profile.dev.package."*"]
 opt-level = 3
