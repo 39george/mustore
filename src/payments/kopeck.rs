@@ -42,6 +42,10 @@ impl Kopeck {
         let kopeck = mantissa as u32;
         Ok(Kopeck(kopeck))
     }
+
+    pub fn raw(&self) -> u32 {
+        self.0
+    }
 }
 
 impl std::fmt::Display for Kopeck {
