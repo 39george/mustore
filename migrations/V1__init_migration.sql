@@ -305,20 +305,31 @@ CREATE TABLE conversations (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+-- If offer is rejected, just delete it
+CREATE TABLE offers (
+	id SERIAL PRIMARY KEY,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    conversations_id INTEGER NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+    services_id INTEGER NOT NULL REFERENCES services(id) ON DELETE CASCADE,
+    creator_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    consumer_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	text VARCHAR(2500) NOT NULL,
+    price NUMERIC(10, 2) NOT NULL,
+    delivery_interval INTERVAL NOT NULL,
+    free_revisions INTEGER NOT NULL,
+    revision_price NUMERIC(10, 2) NOT NULL,
+    status OfferStatus NOT NULL DEFAULT 'pending'
+);
+
 CREATE TABLE service_orders (
     id SERIAL PRIMARY KEY,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    consumers_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
-    services_id INTEGER REFERENCES services(id) ON DELETE SET NULL,
-    -- Temporary disable, because can't figure out why it is here.
-    -- If all will OK, just delete that later.
-    -- conversations_id INTEGER NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
-    delivery_date TIMESTAMP NOT NULL,
-    revisions INTEGER NOT NULL,
-    revision_price NUMERIC(10, 2) NOT NULL,
-    name VARCHAR(30) NOT NULL,
-    price NUMERIC(10, 2) NOT NULL,
+    offers_id INTEGER REFERENCES offers(id) ON DELETE SET NULL,
+    delivery_date TIMESTAMP WITH TIME ZONE NOT NULL,
+    free_revisions_left INTEGER NOT NULL,
+    paid_revisions_made INTEGER NOT NULL,
     status ServiceOrderStatus NOT NULL DEFAULT 'paid',
 
     -- Value should be nulled every time when delivery time changes,
@@ -400,20 +411,6 @@ CREATE TABLE participants (
         COALESCE((service_orders_id)::BOOLEAN::INTEGER, 0)
         = 1
     )
-);
-
--- If offer is rejected, just delete it
-CREATE TABLE offers (
-	id SERIAL PRIMARY KEY,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    conversations_id INTEGER NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
-    services_id INTEGER NOT NULL REFERENCES services(id) ON DELETE CASCADE,
-	text VARCHAR(2500) NOT NULL,
-    price NUMERIC(10, 2) NOT NULL,
-    delivery_date TIMESTAMP WITH TIME ZONE NOT NULL,
-    free_revisions INTEGER NOT NULL,
-    revision_price NUMERIC(10, 2) NOT NULL,
-    status OfferStatus NOT NULL DEFAULT 'pending'
 );
 
 CREATE TABLE system_notifications (
