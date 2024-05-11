@@ -301,7 +301,7 @@ Products, 1>
         |row| {  ProductsBorrowed { product_name: row.get(0),author_username: row.get(1),price: row.get(2),product_cover: row.get(3),} }, mapper: |it| { <Products>::from(it) },
     }
 } } } pub mod creator_access
-{  #[derive(Clone,Copy, Debug)] pub struct GetCreatorSongsParams<> { pub user_id: i32,pub product_status: super::super::types::public::Productstatus,} #[derive( Debug)] pub struct InsertProductAndGetProductIdParams<T1: cornucopia_async::StringSql,T2: cornucopia_async::StringSql,> { pub owher_id: i32,pub name: T1,pub description: Option<T2>,pub price: rust_decimal::Decimal,} #[derive( Debug)] pub struct InsertProductCoverObjectKeyParams<T1: cornucopia_async::StringSql,> { pub key: T1,pub product_id: i32,} #[derive( Debug)] pub struct InsertProductMoodByNameParams<T1: cornucopia_async::StringSql,> { pub product_id: i32,pub mood_name: T1,} #[derive( Debug)] pub struct InsertSongAndGetSongIdParams<T1: cornucopia_async::StringSql,T2: cornucopia_async::StringSql,T3: cornucopia_async::StringSql,T4: cornucopia_async::StringSql,> { pub product_id: i32,pub primary_genre: T1,pub secondary_genre: Option<T2>,pub sex: T3,pub tempo: i16,pub key: super::super::types::public::Musickey,pub duration: i16,pub lyric: T4,} #[derive( Debug)] pub struct InsertBeatAndGetBeatIdParams<T1: cornucopia_async::StringSql,T2: cornucopia_async::StringSql,> { pub product_id: i32,pub primary_genre: T1,pub secondary_genre: Option<T2>,pub tempo: i16,pub key: super::super::types::public::Musickey,pub duration: i16,} #[derive( Debug)] pub struct InsertMusicProductMasterObjectKeyParams<T1: cornucopia_async::StringSql,> { pub key: T1,pub song_id: Option<i32>,pub beat_id: Option<i32>,} #[derive( Debug)] pub struct InsertMusicProductMasterTaggedObjectKeyParams<T1: cornucopia_async::StringSql,> { pub key: T1,pub song_id: Option<i32>,pub beat_id: Option<i32>,} #[derive( Debug)] pub struct InsertMusicProductMultitrackObjectKeyParams<T1: cornucopia_async::StringSql,> { pub key: T1,pub song_id: Option<i32>,pub beat_id: Option<i32>,} #[derive( Debug)] pub struct InsertLyricParams<T1: cornucopia_async::StringSql,T2: cornucopia_async::StringSql,> { pub product_id: i32,pub text: T1,pub sex: Option<T2>,} #[derive( Debug)] pub struct InsertServiceGetIdParams<T1: cornucopia_async::StringSql,T2: cornucopia_async::StringSql,> { pub creator_id: i32,pub name: T1,pub description: Option<T2>,pub display_price: rust_decimal::Decimal,} #[derive( Debug)] pub struct InsertGhostWritingParams<T1: cornucopia_async::StringSql,T2: cornucopia_async::ArraySql<Item = T1>,> { pub service_id: i32,pub ghost_credits: Option<T2>,} #[derive( Debug)] pub struct InsertServiceCoverObjectKeyParams<T1: cornucopia_async::StringSql,> { pub key: T1,pub service_id: i32,} #[derive( Debug)] pub struct InsertMixingCreditObjectKeyParams<T1: cornucopia_async::StringSql,> { pub key: T1,pub object_type: super::super::types::public::Objecttype,pub credit_mixing_id: i32,} #[derive( Debug)] pub struct InsertSongWritingCreditObjectKeyParams<T1: cornucopia_async::StringSql,> { pub key: T1,pub object_type: super::super::types::public::Objecttype,pub credit_song_writing_id: i32,} #[derive( Debug)] pub struct InsertBeatWritingCreditObjectKeyParams<T1: cornucopia_async::StringSql,> { pub key: T1,pub object_type: super::super::types::public::Objecttype,pub credit_beat_writing_id: i32,} #[derive( Debug)] pub struct InsertCoverDesignCreditObjectKeyParams<T1: cornucopia_async::StringSql,> { pub key: T1,pub object_type: super::super::types::public::Objecttype,pub credit_cover_design_id: i32,} #[derive( Debug)] pub struct InsertMusicServiceGenreParams<T1: cornucopia_async::StringSql,> { pub genre: T1,pub beat_writing_id: Option<i32>,pub song_writing_id: Option<i32>,pub mixing_id: Option<i32>,} #[derive( Debug)] pub struct CreateOfferParams<T1: cornucopia_async::StringSql,> { pub conversations_id: i32,pub services_id: i32,pub text: T1,pub price: rust_decimal::Decimal,pub delivery_date: time::OffsetDateTime,pub free_refisions: i32,pub revision_price: rust_decimal::Decimal,} #[derive(serde::Serialize, Debug, Clone, PartialEq,Copy)] pub struct GetCreatorMarksAvg
+{  #[derive(Clone,Copy, Debug)] pub struct GetCreatorSongsParams<> { pub user_id: i32,pub product_status: super::super::types::public::Productstatus,} #[derive( Debug)] pub struct InsertProductAndGetProductIdParams<T1: cornucopia_async::StringSql,T2: cornucopia_async::StringSql,> { pub owher_id: i32,pub name: T1,pub description: Option<T2>,pub price: rust_decimal::Decimal,} #[derive( Debug)] pub struct InsertProductCoverObjectKeyParams<T1: cornucopia_async::StringSql,> { pub key: T1,pub product_id: i32,} #[derive( Debug)] pub struct InsertProductMoodByNameParams<T1: cornucopia_async::StringSql,> { pub product_id: i32,pub mood_name: T1,} #[derive( Debug)] pub struct InsertSongAndGetSongIdParams<T1: cornucopia_async::StringSql,T2: cornucopia_async::StringSql,T3: cornucopia_async::StringSql,T4: cornucopia_async::StringSql,> { pub product_id: i32,pub primary_genre: T1,pub secondary_genre: Option<T2>,pub sex: T3,pub tempo: i16,pub key: super::super::types::public::Musickey,pub duration: i16,pub lyric: T4,} #[derive( Debug)] pub struct InsertBeatAndGetBeatIdParams<T1: cornucopia_async::StringSql,T2: cornucopia_async::StringSql,> { pub product_id: i32,pub primary_genre: T1,pub secondary_genre: Option<T2>,pub tempo: i16,pub key: super::super::types::public::Musickey,pub duration: i16,} #[derive( Debug)] pub struct InsertMusicProductMasterObjectKeyParams<T1: cornucopia_async::StringSql,> { pub key: T1,pub song_id: Option<i32>,pub beat_id: Option<i32>,} #[derive( Debug)] pub struct InsertMusicProductMasterTaggedObjectKeyParams<T1: cornucopia_async::StringSql,> { pub key: T1,pub song_id: Option<i32>,pub beat_id: Option<i32>,} #[derive( Debug)] pub struct InsertMusicProductMultitrackObjectKeyParams<T1: cornucopia_async::StringSql,> { pub key: T1,pub song_id: Option<i32>,pub beat_id: Option<i32>,} #[derive( Debug)] pub struct InsertLyricParams<T1: cornucopia_async::StringSql,T2: cornucopia_async::StringSql,> { pub product_id: i32,pub text: T1,pub sex: Option<T2>,} #[derive( Debug)] pub struct InsertServiceGetIdParams<T1: cornucopia_async::StringSql,T2: cornucopia_async::StringSql,> { pub creator_id: i32,pub name: T1,pub description: Option<T2>,pub display_price: rust_decimal::Decimal,} #[derive( Debug)] pub struct InsertGhostWritingParams<T1: cornucopia_async::StringSql,T2: cornucopia_async::ArraySql<Item = T1>,> { pub service_id: i32,pub ghost_credits: Option<T2>,} #[derive( Debug)] pub struct InsertServiceCoverObjectKeyParams<T1: cornucopia_async::StringSql,> { pub key: T1,pub service_id: i32,} #[derive( Debug)] pub struct InsertMixingCreditObjectKeyParams<T1: cornucopia_async::StringSql,> { pub key: T1,pub object_type: super::super::types::public::Objecttype,pub credit_mixing_id: i32,} #[derive( Debug)] pub struct InsertSongWritingCreditObjectKeyParams<T1: cornucopia_async::StringSql,> { pub key: T1,pub object_type: super::super::types::public::Objecttype,pub credit_song_writing_id: i32,} #[derive( Debug)] pub struct InsertBeatWritingCreditObjectKeyParams<T1: cornucopia_async::StringSql,> { pub key: T1,pub object_type: super::super::types::public::Objecttype,pub credit_beat_writing_id: i32,} #[derive( Debug)] pub struct InsertCoverDesignCreditObjectKeyParams<T1: cornucopia_async::StringSql,> { pub key: T1,pub object_type: super::super::types::public::Objecttype,pub credit_cover_design_id: i32,} #[derive( Debug)] pub struct InsertMusicServiceGenreParams<T1: cornucopia_async::StringSql,> { pub genre: T1,pub beat_writing_id: Option<i32>,pub song_writing_id: Option<i32>,pub mixing_id: Option<i32>,} #[derive( Debug)] pub struct CreateOfferParams<T1: cornucopia_async::StringSql,T2: cornucopia_async::StringSql,> { pub conversations_id: i32,pub services_id: i32,pub creator_id: i32,pub consumer_id: i32,pub text: T1,pub price: rust_decimal::Decimal,pub delivery_interval: T2,pub free_refisions: i32,pub revision_price: rust_decimal::Decimal,} #[derive(serde::Serialize, Debug, Clone, PartialEq,Copy)] pub struct GetCreatorMarksAvg
 { pub avg : rust_decimal::Decimal,pub count : i64,} #[derive(serde::Serialize, Debug, Clone, PartialEq,)] pub struct GetCreatorInboxResponseRateAndTime
 { pub response_rate_percentage : f64,pub average_response_time : String,} pub struct GetCreatorInboxResponseRateAndTimeBorrowed<'a> { pub response_rate_percentage : f64,pub average_response_time : &'a str,}
 impl<'a> From<GetCreatorInboxResponseRateAndTimeBorrowed<'a>> for GetCreatorInboxResponseRateAndTime
@@ -475,8 +475,8 @@ GenericClient
 FROM service_reviews
 JOIN service_orders
 ON service_reviews.service_orders_id = service_orders.id
-JOIN services
-ON service_orders.services_id = services.id
+JOIN offers ON service_orders.offers_id = offers.id
+JOIN services ON offers.services_id = services.id
 WHERE services.creator_id = $1")) } pub struct
 GetCreatorMarksAvgStmt(cornucopia_async::private::Stmt); impl GetCreatorMarksAvgStmt
 {  pub fn bind<'a, C:
@@ -1090,25 +1090,26 @@ tokio_postgres::Error>> + Send + 'a>>, C> for InsertMusicServiceGenreStmt
     tokio_postgres::Error>> + Send + 'a>>
     { Box::pin(self.bind(client, &params.genre,&params.beat_writing_id,&params.song_writing_id,&params.mixing_id,)) }
 } pub fn create_offer() -> CreateOfferStmt
-{ CreateOfferStmt(cornucopia_async::private::Stmt::new("INSERT INTO offers(conversations_id, services_id, text, price, delivery_date, free_revisions, revision_price)
-VALUES ($1, $2, $3, $4, $5, $6, $7)")) } pub struct
+{ CreateOfferStmt(cornucopia_async::private::Stmt::new("INSERT INTO offers(conversations_id, services_id, creator_id, consumer_id, text, price, delivery_interval, free_revisions, revision_price)
+VALUES ($1, $2, $3, $4, $5, $6, ($7::TEXT)::INTERVAL, $8, $9)")) } pub struct
 CreateOfferStmt(cornucopia_async::private::Stmt); impl CreateOfferStmt
 {  pub async fn bind<'a, C:
 GenericClient,T1:
+cornucopia_async::StringSql,T2:
 cornucopia_async::StringSql,>(&'a mut self, client: &'a  C,
-conversations_id: &'a i32,services_id: &'a i32,text: &'a T1,price: &'a rust_decimal::Decimal,delivery_date: &'a time::OffsetDateTime,free_refisions: &'a i32,revision_price: &'a rust_decimal::Decimal,) -> Result<u64, tokio_postgres::Error>
+conversations_id: &'a i32,services_id: &'a i32,creator_id: &'a i32,consumer_id: &'a i32,text: &'a T1,price: &'a rust_decimal::Decimal,delivery_interval: &'a T2,free_refisions: &'a i32,revision_price: &'a rust_decimal::Decimal,) -> Result<u64, tokio_postgres::Error>
 {
     let stmt = self.0.prepare(client).await?;
-    client.execute(stmt, &[conversations_id,services_id,text,price,delivery_date,free_refisions,revision_price,]).await
-} } impl <'a, C: GenericClient + Send + Sync, T1: cornucopia_async::StringSql,>
-cornucopia_async::Params<'a, CreateOfferParams<T1,>, std::pin::Pin<Box<dyn futures::Future<Output = Result<u64,
+    client.execute(stmt, &[conversations_id,services_id,creator_id,consumer_id,text,price,delivery_interval,free_refisions,revision_price,]).await
+} } impl <'a, C: GenericClient + Send + Sync, T1: cornucopia_async::StringSql,T2: cornucopia_async::StringSql,>
+cornucopia_async::Params<'a, CreateOfferParams<T1,T2,>, std::pin::Pin<Box<dyn futures::Future<Output = Result<u64,
 tokio_postgres::Error>> + Send + 'a>>, C> for CreateOfferStmt
 {
     fn
     params(&'a mut self, client: &'a  C, params: &'a
-    CreateOfferParams<T1,>) -> std::pin::Pin<Box<dyn futures::Future<Output = Result<u64,
+    CreateOfferParams<T1,T2,>) -> std::pin::Pin<Box<dyn futures::Future<Output = Result<u64,
     tokio_postgres::Error>> + Send + 'a>>
-    { Box::pin(self.bind(client, &params.conversations_id,&params.services_id,&params.text,&params.price,&params.delivery_date,&params.free_refisions,&params.revision_price,)) }
+    { Box::pin(self.bind(client, &params.conversations_id,&params.services_id,&params.creator_id,&params.consumer_id,&params.text,&params.price,&params.delivery_interval,&params.free_refisions,&params.revision_price,)) }
 } } pub mod internal
 {  #[derive( Debug)] pub struct InsertCardTokenParams<T1: cornucopia_async::StringSql,> { pub user_id: i32,pub card_token: T1,}  use futures::{StreamExt, TryStreamExt};use futures; use cornucopia_async::GenericClient; pub struct StringQuery<'a, C: GenericClient, T, const N: usize>
 {
@@ -1158,6 +1159,19 @@ GenericClient,>(&'a mut self, client: &'a  C,
 {
     let stmt = self.0.prepare(client).await?;
     client.execute(stmt, &[]).await
+} } pub fn fetch_card_token_by_user_id() -> FetchCardTokenByUserIdStmt
+{ FetchCardTokenByUserIdStmt(cornucopia_async::private::Stmt::new("SELECT token FROM card_tokens WHERE users_id = $1")) } pub struct
+FetchCardTokenByUserIdStmt(cornucopia_async::private::Stmt); impl FetchCardTokenByUserIdStmt
+{  pub fn bind<'a, C:
+GenericClient,>(&'a mut self, client: &'a  C,
+user_id: &'a i32,) -> StringQuery<'a,C,
+String, 1>
+{
+    StringQuery
+    {
+        client, params: [user_id,], stmt: &mut self.0, extractor:
+        |row| {  row.get(0) }, mapper: |it| { it.into() },
+    }
 } } pub fn insert_card_token() -> InsertCardTokenStmt
 { InsertCardTokenStmt(cornucopia_async::private::Stmt::new("INSERT INTO card_tokens (users_id, token)
 VALUES ($1, $2)")) } pub struct
@@ -1178,19 +1192,25 @@ tokio_postgres::Error>> + Send + 'a>>, C> for InsertCardTokenStmt
     InsertCardTokenParams<T1,>) -> std::pin::Pin<Box<dyn futures::Future<Output = Result<u64,
     tokio_postgres::Error>> + Send + 'a>>
     { Box::pin(self.bind(client, &params.user_id,&params.card_token,)) }
-} pub fn fetch_card_token_by_user_id() -> FetchCardTokenByUserIdStmt
-{ FetchCardTokenByUserIdStmt(cornucopia_async::private::Stmt::new("SELECT token FROM card_tokens WHERE users_id = $1")) } pub struct
-FetchCardTokenByUserIdStmt(cornucopia_async::private::Stmt); impl FetchCardTokenByUserIdStmt
-{  pub fn bind<'a, C:
+} pub fn create_service_order() -> CreateServiceOrderStmt
+{ CreateServiceOrderStmt(cornucopia_async::private::Stmt::new("INSERT INTO service_orders (offers_id, delivery_date, free_revisions_left, paid_revisions_made)
+VALUES (
+    $1,
+    CURRENT_TIMESTAMP + (
+        SELECT delivery_interval FROM offers WHERE id = $1
+    ),
+    (
+        SELECT free_revisions FROM offers WHERE id = $1
+    ),
+    0
+)")) } pub struct
+CreateServiceOrderStmt(cornucopia_async::private::Stmt); impl CreateServiceOrderStmt
+{  pub async fn bind<'a, C:
 GenericClient,>(&'a mut self, client: &'a  C,
-user_id: &'a i32,) -> StringQuery<'a,C,
-String, 1>
+offer_id: &'a i32,) -> Result<u64, tokio_postgres::Error>
 {
-    StringQuery
-    {
-        client, params: [user_id,], stmt: &mut self.0, extractor:
-        |row| {  row.get(0) }, mapper: |it| { it.into() },
-    }
+    let stmt = self.0.prepare(client).await?;
+    client.execute(stmt, &[offer_id,]).await
 } } pub fn delete_card_token() -> DeleteCardTokenStmt
 { DeleteCardTokenStmt(cornucopia_async::private::Stmt::new("DELETE FROM card_tokens WHERE token = $1")) } pub struct
 DeleteCardTokenStmt(cornucopia_async::private::Stmt); impl DeleteCardTokenStmt
@@ -1201,6 +1221,17 @@ token: &'a T1,) -> Result<u64, tokio_postgres::Error>
 {
     let stmt = self.0.prepare(client).await?;
     client.execute(stmt, &[token,]).await
+} } pub fn update_offer_status_accepted() -> UpdateOfferStatusAcceptedStmt
+{ UpdateOfferStatusAcceptedStmt(cornucopia_async::private::Stmt::new("UPDATE offers
+SET status = 'accepted', updated_at = CURRENT_TIMESTAMP
+WHERE id = $1")) } pub struct
+UpdateOfferStatusAcceptedStmt(cornucopia_async::private::Stmt); impl UpdateOfferStatusAcceptedStmt
+{  pub async fn bind<'a, C:
+GenericClient,>(&'a mut self, client: &'a  C,
+offer_id: &'a i32,) -> Result<u64, tokio_postgres::Error>
+{
+    let stmt = self.0.prepare(client).await?;
+    client.execute(stmt, &[offer_id,]).await
 } } } pub mod open_access
 {  #[derive( Debug)] pub struct GetSongsParams<T1: cornucopia_async::StringSql,T2: cornucopia_async::ArraySql<Item = i16>,T3: cornucopia_async::ArraySql<Item = super::super::types::public::Musickey>,T4: cornucopia_async::StringSql,T5: cornucopia_async::ArraySql<Item = T4>,T6: cornucopia_async::StringSql,T7: cornucopia_async::ArraySql<Item = T6>,T8: cornucopia_async::StringSql,> { pub user_id: Option<i32>,pub sex: Option<T1>,pub tempo: T2,pub key: T3,pub genre: T5,pub mood: T7,pub sort_by: T8,pub offset: i64,pub amount: i64,} #[derive(Clone,Copy, Debug)] pub struct GetNewSongsParams<> { pub user_id: Option<i32>,pub amount: i64,} #[derive(Clone,Copy, Debug)] pub struct GetRecommendedSongsParams<> { pub user_id: Option<i32>,pub amount: i64,} #[derive(serde::Serialize, Debug, Clone, PartialEq,)] pub struct GetStats
 { pub table_name : String,pub count : i64,} pub struct GetStatsBorrowed<'a> { pub table_name : &'a str,pub count : i64,}
@@ -1704,17 +1735,17 @@ impl<'a> From<GetConversationsEntriesBorrowed<'a>> for GetConversationsEntries
     fn from(GetConversationsEntriesBorrowed { conversation_id,interlocutor,last_message_text,last_message_timestamp,image_url,unread_messages_count,}: GetConversationsEntriesBorrowed<'a>) ->
     Self { Self { conversation_id,interlocutor: interlocutor.into(),last_message_text: last_message_text.into(),last_message_timestamp,image_url: image_url.into(),unread_messages_count,} }
 } #[derive(serde::Serialize, Debug, Clone, PartialEq,)] pub struct ListConversationById
-{ pub conversation_id : i32,pub participant_user_id : i32,pub participant_username : String,pub participant_avatar_key : String,pub message_id : Option<i32>,pub message_text : Option<String>,pub message_created_at : Option<time::OffsetDateTime>,pub message_updated_at : Option<time::OffsetDateTime>,pub reply_message_id : Option<i32>,pub message_attachments : Option<Vec<String>>,pub service_id : Option<i32>,pub service_name : Option<String>,pub service_cover_key : Option<String>,pub offer_id : Option<i32>,pub offer_text : Option<String>,pub offer_price : Option<rust_decimal::Decimal>,pub offer_delivery_date : Option<time::OffsetDateTime>,pub offer_free_revisions : Option<i32>,pub offer_revision_price : Option<rust_decimal::Decimal>,} pub struct ListConversationByIdBorrowed<'a> { pub conversation_id : i32,pub participant_user_id : i32,pub participant_username : &'a str,pub participant_avatar_key : &'a str,pub message_id : Option<i32>,pub message_text : Option<&'a str>,pub message_created_at : Option<time::OffsetDateTime>,pub message_updated_at : Option<time::OffsetDateTime>,pub reply_message_id : Option<i32>,pub message_attachments : Option<cornucopia_async::ArrayIterator<'a, &'a str>>,pub service_id : Option<i32>,pub service_name : Option<&'a str>,pub service_cover_key : Option<&'a str>,pub offer_id : Option<i32>,pub offer_text : Option<&'a str>,pub offer_price : Option<rust_decimal::Decimal>,pub offer_delivery_date : Option<time::OffsetDateTime>,pub offer_free_revisions : Option<i32>,pub offer_revision_price : Option<rust_decimal::Decimal>,}
+{ pub conversation_id : i32,pub participant_user_id : i32,pub participant_username : String,pub participant_avatar_key : String,pub message_id : Option<i32>,pub message_text : Option<String>,pub message_created_at : Option<time::OffsetDateTime>,pub message_updated_at : Option<time::OffsetDateTime>,pub reply_message_id : Option<i32>,pub message_attachments : Option<Vec<String>>,pub service_id : Option<i32>,pub service_name : Option<String>,pub service_cover_key : Option<String>,pub offer_id : Option<i32>,pub offer_text : Option<String>,pub offer_price : Option<rust_decimal::Decimal>,pub offer_delivery_interval : Option<String>,pub offer_free_revisions : Option<i32>,pub offer_revision_price : Option<rust_decimal::Decimal>,} pub struct ListConversationByIdBorrowed<'a> { pub conversation_id : i32,pub participant_user_id : i32,pub participant_username : &'a str,pub participant_avatar_key : &'a str,pub message_id : Option<i32>,pub message_text : Option<&'a str>,pub message_created_at : Option<time::OffsetDateTime>,pub message_updated_at : Option<time::OffsetDateTime>,pub reply_message_id : Option<i32>,pub message_attachments : Option<cornucopia_async::ArrayIterator<'a, &'a str>>,pub service_id : Option<i32>,pub service_name : Option<&'a str>,pub service_cover_key : Option<&'a str>,pub offer_id : Option<i32>,pub offer_text : Option<&'a str>,pub offer_price : Option<rust_decimal::Decimal>,pub offer_delivery_interval : Option<&'a str>,pub offer_free_revisions : Option<i32>,pub offer_revision_price : Option<rust_decimal::Decimal>,}
 impl<'a> From<ListConversationByIdBorrowed<'a>> for ListConversationById
 {
-    fn from(ListConversationByIdBorrowed { conversation_id,participant_user_id,participant_username,participant_avatar_key,message_id,message_text,message_created_at,message_updated_at,reply_message_id,message_attachments,service_id,service_name,service_cover_key,offer_id,offer_text,offer_price,offer_delivery_date,offer_free_revisions,offer_revision_price,}: ListConversationByIdBorrowed<'a>) ->
-    Self { Self { conversation_id,participant_user_id,participant_username: participant_username.into(),participant_avatar_key: participant_avatar_key.into(),message_id,message_text: message_text.map(|v| v.into()),message_created_at,message_updated_at,reply_message_id,message_attachments: message_attachments.map(|v| v.map(|v| v.into()).collect()),service_id,service_name: service_name.map(|v| v.into()),service_cover_key: service_cover_key.map(|v| v.into()),offer_id,offer_text: offer_text.map(|v| v.into()),offer_price,offer_delivery_date,offer_free_revisions,offer_revision_price,} }
+    fn from(ListConversationByIdBorrowed { conversation_id,participant_user_id,participant_username,participant_avatar_key,message_id,message_text,message_created_at,message_updated_at,reply_message_id,message_attachments,service_id,service_name,service_cover_key,offer_id,offer_text,offer_price,offer_delivery_interval,offer_free_revisions,offer_revision_price,}: ListConversationByIdBorrowed<'a>) ->
+    Self { Self { conversation_id,participant_user_id,participant_username: participant_username.into(),participant_avatar_key: participant_avatar_key.into(),message_id,message_text: message_text.map(|v| v.into()),message_created_at,message_updated_at,reply_message_id,message_attachments: message_attachments.map(|v| v.map(|v| v.into()).collect()),service_id,service_name: service_name.map(|v| v.into()),service_cover_key: service_cover_key.map(|v| v.into()),offer_id,offer_text: offer_text.map(|v| v.into()),offer_price,offer_delivery_interval: offer_delivery_interval.map(|v| v.into()),offer_free_revisions,offer_revision_price,} }
 } #[derive(serde::Serialize, Debug, Clone, PartialEq,)] pub struct GetOfferInfoById
-{ pub id : i32,pub created_at : time::OffsetDateTime,pub conversations_id : i32,pub services_id : i32,pub text : String,pub price : rust_decimal::Decimal,pub delivery_date : time::OffsetDateTime,pub free_revisions : i32,pub revision_price : rust_decimal::Decimal,pub status : super::super::types::public::Offerstatus,} pub struct GetOfferInfoByIdBorrowed<'a> { pub id : i32,pub created_at : time::OffsetDateTime,pub conversations_id : i32,pub services_id : i32,pub text : &'a str,pub price : rust_decimal::Decimal,pub delivery_date : time::OffsetDateTime,pub free_revisions : i32,pub revision_price : rust_decimal::Decimal,pub status : super::super::types::public::Offerstatus,}
+{ pub created_at : time::OffsetDateTime,pub updated_at : time::OffsetDateTime,pub conversations_id : i32,pub services_id : i32,pub creator_id : i32,pub consumer_id : i32,pub text : String,pub price : rust_decimal::Decimal,pub delivery_interval : String,pub free_revisions : i32,pub revision_price : rust_decimal::Decimal,pub status : super::super::types::public::Offerstatus,} pub struct GetOfferInfoByIdBorrowed<'a> { pub created_at : time::OffsetDateTime,pub updated_at : time::OffsetDateTime,pub conversations_id : i32,pub services_id : i32,pub creator_id : i32,pub consumer_id : i32,pub text : &'a str,pub price : rust_decimal::Decimal,pub delivery_interval : &'a str,pub free_revisions : i32,pub revision_price : rust_decimal::Decimal,pub status : super::super::types::public::Offerstatus,}
 impl<'a> From<GetOfferInfoByIdBorrowed<'a>> for GetOfferInfoById
 {
-    fn from(GetOfferInfoByIdBorrowed { id,created_at,conversations_id,services_id,text,price,delivery_date,free_revisions,revision_price,status,}: GetOfferInfoByIdBorrowed<'a>) ->
-    Self { Self { id,created_at,conversations_id,services_id,text: text.into(),price,delivery_date,free_revisions,revision_price,status,} }
+    fn from(GetOfferInfoByIdBorrowed { created_at,updated_at,conversations_id,services_id,creator_id,consumer_id,text,price,delivery_interval,free_revisions,revision_price,status,}: GetOfferInfoByIdBorrowed<'a>) ->
+    Self { Self { created_at,updated_at,conversations_id,services_id,creator_id,consumer_id,text: text.into(),price,delivery_interval: delivery_interval.into(),free_revisions,revision_price,status,} }
 }  use futures::{StreamExt, TryStreamExt};use futures; use cornucopia_async::GenericClient; pub struct GetUserSettingsQuery<'a, C: GenericClient, T, const N: usize>
 {
     client: &'a  C, params:
@@ -2224,7 +2255,7 @@ i32, 1>
     offers.id as offer_id,
     offers.text as offer_text,
     offers.price as offer_price,
-    offers.delivery_date as offer_delivery_date,
+    offers.delivery_interval::TEXT as offer_delivery_interval,
     offers.free_revisions as offer_free_revisions,
     offers.revision_price as offer_revision_price
 FROM 
@@ -2240,7 +2271,7 @@ LEFT JOIN objects obj3 ON obj.message_attachment = msg.id
 WHERE 
     conv.id = $1
 GROUP BY 
-    msg.id, conv.id, part.users_id, usr.username, obj.key, serv.id, serv.name, obj2.key, offers.id, offers.text, offers.price, offers.delivery_date, offers.free_revisions, offers.revision_price
+    msg.id, conv.id, part.users_id, usr.username, obj.key, serv.id, serv.name, obj2.key, offers.id, offers.text, offers.price, offers.delivery_interval, offers.free_revisions, offers.revision_price
 ORDER BY 
     msg.created_at ASC, 
     offers.created_at ASC
@@ -2255,7 +2286,7 @@ ListConversationById, 2>
     ListConversationByIdQuery
     {
         client, params: [conversation_id,offset,], stmt: &mut self.0, extractor:
-        |row| {  ListConversationByIdBorrowed { conversation_id: row.get(0),participant_user_id: row.get(1),participant_username: row.get(2),participant_avatar_key: row.get(3),message_id: row.get(4),message_text: row.get(5),message_created_at: row.get(6),message_updated_at: row.get(7),reply_message_id: row.get(8),message_attachments: row.get(9),service_id: row.get(10),service_name: row.get(11),service_cover_key: row.get(12),offer_id: row.get(13),offer_text: row.get(14),offer_price: row.get(15),offer_delivery_date: row.get(16),offer_free_revisions: row.get(17),offer_revision_price: row.get(18),} }, mapper: |it| { <ListConversationById>::from(it) },
+        |row| {  ListConversationByIdBorrowed { conversation_id: row.get(0),participant_user_id: row.get(1),participant_username: row.get(2),participant_avatar_key: row.get(3),message_id: row.get(4),message_text: row.get(5),message_created_at: row.get(6),message_updated_at: row.get(7),reply_message_id: row.get(8),message_attachments: row.get(9),service_id: row.get(10),service_name: row.get(11),service_cover_key: row.get(12),offer_id: row.get(13),offer_text: row.get(14),offer_price: row.get(15),offer_delivery_interval: row.get(16),offer_free_revisions: row.get(17),offer_revision_price: row.get(18),} }, mapper: |it| { <ListConversationById>::from(it) },
     }
 } } impl <'a, C: GenericClient,> cornucopia_async::Params<'a,
 ListConversationByIdParams<>, ListConversationByIdQuery<'a, C,
@@ -2267,7 +2298,20 @@ ListConversationById, 2>, C> for ListConversationByIdStmt
     ListConversationById, 2>
     { self.bind(client, &params.conversation_id,&params.offset,) }
 } pub fn get_offer_info_by_id() -> GetOfferInfoByIdStmt
-{ GetOfferInfoByIdStmt(cornucopia_async::private::Stmt::new("SELECT * FROM offers
+{ GetOfferInfoByIdStmt(cornucopia_async::private::Stmt::new("SELECT
+    created_at,
+    updated_at,
+    conversations_id,
+    services_id,
+    creator_id,
+    consumer_id,
+	text,
+    price,
+    delivery_interval::TEXT,
+    free_revisions,
+    revision_price,
+    status
+FROM offers
 WHERE id = $1")) } pub struct
 GetOfferInfoByIdStmt(cornucopia_async::private::Stmt); impl GetOfferInfoByIdStmt
 {  pub fn bind<'a, C:
@@ -2278,7 +2322,7 @@ GetOfferInfoById, 1>
     GetOfferInfoByIdQuery
     {
         client, params: [offer_id,], stmt: &mut self.0, extractor:
-        |row| {  GetOfferInfoByIdBorrowed { id: row.get(0),created_at: row.get(1),conversations_id: row.get(2),services_id: row.get(3),text: row.get(4),price: row.get(5),delivery_date: row.get(6),free_revisions: row.get(7),revision_price: row.get(8),status: row.get(9),} }, mapper: |it| { <GetOfferInfoById>::from(it) },
+        |row| {  GetOfferInfoByIdBorrowed { created_at: row.get(0),updated_at: row.get(1),conversations_id: row.get(2),services_id: row.get(3),creator_id: row.get(4),consumer_id: row.get(5),text: row.get(6),price: row.get(7),delivery_interval: row.get(8),free_revisions: row.get(9),revision_price: row.get(10),status: row.get(11),} }, mapper: |it| { <GetOfferInfoById>::from(it) },
     }
 } } pub fn create_new_conversation() -> CreateNewConversationStmt
 { CreateNewConversationStmt(cornucopia_async::private::Stmt::new("INSERT INTO conversations VALUES (DEFAULT) returning id")) } pub struct
