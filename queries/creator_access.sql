@@ -5,8 +5,8 @@ SELECT AVG(mark), COUNT(mark)
 FROM service_reviews
 JOIN service_orders
 ON service_reviews.service_orders_id = service_orders.id
-JOIN services
-ON service_orders.services_id = services.id
+JOIN offers ON service_orders.offers_id = offers.id
+JOIN services ON offers.services_id = services.id
 WHERE services.creator_id = :creator_id;
 
 --! get_creator_inbox_response_rate_and_time
@@ -90,7 +90,7 @@ WHERE products.author_id = :user_id AND products.status = :product_status
 GROUP BY songs.id, products.status, products.name, products.price, objects.key, primary_genre,
         secondary_genre, songs.tempo, songs.key, songs.sex, songs.duration, songs.lyric;
 
--- UPDATING CONTENT --
+-- INSERTING CONTENT --
 
 -- Products
 
@@ -238,5 +238,5 @@ VALUES (
 -- Offers
 
 --! create_offer
-INSERT INTO offers(conversations_id, services_id, text, price, delivery_date, free_revisions, revision_price)
-VALUES (:conversations_id, :services_id, :text, :price, :delivery_date, :free_refisions, :revision_price);
+INSERT INTO offers(conversations_id, services_id, creator_id, consumer_id, text, price, delivery_interval, free_revisions, revision_price)
+VALUES (:conversations_id, :services_id, :creator_id, :consumer_id, :text, :price, (:delivery_interval::TEXT)::INTERVAL, :free_refisions, :revision_price);

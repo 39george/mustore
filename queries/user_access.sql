@@ -88,7 +88,7 @@ WHERE users.id = :user_id AND conv.id = :conversation_id;
 --! conversation_exists
 SELECT id FROM conversations WHERE conversations.id = :id;
 
---! list_conversation_by_id : (message_id?, message_text?, message_created_at?, message_updated_at?, reply_message_id?, message_attachments?, service_id?, service_name?, service_cover_key?, offer_id?, offer_text?, offer_price?, offer_delivery_date?, offer_free_revisions?, offer_revision_price?)
+--! list_conversation_by_id : (message_id?, message_text?, message_created_at?, message_updated_at?, reply_message_id?, message_attachments?, service_id?, service_name?, service_cover_key?, offer_id?, offer_text?, offer_price?, offer_delivery_interval?, offer_free_revisions?, offer_revision_price?)
 SELECT 
     conv.id as conversation_id,
     part.users_id as participant_user_id,
@@ -106,7 +106,7 @@ SELECT
     offers.id as offer_id,
     offers.text as offer_text,
     offers.price as offer_price,
-    offers.delivery_date as offer_delivery_date,
+    offers.delivery_interval::TEXT as offer_delivery_interval,
     offers.free_revisions as offer_free_revisions,
     offers.revision_price as offer_revision_price
 FROM 
@@ -122,7 +122,7 @@ LEFT JOIN objects obj3 ON obj.message_attachment = msg.id
 WHERE 
     conv.id = :conversation_id
 GROUP BY 
-    msg.id, conv.id, part.users_id, usr.username, obj.key, serv.id, serv.name, obj2.key, offers.id, offers.text, offers.price, offers.delivery_date, offers.free_revisions, offers.revision_price
+    msg.id, conv.id, part.users_id, usr.username, obj.key, serv.id, serv.name, obj2.key, offers.id, offers.text, offers.price, offers.delivery_interval, offers.free_revisions, offers.revision_price
 ORDER BY 
     msg.created_at ASC, 
     offers.created_at ASC
@@ -130,10 +130,23 @@ OFFSET :offset
 LIMIT 30;
 
 --! get_offer_info_by_id
-SELECT * FROM offers
+SELECT
+    created_at,
+    updated_at,
+    conversations_id,
+    services_id,
+    creator_id,
+    consumer_id,
+	text,
+    price,
+    delivery_interval::TEXT,
+    free_revisions,
+    revision_price,
+    status
+FROM offers
 WHERE id = :offer_id;
 
--- UPDATING CONTENT --
+-- INSERTING CONTENT --
 
 --! create_new_conversation
 INSERT INTO conversations VALUES (DEFAULT) returning id;
@@ -151,3 +164,5 @@ VALUES (:conversation_id, :service_id, :user_id, :reply_message_id, :text) retur
 --! insert_message_attachment
 INSERT INTO objects (key, object_type, message_attachment)
 VALUES (:key, 'attachment', :message_id);
+
+-- UPDATING CONTENT --
