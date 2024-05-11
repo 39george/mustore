@@ -46,6 +46,7 @@ const SIMPLE_ISO: Iso8601<6651332276402088934156738804825718784> = Iso8601::<
 time::serde::format_description!(iso_format, OffsetDateTime, SIMPLE_ISO);
 
 pub const PRESIGNED_IMAGE_EXP: Duration = Duration::from_secs(10);
+pub const SESSION_EXPIRATION_SECS: i64 = 60 * 60; // 1 hour
 
 pub const MAX_MP3_SIZE_MB: u64 = 15;
 pub const MAX_MULTITRACK_SIZE_GB: u64 = 5;

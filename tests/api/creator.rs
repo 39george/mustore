@@ -1,7 +1,15 @@
 //! tests/api/upload_song.rs
 
-use crate::helpers::{TestApp, TestUser};
-use mustore::config::Settings;
+use crate::helpers::{
+    creator::new_mixing_service_for_creator, TestApp, TestUser, WEBDRIVER_LOCK,
+};
+use mustore::{
+    config::Settings,
+    domain::{
+        requests::creator_access::CreateOfferRequest,
+        responses::user_access::DialogId,
+    },
+};
 
 #[tokio::test]
 async fn register_card_token_success() {
@@ -12,7 +20,6 @@ async fn register_card_token_success() {
     let creator = TestUser::generate_user(String::from("creator"), 0);
     assert_eq!(app.register_user(&creator).await.as_u16(), 200);
 
-    // Login http clients on server
     let creator_client = reqwest::Client::builder()
         .cookie_store(true)
         // Don't follow redirects
@@ -20,6 +27,7 @@ async fn register_card_token_success() {
         .build()
         .unwrap();
 
+    // Login http client on server
     assert_eq!(
         app.login_user(&creator, &creator_client).await.as_u16(),
         200
@@ -42,6 +50,8 @@ async fn register_card_token_success() {
         .unwrap()
         .to_str()
         .unwrap();
+
+    let _lock = WEBDRIVER_LOCK.lock();
 
     // Connect to webdriver
     let webdriver = fantoccini::ClientBuilder::native()

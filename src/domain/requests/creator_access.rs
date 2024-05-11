@@ -2,7 +2,6 @@ use garde::Validate;
 use rust_decimal::Decimal;
 use serde::Deserialize;
 use serde::Serialize;
-use time::OffsetDateTime;
 use utoipa::ToSchema;
 
 use crate::domain::music_parameters::MusicKey;
@@ -219,6 +218,7 @@ pub enum SubmitServiceRequest {
 #[garde(allow_unvalidated)]
 pub struct CreateOfferRequest {
     pub conversation_id: i32,
+    pub consumer_id: i32,
     pub service_id: i32,
     #[garde(length(chars, min = MIN_MESSAGE_LEN, max = MAX_MESSAGE_LEN))]
     #[schema(
@@ -232,8 +232,7 @@ pub struct CreateOfferRequest {
         example = 18.50
     )]
     pub price: Decimal,
-    #[serde(with = "crate::iso_format")]
-    pub delivery_date: OffsetDateTime,
+    pub delivery_days: i32,
     pub free_revisions: i32,
     #[schema(
         value_type = f32,

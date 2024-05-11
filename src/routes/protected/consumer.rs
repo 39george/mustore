@@ -3,20 +3,27 @@ use std::time::Duration;
 use anyhow::Context;
 use axum::extract::Path;
 use axum::extract::State;
+use axum::response::Redirect;
 use axum::routing;
 use axum::Form;
 use axum::Json;
 use axum::Router;
 use axum_login::permission_required;
+use banksim_api::init_payment::InitPayment;
+use banksim_api::init_payment::InitPaymentRequest;
 use futures::future::try_join_all;
 use http::StatusCode;
+use reqwest::Url;
 
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
 use crate::auth::users::AuthSession;
 use crate::cornucopia::queries::consumer_access;
+use crate::cornucopia::queries::user_access;
 use crate::domain::object_key::ObjectKey;
 use crate::domain::requests::consumer_access::AcceptOffer;
+use crate::domain::sessions::Session;
+use crate::payments::kopeck::Kopeck;
 use crate::routes::ErrorResponse;
 use crate::startup::api_doc::BadRequestResponse;
 use crate::startup::api_doc::InternalErrorResponse;
@@ -133,27 +140,87 @@ async fn status_bar_info(
     Ok(Json(products))
 }
 
-// TODO: implement function
 #[tracing::instrument(name = "Accept offer", skip_all, fields(username))]
 async fn accept_offer(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
-    Form(AcceptOffer { offer_id: _ }): Form<AcceptOffer>,
-) -> Result<StatusCode, ErrorResponse> {
+    Form(AcceptOffer { offer_id }): Form<AcceptOffer>,
+) -> Result<Redirect, ErrorResponse> {
     let user = auth_session.user.ok_or(ErrorResponse::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
     tracing::Span::current().record("username", &user.username);
 
-    // Check that this offer is available for that user
-    // We should check that user is participant of conversation
-    // where that offer was posted.
-
-    let _db_client = app_state
+    let db_client = app_state
         .pg_pool
         .get()
         .await
         .context("Failed to get connection from postgres pool")?;
 
-    Ok(StatusCode::OK)
+    // Check that this offer is available for that user
+    let offer_info = user_access::get_offer_info_by_id()
+        .bind(&db_client, &offer_id)
+        .one()
+        .await
+        .context("Failed to get conversation id by offer id")?;
+    super::check_conversation_access(
+        &db_client,
+        &user.id,
+        &user.username,
+        &offer_info.conversations_id,
+    )
+    .await?;
+
+    let base: Url = app_state.settings.app_base_url.parse().unwrap();
+    let success_url = "https://www.google.com".parse().unwrap();
+    let fail_url = base.join("/notification_center/bank").unwrap();
+    let notification_url = base.join("/notification_center/bank").unwrap();
+    let cashbox_pass = &app_state.settings.payments.cashbox_password;
+    let request = InitPaymentRequest::new(
+        notification_url,
+        success_url,
+        fail_url,
+        Kopeck::from_rub(offer_info.price)
+            .context("Failed to parse decimal as kopeck")?
+            .raw() as i64,
+        cashbox_pass,
+        None,
+    );
+    let response = app_state
+        .airactions_c
+        .execute(InitPayment, request)
+        .await
+        .context("Failed to initiate payment for offer")?;
+
+    let (payment_id, payment_url) = match response.status {
+        banksim_api::OperationStatus::Success => (
+            response.payment_id.unwrap(),
+            response.payment_url.unwrap().to_string(),
+        ),
+        banksim_api::OperationStatus::Fail(e) => {
+            return Err(ErrorResponse::InternalError(anyhow::Error::msg(e)));
+        }
+        banksim_api::OperationStatus::Cancel => todo!(),
+    };
+
+    let redis_client = app_state.redis_pool;
+    match Session::new(
+        redis_client.next_connected(),
+        payment_id,
+        user.id,
+        crate::domain::sessions::Kind::AcceptingOffer { offer_id },
+    )
+    .await
+    {
+        Ok(()) => (),
+        Err(e) => {
+            return Err(ErrorResponse::InternalError(anyhow::anyhow!(
+                "Failed to store payment session in redis: {e}"
+            ))
+            .into())
+        }
+    }
+
+    tracing::info!("Redirecting to: {payment_url}");
+    Ok(Redirect::to(&payment_url))
 }

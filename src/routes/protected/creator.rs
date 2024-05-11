@@ -28,7 +28,7 @@ use crate::domain::object_key::ObjectKey;
 use crate::domain::requests::creator_access::CreateOfferRequest;
 use crate::domain::requests::creator_access::SubmitProductRequest;
 use crate::domain::requests::creator_access::SubmitServiceRequest;
-use crate::domain::sessions::card_token_registration::CardTokenSession;
+use crate::domain::sessions::Session;
 use crate::domain::upload_request::delete_upload_request_data_from_redis;
 use crate::domain::upload_request::verify_upload_request_data_in_redis;
 use crate::impl_debug;
@@ -235,10 +235,11 @@ async fn connect_card(
     };
 
     let redis_client = state.redis_pool;
-    match CardTokenSession::new(
+    match Session::new(
         redis_client.next_connected(),
         operation_id,
         user.id,
+        crate::domain::sessions::Kind::CardTokenRegistration,
     )
     .await
     {
@@ -800,9 +801,11 @@ async fn create_offer(
             &db_client,
             &req.conversation_id,
             &req.service_id,
+            &user.id,
+            &req.consumer_id,
             &req.text,
             &req.price,
-            &req.delivery_date,
+            &format!("{} days", req.delivery_days),
             &req.free_revisions,
             &req.revision_price,
         )

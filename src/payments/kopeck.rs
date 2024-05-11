@@ -43,6 +43,12 @@ impl Kopeck {
         Ok(Kopeck(kopeck))
     }
 
+    /// Panics, if can't parse str as decimal
+    pub fn from_rub_str(rub: &str) -> Result<Kopeck, KopeckError> {
+        let parsed = rub.try_into().unwrap();
+        Self::from_rub(parsed)
+    }
+
     pub fn raw(&self) -> u32 {
         self.0
     }

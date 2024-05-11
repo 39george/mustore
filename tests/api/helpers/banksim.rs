@@ -33,6 +33,7 @@ impl Banksim {
                 password: password.to_string(),
             })
             .basic_auth(
+                // TODO: use username from config here
                 "ghashy",
                 Some(self.app_config.payments.cashbox_password.expose_secret()),
             )
@@ -50,6 +51,35 @@ impl Banksim {
             password: password.to_string(),
         })
     }
+
+    pub async fn open_credit(
+        &self,
+        account: &Account,
+        amount: i64,
+    ) -> Result<(), reqwest::Error> {
+        let client = reqwest::Client::new();
+        let endpoint = format!(
+            "{}/system/credit",
+            self.app_config.payments.merchant_api_endpoint
+        );
+        let response = client
+            .post(endpoint)
+            .json(&OpenCreditRequest {
+                card_number: account.card_number.clone(),
+                amount,
+            })
+            .basic_auth(
+                // TODO: use username from config here
+                "ghashy",
+                Some(self.app_config.payments.cashbox_password.expose_secret()),
+            )
+            .send()
+            .await?;
+        assert_eq!(response.status().as_u16(), 200);
+
+        Ok(())
+    }
+
     pub async fn tokens_for_card_number(
         &self,
         card_number: String,
@@ -62,6 +92,7 @@ impl Banksim {
         let response = client
             .get(endpoint)
             .basic_auth(
+                // TODO: use username from config here
                 "ghashy",
                 Some(self.app_config.payments.cashbox_password.expose_secret()),
             )
@@ -98,4 +129,10 @@ impl Banksim {
 struct AddAccountRequest {
     username: String,
     password: String,
+}
+
+#[derive(Serialize)]
+pub struct OpenCreditRequest {
+    pub card_number: String,
+    pub amount: i64,
 }

@@ -122,8 +122,7 @@ pub struct Offer {
         example = 18.50
     )]
     pub price: Decimal,
-    #[serde(with = "crate::iso_format")]
-    pub delivery_date: OffsetDateTime,
+    pub delivery_interval: String,
     pub free_revisions: i32,
     #[schema(
         value_type = f32,
@@ -275,8 +274,8 @@ impl ConversationDataResponse {
                     price: data
                         .offer_price
                         .unpack("offer id is represented, but price is not")?,
-                    delivery_date: data.offer_delivery_date.unpack(
-                        "offer id is represented, but delivery date is not",
+                    delivery_interval: data.offer_delivery_interval.unpack(
+                        "offer id is represented, but delivery interval is not",
                     )?,
                     free_revisions: data.offer_free_revisions.unpack(
                         "offer id is represented, but free revisions are not",

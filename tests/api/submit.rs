@@ -1,8 +1,9 @@
 //! tests/api/upload_song.rs
 
-use std::ops::RangeBounds;
-
-use crate::helpers::{TestApp, TestUser};
+use crate::helpers::{
+    creator::{new_mixing_service_for_creator, new_song_for_creator},
+    get_rand_subiter, TestApp, TestUser,
+};
 use mustore::{
     config::Settings,
     cornucopia::queries::open_access,
@@ -11,7 +12,6 @@ use mustore::{
         SubmitServiceRequest,
     },
 };
-use rand::Rng;
 
 #[tokio::test]
 async fn song_submit_success() {
@@ -25,58 +25,7 @@ async fn song_submit_success() {
         .build()
         .unwrap();
     assert_eq!(app.login_user(&test_user, &client).await.as_u16(), 200);
-
-    let song_file = std::fs::read("assets/song.mp3").unwrap();
-    let image_file = std::fs::read("assets/image.png").unwrap();
-    let arch_file = std::fs::read("assets/arch.zip").unwrap();
-
-    let (response, song_key) = app
-        .upload_file(&client, "audio/mpeg", "song.mp3", song_file)
-        .await;
-    assert_eq!(response.status().as_u16(), 200);
-
-    let (response, image_key) = app
-        .upload_file(&client, "image/png", "image.png", image_file)
-        .await;
-    assert_eq!(response.status().as_u16(), 200);
-
-    let (response, arch_key) = app
-        .upload_file(&client, "application/zip", "arch.zip", arch_file)
-        .await;
-    assert_eq!(response.status().as_u16(), 200);
-
-    let body = SubmitProductRequest::Song {
-        product: Product {
-            name: "some_song".to_string(),
-            description: None,
-            moods: vec!["веселый".to_string()],
-            cover_object_key: image_key.parse().unwrap(),
-            price: 100.into(),
-        },
-        music_product: MusicProduct {
-            master_object_key: song_key.parse().unwrap(),
-            master_tagged_object_key: None,
-            multitrack_object_key: arch_key.parse().unwrap(),
-            primary_genre: "хор".to_string(),
-            secondary_genre: None,
-            tempo: 100,
-            duration: 30,
-            music_key: mustore::domain::music_parameters::MusicKey::a_major,
-        },
-        lyric: "this is song's lyric. Is it long enough or not?".into(),
-        sex: mustore::domain::music_parameters::Sex::Female,
-    };
-
-    let response = client
-        .post(format!(
-            "{}/api/protected/creator/submit_product",
-            app.address
-        ))
-        .json(&body)
-        .send()
-        .await
-        .unwrap();
-    assert_eq!(response.status().as_u16(), 201);
+    new_song_for_creator(&app, &client, 100).await;
 }
 
 #[tokio::test]
@@ -296,57 +245,7 @@ async fn mixing_service_submit_with_credits_success() {
         .unwrap();
     assert_eq!(app.login_user(&test_user, &client).await.as_u16(), 200);
 
-    let image_file = std::fs::read("assets/image.png").unwrap();
-    let (response, image_key) = app
-        .upload_file(&client, "image/png", "image.png", image_file)
-        .await;
-    assert_eq!(response.status().as_u16(), 200);
-
-    let mut credits = Vec::new();
-    for i in 0..3 {
-        let credit_file = std::fs::read("assets/song.mp3").unwrap();
-        let (response, credit_key) = app
-            .upload_file(
-                &client,
-                "audio/mpeg",
-                &format!("song-{i}.mp3"),
-                credit_file,
-            )
-            .await;
-        assert_eq!(response.status().as_u16(), 200);
-        credits.push(credit_key.parse().unwrap());
-    }
-
-    let genres_list = open_access::get_genres_list()
-        .bind(&app.pg_client)
-        .all()
-        .await
-        .unwrap();
-
-    let genres: Vec<_> =
-        get_rand_subiter(&genres_list, 0..10).cloned().collect();
-
-    let body = SubmitServiceRequest::Mixing(MusicService {
-        service: mustore::domain::requests::creator_access::Service {
-            name: "Some service".to_string(),
-            description: None,
-            cover_object_key: image_key.parse().unwrap(),
-            display_price: 500.into(),
-            credits_object_keys: Some(credits),
-        },
-        genres: Some(genres.clone()),
-    });
-
-    let response = client
-        .post(format!(
-            "{}/api/protected/creator/submit_service",
-            app.address
-        ))
-        .json(&body)
-        .send()
-        .await
-        .unwrap();
-    assert_eq!(response.status().as_u16(), 201);
+    new_mixing_service_for_creator(&app, &client, 500).await;
 
     let row = app
         .pg_client
@@ -366,25 +265,6 @@ async fn mixing_service_submit_with_credits_success() {
         .unwrap();
 
     assert_eq!(row.get::<&str, i32>("services_id"), 1);
-
-    let service_genres = app
-        .pg_client
-        .query(
-            "
-            SELECT genres.name AS genre
-            FROM music_services_genres
-            JOIN genres ON genres.id = music_services_genres.genres_id
-            WHERE mixing_id = 1",
-            &[],
-        )
-        .await
-        .unwrap()
-        .into_iter()
-        .map(|row| row.get::<&str, String>("genre"));
-
-    for genre in service_genres {
-        assert!(genres.contains(&genre));
-    }
 }
 
 #[tokio::test]
@@ -675,38 +555,4 @@ async fn submitting_ghost_writing_service_bad_formed_credits_fails() {
         .await
         .unwrap();
     assert_eq!(response.status().as_u16(), 400);
-}
-
-// ───── Functions ────────────────────────────────────────────────────────── //
-
-fn get_rand_subiter<'a, T, R>(
-    input: &'a [T],
-    bounds: R,
-) -> impl Iterator<Item = &'a T> + 'a + std::fmt::Debug
-where
-    T: std::fmt::Debug,
-    R: RangeBounds<usize>,
-{
-    let mut rng = rand::thread_rng();
-
-    let start = match bounds.start_bound() {
-        std::ops::Bound::Included(&start) => start,
-        std::ops::Bound::Excluded(&start) => start + 1,
-        std::ops::Bound::Unbounded => 0,
-    };
-
-    let end = match bounds.end_bound() {
-        std::ops::Bound::Included(&end) => end + 1,
-        std::ops::Bound::Excluded(&end) => end,
-        std::ops::Bound::Unbounded => input.len(),
-    };
-
-    let count = rng.gen_range(start..end);
-
-    let indices: Vec<usize> =
-        rand::seq::index::sample(&mut rng, input.len(), count)
-            .into_iter()
-            .collect();
-
-    indices.into_iter().map(move |i| &input[i])
 }

@@ -1,12 +1,16 @@
 //! This is a module with common initialization functions.
 
 use std::collections::HashMap;
+use std::ops::RangeBounds;
+use std::sync::{Mutex, MutexGuard};
 
 use deadpool_postgres::Client;
 use fake::Fake;
 use fred::clients::RedisClient;
 use mustore::service_providers::object_storage::presigned_post_form::PresignedPostData;
 use mustore::startup::get_redis_connection_pool;
+use rand::Rng;
+use regex::Regex;
 use reqwest::multipart::Form;
 use reqwest::multipart::Part;
 use secrecy::Secret;
@@ -21,8 +25,20 @@ use mustore::startup::Application;
 use wiremock::matchers;
 use wiremock::ResponseTemplate;
 
-mod banksim;
+pub mod banksim;
+pub mod creator;
 mod webdriver;
+
+pub struct WebDriverLock(Mutex<()>);
+
+pub static WEBDRIVER_LOCK: WebDriverLock = WebDriverLock(Mutex::new(()));
+
+impl WebDriverLock {
+    pub fn lock(&self) -> MutexGuard<'static, ()> {
+        let lock = WEBDRIVER_LOCK.0.lock().unwrap();
+        lock
+    }
+}
 
 #[derive(Debug)]
 pub struct TestUser {
@@ -383,4 +399,50 @@ pub fn generate_username() -> String {
         .take(5)
         .collect::<String>()
     )
+}
+
+pub fn get_rand_subiter<'a, T, R>(
+    input: &'a [T],
+    bounds: R,
+) -> impl Iterator<Item = &'a T> + 'a + std::fmt::Debug
+where
+    T: std::fmt::Debug,
+    R: RangeBounds<usize>,
+{
+    let mut rng = rand::thread_rng();
+
+    let start = match bounds.start_bound() {
+        std::ops::Bound::Included(&start) => start,
+        std::ops::Bound::Excluded(&start) => start + 1,
+        std::ops::Bound::Unbounded => 0,
+    };
+
+    let end = match bounds.end_bound() {
+        std::ops::Bound::Included(&end) => end + 1,
+        std::ops::Bound::Excluded(&end) => end,
+        std::ops::Bound::Unbounded => input.len(),
+    };
+
+    let count = rng.gen_range(start..end);
+
+    let indices: Vec<usize> =
+        rand::seq::index::sample(&mut rng, input.len(), count)
+            .into_iter()
+            .collect();
+
+    indices.into_iter().map(move |i| &input[i])
+}
+
+pub fn extract_days_count(input: &str) -> Option<u32> {
+    let re = Regex::new(r"(\d+) day[s]?").unwrap();
+
+    if let Some(captures) = re.captures(input) {
+        if let Some(days_str) = captures.get(1) {
+            if let Ok(days_count) = days_str.as_str().parse::<u32>() {
+                return Some(days_count);
+            }
+        }
+    }
+
+    None
 }
