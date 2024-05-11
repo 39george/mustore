@@ -22,6 +22,7 @@ use wiremock::matchers;
 use wiremock::ResponseTemplate;
 
 mod banksim;
+mod webdriver;
 
 #[derive(Debug)]
 pub struct TestUser {
