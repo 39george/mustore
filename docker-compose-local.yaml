@@ -40,32 +40,32 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/health_check"]
-      # The health check will first run interval seconds after the container is 
-      # started, and then again interval seconds after each previous check 
+      # The health check will first run interval seconds after the container is
+      # started, and then again interval seconds after each previous check
       # completes.
       interval: 5s
-      # If a single run of the check takes longer than timeout seconds then the 
+      # If a single run of the check takes longer than timeout seconds then the
       # check is considered to have failed.
       timeout: 5s
-      # It takes retries consecutive failures of the health check for the 
+      # It takes retries consecutive failures of the health check for the
       # container to be considered unhealthy.
       retries: 2
-      # Start period provides initialization time for containers that need time 
-      # to bootstrap. Probe failure during that period will not be counted 
-      # towards the maximum number of retries. However, if a health check 
-      # succeeds during the start period, the container is considered started 
-      # and all consecutive failures will be counted towards the maximum number 
+      # Start period provides initialization time for containers that need time
+      # to bootstrap. Probe failure during that period will not be counted
+      # towards the maximum number of retries. However, if a health check
+      # succeeds during the start period, the container is considered started
+      # and all consecutive failures will be counted towards the maximum number
       # of retries.
       start_period: 3s
 
   email-mock:
-    image: ghashy/email-mock:0.1
+    image: ghashy/email-mock:0.2
     expose:
       - "8001"
     networks:
       - default
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8001/health_check"]
+      test: ["CMD", "curl", "-f", "http://localhost:8001/healthcheck"]
       interval: 5s
       timeout: 5s
       retries: 2
@@ -85,7 +85,7 @@ services:
       start_period: 2s
 
   postgres:
-    image: postgres:16.1-alpine3.18
+    image: postgres:16.3-alpine3.20
     restart: always
     user: postgres
     secrets:
@@ -107,7 +107,7 @@ services:
       retries: 2
 
   redis:
-    image: redis:alpine
+    image: redis:7.2.5-alpine3.20
     secrets:
       - redis-password
     environment:
@@ -165,4 +165,3 @@ secrets:
 
 networks:
   default: {}
-

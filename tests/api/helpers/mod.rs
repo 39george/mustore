@@ -7,7 +7,7 @@ use std::sync::{Mutex, MutexGuard};
 use deadpool_postgres::Client;
 use fake::Fake;
 use fred::clients::RedisClient;
-use mustore::service_providers::object_storage::presigned_post_form::PresignedPostData;
+use mustore::service_providers::object_storage::presigned_post_form::PresignedPostObject;
 use mustore::startup::get_redis_connection_pool;
 use rand::Rng;
 use regex::Regex;
@@ -273,7 +273,7 @@ impl TestApp {
             .send()
             .await
             .unwrap();
-        let post_form: PresignedPostData = response.json().await.unwrap();
+        let post_form: PresignedPostObject = response.json().await.unwrap();
         let object_key = post_form.fields.get("key").unwrap().clone();
         let url = post_form.url;
         let mut multipart = Form::new();

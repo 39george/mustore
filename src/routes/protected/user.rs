@@ -36,7 +36,7 @@ use crate::domain::upload_request::store_upload_request_data;
 use crate::domain::upload_request::verify_upload_request_data_in_redis;
 use crate::domain::user_name::UserName;
 use crate::routes::ErrorResponse;
-use crate::service_providers::object_storage::presigned_post_form::PresignedPostData;
+use crate::service_providers::object_storage::presigned_post_form::PresignedPostObject;
 use crate::startup::api_doc::BadRequestResponse;
 use crate::startup::api_doc::ConflictErrorResponse;
 use crate::startup::api_doc::InternalErrorResponse;
@@ -179,7 +179,7 @@ async fn avatar_username(
         UploadFileRequest
     ),
     responses(
-        (status = 200, response = PresignedPostData),
+        (status = 200, response = PresignedPostObject),
         (status = 400, response = BadRequestResponse),
         (status = 403, description = "Forbidden"),
         (
@@ -205,7 +205,7 @@ async fn request_obj_storage_upload(
     auth_session: AuthSession,
     State(app_state): State<AppState>,
     Query(params): Query<UploadFileRequest>,
-) -> Result<Json<PresignedPostData>, ErrorResponse> {
+) -> Result<Json<PresignedPostObject>, ErrorResponse> {
     let user = auth_session.user.ok_or(ErrorResponse::UnauthorizedError(
         anyhow::anyhow!("No such user in AuthSession!"),
     ))?;
@@ -234,12 +234,9 @@ async fn request_obj_storage_upload(
     .context("Failed to build object key")
     .map_err(ErrorResponse::BadRequest)?;
 
-    let presigned_post_data =
-        app_state.object_storage.generate_presigned_post_form(
-            &object_key,
-            params.media_type,
-            max_size,
-        )?;
+    let presigned_post_data = app_state
+        .object_storage
+        .generate_presigned_post(&object_key, params.media_type, max_size)?;
 
     store_upload_request_data(&app_state.redis_pool, &object_key, user.id)
         .await

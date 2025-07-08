@@ -20,7 +20,11 @@ async fn register_card_token_success() {
     let creator = TestUser::generate_user(String::from("creator"), 0);
     assert_eq!(app.register_user(&creator).await.as_u16(), 200);
 
+    // TODO: implement logic to use self-signed certificate only in development
+    // also in startup
+    let cert = include_bytes!("/home/ghashy/.local/share/mkcert/rootCA.pem");
     let creator_client = reqwest::Client::builder()
+        .add_root_certificate(reqwest::Certificate::from_pem(cert).unwrap())
         .cookie_store(true)
         // Don't follow redirects
         .redirect(reqwest::redirect::Policy::none())

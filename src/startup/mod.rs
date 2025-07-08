@@ -116,7 +116,17 @@ impl Application {
             configuration.recaptcha.endpoint_url.parse().unwrap(),
             configuration.recaptcha.secret.clone(),
         );
-        let payments_client = airactions::Client::new(
+        // TODO: implement logic to use self-signed certificate only in development
+        // also in tests
+        let cert =
+            include_bytes!("/home/ghashy/.local/share/mkcert/rootCA.pem");
+        let payments_client = airactions::Client::from_client_and_url(
+            reqwest::Client::builder()
+                .add_root_certificate(
+                    reqwest::Certificate::from_pem(cert).unwrap(),
+                )
+                .build()
+                .unwrap(),
             configuration.payments.merchant_api_endpoint.clone(),
         )
         .unwrap();

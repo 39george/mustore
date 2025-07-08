@@ -49,12 +49,12 @@ impl_debug!(Error);
         }
     )
 )]
-pub struct PresignedPostData {
+pub struct PresignedPostObject {
     pub url: String,
     pub fields: HashMap<String, String>,
 }
 
-impl PresignedPostData {
+impl PresignedPostObject {
     pub fn builder<'a>(
         access_key: &'a str,
         access_key_id: &'a str,
@@ -144,7 +144,7 @@ impl<'a> PresignedPostDataBuilder<'a> {
         }
     }
 
-    pub fn build(self) -> Result<PresignedPostData, Error> {
+    pub fn build(self) -> Result<PresignedPostObject, Error> {
         let date = self.date.unwrap_or(OffsetDateTime::now_utc());
         let expiration = date + self.expiration.unwrap_or(Duration::MINUTE);
         let service_name = self.service_name.unwrap_or("s3");
@@ -202,7 +202,7 @@ impl<'a> PresignedPostDataBuilder<'a> {
             content_disposition.to_string(),
         );
 
-        Ok(PresignedPostData {
+        Ok(PresignedPostObject {
             url: format!("{}/{}", self.obj_storage_endpoint, self.bucket),
             fields: map,
         })
@@ -291,7 +291,7 @@ fn get_policy_signature(
 mod tests {
     use time::OffsetDateTime;
 
-    use super::PresignedPostData;
+    use super::PresignedPostObject;
     use crate::types::data_size::DataSizes;
 
     #[test]
@@ -299,7 +299,7 @@ mod tests {
         let key_id = "test_key_id";
         let access_key = "test_access_id";
 
-        let presigned_post = PresignedPostData::builder(
+        let presigned_post = PresignedPostObject::builder(
             access_key,
             key_id,
             "https://storage.yandexcloud.net",

@@ -3,22 +3,22 @@ app_addr: "192.168.31.150"
 app_base_url: "http://192.168.31.150:8000"
 email_delivery_service: smtp
 database:
-  host: "172.18.0.3"
+  host: "docker.localdev"
   port: 5432
 redis:
-  host: "172.18.0.4"
+  host: "docker.localdev"
   port: 6379
   db_number: 0
 email_client:
-  base_url: "http://172.18.0.7:8001"
+  base_url: "http://email-mock.docker.localdev"
   sender_email: "anymail@anydomain.com"
   timeout: 10000
 object_storage:
-  endpoint_url: "http://172.18.0.2:3900"
+  endpoint_url: "http://s3api.docker.localdev"
   region: "garage"
   bucket_name: "mustore-data"
 recaptcha:
   endpoint_url: "http://ghashytest.com"
 payments:
-  merchant_api_endpoint: "http://172.18.0.6:15100"
+  merchant_api_endpoint: "http://banksim.docker.localdev"
 

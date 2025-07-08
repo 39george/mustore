@@ -18,7 +18,7 @@ use crate::config::ObjectStorageSettings;
 use crate::domain::object_key::ObjectKey;
 use crate::impl_debug;
 
-use self::presigned_post_form::PresignedPostData;
+use self::presigned_post_form::PresignedPostObject;
 
 pub mod presigned_post_form;
 
@@ -203,13 +203,13 @@ impl ObjectStorage {
         Ok(presigned_request.uri().to_string())
     }
 
-    pub fn generate_presigned_post_form(
+    pub fn generate_presigned_post(
         &self,
         object_key: &ObjectKey,
         mime: mediatype::MediaTypeBuf,
         max: u64,
-    ) -> Result<PresignedPostData, ObjectStorageError> {
-        let form = PresignedPostData::builder(
+    ) -> Result<PresignedPostObject, ObjectStorageError> {
+        let form = PresignedPostObject::builder(
             &self.settings.secret_access_key.expose_secret(),
             &self.settings.access_key_id.expose_secret(),
             &self.settings.endpoint_url,

@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use anyhow::Context;
 use garde::Validate;
+use serde::Deserialize;
 use serde::Serialize;
 use utoipa::IntoParams;
 use utoipa::ToSchema;
@@ -11,8 +12,6 @@ use crate::domain::music_parameters::MusicKey;
 use crate::domain::music_parameters::Sex;
 use crate::domain::music_parameters::SortBy;
 use crate::domain::*;
-
-use serde::Deserialize;
 
 #[derive(Debug, Deserialize, Serialize, ToSchema)]
 pub struct Stats {

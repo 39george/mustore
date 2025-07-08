@@ -18,7 +18,7 @@ use utoipa::IntoParams;
 // ───── Current Crate Imports ────────────────────────────────────────────── //
 
 use crate::domain::upload_request::remove_outdated_uploads_from_redis;
-use crate::service_providers::object_storage::presigned_post_form::PresignedPostData;
+use crate::service_providers::object_storage::presigned_post_form::PresignedPostObject;
 use crate::startup::AppState;
 use crate::types::data_size::DataSizes;
 
@@ -32,7 +32,7 @@ pub struct InputWithFiles {
     /// that is, type: string + format: binary
     #[schema(value_type = String, format = Binary)]
     file: Vec<u8>,
-    presigned_post_form: PresignedPostData,
+    presigned_post_form: PresignedPostObject,
 }
 
 #[derive(Deserialize, IntoParams)]
@@ -89,7 +89,7 @@ async fn upload_file(
                 .into();
             file = Some(data);
         } else if field.name().is_some_and(|f| f.eq("presigned_post_form")) {
-            let data: PresignedPostData = serde_json::from_str(
+            let data: PresignedPostObject = serde_json::from_str(
                 &field
                     .text()
                     .await

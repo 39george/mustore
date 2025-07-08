@@ -40,6 +40,7 @@ USER appuser
 WORKDIR /app
 # Copy the executable from the "build" stage.
 COPY --from=build /app/$APP_NAME /app/$APP_NAME
+# FIXME: we should pass config dynamically, not built container with it
 COPY config /app/config
 COPY migrations /app/migrations
 
